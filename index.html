@@ -563,6 +563,7 @@
         <button data-preset="kirchhof">Kirchhof&nbsp;Flat</button>
         <button data-preset="radikal">Stark&nbsp;Umverteilend</button>
         <button data-preset="simpel">5-Steuern-System</button>
+        <button data-preset="nordisch">Nordisches&nbsp;Modell</button>
       </div>
     </div>
 
@@ -710,6 +711,10 @@
 
   <!-- ============ DASHBOARD ============ -->
   <main class="dashboard">
+
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <button id="csv-export-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">↓ CSV Export</button>
+    </div>
 
     <details class="about">
       <summary>Wie funktioniert das? (Kurz)</summary>
@@ -933,56 +938,53 @@ function estTarif(einkommen, freibetrag, eingang, spitze, grenze) {
   // Zone 4 (42%-Äquivalent) interpolieren wir als (eingang*0.1 + spitze*0.9) - typisch DE
   const satz4 = Math.min(spitze, eingang * 0.05 + spitze * 0.95) / 100;
 
+  // Marginalsteuersatz-Grenzen (keine Sprünge an Zonengrenzen):
+  // Zone 2: r0 → rm  (Eingangssatz → Zwischensatz)
+  // Zone 3: rm → r4  (Zwischensatz → Zone-4-Satz, kontinuierlich)
+  // Zone 4: r4 (konstant)  Zone 5: r5 = spitze/100
+  // rm = r0 + (r4 - r0) * 0.344  — entspricht § 32a-Verhältnis (SQ: ~23,6 %)
+  const r0 = eingang / 100;
+  const r4 = satz4;
+  const r5 = spitze / 100;
+  const rm = r0 + (r4 - r0) * 0.344;
+  const g4 = sq_z4 * scale;
+
+  // Integral der stückweise linearen Grenzsteuerrate: ∫₀ˣ [a + (b−a)·t/w] dt
+  const T = (a, b, w, x) => a * x + (b - a) * x * x / (2 * w);
+
+  const T2 = T(r0, rm, g2, g2);
+  const T3 = T(rm, r4, g3, g3);
+  const T4 = r4 * g4;
+
   if (zve <= g2) {
-    // Zone 2: quadratischer Anstieg von eingang% auf ~(eingang+15)%
-    const y = zve / g2;
-    const s_mid = (eingang + eingang * 1.8) / 2 / 100; // Näherung
-    return zve * (eingang / 100 + y * (eingang * 0.8 / 100) / 2);
+    return T(r0, rm, g2, zve);
   } else if (zve <= g2 + g3) {
-    // Zone 3: quadratischer Anstieg von ~(eingang*2)% auf satz4
-    const tax_z2 = g2 * (eingang / 100 + 1 * (eingang * 0.8 / 100) / 2);
-    const zv3 = zve - g2;
-    const z = zv3 / g3;
-    const satz_start3 = eingang * 2 / 100;
-    const satz_end3 = satz4;
-    const avg3 = (satz_start3 + satz_start3 + z * (satz_end3 - satz_start3)) / 2;
-    return tax_z2 + zv3 * avg3;
-  } else if (zve <= g2 + g3 + sq_z4 * scale) {
+    return T2 + T(rm, r4, g3, zve - g2);
+  } else if (zve <= g2 + g3 + g4) {
     // Zone 4: linear mit satz4
-    const tax_z2 = g2 * (eingang / 100 + 1 * (eingang * 0.8 / 100) / 2);
-    const tax_z3 = g3 * (eingang * 2 / 100 + satz4) / 2;
     const zv4 = zve - g2 - g3;
-    return tax_z2 + tax_z3 + zv4 * satz4;
+    return T2 + T3 + r4 * zv4;
   } else {
-    // Zone 5: Spitzensteuersatz
-    const tax_z2 = g2 * (eingang / 100 + 1 * (eingang * 0.8 / 100) / 2);
-    const tax_z3 = g3 * (eingang * 2 / 100 + satz4) / 2;
-    const tax_z4 = (sq_z4 * scale) * satz4;
-    const zv5 = zve - g2 - g3 - sq_z4 * scale;
-    return tax_z2 + tax_z3 + tax_z4 + zv5 * spitze / 100;
+    const zv5 = zve - g2 - g3 - g4;
+    return T2 + T3 + T4 + r5 * zv5;
   }
 }
 
 function grenzsteuersatz(einkommen, freibetrag, eingang, spitze, grenze) {
   if (einkommen <= freibetrag) return 0;
   const zve = einkommen - freibetrag;
-  const sq_total = 265741;
-  const scale = (grenze - freibetrag) / sq_total;
+  const scale = (grenze - freibetrag) / 265741;
   const g2 = 4921 * scale;
   const g3 = 49755 * scale;
   const g4 = 211065 * scale;
-  const satz4 = Math.min(spitze, eingang * 0.05 + spitze * 0.95) / 100;
+  const r0 = eingang / 100;
+  const r4 = Math.min(spitze, eingang * 0.05 + spitze * 0.95) / 100;
+  const rm = r0 + (r4 - r0) * 0.344; // kontinuierlich: Zone-2-Ende = Zone-3-Start
 
-  if (zve <= g2) {
-    return (eingang / 100) * (1 + (zve / g2) * 0.8);
-  } else if (zve <= g2 + g3) {
-    const z = (zve - g2) / g3;
-    return eingang * 2 / 100 + z * (satz4 - eingang * 2 / 100);
-  } else if (zve <= g2 + g3 + g4) {
-    return satz4;
-  } else {
-    return spitze / 100;
-  }
+  if (zve <= g2)           return r0 + (rm - r0) * zve / g2;
+  if (zve <= g2 + g3)      return rm + (r4 - rm) * (zve - g2) / g3;
+  if (zve <= g2 + g3 + g4) return r4;
+  return spitze / 100;
 }
 
 // Effektiver Durchschnittssteuersatz
@@ -1191,14 +1193,22 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg) {
     const konsum = vornetto * d.konsum;
     const mwst = konsum * (0.7 * params.mwst / (100 + params.mwst) + 0.3 * params.mwst_erm / (100 + params.mwst_erm));
     // CO2-Last (untere Dezile höherer Anteil am Einkommen)
+    // CO₂-Last: Dezil-Anteil am Einkommen × CO₂-Preis × Emissionsreaktion
     const co2_share = [0.04, 0.038, 0.036, 0.034, 0.032, 0.030, 0.028, 0.025, 0.022, 0.018];
-    const co2_last = brutto * co2_share[i] * (params.co2 / 55);
+    const co2_factor_dez = Math.max(0.4, Math.min(1.1, 1 + ELAST.co2 * (params.co2 - 55) / 100));
+    const co2_last = brutto * co2_share[i] * (params.co2 / 55) * co2_factor_dez;
     // Klimageld zurück (gleichverteilt pro Kopf)
     const klimageld_per_hh = klima * 1000 / 41; // Mio. Haushalte
     // Transfers erhalten
+    // Bürgergeld: Empfängerquote je Dezil (BMAS/BA 2025: ~5,5 Mio. Bedarfsgemeinschaften)
+    // Konzentriert in D1 (~60 %) und D2 (~25 %), kaum ab D3 (~8 %)
+    const bg_quote = [0.60, 0.25, 0.08, 0.02, 0, 0, 0, 0, 0, 0];
+    // Kindergeld: Kinder je Haushalt variiert — D1–D3 kinderreich, D8–D10 weniger Kinder
+    // Gewichte basierend auf Mikrozensus 2024 Kinderverteilung nach Einkommensdezil
+    const kg_quote = [0.80, 1.10, 1.20, 1.15, 1.05, 0.95, 0.85, 0.75, 0.65, 0.50];
     let transfers = 0;
-    if (i < 3) transfers += params.bg * 12 * 0.3; // nur Teil der Dezile im Bürgergeld
-    transfers += params.kg * 12 * 0.6;            // Kindergeld breit, konzentriert auf D2-D6
+    transfers += params.bg * 12 * bg_quote[i];
+    transfers += params.kg * 12 * kg_quote[i];
     if (params.neg_est && i < 3) transfers += 3000;
 
     const netto_final = brutto - est - sv - mwst - co2_last + klimageld_per_hh + transfers;
@@ -1222,10 +1232,14 @@ function berechneNettoSQ(d) {
   const mwst = konsum * (0.7 * 19/119 + 0.3 * 7/107);
   const co2_share = [0.04, 0.038, 0.036, 0.034, 0.032, 0.030, 0.028, 0.025, 0.022, 0.018];
   const co2_last = brutto * co2_share[d.d - 1];
-  const klimageld_per_hh = 18 * 0.7 * 1000 / 41;
+  // Klimageld SQ konsistent mit PRESETS.status_quo (co2=55, 500 Mio.t Basis)
+  const sq_co2_auf = 500 * 55 / 1000; // 27,5 Mrd.
+  const klimageld_per_hh = sq_co2_auf * 0.7 * 1000 / 41;
   let transfers = 0;
-  if (d.d <= 3) transfers += 563 * 12 * 0.3;
-  transfers += 255 * 12 * 0.6;
+  const bg_quote_sq = [0.60, 0.25, 0.08, 0.02, 0, 0, 0, 0, 0, 0];
+  const kg_quote_sq = [0.80, 1.10, 1.20, 1.15, 1.05, 0.95, 0.85, 0.75, 0.65, 0.50];
+  transfers += 563 * 12 * bg_quote_sq[d.d - 1];
+  transfers += 255 * 12 * kg_quote_sq[d.d - 1];
   return brutto - est - sv - mwst - co2_last + klimageld_per_hh + transfers;
 }
 
@@ -1307,6 +1321,19 @@ const PRESETS = {
     rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false,
     bg: 600, kg: 280, neg_est: false,
     kleine_st: false
+  },
+  nordisch: {
+    // Nordisches Modell: hohe MwSt, duale ESt mit niedrigerem Kapitalsteuersatz,
+    // starke SV, großzügige Transfers — angelehnt an DK/SE/FI
+    freibetrag: 14000, eingang: 20, spitze: 52, grenze: 120000,
+    synthetisch: false, abgeltung: 30,
+    kst: 22, gewst: 0, gewst_aus: true,
+    mwst: 25, mwst_erm: 12,
+    co2: 120, klimageld: true,
+    erb: 15, betriebs: true, boden: 0.8, verm: 0,
+    rv: 22, kv: 12, alpf: 7.0, buergerv: true,
+    bg: 750, kg: 350, neg_est: false,
+    kleine_st: true
   }
 };
 
@@ -1787,12 +1814,12 @@ function renderRechenweg(r, p) {
   panel.innerHTML = `
     <div class="rw-section">
       <div class="rw-section-title">1 · Einkommensteuer — § 32a EStG Formeltarif</div>
-      <div class="rw-text">Das deutsche Einkommensteuerrecht kennt 5 Zonen mit gleitendem Übergang (kein harter Knick). Die Modellformel bildet diesen Tarif nach und skaliert die Zonengrenzen proportional zu den Slider-Werten.</div>
+      <div class="rw-text">Das Modell verwendet einen parametrischen Formeltarif mit 5 Zonen analog § 32a EStG. In Zonen 2 und 3 steigt der Grenzsteuersatz <em>linear</em> an (Integral der Grenzrate = exakte Steuer). Die Zonengrenzen skalieren proportional zu den Slider-Werten. Kein Sprung an Zonengrenzen.</div>
       <table class="rw-zone-table">
         <tr><th>Zone</th><th>ZVE-Bereich</th><th>Grenzsteuersatz</th><th>Formeltyp</th></tr>
         <tr class="${d5_zone===1?'active-zone':''}"><td>1</td><td>0 – ${fk(p.freibetrag)} €</td><td>0 %</td><td>Grundfreibetrag</td></tr>
-        <tr class="${d5_zone===2?'active-zone':''}"><td>2</td><td>${fk(p.freibetrag)} – ${fk(z2_end)} €</td><td>${p.eingang} → ${Math.round(p.eingang*1.8)} %</td><td>quadratisch (§ 32a Nr. 2)</td></tr>
-        <tr class="${d5_zone===3?'active-zone':''}"><td>3</td><td>${fk(z2_end)} – ${fk(z3_end)} €</td><td>${Math.round(p.eingang*2)} → ${Math.round(satz4)} %</td><td>quadratisch (§ 32a Nr. 3)</td></tr>
+        <tr class="${d5_zone===2?'active-zone':''}"><td>2</td><td>${fk(p.freibetrag)} – ${fk(z2_end)} €</td><td>${p.eingang} → ${(p.eingang + (satz4*100 - p.eingang)*0.344).toFixed(1)} %</td><td>linear ansteigend (§ 32a Nr. 2)</td></tr>
+        <tr class="${d5_zone===3?'active-zone':''}"><td>3</td><td>${fk(z2_end)} – ${fk(z3_end)} €</td><td>${(p.eingang + (satz4*100 - p.eingang)*0.344).toFixed(1)} → ${(satz4*100).toFixed(1)} %</td><td>linear ansteigend (§ 32a Nr. 3)</td></tr>
         <tr class="${d5_zone===4?'active-zone':''}"><td>4</td><td>${fk(z3_end)} – ${fk(z4_end)} €</td><td>${Math.round(satz4)} %</td><td>linear (§ 32a Nr. 4)</td></tr>
         <tr class="${d5_zone===5?'active-zone':''}"><td>5</td><td>ab ${fk(z4_end)} €</td><td>${p.spitze} %</td><td>Spitzensteuersatz (§ 32a Nr. 5)</td></tr>
       </table>
@@ -1907,12 +1934,85 @@ document.querySelectorAll('input[type="range"], input[type="checkbox"]').forEach
   });
 });
 
+function exportCSV() {
+  const p = getParams();
+  const r = berechne(p);
+  const rows = [];
+  const sep = ';';
+
+  rows.push(['Haushaltsspiel Deutschland — Export', new Date().toLocaleDateString('de-DE')].join(sep));
+  rows.push([]);
+
+  rows.push(['=== PARAMETER ===']);
+  rows.push(['Grundfreibetrag', p.freibetrag + ' €']);
+  rows.push(['Eingangssteuersatz', p.eingang + ' %']);
+  rows.push(['Spitzensteuersatz', p.spitze + ' %']);
+  rows.push(['Einkommen ab Spitzensatz', p.grenze + ' €']);
+  rows.push(['Kapital synthetisch', p.synthetisch ? 'Ja' : 'Nein']);
+  rows.push(['Abgeltungsteuer', p.abgeltung + ' %']);
+  rows.push(['Körperschaftsteuer', p.kst + ' %']);
+  rows.push(['Gewerbesteuer', p.gewst_aus ? 'abgeschafft' : p.gewst + ' %']);
+  rows.push(['MwSt Regelsatz', p.mwst + ' %']);
+  rows.push(['MwSt ermäßigt', p.mwst_erm + ' %']);
+  rows.push(['CO₂-Preis', p.co2 + ' €/t']);
+  rows.push(['Klimageld', p.klimageld ? 'Ja' : 'Nein']);
+  rows.push(['Erbschaftsteuer Spitze', p.erb + ' %']);
+  rows.push(['Bodenwertsteuer', p.boden + ' %']);
+  rows.push(['Vermögensteuer', p.verm + ' %']);
+  rows.push(['Rentenversicherung', p.rv + ' %']);
+  rows.push(['Krankenversicherung', p.kv + ' %']);
+  rows.push(['AL+Pflege', p.alpf + ' %']);
+  rows.push(['Bürgerversicherung', p.buergerv ? 'Ja' : 'Nein']);
+  rows.push(['Bürgergeld-Regelsatz', p.bg + ' €/Monat']);
+  rows.push(['Kindergeld', p.kg + ' €/Monat']);
+  rows.push([]);
+
+  rows.push(['=== FISKAL-KENNZAHLEN (Mrd. €) ===']);
+  rows.push(['Einnahmen gesamt', r.einnahmen_total.toFixed(1)]);
+  rows.push(['Ausgaben gesamt', r.ausgaben_total.toFixed(1)]);
+  rows.push(['Saldo', r.saldo.toFixed(1)]);
+  rows.push(['Verwaltungskosten', r.admin_kosten.toFixed(1)]);
+  rows.push([]);
+
+  rows.push(['=== EINNAHMEN NACH STEUERART (Mrd. €) ===']);
+  const rLabels = {est:'Einkommensteuer',kst:'Körperschaftsteuer',gewst:'Gewerbesteuer',mwst:'Mehrwertsteuer',co2:'CO₂ (netto)',erbschaft:'Erbschaftsteuer',boden:'Bodenwertsteuer',vermoegen:'Vermögensteuer',rv:'Rentenversicherung',kv:'Krankenversicherung',al:'AL+Pflege',klein:'Kleine Verbrauchsteuern'};
+  Object.entries(r.rev).forEach(([k,v]) => rows.push([rLabels[k]||k, v.toFixed(1)]));
+  rows.push([]);
+
+  rows.push(['=== VERTEILUNG NACH DEZIL ===']);
+  rows.push(['Dezil', 'Netto-Einkommen (€)', 'Δ vs. Status Quo (€)', 'Steuerbelastung (%)']);
+  r.hh_delta.netto.forEach((n, i) => rows.push([
+    'D' + (i+1), Math.round(n), Math.round(r.hh_delta.delta[i]), r.hh_delta.belastung_pct[i].toFixed(1)
+  ]));
+  rows.push([]);
+
+  rows.push(['=== VERTEILUNGS- & VERHALTENSKENNZAHLEN ===']);
+  rows.push(['Gini-Koeffizient (neu)', r.gini.toFixed(4)]);
+  rows.push(['Gini-Koeffizient (Basis)', REF.gini.toFixed(4)]);
+  rows.push(['Palma-Ratio', r.palma.toFixed(3)]);
+  rows.push(['Arbeitsangebot Index', r.behavior.labor.toFixed(1)]);
+  rows.push(['Konsum Index', r.behavior.konsum.toFixed(1)]);
+  rows.push(['Investitionen Index', r.behavior.invest.toFixed(1)]);
+  rows.push(['CO₂-Emissionen Index', r.behavior.co2.toFixed(1)]);
+
+  const csvStr = rows.map(r => Array.isArray(r) ? r.join(sep) : r).join('\n');
+  const blob = new Blob(['\uFEFF' + csvStr], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'haushaltsspiel_export_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 computeRef();
 setParams(PRESETS.status_quo);
 render();
 injectTooltips();
 
 // Rechenweg-Panel: bei Aufklappen rendern
+document.getElementById('csv-export-btn').addEventListener('click', exportCSV);
+
 document.getElementById('rw-details').addEventListener('toggle', function() {
   const hint = this.querySelector('.rw-hint');
   if (this.open) {
