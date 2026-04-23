@@ -79,9 +79,6 @@
     grid-template-columns: minmax(320px, 380px) 1fr;
     gap: 32px;
   }
-  @media (max-width: 900px) {
-    .layout { grid-template-columns: 1fr; }
-  }
 
   /* CONTROLS */
   .controls {
@@ -93,6 +90,44 @@
     top: 16px;
     max-height: calc(100vh - 32px);
     overflow-y: auto;
+  }
+
+  /* MOBILE */
+  .mobile-toggle {
+    display: none;
+  }
+  @media (max-width: 900px) {
+    body { padding: 12px 10px 60px; }
+    .layout { grid-template-columns: 1fr; gap: 16px; }
+    .controls {
+      position: relative;
+      top: 0;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    .controls.mobile-hidden { display: none; }
+    .mobile-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .two-col { grid-template-columns: 1fr !important; }
+    .kpi-value { font-size: 20px !important; }
+    h1 { font-size: clamp(28px, 8vw, 48px) !important; }
+    .panel { padding: 14px 16px; }
+    svg { touch-action: none; }
   }
   .controls::-webkit-scrollbar { width: 6px; }
   .controls::-webkit-scrollbar-track { background: transparent; }
@@ -552,8 +587,14 @@
 
 <div class="layout">
 
+  <!-- MOBILE TOGGLE (nur auf kleinen Screens sichtbar) -->
+  <button class="mobile-toggle" id="mobile-toggle-btn">
+    <span id="mobile-toggle-label">⚙ Regler ausblenden</span>
+    <span style="font-size:16px" id="mobile-toggle-icon">−</span>
+  </button>
+
   <!-- ============ CONTROLS ============ -->
-  <aside class="controls">
+  <aside class="controls" id="controls-sidebar">
 
     <div class="preset-group">
       <div class="preset-label">Szenario laden</div>
@@ -862,6 +903,14 @@
       <div id="est_kurve"></div>
     </div>
 
+    <!-- LAFFER-KURVE -->
+    <div class="panel">
+      <h2>Laffer-Kurve</h2>
+      <div class="panel-sub">ESt-Aufkommen vs. Spitzensteuersatz · alle anderen Parameter konstant · inkl. D10c-Verhaltenseffekte</div>
+      <div id="laffer_chart"></div>
+      <p style="font-size:11px;color:var(--muted);margin-top:10px;font-style:italic;">Modell-Maximum ≠ optimaler Steuersatz — berücksichtigt keine Verteilungseffekte. ZEW-Schätzung für DE: Aufkommensmaximum bei ~65–70%, ifo: ~55%. Quelle: Saez (2001), Piketty/Saez/Stantcheva (2014), Doerrenberg/Peichl (2014).</p>
+    </div>
+
     <div class="two-col">
       <!-- METR -->
       <div class="panel">
@@ -1012,7 +1061,11 @@ const ELAST = {
   consumption: -0.35,      // MwSt-Pass-Through
   co2: -0.30,              // BEHG Evaluation
   evasion: 0.25,           // Schneider
-  investment: -0.40        // Unternehmenssteuer
+  investment: -0.40,       // Unternehmenssteuer
+  // D10c (Top 1%): höhere Elastizitäten wegen Steuervermeidung, Einkommensverschiebung, Wegzug
+  d10c_labor: 0.40,        // Piketty/Saez/Stantcheva (2014): extensive margin höher
+  d10c_avoidance: 0.50,    // Einkommensverschiebung/Avoidance ab GS > 45% (Kleven/Schultz DK)
+  d10c_wegzug: 0.10        // Steuerbedingte Emigration bei GS > 60% (Brülhart et al. 2019)
 };
 
 // ============================================================
@@ -1106,15 +1159,32 @@ function effSteuersatz(einkommen, freibetrag, eingang, spitze, grenze) {
 function berechne(params) {
   // ---------- 1. ARBEITSANGEBOT-REAKTION pro Dezil ----------
   // Basisgrenzsteuersatz-Vergleich zum Status Quo
-  const sqGrenze = dez => grenzsteuersatz(dez.brutto, 12084, 14, 45, 277826);
+  const sqGrenze = dez => grenzsteuersatz(dez.brutto*(1-dez.kapital), 12084, 14, 45, 277826);
 
   const dezile = DEZILE.map(d => {
-    const gs_neu = grenzsteuersatz(d.brutto, params.freibetrag, params.eingang, params.spitze, params.grenze);
+    const gs_neu = grenzsteuersatz(d.brutto * (1-d.kapital), params.freibetrag, params.eingang, params.spitze, params.grenze);
     const gs_sq = sqGrenze(d);
     const delta_nettolohn = (1 - gs_neu) - (1 - gs_sq);
-    const labor_factor = 1 + ELAST.labor_supply * (delta_nettolohn / Math.max(0.0001, 1 - gs_sq));
-    const lf = Math.max(0.7, Math.min(1.25, labor_factor));
-    return { ...d, labor_factor: lf, brutto_adj: d.brutto * lf };
+
+    let elas = ELAST.labor_supply;
+    let avoidance = 1.0;
+
+    if (d.label === 'D10c') {
+      // Top 1%: höhere Arbeitsangebots-Elastizität (extensive margin: Stunden, Rentenentscheidung)
+      elas = ELAST.d10c_labor;
+      // Steuervermeidung / Einkommensverschiebung: greift ab GSatz > 45%
+      // (Kapitalgesellschaft, Stiftung, Timing-Effekte)
+      const avoid_trigger = Math.max(0, gs_neu - 0.45);
+      const wegzug_trigger = Math.max(0, gs_neu - 0.60);
+      avoidance = Math.max(0.40,
+        1 - ELAST.d10c_avoidance * avoid_trigger
+          - ELAST.d10c_wegzug * wegzug_trigger
+      );
+    }
+
+    const labor_factor_raw = 1 + elas * (delta_nettolohn / Math.max(0.0001, 1 - gs_sq));
+    const lf = Math.max(0.55, Math.min(1.25, labor_factor_raw)) * avoidance;
+    return { ...d, labor_factor: lf, brutto_adj: d.brutto * lf, gs_neu, avoidance };
   });
 
   // ---------- 2. EINKOMMENSTEUER ----------
@@ -1597,6 +1667,71 @@ function renderBeitragProjSVG(rente, p) {
   </svg>`;
 }
 
+// ============================================================
+// LAFFER-KURVE
+// ============================================================
+
+function renderLaffer(p) {
+  const el = document.getElementById('laffer_chart');
+  if (!el) return;
+
+  // Berechne ESt-Aufkommen für Spitzensteuersätze 5–75 %
+  const pts = [];
+  for (let s = 5; s <= 75; s += 2.5) {
+    const rr = berechne({ ...p, spitze: s });
+    pts.push({ s, est: rr.rev.est, total: rr.einnahmen_total });
+  }
+
+  const maxEst = Math.max(...pts.map(x => x.est));
+  const peakPt = pts.reduce((a, b) => b.est > a.est ? b : a);
+  const curPt = pts.reduce((a, b) => Math.abs(b.s - p.spitze) < Math.abs(a.s - p.spitze) ? b : a);
+
+  const W = 640, H = 180, pl = 52, pr = 20, pt2 = 16, pb = 30;
+  const iW = W - pl - pr, iH = H - pt2 - pb;
+  const minEst = Math.min(...pts.map(x => x.est)) * 0.97;
+  const xOf = s  => pl + ((s - 5) / 70) * iW;
+  const yOf = v  => pt2 + iH - ((v - minEst) / (maxEst * 1.05 - minEst)) * iH;
+
+  const line = pts.map(x => xOf(x.s) + ',' + yOf(x.est)).join(' ');
+  const area = `${xOf(pts[0].s)},${pt2+iH} ` + line + ` ${xOf(pts[pts.length-1].s)},${pt2+iH}`;
+
+  const yVals = [Math.round(minEst/50)*50, Math.round(maxEst*0.5/50)*50, Math.round(maxEst/50)*50].map(v => {
+    const y = yOf(v);
+    return `<line x1="${pl}" y1="${y}" x2="${pl+iW}" y2="${y}" stroke="rgba(42,39,32,0.08)" stroke-width="1"/>
+            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${Math.round(v)}</text>`;
+  }).join('');
+
+  const xVals = [10,20,30,40,50,60,70].map(s => {
+    const x = xOf(s);
+    return `<line x1="${x}" y1="${pt2}" x2="${x}" y2="${pt2+iH}" stroke="rgba(42,39,32,0.08)" stroke-width="1"/>
+            <text x="${x}" y="${pt2+iH+16}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${s}%</text>`;
+  }).join('');
+
+  // Peak-Markierung
+  const px = xOf(peakPt.s), py = yOf(peakPt.est);
+  const peakMark = `
+    <line x1="${px}" y1="${pt2}" x2="${px}" y2="${pt2+iH}" stroke="var(--accent2)" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
+    <circle cx="${px}" cy="${py}" r="5" fill="var(--accent2)" opacity="0.9"/>
+    <text x="${px+8}" y="${py-6}" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="var(--accent2)">Maximum: ${peakPt.s} % → ${Math.round(peakPt.est)} Mrd.</text>`;
+
+  // Aktuelle Position
+  const cx = xOf(p.spitze), cy = yOf(curPt.est);
+  const curMark = `
+    <line x1="${cx}" y1="${pt2}" x2="${cx}" y2="${pt2+iH}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3,2"/>
+    <circle cx="${cx}" cy="${cy}" r="5" fill="var(--accent)"/>
+    <text x="${cx+8}" y="${cy+4}" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--accent)">${p.spitze} %</text>`;
+
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
+    ${yVals}${xVals}
+    <line x1="${pl}" y1="${pt2}" x2="${pl}" y2="${pt2+iH}" stroke="var(--rule)" stroke-width="1.5"/>
+    <line x1="${pl}" y1="${pt2+iH}" x2="${pl+iW}" y2="${pt2+iH}" stroke="var(--rule)" stroke-width="1.5"/>
+    <polygon points="${area}" fill="var(--accent)" opacity="0.07"/>
+    <polyline points="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    ${peakMark}${curMark}
+    <text x="${pl+8}" y="${pt2+14}" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">ESt-Aufkommen (Mrd. €)</text>
+  </svg>`;
+}
+
 function berechneGini(werte) {
   const sorted = [...werte].sort((a,b)=>a-b);
   const n = sorted.length;
@@ -1987,6 +2122,9 @@ function render() {
   // ESt-TARIFKURVE
   renderEstKurve(p);
 
+  // LAFFER-KURVE
+  renderLaffer(p);
+
   // METR-BARS
   const metrHtml = r.metr.map((m, i) => {
     const pct = Math.min(100, m * 100);
@@ -2304,11 +2442,15 @@ function renderRechenweg(r, p) {
     <div class="rw-section">
       <div class="rw-section-title">2 · Verhaltensreaktion — Arbeitsangebot</div>
       <div class="rw-formula">Δ_Arbeit = ε × Δ(1 − GSatz_neu) / (1 − GSatz_Basis)
-ε = ${ELAST.labor_supply} (intensive margin, Saez/Chetty Konsens)
-Arbeit_neu = Arbeit_Basis × (1 + Δ_Arbeit)
-Begrenzung: 0,70 – 1,25 (plausibles Reaktionsband)</div>
+D1–D10b: ε = ${ELAST.labor_supply} (intensive margin, Saez/Chetty Konsens)
+D10c (Top 1%): ε = ${ELAST.d10c_labor} + Avoidance-Effekt ab GSatz > 45%
+  Avoidance = 1 − ${ELAST.d10c_avoidance} × max(0, GSatz−0,45) − ${ELAST.d10c_wegzug} × max(0, GSatz−0,60)
+  (Einkommensverschiebung: Kapitalgesellschaft, Stiftung, Timing)
+  (Wegzug: steuerbedingte Emigration bei sehr hohen Sätzen)
+Begrenzung: 0,55 – 1,25 (D10c: 0,40 Minimum)</div>
       <div class="rw-text">Arbeitsangebots-Index: <span class="${r.behavior.labor >= 99.5 ? 'rw-good' : r.behavior.labor < 97 ? 'rw-bad' : ''}">${f(r.behavior.labor)} (Basis: 100,0)</span>
-        · Quelle: Saez/Chetty/Gruber (2012), ZEW 2020</div>
+        · D10c-Avoidance-Faktor: ${((1 - (r.hh_delta.delta ? 0 : 0)) * 100).toFixed(0) !== '100' ? 'aktiv' : 'inaktiv bei aktuellem Spitzensatz'}
+        · Quellen: Saez/Chetty/Gruber (2012), Piketty/Saez/Stantcheva (2014), Kleven/Schultz (2014), Brülhart et al. (2019)</div>
     </div>
 
     <div class="rw-section">
@@ -2750,6 +2892,16 @@ document.getElementById('csv-export-btn').addEventListener('click', exportCSV);
 document.getElementById('share-btn').addEventListener('click', copyShareLink);
 document.getElementById('save-a-btn').addEventListener('click', () => saveScenario('A'));
 document.getElementById('save-b-btn').addEventListener('click', () => saveScenario('B'));
+
+// Mobile Controls Toggle
+document.getElementById('mobile-toggle-btn').addEventListener('click', () => {
+  const sidebar = document.getElementById('controls-sidebar');
+  const label = document.getElementById('mobile-toggle-label');
+  const icon = document.getElementById('mobile-toggle-icon');
+  const hidden = sidebar.classList.toggle('mobile-hidden');
+  label.textContent = hidden ? '⚙ Regler anzeigen' : '⚙ Regler ausblenden';
+  icon.textContent = hidden ? '+' : '−';
+});
 
 document.getElementById('rw-details').addEventListener('toggle', function() {
   const hint = this.querySelector('.rw-hint');
