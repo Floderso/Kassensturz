@@ -1729,7 +1729,7 @@ function renderKapitalstockSVG(rente, p) {
   }).join('');
 
   const xLabels = [];
-  for (let j = minJahr; j <= maxJahr; j += Math.ceil((maxJahr - minJahr) / 5)) {
+  for (let j = minJahr; j <= maxJahr; j += Math.max(1, Math.ceil((maxJahr - minJahr) / 5))) {
     xLabels.push(`<text x="${xOf(j)}" y="${pt+iH+16}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${j}</text>`);
   }
 
