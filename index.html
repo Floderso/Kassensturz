@@ -878,6 +878,13 @@
     <!-- Szenario-Vergleich Panel (erscheint wenn A+B gespeichert) -->
     <div id="szenario-panel" style="display:none"></div>
 
+    <!-- CHALLENGES -->
+    <div class="panel" id="challenges-panel">
+      <h2>Tages- · Wochen- · Monats-Challenge</h2>
+      <div class="panel-sub">Täglich neue Ziele — für alle gleich · Fortschritt wird live berechnet</div>
+      <div class="challenge-grid" id="challenges-grid"></div>
+    </div>
+
     <!-- Wissenschafts-Kompass -->
     <div class="panel" id="wissenschafts-panel">
       <h2>Wissenschafts-Kompass</h2>
@@ -945,13 +952,6 @@
     <div class="warning-box" id="warnbox" style="display:none">
       <strong>Hinweis</strong>
       <span id="warntext"></span>
-    </div>
-
-    <!-- CHALLENGES -->
-    <div class="panel" id="challenges-panel">
-      <h2>Tages- · Wochen- · Monats-Challenge</h2>
-      <div class="panel-sub">Täglich neue Ziele — für alle gleich · Fortschritt wird live berechnet</div>
-      <div class="challenge-grid" id="challenges-grid"></div>
     </div>
 
     <!-- EINNAHMEN NACH STEUERART -->
@@ -1984,19 +1984,19 @@ const PRESETS = {
     pkv_abschaffen: true, anzahl_kv: 30, praevention: 8
   },
   koalition27: {
-    // Basis: Koalitionsvertrag CDU/CSU+SPD 2025; Steuerreform zur Mitte der Legislatur (2027)
-    // Beschlossen: Grundfreibetrag 12.348 € (2026), Kindergeld 259 €, GastroMwSt 7%
-    // Geplant: KSt-Reform, Mittelstandsentlastung, Gewerbesteuer-Vereinfachung, Generationenkapital
-    freibetrag: 12600, eingang: 13, spitze: 44, grenze: 290000,
+    // Basis: Koalitionsvertrag CDU/CSU+SPD 2025 — projizierte Wirkung 2027
+    // KSt-Reform: Gesamtlast auf 25% (KSt 13% + GewSt 12%), Mittelstandsentlastung
+    // Freibetrag 13.000 €, Eingang 12%, Kindergeld 259 €, Rentenpaket II (kapitalquote 10%)
+    freibetrag: 13000, eingang: 12, spitze: 44, grenze: 290000,
     synthetisch: false, abgeltung: 25,
-    kst: 15, gewst: 12, gewst_aus: false,  // kleine GewSt-Entlastung, KSt bleibt (Gesamtlast -2 PP)
+    kst: 13, gewst: 12, gewst_aus: false,  // KSt-Reform: Gesamtlast 25% (KSt 13 + GewSt 12)
     mwst: 19, mwst_erm: 7,
     co2: 65, klimageld: true,
     erb: 20, betriebs: true, boden: 0.4, verm: 0, zucman: 0,
     rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
-    bg: 600, kg: 259, neg_est: false, kleine_st: true,
-    kapitalquote: 5, rendite_fonds: 7, startjahr: 2024,  // Rentenpaket II 2024
-    pkv_abschaffen: false, anzahl_kv: 95, praevention: 2
+    bg: 550, kg: 259, neg_est: false, kleine_st: true,
+    kapitalquote: 10, rendite_fonds: 7, startjahr: 2024,  // Rentenpaket II: höhere Aktienquote
+    pkv_abschaffen: false, anzahl_kv: 95, praevention: 3
   }
 };
 
