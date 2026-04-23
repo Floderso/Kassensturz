@@ -1576,18 +1576,22 @@ function renderRenten(p, r) {
 
   const maxAbs = Math.max(1, ...gkvItems.map(x => Math.abs(x.v)));
   document.getElementById('gkv_panel').innerHTML = `
-    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:10px;">GKV-Struktureffekte (Mrd. € / Jahr)</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px;">GKV-Struktureffekte (Mrd. € / Jahr)</div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
     ${gkvItems.map(item => {
       const pct = Math.max(2, Math.abs(item.v) / maxAbs * 100);
       const cls = item.v >= 0 ? 'pos' : 'neg';
-      return `<div style="display:grid;grid-template-columns:180px 1fr 80px;align-items:center;gap:10px;margin-bottom:4px;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.label}</div>
-        <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
-        <div class="bar-value">${item.v >= 0 ? '+' : ''}${f1(item.v)} Mrd.</div>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin:-2px 0 10px 190px;font-style:italic">${item.note}</div>`;
+      return `<div>
+        <div style="display:grid;grid-template-columns:180px 1fr 72px;align-items:center;gap:10px;margin-bottom:4px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${item.label}">${item.label}</div>
+          <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;white-space:nowrap;">${item.v >= 0 ? '+' : ''}${f1(item.v)} Mrd.</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);font-style:italic;padding-left:4px;">${item.note}</div>
+      </div>`;
     }).join('')}
-    <p style="font-size:11px;color:var(--muted);margin-top:12px;font-style:italic;">Quelle: GKV-SV Jahresbericht 2025, PKV-Verband, WHO Prevention ROI Report 2017, BMG.</p>`;
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:14px;font-style:italic;">Quelle: GKV-SV Jahresbericht 2025, PKV-Verband, WHO Prevention ROI Report 2017, BMG.</p>`;
 }
 
 function renderKapitalstockSVG(rente, p) {
