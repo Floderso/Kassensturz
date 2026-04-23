@@ -102,7 +102,7 @@
     .controls {
       position: relative;
       top: 0;
-      max-height: 60vh;
+      max-height: 65vh;
       overflow-y: auto;
     }
     .controls.mobile-hidden { display: none; }
@@ -110,17 +110,19 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      width: 100%;
+      grid-column: 1 / -1;
       padding: 10px 14px;
-      margin-bottom: 12px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.12em;
-      background: var(--paper);
-      border: 1px solid var(--rule);
-      color: var(--ink);
+      background: var(--ink);
+      color: var(--paper);
+      border: none;
       cursor: pointer;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
     .two-col { grid-template-columns: 1fr !important; }
@@ -128,6 +130,9 @@
     h1 { font-size: clamp(28px, 8vw, 48px) !important; }
     .panel { padding: 14px 16px; }
     svg { touch-action: none; }
+    /* Prevent bar-row label overflow on small screens */
+    .bar-row { grid-template-columns: 60px 1fr 70px; }
+    .bar-label { font-size: 10px; }
   }
   .controls::-webkit-scrollbar { width: 6px; }
   .controls::-webkit-scrollbar-track { background: transparent; }
@@ -1575,12 +1580,12 @@ function renderRenten(p, r) {
     ${gkvItems.map(item => {
       const pct = Math.max(2, Math.abs(item.v) / maxAbs * 100);
       const cls = item.v >= 0 ? 'pos' : 'neg';
-      return `<div class="bar-row">
-        <div class="bar-label" style="width:160px;flex-shrink:0">${item.label}</div>
+      return `<div style="display:grid;grid-template-columns:180px 1fr 80px;align-items:center;gap:10px;margin-bottom:4px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.label}</div>
         <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
-        <div class="bar-value" style="min-width:80px">${item.v >= 0 ? '+' : ''}${f1(item.v)} Mrd.</div>
+        <div class="bar-value">${item.v >= 0 ? '+' : ''}${f1(item.v)} Mrd.</div>
       </div>
-      <div style="font-size:11px;color:var(--muted);margin:-4px 0 10px 160px;font-style:italic">${item.note}</div>`;
+      <div style="font-size:11px;color:var(--muted);margin:-2px 0 10px 190px;font-style:italic">${item.note}</div>`;
     }).join('')}
     <p style="font-size:11px;color:var(--muted);margin-top:12px;font-style:italic;">Quelle: GKV-SV Jahresbericht 2025, PKV-Verband, WHO Prevention ROI Report 2017, BMG.</p>`;
 }
@@ -1671,16 +1676,34 @@ function renderBeitragProjSVG(rente, p) {
 // LAFFER-KURVE
 // ============================================================
 
+let _lafferTimer = null;
+let _lafferPCache = null;
+let _lafferPts = null;
+
 function renderLaffer(p) {
   const el = document.getElementById('laffer_chart');
   if (!el) return;
 
-  // Berechne ESt-Aufkommen für Spitzensteuersätze 5–75 %
-  const pts = [];
-  for (let s = 5; s <= 75; s += 2.5) {
-    const rr = berechne({ ...p, spitze: s });
-    pts.push({ s, est: rr.rev.est, total: rr.einnahmen_total });
+  // Debounce: compute only 200ms after last change
+  clearTimeout(_lafferTimer);
+  _lafferTimer = setTimeout(() => _renderLafferNow(p), 200);
+}
+
+function _renderLafferNow(p) {
+  const el = document.getElementById('laffer_chart');
+  if (!el) return;
+
+  // Cache: skip recompute if only spitze changed (curve shape is driven by other params)
+  const cacheKey = JSON.stringify({...p, spitze: 0});
+  if (_lafferPCache !== cacheKey) {
+    _lafferPts = [];
+    for (let s = 5; s <= 75; s += 2.5) {
+      const rr = berechne({ ...p, spitze: s });
+      _lafferPts.push({ s, est: rr.rev.est });
+    }
+    _lafferPCache = cacheKey;
   }
+  const pts = _lafferPts;
 
   const maxEst = Math.max(...pts.map(x => x.est));
   const peakPt = pts.reduce((a, b) => b.est > a.est ? b : a);
@@ -1695,7 +1718,9 @@ function renderLaffer(p) {
   const line = pts.map(x => xOf(x.s) + ',' + yOf(x.est)).join(' ');
   const area = `${xOf(pts[0].s)},${pt2+iH} ` + line + ` ${xOf(pts[pts.length-1].s)},${pt2+iH}`;
 
-  const yVals = [Math.round(minEst/50)*50, Math.round(maxEst*0.5/50)*50, Math.round(maxEst/50)*50].map(v => {
+  // Y-axis: deduplicated labels
+  const yTickSet = new Set([Math.round(minEst/50)*50, Math.round((minEst+maxEst)/2/50)*50, Math.round(maxEst/50)*50]);
+  const yVals = [...yTickSet].filter(v => v >= minEst && v <= maxEst*1.1).map(v => {
     const y = yOf(v);
     return `<line x1="${pl}" y1="${y}" x2="${pl+iW}" y2="${y}" stroke="rgba(42,39,32,0.08)" stroke-width="1"/>
             <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${Math.round(v)}</text>`;
@@ -1707,19 +1732,21 @@ function renderLaffer(p) {
             <text x="${x}" y="${pt2+iH+16}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${s}%</text>`;
   }).join('');
 
-  // Peak-Markierung
+  // Peak-Markierung — text-anchor rechts wenn zu nah am Rand
   const px = xOf(peakPt.s), py = yOf(peakPt.est);
+  const peakNearRight = px > pl + iW * 0.6;
   const peakMark = `
     <line x1="${px}" y1="${pt2}" x2="${px}" y2="${pt2+iH}" stroke="var(--accent2)" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
     <circle cx="${px}" cy="${py}" r="5" fill="var(--accent2)" opacity="0.9"/>
-    <text x="${px+8}" y="${py-6}" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="var(--accent2)">Maximum: ${peakPt.s} % → ${Math.round(peakPt.est)} Mrd.</text>`;
+    <text x="${peakNearRight ? px-8 : px+8}" y="${py-8}" text-anchor="${peakNearRight ? 'end' : 'start'}" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="var(--accent2)">Max: ${peakPt.s}% → ${Math.round(peakPt.est)} Mrd.</text>`;
 
   // Aktuelle Position
   const cx = xOf(p.spitze), cy = yOf(curPt.est);
+  const curNearRight = cx > pl + iW * 0.75;
   const curMark = `
     <line x1="${cx}" y1="${pt2}" x2="${cx}" y2="${pt2+iH}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3,2"/>
     <circle cx="${cx}" cy="${cy}" r="5" fill="var(--accent)"/>
-    <text x="${cx+8}" y="${cy+4}" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--accent)">${p.spitze} %</text>`;
+    <text x="${curNearRight ? cx-8 : cx+8}" y="${cy-6}" text-anchor="${curNearRight ? 'end' : 'start'}" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--accent)">${p.spitze}%</text>`;
 
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
     ${yVals}${xVals}
@@ -2122,7 +2149,7 @@ function render() {
   // ESt-TARIFKURVE
   renderEstKurve(p);
 
-  // LAFFER-KURVE
+  // LAFFER-KURVE (debounced — sofort beim ersten Aufruf, danach 200ms nach letzter Änderung)
   renderLaffer(p);
 
   // METR-BARS
@@ -2449,7 +2476,7 @@ D10c (Top 1%): ε = ${ELAST.d10c_labor} + Avoidance-Effekt ab GSatz > 45%
   (Wegzug: steuerbedingte Emigration bei sehr hohen Sätzen)
 Begrenzung: 0,55 – 1,25 (D10c: 0,40 Minimum)</div>
       <div class="rw-text">Arbeitsangebots-Index: <span class="${r.behavior.labor >= 99.5 ? 'rw-good' : r.behavior.labor < 97 ? 'rw-bad' : ''}">${f(r.behavior.labor)} (Basis: 100,0)</span>
-        · D10c-Avoidance-Faktor: ${((1 - (r.hh_delta.delta ? 0 : 0)) * 100).toFixed(0) !== '100' ? 'aktiv' : 'inaktiv bei aktuellem Spitzensatz'}
+        · D10c-Avoidance: ${p.spitze > 45 ? `aktiv (GS ${p.spitze}% > 45% Schwelle)` : `inaktiv (GS ${p.spitze}% ≤ 45% Schwelle)`}
         · Quellen: Saez/Chetty/Gruber (2012), Piketty/Saez/Stantcheva (2014), Kleven/Schultz (2014), Brülhart et al. (2019)</div>
     </div>
 
@@ -2879,12 +2906,13 @@ function renderSzenarioVergleich() {
 
 computeRef();
 setParams(PRESETS.status_quo);
-// Lade URL-Parameter wenn vorhanden
 if (window.location.hash) {
   const fromHash = hashToParams(window.location.hash);
   if (fromHash) setParams(fromHash);
 }
 render();
+// Laffer-Kurve sofort beim Start berechnen (kein Debounce-Delay)
+_renderLafferNow(getParams());
 injectTooltips();
 
 // Rechenweg-Panel: bei Aufklappen rendern
