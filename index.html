@@ -437,6 +437,36 @@
     line-height: 1.7;
   }
 
+  /* ── SITE NAV ── */
+  .site-nav-bar {
+    background: var(--ink);
+    margin: -24px -16px 28px;
+    padding: 0 16px;
+  }
+  .site-nav-bar-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+  }
+  .site-nav-bar a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(251,249,244,0.55);
+    text-decoration: none;
+    padding: 11px 16px;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.15s;
+    display: inline-block;
+  }
+  .site-nav-bar a:hover { color: var(--paper); }
+  .site-nav-bar a.active { color: var(--paper); border-bottom-color: var(--accent); }
+  .site-nav-bar-sep { color: rgba(251,249,244,0.2); padding: 0 2px; font-size: 12px; }
+
   details.about {
     background: var(--paper);
     border: 1px solid var(--rule);
@@ -648,6 +678,14 @@
 </head>
 <body>
 <div class="wrap">
+
+<nav class="site-nav-bar">
+  <div class="site-nav-bar-inner">
+    <a href="index.html" class="active">Haushaltsspiel</a>
+    <span class="site-nav-bar-sep">·</span>
+    <a href="finanz.html">Finanztools</a>
+  </div>
+</nav>
 
 <header>
   <div class="masthead">
