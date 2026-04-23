@@ -1459,7 +1459,9 @@ function berechne(params) {
   // ---------- 18. ARMUTSRISIKOQUOTE ----------
   // Gewichteter Median (nach Haushaltsanzahl) — korrekt für ungleiche Dezilgrößen (D10a/b/c)
   const median_netto = berechneMedianGewichtet(hh_delta.netto, dezile);
-  const poverty_line = median_netto * 0.60;
+  // 65% statt 60%: bei 60% liegt D1 (inkl. Bürgergeld/Klimageld ~15.900€) knapp über
+  // der Grenze → armutsrisiko = immer 0. 65% → Grenze ~16.380€ → D1 darunter → ~10% SQ.
+  const poverty_line = median_netto * 0.65;
   const total_hh_all = dezile.reduce((a,d)=>a+d.anzahl,0);
   const armutsrisiko = dezile.reduce((a,d,i)=>hh_delta.netto[i]<poverty_line?a+d.anzahl:a,0)/total_hh_all*100;
 
@@ -2335,8 +2337,8 @@ const CHALLENGES = [
     desc:'Arbeitsangebot-Index über 101',
     subs:[{ label:'Arbeit-Index', check:r=>r.behavior.labor>101, cur:r=>r.behavior.labor, tgt:101, refFn:()=>100, dir:'up', fmt:v=>v.toFixed(1) }]},
   { id:'armut_16', diff:'daily', title:'Armutsreduktion',
-    desc:'Armutsrisikoquote unter 16 %',
-    subs:[{ label:'Armutsrisiko', check:r=>r.armutsrisiko<16, cur:r=>r.armutsrisiko, tgt:16, refFn:()=>REF.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' }]},
+    desc:'Armutsrisikoquote unter 8 %',
+    subs:[{ label:'Armutsrisiko', check:r=>r.armutsrisiko<8, cur:r=>r.armutsrisiko, tgt:8, refFn:()=>REF.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' }]},
   { id:'co2_85', diff:'daily', title:'Klimakurs',
     desc:'CO₂-Emissionen auf Index unter 85',
     subs:[{ label:'CO₂-Index', check:r=>r.behavior.co2<85, cur:r=>r.behavior.co2, tgt:85, refFn:()=>100, dir:'down', fmt:v=>v.toFixed(1) }]},
@@ -2361,8 +2363,8 @@ const CHALLENGES = [
     desc:'Investitionsindex über 104',
     subs:[{ label:'Investition', check:r=>r.behavior.invest>104, cur:r=>r.behavior.invest, tgt:104, refFn:()=>100, dir:'up', fmt:v=>v.toFixed(1) }]},
   { id:'armut_14', diff:'weekly', title:'Soziale Gerechtigkeit',
-    desc:'Armutsrisikoquote unter 14 %',
-    subs:[{ label:'Armutsrisiko', check:r=>r.armutsrisiko<14, cur:r=>r.armutsrisiko, tgt:14, refFn:()=>REF.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' }]},
+    desc:'Armutsrisikoquote unter 5 %',
+    subs:[{ label:'Armutsrisiko', check:r=>r.armutsrisiko<5, cur:r=>r.armutsrisiko, tgt:5, refFn:()=>REF.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' }]},
   { id:'schuld_neg', diff:'weekly', title:'Schuldenabbau',
     desc:'Schuldenquote jährlich sinkend (Δ < 0)',
     subs:[{ label:'Schulden-Δ', check:r=>r.schuldenquote_delta<0, cur:r=>r.schuldenquote_delta, tgt:0, refFn:()=>REF.schuldenquote_delta, dir:'down', fmt:v=>v.toFixed(2)+' %' }]},
@@ -2402,7 +2404,7 @@ const CHALLENGES = [
   { id:'sozmark', diff:'monthly', title:'Soziale Marktwirtschaft',
     desc:'Armut < 14%, Investitionen > 101, Saldo > −40 Mrd.',
     subs:[
-      { label:'Armut < 14 %',   check:r=>r.armutsrisiko<14,     cur:r=>r.armutsrisiko,   tgt:14,  refFn:()=>REF.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' },
+      { label:'Armut < 6 %',    check:r=>r.armutsrisiko<6,      cur:r=>r.armutsrisiko,   tgt:6,   refFn:()=>REF.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' },
       { label:'Invest. > 101',  check:r=>r.behavior.invest>101, cur:r=>r.behavior.invest, tgt:101, refFn:()=>100,              dir:'up',   fmt:v=>v.toFixed(1) },
       { label:'Saldo > −40',    check:r=>r.saldo>-40,           cur:r=>r.saldo,           tgt:-40, refFn:()=>REF.saldo,        dir:'up',   fmt:v=>v.toFixed(0)+' Mrd.' }
     ]},
