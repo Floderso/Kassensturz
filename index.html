@@ -467,6 +467,74 @@
   .badge.bad { background: var(--bad); color: var(--paper); border-color: var(--bad); }
   .badge.warn { background: var(--warn); color: var(--paper); border-color: var(--warn); }
 
+  /* CHALLENGES */
+  .challenge-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 900px) { .challenge-grid { grid-template-columns: 1fr; } }
+  .challenge-card {
+    border: 1px solid var(--rule);
+    padding: 14px 16px;
+    background: var(--paper);
+    position: relative;
+  }
+  .challenge-card.done { opacity: 0.75; }
+  .challenge-period {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+  .challenge-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    line-height: 1.2;
+  }
+  .challenge-desc {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+  .challenge-bar-wrap { margin-bottom: 6px; }
+  .challenge-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  .challenge-bar-label .cur { font-weight: 600; color: var(--ink); }
+  .challenge-track {
+    height: 5px;
+    background: rgba(42,39,32,0.12);
+    overflow: hidden;
+  }
+  .challenge-fill { height: 100%; transition: width 0.4s ease; }
+  .challenge-done-badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    margin-top: 8px;
+    border: 1px solid;
+  }
+  .challenge-accent-bar {
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+  }
+
   /* TOOLTIPS */
   .tt-btn {
     display: inline-flex;
@@ -610,6 +678,7 @@
         <button data-preset="radikal">Stark&nbsp;Umverteilend</button>
         <button data-preset="simpel">5-Steuern-System</button>
         <button data-preset="nordisch">Nordisches&nbsp;Modell</button>
+        <button data-preset="koalition27">Koalition&nbsp;2027</button>
       </div>
     </div>
 
@@ -704,6 +773,10 @@
         <label>Vermögensteuer (ab 2 Mio) <span class="value" id="v_verm"></span></label>
         <input type="range" id="verm" min="0" max="3" step="0.1" value="0">
       </div>
+      <div class="slider-row">
+        <label>Zucman-Mindeststeuer (Mrd.) <span class="value" id="v_zucman"></span></label>
+        <input type="range" id="zucman" min="0" max="3" step="0.1" value="0">
+      </div>
     </div>
 
     <!-- Sozialversicherung -->
@@ -720,6 +793,10 @@
       <div class="slider-row">
         <label>Arbeitslosen+Pflege <span class="value" id="v_alpf"></span></label>
         <input type="range" id="alpf" min="2" max="10" step="0.1" value="6.2">
+      </div>
+      <div class="slider-row">
+        <label>Beitr.-Bemessungsgrenze <span class="value" id="v_bbg"></span></label>
+        <input type="range" id="bbg" min="40000" max="160000" step="5000" value="90000">
       </div>
       <div class="toggle-row">
         <span>Bürgerversicherung (alle zahlen)</span>
@@ -801,6 +878,14 @@
     <!-- Szenario-Vergleich Panel (erscheint wenn A+B gespeichert) -->
     <div id="szenario-panel" style="display:none"></div>
 
+    <!-- Wissenschafts-Kompass -->
+    <div class="panel" id="wissenschafts-panel">
+      <h2>Wissenschafts-Kompass</h2>
+      <div class="panel-sub">Welchem Reformlager entsprechen deine Einstellungen? · ifo/DIW/Zucman/Kirchhof</div>
+      <div id="wissenschafts_bars"></div>
+      <p id="wissenschafts_note" style="font-size:11px;color:var(--muted);margin-top:10px;font-style:italic;"></p>
+    </div>
+
     <details class="about">
       <summary>Wie funktioniert das? (Kurz)</summary>
       <p>Das Modell rechnet mit <strong>10 repräsentativen Haushalten</strong> (Dezile), einem Unternehmenssektor und dem Staat. Alle Startwerte basieren auf Bundeshaushalt 2025, SOEP-Einkommensdezilen, EU-SILC und BMF-Steuerstatistik.</p>
@@ -860,6 +945,13 @@
     <div class="warning-box" id="warnbox" style="display:none">
       <strong>Hinweis</strong>
       <span id="warntext"></span>
+    </div>
+
+    <!-- CHALLENGES -->
+    <div class="panel" id="challenges-panel">
+      <h2>Tages- · Wochen- · Monats-Challenge</h2>
+      <div class="panel-sub">Täglich neue Ziele — für alle gleich · Fortschritt wird live berechnet</div>
+      <div class="challenge-grid" id="challenges-grid"></div>
     </div>
 
     <!-- EINNAHMEN NACH STEUERART -->
@@ -1227,7 +1319,7 @@ function berechne(params) {
     // Netto nach ESt und SV
     const est_d = est_pro_dezil.find(x => x.d === d.d).est;
     const sv_satz = (params.rv + params.kv + params.alpf) / 100 * 0.5; // AN-Anteil ca.
-    const sv_d = Math.min(d.brutto_adj, 90000) * sv_satz; // BBG ~90k
+    const sv_d = Math.min(d.brutto_adj, params.bbg ?? 90000) * sv_satz;
     const netto = d.brutto_adj - est_d - sv_d;
     const konsum = netto * d.konsum;
     // 70% Regelsatz, 30% ermäßigt (grob aus VGR)
@@ -1260,11 +1352,22 @@ function berechne(params) {
 
   // ---------- 7. SV-BEITRÄGE ----------
   // Versicherungspflichtige Lohnsumme ca. 1750 Mrd., BBG begrenzt
-  const lohnsumme_sv = 1750;
+  const bbg = params.bbg ?? 90000;
+  // BBG-Erhöhung: ~12% der sozialversicherungspflichtigen Löhne liegt zwischen 90k und 160k
+  const bbg_lohnsumme_factor = 1 + Math.max(0, (bbg - 90000) / 90000) * 0.12;
+  const lohnsumme_sv = 1750 * bbg_lohnsumme_factor;
   const buerger_boost = params.buergerv ? 1.15 : 1.0; // breitere Basis
   const rv_auf = lohnsumme_sv * params.rv / 100 * buerger_boost;
   const kv_auf = lohnsumme_sv * params.kv / 100 * buerger_boost;
   const al_auf = lohnsumme_sv * params.alpf / 100 * buerger_boost;
+
+  // ---------- 7b. ZUCMAN-MINDESTSTEUER ----------
+  // 2%-Mindeststeuer auf Nettovermögen ultra-Reicher (Zucman G20 2024)
+  // Basis D10c: 0,41 Mio. HH × 7 Mio. € Median-Vermögen = ~2.870 Mrd. €
+  // Avoidance: ~15% bei 2% Satz (Jakobsen/Kleven/Kolsrud 2024)
+  const zucman_basis = 2870;
+  const zucman_avoidance = 1 - 0.15 * Math.min(1, (params.zucman ?? 0) / 2);
+  const zucman_auf = zucman_basis * (params.zucman ?? 0) / 100 * zucman_avoidance;
 
   // ---------- 8. KLEINE VERBRAUCHSTEUERN ----------
   const klein_auf = params.kleine_st ?
@@ -1291,6 +1394,7 @@ function berechne(params) {
     erbschaft: erb_auf,
     boden: boden_auf,
     vermoegen: verm_auf,
+    zucman: zucman_auf,
     rv: rv_auf,
     kv: kv_auf,
     al: al_auf,
@@ -1309,6 +1413,7 @@ function berechne(params) {
     erb_auf * ADMIN_QUOTE.erbschaft +
     boden_auf * ADMIN_QUOTE.grundst +
     verm_auf * ADMIN_QUOTE.verm +
+    zucman_auf * ADMIN_QUOTE.verm +
     klein_auf * ADMIN_QUOTE.klein +
     (rv_auf + kv_auf + al_auf) * ADMIN_QUOTE.sv +
     (bg_auszahlung + kg_auszahlung + neg_est_auszahlung) * ADMIN_QUOTE.transfer;
@@ -1329,6 +1434,7 @@ function berechne(params) {
   if (erb_auf > 0) nst++;
   if (boden_auf > 0) nst++;
   if (verm_auf > 0) nst++;
+  if (zucman_auf > 0) nst++;
   if (rv_auf > 0) nst++;
   if (kv_auf > 0) nst++;
   if (al_auf > 0) nst += 2;
@@ -1368,8 +1474,8 @@ function berechne(params) {
     const brutto = d.brutto_adj;
     const arbeit = brutto * (1 - d.kapital);
     const gs_est = grenzsteuersatz(arbeit, params.freibetrag, params.eingang, params.spitze, params.grenze);
-    // SV: nur bis BBG (90.000 €) fällig, AN-Anteil ~50%
-    const sv_grenz = arbeit < 90000 ? (params.rv + params.kv + params.alpf) / 100 * 0.5 : 0;
+    // SV: nur bis BBG fällig, AN-Anteil ~50%
+    const sv_grenz = arbeit < (params.bbg ?? 90000) ? (params.rv + params.kv + params.alpf) / 100 * 0.5 : 0;
     // Transfer-Entzug: Bürgergeld-Empfänger verlieren 80% des Zusatzeinkommens (§ 11b SGB II)
     const bg_entzug = [0.80, 0.70, 0.20, 0, 0, 0, 0, 0, 0, 0, 0, 0][i];
     return Math.min(0.99, gs_est + sv_grenz + bg_entzug);
@@ -1401,7 +1507,7 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg) {
     const est = est_dez[i].est;
     const brutto = d.brutto_adj;
     // SV-Beiträge
-    const sv_base = Math.min(brutto, 90000);
+    const sv_base = Math.min(brutto, params.bbg ?? 90000);
     const sv = sv_base * (params.rv + params.kv + params.alpf)/100 * 0.5;
     // MwSt auf Konsum
     const vornetto = brutto - est - sv;
@@ -1809,8 +1915,8 @@ const PRESETS = {
     kst: 15, gewst: 14, gewst_aus: false,
     mwst: 19, mwst_erm: 7,
     co2: 55, klimageld: true,
-    erb: 20, betriebs: true, boden: 0.4, verm: 0,
-    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false,
+    erb: 20, betriebs: true, boden: 0.4, verm: 0, zucman: 0,
+    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
     bg: 563, kg: 255, neg_est: false, kleine_st: true,
     kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
     pkv_abschaffen: false, anzahl_kv: 95, praevention: 0
@@ -1821,8 +1927,8 @@ const PRESETS = {
     kst: 25, gewst: 0, gewst_aus: true,
     mwst: 19, mwst_erm: 7,
     co2: 80, klimageld: true,
-    erb: 30, betriebs: false, boden: 1.0, verm: 0,
-    rv: 18.6, kv: 14, alpf: 6.2, buergerv: true,
+    erb: 30, betriebs: false, boden: 1.0, verm: 0.5, zucman: 0,
+    rv: 18.6, kv: 14, alpf: 6.2, buergerv: true, bbg: 115000,
     bg: 650, kg: 300, neg_est: false, kleine_st: false,
     kapitalquote: 5, rendite_fonds: 7, startjahr: 2015,
     pkv_abschaffen: false, anzahl_kv: 95, praevention: 3
@@ -1833,8 +1939,8 @@ const PRESETS = {
     kst: 25, gewst: 0, gewst_aus: true,
     mwst: 19, mwst_erm: 7,
     co2: 55, klimageld: true,
-    erb: 10, betriebs: true, boden: 0.4, verm: 0,
-    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false,
+    erb: 10, betriebs: true, boden: 0.4, verm: 0, zucman: 0,
+    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
     bg: 563, kg: 255, neg_est: false, kleine_st: false,
     kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
     pkv_abschaffen: false, anzahl_kv: 95, praevention: 0
@@ -1845,8 +1951,8 @@ const PRESETS = {
     kst: 30, gewst: 0, gewst_aus: true,
     mwst: 19, mwst_erm: 5,
     co2: 150, klimageld: true,
-    erb: 50, betriebs: false, boden: 2.0, verm: 1.5,
-    rv: 20, kv: 14, alpf: 6.2, buergerv: true,
+    erb: 50, betriebs: false, boden: 2.0, verm: 1.5, zucman: 2,
+    rv: 20, kv: 14, alpf: 6.2, buergerv: true, bbg: 150000,
     bg: 800, kg: 350, neg_est: true, kleine_st: false,
     kapitalquote: 10, rendite_fonds: 7, startjahr: 2010,
     pkv_abschaffen: true, anzahl_kv: 20, praevention: 10
@@ -1857,8 +1963,8 @@ const PRESETS = {
     kst: 20, gewst: 0, gewst_aus: true,
     mwst: 19, mwst_erm: 7,
     co2: 100, klimageld: true,
-    erb: 30, betriebs: false, boden: 1.5, verm: 0,
-    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false,
+    erb: 30, betriebs: false, boden: 1.5, verm: 0, zucman: 0,
+    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
     bg: 600, kg: 280, neg_est: false, kleine_st: false,
     kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
     pkv_abschaffen: false, anzahl_kv: 95, praevention: 0
@@ -1869,11 +1975,26 @@ const PRESETS = {
     kst: 22, gewst: 0, gewst_aus: true,
     mwst: 25, mwst_erm: 12,
     co2: 120, klimageld: true,
-    erb: 15, betriebs: true, boden: 0.8, verm: 0,
-    rv: 22, kv: 12, alpf: 7.0, buergerv: true,
+    erb: 15, betriebs: true, boden: 0.8, verm: 0, zucman: 0,
+    rv: 22, kv: 12, alpf: 7.0, buergerv: true, bbg: 120000,
     bg: 750, kg: 350, neg_est: false, kleine_st: true,
     kapitalquote: 15, rendite_fonds: 7, startjahr: 2005,
     pkv_abschaffen: true, anzahl_kv: 30, praevention: 8
+  },
+  koalition27: {
+    // Basis: Koalitionsvertrag CDU/CSU+SPD 2025; Steuerreform zur Mitte der Legislatur (2027)
+    // Beschlossen: Grundfreibetrag 12.348 € (2026), Kindergeld 259 €, GastroMwSt 7%
+    // Geplant: KSt-Reform, Mittelstandsentlastung, Gewerbesteuer-Vereinfachung, Generationenkapital
+    freibetrag: 12600, eingang: 13, spitze: 44, grenze: 290000,
+    synthetisch: false, abgeltung: 25,
+    kst: 15, gewst: 12, gewst_aus: false,  // kleine GewSt-Entlastung, KSt bleibt (Gesamtlast -2 PP)
+    mwst: 19, mwst_erm: 7,
+    co2: 65, klimageld: true,
+    erb: 20, betriebs: true, boden: 0.4, verm: 0, zucman: 0,
+    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
+    bg: 600, kg: 259, neg_est: false, kleine_st: true,
+    kapitalquote: 5, rendite_fonds: 7, startjahr: 2024,  // Rentenpaket II 2024
+    pkv_abschaffen: false, anzahl_kv: 95, praevention: 2
   }
 };
 
@@ -1913,7 +2034,9 @@ function getParams() {
     startjahr:      +document.getElementById('startjahr').value,
     pkv_abschaffen: document.getElementById('pkv_abschaffen').checked,
     anzahl_kv:      +document.getElementById('anzahl_kv').value,
-    praevention:    +document.getElementById('praevention').value
+    praevention:    +document.getElementById('praevention').value,
+    bbg:            +document.getElementById('bbg').value,
+    zucman:         +document.getElementById('zucman').value
   };
 }
 
@@ -1949,6 +2072,8 @@ function setParams(p) {
   document.getElementById('pkv_abschaffen').checked = p.pkv_abschaffen ?? false;
   document.getElementById('anzahl_kv').value = p.anzahl_kv ?? 95;
   document.getElementById('praevention').value = p.praevention ?? 0;
+  document.getElementById('bbg').value = p.bbg ?? 90000;
+  document.getElementById('zucman').value = p.zucman ?? 0;
 }
 
 function fmtEUR(x) {
@@ -1995,6 +2120,8 @@ function render() {
   document.getElementById('v_startjahr').textContent = p.startjahr;
   document.getElementById('v_anzahl_kv').textContent = p.anzahl_kv;
   document.getElementById('v_praevention').textContent = p.praevention + ' Mrd.';
+  document.getElementById('v_bbg').textContent = (p.bbg / 1000).toFixed(0) + '.000 €';
+  document.getElementById('v_zucman').textContent = p.zucman.toFixed(1) + ' %';
 
   // Abgeltungsteuer-Row nur zeigen wenn nicht synthetisch
   document.getElementById('row_abgeltung').style.opacity = p.synthetisch ? 0.3 : 1;
@@ -2049,7 +2176,7 @@ function render() {
   const revLabels = {
     est: 'Einkommensteuer', kst: 'Körperschaftst.', gewst: 'Gewerbest.',
     mwst: 'Mehrwertsteuer', co2: 'CO₂ (netto)', erbschaft: 'Erbschaftst.',
-    boden: 'Bodenwertst.', vermoegen: 'Vermögenst.',
+    boden: 'Bodenwertst.', vermoegen: 'Vermögenst.', zucman: 'Zucman-Mindestst.',
     rv: 'Rentenvers.', kv: 'Krankenvers.', al: 'AL+Pflege',
     klein: 'Kleine Verbrauchst.'
   };
@@ -2177,10 +2304,271 @@ function render() {
   // SCHULDENQUOTENPFAD
   renderSchuldenpfad(r);
 
+  // CHALLENGES
+  renderChallenges(r);
+
+  // WISSENSCHAFTS-KOMPASS
+  renderWissenschaftsPanel(p);
+
   // URL-Hash aktualisieren
   window.history.replaceState(null, '', paramsToHash(p));
 
   renderRechenweg(r, p);
+}
+
+// ============================================================
+// CHALLENGES
+// ============================================================
+
+const CHALLENGES = [
+  // ── TÄGLICH (leicht, ein Ziel) ──────────────────────────
+  { id:'gini_285', diff:'daily', title:'Soziale Balance',
+    desc:'Gini-Koeffizient unter 0,285 senken',
+    subs:[{ label:'Gini', check:r=>r.gini<0.285, cur:r=>r.gini, tgt:0.285, refFn:()=>REF.gini, dir:'down', fmt:v=>v.toFixed(3).replace('.',',') }]},
+  { id:'saldo_50', diff:'daily', title:'Haushaltsdisziplin',
+    desc:'Defizit unter 50 Mrd. € drücken',
+    subs:[{ label:'Saldo', check:r=>r.saldo>-50, cur:r=>r.saldo, tgt:-50, refFn:()=>REF.saldo, dir:'up', fmt:v=>v.toFixed(0)+' Mrd.' }]},
+  { id:'admin_120', diff:'daily', title:'Schlankerer Staat',
+    desc:'Verwaltungskosten unter 120 Mrd. €',
+    subs:[{ label:'Verwaltung', check:r=>r.admin_kosten<120, cur:r=>r.admin_kosten, tgt:120, refFn:()=>REF.admin_kosten, dir:'down', fmt:v=>v.toFixed(0)+' Mrd.' }]},
+  { id:'labor_101', diff:'daily', title:'Beschäftigungsimpuls',
+    desc:'Arbeitsangebot-Index über 101',
+    subs:[{ label:'Arbeit-Index', check:r=>r.behavior.labor>101, cur:r=>r.behavior.labor, tgt:101, refFn:()=>100, dir:'up', fmt:v=>v.toFixed(1) }]},
+  { id:'armut_16', diff:'daily', title:'Armutsreduktion',
+    desc:'Armutsrisikoquote unter 16 %',
+    subs:[{ label:'Armutsrisiko', check:r=>r.armutsrisiko<16, cur:r=>r.armutsrisiko, tgt:16, refFn:()=>REF.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' }]},
+  { id:'co2_85', diff:'daily', title:'Klimakurs',
+    desc:'CO₂-Emissionen auf Index unter 85',
+    subs:[{ label:'CO₂-Index', check:r=>r.behavior.co2<85, cur:r=>r.behavior.co2, tgt:85, refFn:()=>100, dir:'down', fmt:v=>v.toFixed(1) }]},
+  { id:'nst_12', diff:'daily', title:'Steuervereinfachung',
+    desc:'Höchstens 12 aktive Steuerarten',
+    subs:[{ label:'Steuerarten', check:r=>r.nst<=12, cur:r=>r.nst, tgt:12, refFn:()=>REF.nst, dir:'down', fmt:v=>v+' Arten' }]},
+  { id:'invest_101', diff:'daily', title:'Standortpflege',
+    desc:'Investitionsindex über 101',
+    subs:[{ label:'Investition', check:r=>r.behavior.invest>101, cur:r=>r.behavior.invest, tgt:101, refFn:()=>100, dir:'up', fmt:v=>v.toFixed(1) }]},
+
+  // ── WÖCHENTLICH (mittel, anspruchsvoller) ───────────────
+  { id:'gini_270', diff:'weekly', title:'Starke Umverteilung',
+    desc:'Gini-Koeffizient unter 0,270',
+    subs:[{ label:'Gini', check:r=>r.gini<0.270, cur:r=>r.gini, tgt:0.270, refFn:()=>REF.gini, dir:'down', fmt:v=>v.toFixed(3).replace('.',',') }]},
+  { id:'saldo_0', diff:'weekly', title:'Schwarze Null',
+    desc:'Staatssaldo auf ≥ 0 Mrd. bringen',
+    subs:[{ label:'Saldo', check:r=>r.saldo>=0, cur:r=>r.saldo, tgt:0, refFn:()=>REF.saldo, dir:'up', fmt:v=>v.toFixed(0)+' Mrd.' }]},
+  { id:'nst_7', diff:'weekly', title:'Kirchhof-Schüler',
+    desc:'Maximal 7 aktive Steuerarten',
+    subs:[{ label:'Steuerarten', check:r=>r.nst<=7, cur:r=>r.nst, tgt:7, refFn:()=>REF.nst, dir:'down', fmt:v=>v+' Arten' }]},
+  { id:'invest_104', diff:'weekly', title:'Investitionsoffensive',
+    desc:'Investitionsindex über 104',
+    subs:[{ label:'Investition', check:r=>r.behavior.invest>104, cur:r=>r.behavior.invest, tgt:104, refFn:()=>100, dir:'up', fmt:v=>v.toFixed(1) }]},
+  { id:'armut_14', diff:'weekly', title:'Soziale Gerechtigkeit',
+    desc:'Armutsrisikoquote unter 14 %',
+    subs:[{ label:'Armutsrisiko', check:r=>r.armutsrisiko<14, cur:r=>r.armutsrisiko, tgt:14, refFn:()=>REF.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' }]},
+  { id:'schuld_neg', diff:'weekly', title:'Schuldenabbau',
+    desc:'Schuldenquote jährlich sinkend (Δ < 0)',
+    subs:[{ label:'Schulden-Δ', check:r=>r.schuldenquote_delta<0, cur:r=>r.schuldenquote_delta, tgt:0, refFn:()=>REF.schuldenquote_delta, dir:'down', fmt:v=>v.toFixed(2)+' %' }]},
+  { id:'co2_70', diff:'weekly', title:'Klimaführerschaft',
+    desc:'CO₂-Emissionen auf Index unter 70',
+    subs:[{ label:'CO₂-Index', check:r=>r.behavior.co2<70, cur:r=>r.behavior.co2, tgt:70, refFn:()=>100, dir:'down', fmt:v=>v.toFixed(1) }]},
+  { id:'admin_100', diff:'weekly', title:'Effizienzreform',
+    desc:'Verwaltungskosten unter 100 Mrd. €',
+    subs:[{ label:'Verwaltung', check:r=>r.admin_kosten<100, cur:r=>r.admin_kosten, tgt:100, refFn:()=>REF.admin_kosten, dir:'down', fmt:v=>v.toFixed(0)+' Mrd.' }]},
+
+  // ── MONATLICH (schwer, Kombinationen) ───────────────────
+  { id:'gini_saldo', diff:'monthly', title:'Quadratur des Kreises',
+    desc:'Gini < 0,280 UND Saldo > −30 Mrd.',
+    subs:[
+      { label:'Gini < 0,280',    check:r=>r.gini<0.280,   cur:r=>r.gini,          tgt:0.280,  refFn:()=>REF.gini,         dir:'down', fmt:v=>v.toFixed(3).replace('.',',') },
+      { label:'Saldo > −30',     check:r=>r.saldo>-30,    cur:r=>r.saldo,         tgt:-30,    refFn:()=>REF.saldo,        dir:'up',   fmt:v=>v.toFixed(0)+' Mrd.' }
+    ]},
+  { id:'labor_co2', diff:'monthly', title:'Grünes Wachstum',
+    desc:'Arbeitsangebot > 101 UND CO₂-Index < 80',
+    subs:[
+      { label:'Arbeit > 101',   check:r=>r.behavior.labor>101,  cur:r=>r.behavior.labor, tgt:101, refFn:()=>100, dir:'up',   fmt:v=>v.toFixed(1) },
+      { label:'CO₂ < 80',       check:r=>r.behavior.co2<80,     cur:r=>r.behavior.co2,   tgt:80,  refFn:()=>100, dir:'down', fmt:v=>v.toFixed(1) }
+    ]},
+  { id:'invest_admin', diff:'monthly', title:'Effizienz & Kapital',
+    desc:'Investitionen > 103 UND Verwaltung < 105 Mrd.',
+    subs:[
+      { label:'Invest. > 103',  check:r=>r.behavior.invest>103, cur:r=>r.behavior.invest, tgt:103, refFn:()=>100, dir:'up',   fmt:v=>v.toFixed(1) },
+      { label:'Verwalt. < 105', check:r=>r.admin_kosten<105,    cur:r=>r.admin_kosten,    tgt:105, refFn:()=>REF.admin_kosten, dir:'down', fmt:v=>v.toFixed(0)+' Mrd.' }
+    ]},
+  { id:'triple_klima', diff:'monthly', title:'Klimasozialpakt',
+    desc:'Gini < 0,285, Saldo > −50 Mrd., CO₂ < 80',
+    subs:[
+      { label:'Gini < 0,285',   check:r=>r.gini<0.285,         cur:r=>r.gini,          tgt:0.285, refFn:()=>REF.gini,  dir:'down', fmt:v=>v.toFixed(3).replace('.',',') },
+      { label:'Saldo > −50',    check:r=>r.saldo>-50,          cur:r=>r.saldo,         tgt:-50,   refFn:()=>REF.saldo, dir:'up',   fmt:v=>v.toFixed(0)+' Mrd.' },
+      { label:'CO₂ < 80',       check:r=>r.behavior.co2<80,    cur:r=>r.behavior.co2,  tgt:80,    refFn:()=>100,       dir:'down', fmt:v=>v.toFixed(1) }
+    ]},
+  { id:'sozmark', diff:'monthly', title:'Soziale Marktwirtschaft',
+    desc:'Armut < 14%, Investitionen > 101, Saldo > −40 Mrd.',
+    subs:[
+      { label:'Armut < 14 %',   check:r=>r.armutsrisiko<14,     cur:r=>r.armutsrisiko,   tgt:14,  refFn:()=>REF.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' },
+      { label:'Invest. > 101',  check:r=>r.behavior.invest>101, cur:r=>r.behavior.invest, tgt:101, refFn:()=>100,              dir:'up',   fmt:v=>v.toFixed(1) },
+      { label:'Saldo > −40',    check:r=>r.saldo>-40,           cur:r=>r.saldo,           tgt:-40, refFn:()=>REF.saldo,        dir:'up',   fmt:v=>v.toFixed(0)+' Mrd.' }
+    ]},
+  { id:'gini_invest_schuld', diff:'monthly', title:'Aufstieg ohne Schulden',
+    desc:'Gini < 0,278, Investitionen > 102, Schuldenquote Δ < 0',
+    subs:[
+      { label:'Gini < 0,278',   check:r=>r.gini<0.278,          cur:r=>r.gini,            tgt:0.278, refFn:()=>REF.gini,              dir:'down', fmt:v=>v.toFixed(3).replace('.',',') },
+      { label:'Invest. > 102',  check:r=>r.behavior.invest>102, cur:r=>r.behavior.invest,  tgt:102,   refFn:()=>100,                  dir:'up',   fmt:v=>v.toFixed(1) },
+      { label:'Schulden-Δ < 0', check:r=>r.schuldenquote_delta<0, cur:r=>r.schuldenquote_delta, tgt:0, refFn:()=>REF.schuldenquote_delta, dir:'down', fmt:v=>v.toFixed(2)+' %' }
+    ]},
+];
+
+function dateSeed(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(h ^ s.charCodeAt(i), 16777619)) >>> 0;
+  return h;
+}
+
+function isoWeek(d) {
+  const dt = new Date(d); dt.setHours(0,0,0,0);
+  dt.setDate(dt.getDate() + 3 - (dt.getDay() + 6) % 7);
+  const w1 = new Date(dt.getFullYear(), 0, 4);
+  return 1 + Math.round(((dt - w1) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7);
+}
+
+function challengeKey(diff) {
+  const now = new Date();
+  if (diff === 'daily')   return now.toISOString().slice(0, 10);
+  if (diff === 'weekly')  return now.getFullYear() + '-W' + String(isoWeek(now)).padStart(2,'0');
+  if (diff === 'monthly') return now.toISOString().slice(0, 7);
+}
+
+function pickChallenge(diff) {
+  const pool = CHALLENGES.filter(c => c.diff === diff);
+  return pool[dateSeed(challengeKey(diff)) % pool.length];
+}
+
+function challengeProgress(sub, r) {
+  const cur = sub.cur(r), ref = sub.refFn(), tgt = sub.tgt;
+  if (sub.dir === 'down') {
+    if (ref <= tgt) return 100; // already at/below target in ref
+    return Math.max(0, Math.min(100, (ref - cur) / (ref - tgt) * 100));
+  } else {
+    if (ref >= tgt) return 100;
+    return Math.max(0, Math.min(100, (cur - ref) / (tgt - ref) * 100));
+  }
+}
+
+function lsKey(diff) { return 'challenge_done_' + diff + '_' + challengeKey(diff); }
+
+function renderChallenges(r) {
+  const slots = [
+    { diff:'daily',   label:'TAGES-CHALLENGE',   period: new Date().toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long'}), accent:'var(--accent)' },
+    { diff:'weekly',  label:'WOCHEN-CHALLENGE',   period: 'KW ' + isoWeek(new Date()) + ' · ' + new Date().getFullYear(), accent:'var(--accent3)' },
+    { diff:'monthly', label:'MONATS-CHALLENGE',   period: new Date().toLocaleDateString('de-DE', {month:'long', year:'numeric'}), accent:'var(--accent2)' },
+  ];
+
+  const html = slots.map(slot => {
+    const c = pickChallenge(slot.diff);
+    const allDone = c.subs.every(s => s.check(r));
+    const wasAlreadyDone = localStorage.getItem(lsKey(slot.diff)) === c.id;
+
+    if (allDone && !wasAlreadyDone) localStorage.setItem(lsKey(slot.diff), c.id);
+
+    const subsHtml = c.subs.map(sub => {
+      const pct = challengeProgress(sub, r);
+      const done = sub.check(r);
+      return `<div class="challenge-bar-wrap">
+        <div class="challenge-bar-label">
+          <span>${sub.label}</span>
+          <span class="cur" style="color:${done ? slot.accent : 'var(--ink)'}">${sub.fmt(sub.cur(r))}</span>
+        </div>
+        <div class="challenge-track">
+          <div class="challenge-fill" style="width:${pct}%;background:${done ? slot.accent : 'rgba(42,39,32,0.35)'}"></div>
+        </div>
+      </div>`;
+    }).join('');
+
+    const badge = allDone
+      ? `<div class="challenge-done-badge" style="color:${slot.accent};border-color:${slot.accent}">✓ Geschafft!</div>`
+      : `<div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px;">${c.subs.filter(s=>s.check(r)).length}/${c.subs.length} Ziele erreicht</div>`;
+
+    return `<div class="challenge-card${allDone ? ' done' : ''}">
+      <div class="challenge-accent-bar" style="background:${slot.accent}"></div>
+      <div class="challenge-period">${slot.label} · ${slot.period}</div>
+      <div class="challenge-title">${c.title}</div>
+      <div class="challenge-desc">${c.desc}</div>
+      ${subsHtml}
+      ${badge}
+    </div>`;
+  }).join('');
+
+  document.getElementById('challenges-grid').innerHTML = html;
+}
+
+// ============================================================
+// WISSENSCHAFTS-KOMPASS
+// ============================================================
+
+function berechneWissenschaftsScore(p) {
+  const kst_total = p.kst + (p.gewst_aus ? 0 : p.gewst);
+
+  // ifo-Linie: niedrige Unternehmensteuern, keine Vermögensteuer, Angebotsorientierung
+  const ifo = Math.min(100, Math.round(
+    25 * Math.max(0, 1 - (kst_total - 20) / 15) +   // KSt+GewSt nah an 20%: max
+    20 * (p.verm === 0 && (p.zucman ?? 0) === 0 ? 1 : 0.2) +
+    20 * (!p.synthetisch ? 1 : 0) +
+    20 * (p.gewst_aus ? 1 : p.gewst <= 10 ? 0.6 : 0.2) +
+    15 * Math.max(0, 1 - Math.abs(p.spitze - 42) / 20)  // Spitze nah bei 42%
+  ));
+
+  // DIW-Linie: synthetisch, hoher Spitzensteuersatz, Erb-Reform, Vermögensteuer, hohe BBG
+  const diw = Math.min(100, Math.round(
+    25 * (p.synthetisch ? 1 : 0) +
+    20 * Math.max(0, Math.min(1, (p.spitze - 42) / 18)) +  // Spitze 42–60%
+    15 * (!p.betriebs ? 1 : 0) +
+    20 * Math.min(1, ((p.verm ?? 0) + (p.zucman ?? 0) * 0.5) / 1.5) +
+    10 * Math.max(0, (p.erb - 20) / 30) +
+    10 * Math.min(1, Math.max(0, ((p.bbg ?? 90000) - 90000) / 70000))
+  ));
+
+  // Zucman-Linie: internationale Koordination, Milliardärssteuer, CO₂, Steuertransparenz
+  const zucman_s = Math.min(100, Math.round(
+    40 * Math.min(1, (p.zucman ?? 0) / 2) +
+    20 * Math.min(1, ((p.verm ?? 0) + (p.erb > 30 ? 0.5 : 0)) / 1.5) +
+    25 * Math.min(1, Math.max(0, (p.co2 - 55) / 150)) +
+    15 * (!p.kleine_st ? 1 : 0)
+  ));
+
+  // Kirchhof-Linie: Flat Tax, Vereinfachung, wenig Steuerarten
+  const kirchhof = Math.min(100, Math.round(
+    30 * Math.max(0, 1 - Math.abs(p.eingang - p.spitze) / 25) +  // je flacher, desto mehr
+    25 * (!p.kleine_st ? 1 : 0) +
+    20 * (p.gewst_aus ? 1 : 0) +
+    15 * (p.verm === 0 && (p.zucman ?? 0) === 0 ? 1 : 0) +
+    10 * (!p.neg_est && !p.buergerv ? 1 : 0)   // Vereinfachung Sozialstaat
+  ));
+
+  return { ifo, diw, zucman: zucman_s, kirchhof };
+}
+
+function renderWissenschaftsPanel(p) {
+  const scores = berechneWissenschaftsScore(p);
+  const lager = [
+    { key: 'ifo',      label: 'ifo/Fuest · Angebotsorientiert',   score: scores.ifo,      color: 'var(--accent)',  desc: 'Niedrige Unternehmensteuern, keine Vermögensteuer, Entlastung Mitte' },
+    { key: 'diw',      label: 'DIW/Bach · Verteilungsorientiert',  score: scores.diw,      color: 'var(--accent3)', desc: 'Synthetisch, höhere Spitze, Erbschafts-/Vermögensteuer, hohe BBG' },
+    { key: 'zucman',   label: 'Zucman · Internationalistisch',     score: scores.zucman,   color: 'var(--accent2)', desc: 'Zucman-Mindeststeuer, CO₂-Preis, internationale Koordination' },
+    { key: 'kirchhof', label: 'Kirchhof · Vereinfachung',          score: scores.kirchhof, color: 'var(--warn)',    desc: 'Flat Tax, wenige Steuerarten, GewSt abschaffen' }
+  ];
+
+  const dominant = lager.reduce((a, b) => b.score > a.score ? b : a);
+
+  const barsHtml = lager.map(l => `
+    <div style="margin-bottom:10px;">
+      <div style="display:grid;grid-template-columns:220px 1fr 42px;align-items:center;gap:10px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${l.desc}">${l.label}</div>
+        <div class="bar-track"><div class="bar-fill neu" style="width:${l.score}%;background:${l.color};opacity:${l.score > 0 ? 0.8 : 0.2}"></div></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;">${l.score}%</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('wissenschafts_bars').innerHTML = barsHtml;
+  document.getElementById('wissenschafts_note').textContent =
+    dominant.score >= 40
+      ? `Deine Einstellungen ähneln am stärksten dem ${dominant.label.split('·')[1].trim()}-Lager (${dominant.score}%). ${dominant.desc}.`
+      : 'Deine Einstellungen lassen sich keinem Lager klar zuordnen — ein eklektischer Mix.';
 }
 
 // ============================================================
@@ -2190,158 +2578,168 @@ function render() {
 const TOOLTIPS = {
   freibetrag: {
     title: "Grundfreibetrag",
-    text: "Bis zu diesem Betrag bleibt Einkommen vollständig steuerfrei. Das BVerfG verlangt, dass das sächliche Existenzminimum nicht besteuert wird. Wird jährlich angepasst.",
-    quelle: "§ 32a Abs. 1 EStG · 2025: 12.084 € · Quelle: BMF"
+    text: "Bis zu diesem Betrag bleibt Einkommen vollständig steuerfrei. BVerfG: sächliches Existenzminimum darf nicht besteuert werden. 2026 auf 12.348 € angehoben (Steueränderungsgesetz 2025). Alle Lager fordern Erhöhung — Einigkeit ist selten.",
+    quelle: "§ 32a Abs. 1 EStG · 2026: 12.348 € · Steueränderungsgesetz Okt. 2025 · BMF"
   },
   eingang: {
     title: "Eingangssteuersatz",
-    text: "Grenzsteuersatz auf den ersten steuerpflichtigen Euro über dem Grundfreibetrag. Steigt im deutschen Formeltarif (§ 32a) quadratisch an — kein harter Knick, sondern gleitender Übergang.",
-    quelle: "§ 32a Abs. 1 Nr. 2 EStG · 2025: 14%"
+    text: "Grenzsteuersatz auf den ersten Euro über dem Freibetrag. Im § 32a-Formeltarif quadratisch steigend — kein harter Knick. ifo (Blömer/Fuest/Peichl 2025): 'Mittelstandsbauch' entsteht, wenn Eingangssatz zu nah am Spitzensatz liegt.",
+    quelle: "§ 32a Abs. 1 Nr. 2 EStG · 2025: 14% · ifo Schnelldienst 01/2025"
   },
   spitze: {
     title: "Spitzensteuersatz",
-    text: "Höchster Grenzsteuersatz. Im deutschen Recht: 42% ab ~66.760 € ('Eckwert'), 45% ab 277.826 € ('Reichensteuer'). Das Modell vereinfacht auf einen Spitzensatz, bildet den Tarif aber mit echter Formel nach.",
-    quelle: "§ 32a Abs. 1 Nr. 4+5 EStG · 2025: 45% · Eckwert: 42%"
+    text: "42% ab ~66.760 € (Eckwert), 45% ab 277.826 € (Reichensteuer). DIW/Bach: Erhöhung auf 49–52% kaum Aufkommensverlust, hoher Verteilungseffekt. ifo/Fuest: ab ~55% sinkt Aufkommen durch Verhaltensreaktion (Laffer-Kurve sichtbar im Modell).",
+    quelle: "§ 32a Nr. 4+5 EStG · Piketty/Saez/Stantcheva (2014) AER · ifo Schnelldienst 01/2025"
   },
   grenze: {
     title: "Einkommen ab Spitzensatz",
-    text: "Ab diesem Bruttoeinkommen gilt der volle Spitzensteuersatz. 2025: 277.826 € (Reichensteuer). Die Zonen des Formeltarifs werden proportional zu diesem Wert skaliert.",
-    quelle: "§ 32a Abs. 1 Nr. 5 EStG · 2025: 277.826 € · Quelle: BMF"
+    text: "Ab diesem Brutto greift der volle Spitzensatz. 2025: 277.826 €. Das Modell skaliert alle Tarifzonen proportional zu diesem Wert — Änderungen simulieren eine Verschiebung des gesamten Progressionsverlaufs.",
+    quelle: "§ 32a Abs. 1 Nr. 5 EStG · 2025: 277.826 € · BMF Steuerschätzung 2025"
   },
   synthetisch: {
     title: "Synthetisch vs. Dual",
-    text: "Synthetisch: Kapital- und Arbeitseinkommen werden zusammen progressiv besteuert (historisch in DE bis 2008). Dual (aktuell): Kapitalerträge pauschal per Abgeltungsteuer. Ökonomen streiten — synthetisch ist gerechter, dual vermeidet Kapitalflucht.",
-    quelle: "§§ 32d, 43 EStG · Duales System seit 2009 · OECD: dual in DE, AT, DK"
+    text: "Synthetisch: Kapital- und Arbeitseinkommen zusammen progressiv besteuert (DE bis 2008). Dual (aktuell): Kapitalerträge pauschal mit Abgeltungsteuer. DIW (Bach/Sinclair 2026): synthetisch gerechter, mehr Aufkommen aus D10b/c. ifo: dual vermeidet Kapitalflucht (Elastizität 0,5).",
+    quelle: "§§ 32d, 43 EStG · Bach/Sinclair DIW Wochenbericht 4/2026 · Kleven/Schultz (2014)"
   },
   abgeltung: {
     title: "Abgeltungsteuer",
-    text: "Pauschaler Steuersatz auf Dividenden, Zinsen und Kursgewinne. Gilt nur bei dualem System. Kapitalerträge über dem Sparerpauschbetrag (1.000 €) werden pauschal besteuert, unabhängig vom persönlichen ESt-Satz.",
-    quelle: "§ 32d EStG · 2025: 25% + 5,5% Soli = 26,375% · Sparerpauschbetrag: § 20 Abs. 9"
+    text: "Pauschalsteuer auf Dividenden, Zinsen, Kursgewinne. Gilt nur im dualen System. Seit 2009 in DE. Sparerpauschbetrag: 1.000 €/Jahr. Kritik: Kapital wird deutlich niedriger besteuert als Spitzenlohn. Profitiert fast ausschließlich D10b/c.",
+    quelle: "§ 32d EStG · 2025: 25% + Soli · Bach/Wichers DIW 2026: Abschaffung → +15 Mrd. Aufkommen"
   },
   kst: {
     title: "Körperschaftsteuer",
-    text: "Steuer auf Gewinne von Kapitalgesellschaften (GmbH, AG). Gilt auf einbehaltene Gewinne. Ausschüttungen unterliegen zusätzlich der Abgeltungsteuer beim Gesellschafter. Zusammen mit GewSt: Gesamtbelastung ~30%.",
-    quelle: "§ 23 KStG · 2025: 15% + 5,5% Soli = 15,825% · Quelle: BMF"
+    text: "Steuer auf Gewinne von Kapitalgesellschaften. KSt (15%) + Soli + GewSt (~14%) = ~30% Gesamtbelastung. ifo/Fuest (2025): Senkung auf 25% würde Investitionen signifikant steigern. Meta-Analyse Gechert/Heimberger (2022, Eur. Econ. Rev.): Effekte kleiner als behauptet.",
+    quelle: "§ 23 KStG · 15% + 5,5% Soli · Blömer/Fuest/Peichl ifo 01/2025 · Gechert/Heimberger 2022"
   },
   gewst: {
     title: "Gewerbesteuer",
-    text: "Kommunalsteuer auf Gewerbeerträge. Formel: Gewerbertrag × 3,5% × Hebesatz. Ø Hebesatz 2024: ~432%. Anrechnung auf ESt ab Hebesatz 400%. Stark kritisiert: komplex, kommunal ungleich, wirtschaftsfeindlich.",
-    quelle: "GewStG · Ø effektiv ~14% · Ø Hebesatz: 432% · Quelle: Destatis 2024"
+    text: "Kommunalsteuer: Gewerbertrag × 3,5% × Hebesatz (Ø 432%). Stark kritisiert: komplex, wirtschaftsfeindlich, kommunal ungleich. Sachverständigenrat 2020/21: Abschaffung empfohlen. Koalitionsvertrag 2025: Reformdiskussion angekündigt, aber noch kein Beschluss.",
+    quelle: "GewStG · Ø Hebesatz 432% · SVR Jahresgutachten 2020/21 · Koalitionsvertrag CDU/SPD 2025"
   },
   gewst_aus: {
     title: "Gewerbesteuer abschaffen",
-    text: "Seit Jahrzehnten diskutiert. Vorteil: Vereinfachung, mehr Standortattraktivität, geringere Befolgungskosten. Nachteil: Kommunen verlieren ~75 Mrd. € — Ersatz über höheren Gemeindeanteil an ESt/USt nötig.",
-    quelle: "Sachverständigenrat Jahresgutachten 2020/21 · Kommunalanteil: Art. 106 GG"
+    text: "Kommunen verlieren ~75 Mrd. € — Ersatz nötig (höherer Gemeindeanteil ESt/USt). BDI und ifo befürworten Abschaffung für mehr Standortattraktivität. Kommunalverbände lehnen ab wegen Eigenfinanzierungsanspruch (Art. 28 GG).",
+    quelle: "Art. 28 Abs. 2 GG · SVR 2020/21 · Koalitionsvertrag 2025: 'prüfen' · BDI Positionspapier 2025"
   },
   mwst: {
     title: "Mehrwertsteuer Regelsatz",
-    text: "Gilt für ~70% des privaten Konsums. Wichtigste Einzelsteuer (303 Mrd. €). Wirkt regressiv: Ärmere Haushalte konsumieren fast ihr gesamtes Einkommen, Reiche sparen einen Großteil. Verhaltensreaktion: ε = −0,35.",
-    quelle: "§ 12 UStG · 2025: 19% · Quelle: BMF, Destatis VGR"
+    text: "~70% des Konsums. Größte Einzelsteuer: 303 Mrd. €. Wirkt regressiv — D1 gibt fast 100% des Einkommens aus, D10c nur ~40%. ifo/Peichl: MwSt-Erhöhung als 'wachstumsfreundliche' Gegenfinanzierung für ESt-Senkung diskutiert.",
+    quelle: "§ 12 UStG · 2025: 19% · BMF Steuerschätzung 2025 · ifo Schnelldienst 01/2025"
   },
   mwst_erm: {
     title: "Ermäßigter MwSt-Satz",
-    text: "Gilt für Lebensmittel, Bücher, ÖPNV, Kulturveranstaltungen (~30% des Konsums). Soll regressiven Effekt der MwSt dämpfen. Kritik: teuer, oft durch Lobbyismus erweitert, schlecht zielgerichtet.",
-    quelle: "§ 12 Abs. 2 UStG · 2025: 7% · Kosten Ermäßigung: ~30 Mrd. €/Jahr"
+    text: "Lebensmittel, Bücher, ÖPNV, Gastronomie (dauerhaft 7% ab 2026). ~30% des Konsums. Dämpft Regressivität der MwSt, aber schlecht zielgerichtet: Reiche profitieren absolut mehr. Kosten der Ermäßigung: ~30 Mrd. €/Jahr.",
+    quelle: "§ 12 Abs. 2 UStG · Gastronomie: Steueränderungsgesetz 2025 · BMF Steuerschätzung 2025"
   },
   co2: {
     title: "CO₂-Preis (BEHG)",
-    text: "Preis je Tonne CO₂ im nationalen Brennstoffemissionshandel (BEHG) für Wärme und Verkehr. EU-ETS deckt Industrie und Strom separat. Emissionen reagieren mit Elastizität −0,30 auf Preisänderungen (DIW/EWI).",
-    quelle: "BEHG § 10 · 2025: 55 €/t · Bereich: ~500 Mio. t CO₂ · Quelle: DEHSt, UBA"
+    text: "Nationaler Emissionshandel (BEHG) für Wärme und Verkehr. EU-ETS deckt Industrie/Strom separat. Emissionselastizität: −0,30 (EWI/DIW). Klima-Konsens: höherer CO₂-Preis ist effizientestes Klimainstrument, wenn sozial ausgeglichen (Klimageld).",
+    quelle: "BEHG § 10 · 2025: 55 €/t · EU-ETS ab 2027 fusioniert · Edenhofer/PIK 2024"
   },
   klimageld: {
     title: "Klimageld (Pro-Kopf-Rückzahlung)",
-    text: "70% der CO₂-Steuereinnahmen werden gleichmäßig pro Kopf an alle Haushalte zurückgezahlt. Macht die CO₂-Steuer insgesamt progressiv: Arme emittieren weniger, bekommen genauso viel zurück. Konzept: PIK/Edenhofer.",
-    quelle: "Konzept: PIK Potsdam, Edenhofer · Im Modell: 70% gleichverteilt"
+    text: "70% der CO₂-Einnahmen pro Kopf zurück. Macht CO₂-Steuer insgesamt progressiv: Arme emittieren weniger, bekommen gleich viel. Ökonomen-Konsens (ifo, DIW, PIK): CO₂-Preis + Klimageld ist effizient UND gerecht. Im Modell: 70% gleichverteilt.",
+    quelle: "PIK Potsdam · Edenhofer/Franks/Kalkuhl (2021) Nature Climate Change · Koalitionsvertrag 2025"
   },
   erb: {
     title: "Erbschaftsteuer",
-    text: "Steuer auf Vermögensübertragungen bei Tod. Progressiver Tarif, abhängig von Verwandtschaftsgrad und Betrag. Effektiver Satz weit unter Nominalwert durch Betriebsvermögens-Ausnahmen (BFH-Urteile). Aufkommen: ~8 Mrd. €.",
-    quelle: "§§ 10, 19 ErbStG · 2025: bis 30% (Klasse I, Kinder) · Quelle: Destatis"
+    text: "Progressiver Tarif je nach Verwandtschaft. Effektiver Satz weit unter Nominal durch Betriebsvermögens-Ausnahmen (BFH). Bach/Sinclair/Bührle/Wichers (DIW 2025): Reform-Szenarien 10–30% Flat Tax nach Abbau der Privilegien zeigen +10–40 Mrd. Aufkommen.",
+    quelle: "§§ 10, 19 ErbStG · Bach/Sinclair/Bührle/Wichers DIW 2025 · Finanzausschuss BT Juli 2025"
   },
   betriebs: {
     title: "Betriebsvermögens-Ausnahme",
-    text: "§§ 13a/13b ErbStG: Bis 100% Steuerbefreiung für vererbtes Betriebsvermögen bei Einhaltung von Behaltefristen. BRH 2016: 'Haupteinfallstor zur Steuervermeidung.' BVerfG 2014 forderte Einschränkung — Reform blieb schwach.",
-    quelle: "§§ 13a, 13b ErbStG · BVerfG 2014 · BRH-Bericht 2016"
+    text: "§§ 13a/13b: bis 100% Steuerbefreiung für Betriebsvermögen. BRH 2016: 'Haupteinfallstor zur Steuervermeidung'. Bach/Sinclair (DIW 2025): Privilegien erlaubten 2024 Steuererlasse von 3,4 Mrd. €. Abschaffung = Kern aller DIW/Grünen-Reformvorschläge.",
+    quelle: "§§ 13a, 13b ErbStG · BVerfG 2014 · BRH-Bericht 2016 · Bach/Sinclair DIW 2025"
   },
   boden: {
     title: "Bodenwertsteuer",
-    text: "Grundsteuer nur auf den Bodenwert, nicht auf Gebäude. Schafft Anreize zur Bebauung, wirkt gegen Spekulation mit brachliegendem Land. Idee: Henry George (1879). Einzelne Bundesländer prüfen dies nach der Grundsteuerreform 2025.",
-    quelle: "Konzept: Henry George · Empfehlung: DIW, IW · Akt. Aufkommen Grundsteuer: 16 Mrd."
+    text: "Grundsteuer nur auf Bodenwert, nicht Gebäude. Anreiz zur Bebauung, gegen Spekulation. Henry George (1879). DIW und IW empfehlen nach Grundsteuerreform 2025. Einige Bundesländer (Hamburg, Bayern) prüfen eigene Modelle.",
+    quelle: "Henry George (1879) · DIW Diskussionspapier 2025 · IW Köln 2024 · Akt. GrSt: 16 Mrd."
   },
   verm: {
     title: "Vermögensteuer",
-    text: "Jährliche Steuer auf Nettovermögen. In Deutschland seit 1997 ausgesetzt (BVerfG: ungleiche Bewertung). Steuerbasis im Modell: ~3.500 Mrd. € (Vermögen über 2 Mio. €). International aktiv: Schweiz, Norwegen, Spanien.",
-    quelle: "BVerfG-Urteil 1995 · BVerfGE 93, 121 · DIW Verteilungsbericht 2023"
+    text: "Jährliche Steuer auf Nettovermögen. In DE seit 1997 ausgesetzt. Bach/Wichers/Mudrack (DIW 2026): Linke-Modell erzielt ~100 Mrd./Jahr; bei Freibetrag 10–20 Mio. immer noch 110–125 Mrd. Nur ~1,9% der Bevölkerung betroffen. Migrationseffekte kleiner als oft behauptet (Kleven/Landais 2024).",
+    quelle: "BVerfGE 93, 121 · Bach/Wichers/Mudrack DIW 2026 · Jakobsen/Kleven/Kolsrud NBER 2024"
   },
   rv: {
     title: "Rentenversicherungsbeitrag",
-    text: "Gesamtbeitrag (AN + AG je hälftig). Nur bis zur Beitragsbemessungsgrenze (BBG) fällig — darüber kein Beitrag. Das wirkt regressiv: Wer mehr als 90.600 € verdient, zahlt keinen Marginalanteil mehr.",
-    quelle: "§ 158 SGB VI · 2025: 18,6% · BBG West: 90.600 € · Quelle: DRV"
+    text: "AN+AG je hälftig. Nur bis BBG (90.600 € West 2025) fällig — wirkt regressiv. SVR-Projektion: ohne Reform steigt Beitragssatz bis 2045 auf ~25%. Generationenkapital (Rentenpaket II 2024): 12 Mrd./Jahr in Staatsfonds ab 2024.",
+    quelle: "§ 158 SGB VI · 2025: 18,6% · BBG 90.600 € · Rentenpaket II BT-Drs. 20/10749 · DRV"
   },
   kv: {
     title: "Krankenversicherungsbeitrag",
-    text: "GKV-Beitrag inkl. einkommensabh. Zusatzbeitrag. BBG 2025: 66.150 €. PKV-Versicherte (meist höhere Einkommen) zahlen separat, nicht in GKV. Bürgerversicherung würde alle einbeziehen und Basis verbreitern.",
-    quelle: "§ 241 SGB V · 2025: 14,6% + ⌀1,7% Zusatz = 16,3% · Quelle: GKV-SV"
+    text: "GKV-Beitrag inkl. Zusatzbeitrag (~1,7%). BBG: 66.150 € (2025). Demografiedruck: GKV-Finanzierungslücke ~50 Mrd. bis 2030 (GKV-SV). Bürgerversicherung würde Basis verbreitern. PKV-Abschaffung: per Saldo leicht negativ (Mehrausgaben > Mehreinnahmen).",
+    quelle: "§ 241 SGB V · 2025: 16,3% · GKV-SV Jahresbericht 2025 · BMG Kassenstatistik"
   },
   alpf: {
     title: "Arbeitslosen- + Pflegeversicherung",
-    text: "ALV: 2,6% (je 1,3% AN/AG) bis BBG 90.600 €. PV: 3,6% (Kinderlose +0,6%) bis BBG 66.150 €. Zusammen: 6,2%. Pflegeversicherung unter starkem Reformdruck durch Demographie.",
-    quelle: "§ 341 SGB III · § 55 SGB XI · 2025: 2,6% + 3,6% · Quelle: BA, BMG"
+    text: "ALV: 2,6% bis BBG 90.600 €. Pflegeversicherung: 3,6% (Kinderlose +0,6%) bis BBG 66.150 €. Pflegeversicherung unter massivem Reformdruck: Pflegebedürftige wachsen demografisch stark. Koalitionsvertrag 2025: Pflegereform für 2026 angekündigt.",
+    quelle: "§ 341 SGB III · § 55 SGB XI · 2025: 6,2% · Koalitionsvertrag CDU/SPD 2025 · BMG"
   },
   buergerv: {
     title: "Bürgerversicherung",
-    text: "Alle Einkommensarten (Kapital, Mieten, Selbstständige) werden beitragspflichtig; PKV-Versicherte zahlen in GKV ein. Im Modell: Beitragsbasis wächst um 15% (~+262 Mrd. €). Stark politisch umstritten.",
-    quelle: "Konzept: Bofinger, SVR · SPD/Grüne-Programm · Schätzung: +15% Beitragsbasis"
+    text: "Alle Einkommensarten beitragspflichtig, PKV-Versicherte in GKV. Im Modell: Beitragsbasis +15%. Befürworter (SPD, Grüne, Lauterbach): mehr Solidarität und Finanzierungssicherheit. Gegner (CDU, PKV): Qualitätsverlust, Ärzteschwund. Wissenschaftlich umstritten.",
+    quelle: "Lauterbach et al. (2005) · IGES Institut 2021 · SPD-Grundsatzprogramm 2023"
   },
   bg: {
     title: "Bürgergeld-Regelsatz",
-    text: "Monatlicher Regelsatz für Alleinstehende. Deckt Nahrung, Kleidung, Hygiene, Haushalt. Unterkunftskosten werden zusätzlich übernommen. ~5,5 Mio. Empfänger 2025. Jährliche Anpassung nach Mischindex.",
-    quelle: "§ 20 SGB II · 2025: 563 €/Monat · ~5,5 Mio. Bedarfsgemeinschaften · Quelle: BA"
+    text: "563 €/Monat für Alleinstehende (2025). ~5,5 Mio. Bedarfsgemeinschaften. ifo/Peichl (2025): Schlüsselreform ist METR-Senkung (Anrechnung 80% → 65%), nicht Regelsatz selbst. Simulation zeigt: METR D1 liegt bei 80%+ — stärkstes Arbeitsmarkthemmnis.",
+    quelle: "§ 20 SGB II · 2025: 563 € · Blömer/Fuest/Peichl ifo 01/2025 · BA Statistik 2025"
   },
   kg: {
     title: "Kindergeld",
-    text: "Monatliche Zahlung pro Kind. Wirkt als Vorauszahlung auf den Kinderfreibetrag (§ 31 EStG) — bei hohen Einkommen wird die steuergünstigere Variante verrechnet. ~17 Mio. Kinder anspruchsberechtigt.",
-    quelle: "§ 66 EStG · 2025: 255 €/Monat · ~17 Mio. Kinder · Quelle: Familienkasse"
+    text: "Vorauszahlung auf Kinderfreibetrag (§ 31 EStG) — bei hohen Einkommen wird steuerlich günstigere Variante verrechnet. Ab 2025: 259 € (Steueränderungsgesetz Okt. 2025). ~17 Mio. Kinder. Alle Parteien einig: Kindergeld gehört erhöht.",
+    quelle: "§ 66 EStG · 259 €/Monat ab 2025 · Steueränderungsgesetz 2025 · Familienkasse"
   },
   neg_est: {
     title: "Negative Einkommensteuer",
-    text: "Unterhalb eines Schwellwerts zahlt der Staat statt Steuer einzuziehen einen Betrag aus. Idee: Milton Friedman (1962). Vorteil: ein einheitliches System statt vieler Transfers, weniger Bürokratie. Im Modell: +30 Mrd. für D1–D3.",
-    quelle: "Friedman (1962) 'Capitalism and Freedom' · Verwandt: Earned Income Tax Credit (USA)"
+    text: "Unterhalb eines Schwellwerts zahlt Staat einen Betrag aus statt Steuer einzuziehen. Friedman (1962). Vorteil: ein einheitliches System, weniger Bürokratie, kein Transferentzug-Cliff. Im Modell: +30 Mrd. für D1–D3. Verwandt: US Earned Income Tax Credit.",
+    quelle: "Friedman (1962) · Bürgergeld-Reform Vorschlag ifo 2025 · OECD Taxing Wages 2025"
   },
   kleine_st: {
     title: "Kleine Verbrauchsteuern",
-    text: "Energiesteuer (37 Mrd.), Tabaksteuer (15 Mrd.), Kfz-Steuer (10 Mrd.), Versicherungsteuer, Stromsteuer, Luftverkehrsteuer u.a. Zusammen ~109 Mrd. €. BRH-Kritik: Verwaltungskosten 15–30% des Aufkommens.",
-    quelle: "BMF Steuerschätzung 2025 · BRH: Verwaltungskosten unverhältnismäßig hoch"
+    text: "Energie (37), Tabak (15), Kfz (10), Versicherung, Strom, Luftverkehr u.a. — zusammen ~109 Mrd. €. BRH: Verwaltungskosten 15–30% des Aufkommens (ineffizient). Kirchhof-Modell: alle abschaffen. Koalition 2025: kein Beschluss zur Abschaffung.",
+    quelle: "BMF Steuerschätzung 2025 · BRH Jahresberichte · Kirchhof Einkommensteuergesetzbuch 2011"
   },
   kapitalquote: {
     title: "Fondsquote Rentenversicherung",
-    text: "Anteil des jährlichen RV-Aufkommens, der in einen Staatsfonds investiert wird (Aktienrente / Generationenkapital). Die Bundesregierung hat 2023 beschlossen, ab 2024 jährlich 12 Mrd. € in einen solchen Fonds zu investieren (~4 % des RV-Aufkommens). Der Simulation liegt die Frage zugrunde: Was wäre wenn man früher begonnen hätte?",
-    quelle: "Rentenpaket II 2024 · BT-Drs. 20/10749 · Jahresertrag fließt als Beitragsentlastung zurück"
+    text: "Anteil RV-Aufkommen in Staatsfonds (Generationenkapital). Rentenpaket II 2024: 12 Mrd./Jahr ab 2024 beschlossen (~4% des RV-Aufkommens). Modell zeigt: früherer Start hätte durch Zinseszins erheblich mehr Puffer erzeugt.",
+    quelle: "Rentenpaket II · BT-Drs. 20/10749 · Norges Bank NBIM 2024 · DRV Rentenversicherungsbericht"
   },
   rendite_fonds: {
     title: "Erwartete Jahresrendite",
-    text: "Angenommene jährliche Nominalrendite des Staatsfonds. Historisch: MSCI World ~7 % nominal, realer Wert ~5 % nach Inflation. Konservative Schätzungen: 4–5 %, optimistisch 7–8 %. Das norwegische Ölfonds (GPF-G) erzielte seit 1998 durchschnittlich ~6,3 % nominal.",
-    quelle: "Norges Bank NBIM Annual Report 2024 · Shiller P/E historische Returns · Quelle: KfW-Research"
+    text: "Nominalrendite des Staatsfonds. MSCI World historisch ~7% nominal, ~5% real. Norwegischer Staatsfonds (GPF-G): Ø 6,3% seit 1998. Konservativ: 4–5%. Das Modell rechnet nominell — Inflationsabzug für reale Interpretation nötig.",
+    quelle: "Norges Bank NBIM Annual Report 2024 · Shiller historische Returns · KfW-Research 2025"
   },
   startjahr: {
     title: "Startjahr der Fondsinvestition",
-    text: "Ab wann hätte die Rentenversicherung einen Teil ihrer Einnahmen in Kapitalmarktanlagen investiert? Je früher der Einstieg, desto mehr profitiert der Fonds vom Zinseszinseffekt. Deutschland diskutiert seit den 1990er-Jahren über eine Kapitaldeckung (Rürup-Kommission 2003, CDU-Reformpläne).",
-    quelle: "Rürup-Kommission 2003 (Nachhaltigkeitsfaktor) · SVR Jahresgutachten 2004 · Macron-Reform Frankreich 2023"
+    text: "Je früher, desto mehr Zinseszins-Effekt. Rürup-Kommission (2003) empfahl bereits Kapitaldeckungs-Element — nicht umgesetzt. Schweden: Premiumpension seit 1994 (2,5% der Löhne). Deutschland hat erst 2024 begonnen.",
+    quelle: "Rürup-Kommission 2003 · SVR Jahresgutachten 2004 · Rentenpaket II 2024 · OECD Pensions 2024"
   },
   pkv_abschaffen: {
-    title: "PKV abschaffen / Bürgerversicherung",
-    text: "Private Krankenversicherung für alle abschaffen: ~11 Mio. Privatversicherte wechseln in die GKV. Pro: breitere Einkommensbasis, Solidarausgleich. Contra: GKV-Kosten steigen (PKV-Versicherte nutzen häufig weniger Leistungen im Schnitt), Ärzte verlieren Mehrvergütung → mögliche Unterversorgung. Im Modell: leicht negativer Nettoeffekt (Mehrausgaben > Mehreinnahmen).",
-    quelle: "PKV-Verband Jahrbuch 2025 · Lauterbach et al. (2005) Bürgerversicherung · IGES Institut 2021"
+    title: "PKV abschaffen",
+    text: "~11 Mio. PKV-Versicherte in GKV. Pro: breitere Einkommensbasis, Solidarausgleich. Contra: GKV-Ausgaben steigen (PKV-Klientel kostenintensiv), Ärzteabwanderung, Qualitätsrisiken. Im Modell: leicht negativer Nettoeffekt.",
+    quelle: "PKV-Verband 2025 · IGES Institut 2021 · GKV-SV Schätzung · Lauterbach et al. 2005"
   },
   anzahl_kv: {
     title: "Anzahl Krankenkassen",
-    text: "Deutschland hat 2025 noch ~95 gesetzliche Krankenkassen (1995 waren es ~1.200). Fusionen sparen Verwaltungskosten (Fixkostendegression). Eine Einheitskasse (wie in Taiwan oder Kanada) hätte sehr niedrige Verwaltungskosten, aber weniger Wettbewerb. Im Modell: jede Kassenfusion spart ~45% der proportionalen Verwaltungskosten (GKV-SV-Schätzung).",
-    quelle: "GKV-SV Jahresbericht 2025 · BMG Kassenstatistik · Reinhardt et al. (2004) Health Affairs"
+    text: "2025: ~95 GKV-Kassen (1995: ~1.200). Fusionen senken Verwaltungskosten (Fixkostendegression ~45%). Einheitskasse (Taiwan/Kanada): sehr niedrige Verwaltungskosten, weniger Wettbewerb. Koalition 2025: keine Fusionspflicht geplant.",
+    quelle: "GKV-SV Jahresbericht 2025 · BMG Kassenstatistik · Reinhardt et al. Health Affairs 2004"
   },
   praevention: {
     title: "Prävention-Investitionen",
-    text: "Jährliche Zusatzinvestitionen in Gesundheitsvorsorge, Früherkennung, betriebliche Gesundheitsförderung. Die WHO schätzt den ROI von Präventionsausgaben auf 3–5 € pro investiertem Euro (über 20 Jahre). Im Modell: vereinfacht 1,5× Nettonutzen im eingeschwungenen Zustand.",
-    quelle: "WHO (2017) 'Return on investment of public health interventions' · GKV-Spitzenverband Präventionsbericht 2024"
+    text: "Zusatzinvestitionen in Vorsorge, Früherkennung, betriebliche Gesundheit. WHO (2017): ROI 3–5 € pro 1 € über 20 Jahre. Im Modell: vereinfacht 1,5× Nettonutzen (konservativ). GKV-Präventionsbericht 2024: aktuell ~700 Mio. €/Jahr.",
+    quelle: "WHO (2017) 'Return on investment of public health interventions' · GKV-SV Präventionsbericht 2024"
+  },
+  bbg: {
+    title: "Beitragsbemessungsgrenze (BBG)",
+    text: "Bis zu dieser Einkommenshöhe werden SV-Beiträge fällig — darüber nicht. Wirkt stark regressiv: Wer mehr verdient als die BBG, zahlt keinen Grenzanteil mehr. Erhöhung würde Finanzierungsbasis verbreitern und Progressivität erhöhen. DIW: BBG-Anhebung = günstigste Reform zur SV-Finanzierung.",
+    quelle: "§ 6 SGB IV · RV-BBG 2025: 90.600 € · KV-BBG: 66.150 € · DIW Wochenbericht 2025"
+  },
+  zucman: {
+    title: "Zucman-Mindeststeuer (Milliardäre)",
+    text: "2%-Mindeststeuer auf Nettovermögen ultra-Reicher — Vorschlag von Gabriel Zucman im Auftrag der G20-Präsidentschaft (Brasilien 2024). Weltweites Aufkommen: 200–250 Mrd. $. Deutschland war 2024 Hauptblockierer (zusammen mit USA). Im Modell: Basis ~2.870 Mrd. € (D10c-Vermögen); Avoidance-Abschlag ~15% bei 2% Satz.",
+    quelle: "Zucman G20 Report 2024 · EU Tax Observatory 2024 · Jakobsen/Kleven/Kolsrud NBER 2024"
   }
 };
 
@@ -2412,7 +2810,7 @@ function positionTooltip(target) {
   if (left + 310 > window.innerWidth) left = window.innerWidth - 315;
   if (left < 4) left = 4;
   if (top + 180 > window.innerHeight) top = rect.top - 185;
-  popup.style.top = top + window.scrollY + 'px';
+  popup.style.top = top + 'px';
   popup.style.left = left + 'px';
 }
 
