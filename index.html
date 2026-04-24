@@ -626,6 +626,161 @@
     opacity: 0.75;
   }
 
+  /* ── GESAMTNOTE / SCORE ── */
+  .score-panel {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin-top: 0;
+  }
+  .score-left { flex-shrink: 0; text-align: center; min-width: 80px; }
+  .score-grade {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .score-grade.grade-a { color: #5cc888; }
+  .score-grade.grade-b { color: #a8d870; }
+  .score-grade.grade-c { color: #f0c040; }
+  .score-grade.grade-d { color: #f08040; }
+  .score-grade.grade-e, .score-grade.grade-f { color: #e85840; }
+  .score-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: rgba(251,249,244,0.5);
+    margin-top: 3px;
+  }
+  .score-label-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(251,249,244,0.4);
+    margin-bottom: 12px;
+  }
+  .score-dims { display: flex; gap: 18px; flex-wrap: wrap; flex: 1; }
+  .score-dim { flex: 1; min-width: 100px; }
+  .score-dim-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(251,249,244,0.5);
+    margin-bottom: 5px;
+  }
+  .score-dim-track {
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    margin-bottom: 5px;
+  }
+  .score-dim-fill { height: 100%; background: var(--paper); transition: width 0.4s ease; }
+  .score-dim-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--paper);
+    font-weight: 600;
+  }
+
+  /* ── KPI PULSE ANIMATION ── */
+  @keyframes kpi-pulse {
+    0%   { background: transparent; }
+    20%  { background: rgba(200,64,31,0.13); }
+    100% { background: transparent; }
+  }
+  .kpi.kpi-changed { animation: kpi-pulse 0.7s ease-out; }
+
+  /* ── UNDO BUTTON DISABLED ── */
+  #undo-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── REFORM TOUR BAR ── */
+  .reform-tour-bar {
+    background: var(--accent3);
+    color: var(--paper);
+    padding: 12px 20px;
+    display: none;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .reform-tour-bar.active { display: flex; }
+  .reform-tour-info { flex: 1; min-width: 200px; }
+  .reform-tour-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(251,249,244,0.65);
+    margin-bottom: 3px;
+  }
+  .reform-tour-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+  .reform-tour-desc { font-size: 12px; font-style: italic; color: rgba(251,249,244,0.78); }
+  .reform-tour-step {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(251,249,244,0.55);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .reform-tour-nav { display: flex; gap: 6px; flex-shrink: 0; }
+  .reform-tour-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 6px 14px;
+    background: rgba(255,255,255,0.15);
+    color: var(--paper);
+    border: 1px solid rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .reform-tour-btn:hover:not(:disabled) { background: rgba(255,255,255,0.3); }
+  .reform-tour-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .reform-tour-close {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: none;
+    border: none;
+    color: rgba(251,249,244,0.65);
+    cursor: pointer;
+    padding: 0 2px;
+    flex-shrink: 0;
+  }
+  .reform-tour-close:hover { color: var(--paper); }
+
+  /* ── TOUR BUTTONS IN SIDEBAR ── */
+  .tour-group { margin-top: 12px; }
+  .tour-group-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .tour-buttons { display: flex; flex-direction: column; gap: 4px; }
+  .tour-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 7px 10px;
+    background: transparent;
+    border: 1px solid rgba(42,39,32,0.25);
+    color: var(--muted);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.13s;
+  }
+  .tour-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
   /* ── FINANZTOOLS LINK PANEL ── */
   .ft-link-panel {
     background: var(--ink);
@@ -951,6 +1106,16 @@
       </div>
     </div>
 
+    <!-- REFORM TOURS -->
+    <div class="tour-group">
+      <div class="tour-group-label">▶ Reform-Tour starten</div>
+      <div class="tour-buttons">
+        <button class="tour-btn" onclick="startTour('kirchhof')">Kirchhof-Reform (Flat Tax)</button>
+        <button class="tour-btn" onclick="startTour('skandinavisch')">Skandinavisches Modell</button>
+        <button class="tour-btn" onclick="startTour('umverteilung')">Starke Umverteilung</button>
+      </div>
+    </div>
+
     <!-- Einkommensteuer -->
     <div class="section-title" data-toggle>Einkommensteuer</div>
     <div class="section-body">
@@ -1138,9 +1303,25 @@
   <!-- ============ DASHBOARD ============ -->
   <main class="dashboard">
 
+    <!-- REFORM TOUR BAR -->
+    <div class="reform-tour-bar" id="reform-tour-bar">
+      <div class="reform-tour-info">
+        <div class="reform-tour-eyebrow" id="reform-tour-eyebrow"></div>
+        <div class="reform-tour-title" id="reform-tour-title"></div>
+        <div class="reform-tour-desc" id="reform-tour-desc"></div>
+      </div>
+      <div class="reform-tour-step" id="reform-tour-step"></div>
+      <div class="reform-tour-nav">
+        <button class="reform-tour-btn" id="reform-tour-back" onclick="tourPrev()">← Zurück</button>
+        <button class="reform-tour-btn" id="reform-tour-next" onclick="tourNext()">Weiter →</button>
+      </div>
+      <button class="reform-tour-close" onclick="endTour()" title="Tour beenden">✕</button>
+    </div>
+
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
       <button id="card-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:var(--accent);border:1px solid var(--accent);color:var(--paper);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.borderColor='var(--ink)'" onmouseout="this.style.background='var(--accent)';this.style.borderColor='var(--accent)'">Bild speichern</button>
       <button id="share-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">⇥ Link kopieren</button>
+      <button id="undo-btn" disabled style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="if(!this.disabled){this.style.background='var(--ink)';this.style.color='var(--paper)'}" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">↩ Rückgängig</button>
       <button id="save-a-btn" class="scenario-btn scenario-btn-a" title="Klicken um Szenario A zu bearbeiten">▣ Szenario A</button>
       <button id="save-b-btn" class="scenario-btn scenario-btn-b" title="Klicken um Szenario B zu bearbeiten">▣ Szenario B</button>
       <button id="csv-export-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">↓ CSV Export</button>
@@ -1227,6 +1408,16 @@
         <div class="kpi-delta" id="kpi_dwl_d">Mrd. € / Jahr</div>
         <div class="kpi-bench" id="kpi_dwl_bench"></div>
       </div>
+    </div>
+
+    <!-- GESAMTNOTE / SCORE PANEL -->
+    <div class="score-panel" id="score-panel">
+      <div class="score-left">
+        <div class="score-label-tag">Gesamtnote</div>
+        <div class="score-grade" id="score-grade">—</div>
+        <div class="score-number" id="score-number">— / 100</div>
+      </div>
+      <div class="score-dims" id="score-dims"></div>
     </div>
 
     <!-- FINANZTOOLS LINK PANEL -->
@@ -2620,6 +2811,26 @@ function render() {
 
   renderRechenweg(r, p);
 
+  // SCORE PANEL
+  renderScore(r);
+
+  // KPI PULSE — detect changed KPI values and flash them
+  const _kpiPulseIds = ['kpi_saldo','kpi_einn','kpi_gini','kpi_admin','kpi_nst','kpi_arb','kpi_armut','kpi_schuld','kpi_dwl'];
+  _kpiPulseIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.textContent;
+    if (_prevKpiValues[id] !== undefined && _prevKpiValues[id] !== cur) {
+      const tile = el.closest('.kpi');
+      if (tile) {
+        tile.classList.remove('kpi-changed');
+        void tile.offsetWidth;
+        tile.classList.add('kpi-changed');
+      }
+    }
+    _prevKpiValues[id] = cur;
+  });
+
   _lastResult = r;
   _lastParams  = p;
 
@@ -3275,6 +3486,7 @@ document.querySelectorAll('.section-title[data-toggle]').forEach(el => {
 // Preset buttons
 document.querySelectorAll('#presets button').forEach(btn => {
   btn.addEventListener('click', () => {
+    pushHistory();
     document.querySelectorAll('#presets button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     setParams(PRESETS[btn.dataset.preset]);
@@ -3285,6 +3497,7 @@ document.querySelectorAll('#presets button').forEach(btn => {
 // Listen on all inputs
 document.querySelectorAll('input[type="range"], input[type="checkbox"]').forEach(inp => {
   inp.addEventListener('input', () => {
+    pushHistory();
     document.querySelectorAll('#presets button').forEach(b => b.classList.remove('active'));
     render();
   });
@@ -3678,9 +3891,166 @@ function renderSzenarioVergleich() {
   </div>`;
 }
 
+// ============================================================
+// GESAMTNOTE / SCORE
+// ============================================================
+function berechneGesamtnote(r) {
+  // Fiskal: saldo ≥ 0 = 100, −200 = 0
+  const fiskal  = Math.max(0, Math.min(100, (r.saldo + 200) / 200 * 100));
+  // Gleichheit: gini 0.265 = 100, 0.38 = 0
+  const gleich  = Math.max(0, Math.min(100, (0.38 - r.gini) / (0.38 - 0.265) * 100));
+  // Effizienz: admin_kosten 80 = 100, 230 = 0
+  const effiz   = Math.max(0, Math.min(100, (230 - r.admin_kosten) / 150 * 100));
+  // Arbeit: labor 103 = 100, 96 = 0
+  const arbeit  = Math.max(0, Math.min(100, (r.behavior.labor - 96) / 7 * 100));
+
+  const score = Math.round(fiskal * 0.30 + gleich * 0.30 + effiz * 0.20 + arbeit * 0.20);
+
+  let grade, gradeClass;
+  if      (score >= 93) { grade = 'A+'; gradeClass = 'grade-a'; }
+  else if (score >= 87) { grade = 'A';  gradeClass = 'grade-a'; }
+  else if (score >= 80) { grade = 'B+'; gradeClass = 'grade-b'; }
+  else if (score >= 73) { grade = 'B';  gradeClass = 'grade-b'; }
+  else if (score >= 67) { grade = 'C+'; gradeClass = 'grade-c'; }
+  else if (score >= 60) { grade = 'C';  gradeClass = 'grade-c'; }
+  else if (score >= 53) { grade = 'D+'; gradeClass = 'grade-d'; }
+  else if (score >= 47) { grade = 'D';  gradeClass = 'grade-d'; }
+  else if (score >= 33) { grade = 'E';  gradeClass = 'grade-e'; }
+  else                  { grade = 'F';  gradeClass = 'grade-f'; }
+
+  return { score, grade, gradeClass, dims: { fiskal, gleich, effiz, arbeit } };
+}
+
+function renderScore(r) {
+  const n = berechneGesamtnote(r);
+  const gradeEl = document.getElementById('score-grade');
+  gradeEl.textContent = n.grade;
+  gradeEl.className = 'score-grade ' + n.gradeClass;
+  document.getElementById('score-number').textContent = n.score + ' / 100';
+
+  const dims = [
+    { key: 'fiskal',  label: 'Fiskal',     val: n.dims.fiskal },
+    { key: 'gleich',  label: 'Gleichheit', val: n.dims.gleich },
+    { key: 'effiz',   label: 'Effizienz',  val: n.dims.effiz  },
+    { key: 'arbeit',  label: 'Arbeit',     val: n.dims.arbeit },
+  ];
+  document.getElementById('score-dims').innerHTML = dims.map(d => `
+    <div class="score-dim">
+      <div class="score-dim-label">${d.label}</div>
+      <div class="score-dim-track"><div class="score-dim-fill" style="width:${d.val.toFixed(0)}%"></div></div>
+      <div class="score-dim-val">${d.val.toFixed(0)} Pkt.</div>
+    </div>`).join('');
+}
+
+// ============================================================
+// UNDO HISTORY
+// ============================================================
+function pushHistory() {
+  if (!_lastParams) return;
+  _history.push(JSON.stringify(_lastParams));
+  if (_history.length > 10) _history.shift();
+  document.getElementById('undo-btn').disabled = false;
+}
+
+function undoHistory() {
+  if (!_history.length) return;
+  const prev = JSON.parse(_history.pop());
+  setParams(prev);
+  render();
+  document.getElementById('undo-btn').disabled = _history.length === 0;
+}
+
+// ============================================================
+// REFORM TOURS (Guided)
+// ============================================================
+const REFORM_TOURS = [
+  {
+    id: 'kirchhof',
+    name: 'Kirchhof-Reform',
+    steps: [
+      { title: 'Flat Tax einführen',           desc: 'Einheitlicher Steuersatz von 25 % für alle Einkommen.',        params: { eingang: 25, spitze: 25 } },
+      { title: 'Grundfreibetrag erhöhen',      desc: 'Schutz für niedrige Einkommen: Freibetrag auf 18.000 €.',      params: { freibetrag: 18000 } },
+      { title: 'Gewerbesteuer abschaffen',     desc: 'Vereinfachung: Gewerbesteuer auf 0 — nur Körperschaftsteuer.', params: { gewst: 0 } },
+      { title: 'Auf 4 Steuern reduzieren',     desc: 'Erbschaft-, Boden-, Vermögenssteuer abschaffen.',              params: { erb: 0, boden: 0.0, verm: 0.0, zucman: 0.0 } },
+    ]
+  },
+  {
+    id: 'skandinavisch',
+    name: 'Skandinavisches Modell',
+    steps: [
+      { title: 'MwSt erhöhen',                 desc: 'Höhere Konsumsteuer — 25 % wie in Dänemark/Schweden.',         params: { mwst: 25 } },
+      { title: 'Duale Einkommensteuer',         desc: 'Kapital separat mit 27 % besteuert (NK-Modell).',              params: { synthetisch: false, abgeltung: 27 } },
+      { title: 'Niedrige Körperschaftsteuer',  desc: 'Attraktiv für Unternehmen: KSt auf 20 %.',                     params: { kst: 20 } },
+      { title: 'Hohe Transferleistungen',      desc: 'Bürgergeld 700 €, Kindergeld 300 € für Umverteilung.',         params: { bg: 700, kg: 300 } },
+    ]
+  },
+  {
+    id: 'umverteilung',
+    name: 'Starke Umverteilung',
+    steps: [
+      { title: 'Spitzensteuer erhöhen',         desc: 'Spitzensteuersatz von 42 % auf 58 % für Top-Einkommen.',      params: { spitze: 58 } },
+      { title: 'Kapital wie Arbeit besteuern',  desc: 'Abgeltungsteuer abschaffen — synthetisches System.',           params: { synthetisch: true } },
+      { title: 'Erbschaftsteuer stärken',       desc: 'Erbschaftsteuersatz auf 35 % — weniger Ausnahmen.',            params: { erb: 35 } },
+      { title: 'Vermögensteuer einführen',      desc: 'Zucman-Modell: 1,5 % Steuer auf sehr hohe Vermögen.',         params: { verm: 1.5, zucman: 1.5 } },
+    ]
+  },
+];
+
+function startTour(tourId) {
+  const tour = REFORM_TOURS.find(t => t.id === tourId);
+  if (!tour) return;
+  pushHistory();
+  _tourActive = tourId;
+  _tourStep = 0;
+  _tourBaseParams = getParams();
+  applyTourStep();
+}
+
+function applyTourStep() {
+  const tour = REFORM_TOURS.find(t => t.id === _tourActive);
+  if (!tour) return;
+  const accumulated = Object.assign({}, _tourBaseParams);
+  for (let i = 0; i <= _tourStep; i++) {
+    Object.assign(accumulated, tour.steps[i].params);
+  }
+  setParams(accumulated);
+  render();
+
+  const bar = document.getElementById('reform-tour-bar');
+  const step = tour.steps[_tourStep];
+  bar.classList.add('active');
+  document.getElementById('reform-tour-eyebrow').textContent = tour.name + ' · Schritt ' + (_tourStep + 1);
+  document.getElementById('reform-tour-title').textContent = step.title;
+  document.getElementById('reform-tour-desc').textContent = step.desc;
+  document.getElementById('reform-tour-step').textContent = (_tourStep + 1) + ' / ' + tour.steps.length;
+  document.getElementById('reform-tour-back').disabled = _tourStep === 0;
+  document.getElementById('reform-tour-next').textContent =
+    _tourStep < tour.steps.length - 1 ? 'Weiter →' : 'Fertig ✓';
+}
+
+function tourNext() {
+  const tour = REFORM_TOURS.find(t => t.id === _tourActive);
+  if (!tour) return;
+  if (_tourStep < tour.steps.length - 1) { _tourStep++; applyTourStep(); }
+  else endTour();
+}
+
+function tourPrev() {
+  if (_tourStep > 0) { _tourStep--; applyTourStep(); }
+}
+
+function endTour() {
+  _tourActive = null;
+  _tourBaseParams = null;
+  document.getElementById('reform-tour-bar').classList.remove('active');
+}
+
 // ── ALL LET/CONST USED INSIDE render() ──────────────────────
 // Must be declared BEFORE render() is called (no hoisting for let/const)
 let _lastResult = null, _lastParams = null;
+let _prevKpiValues = {};
+let _history = [];
+let _tourActive = null, _tourStep = 0, _tourBaseParams = null;
 
 // ── KPI BENCHMARKS & CHALLENGE CONTEXT ──────────────────────
 // Must be defined BEFORE render() is called (const = no hoisting)
@@ -3726,6 +4096,7 @@ updateScenarioModeUI();
 // Rechenweg-Panel: bei Aufklappen rendern
 document.getElementById('csv-export-btn').addEventListener('click', exportCSV);
 document.getElementById('share-btn').addEventListener('click', copyShareLink);
+document.getElementById('undo-btn').addEventListener('click', undoHistory);
 document.getElementById('save-a-btn').addEventListener('click', () => enterScenarioMode('A'));
 document.getElementById('save-b-btn').addEventListener('click', () => enterScenarioMode('B'));
 
@@ -3769,6 +4140,7 @@ setTimeout(() => {
 
 function startWith(preset) {
   closeOnboarding();
+  pushHistory();
   document.querySelectorAll('#presets button').forEach(b => b.classList.remove('active'));
   const btn = document.querySelector(`[data-preset="${preset}"]`);
   if (btn) btn.classList.add('active');
