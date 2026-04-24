@@ -745,8 +745,9 @@
 
   /* ── GESAMTNOTE / SCORE ── */
   .score-panel {
-    background: var(--ink);
-    color: var(--paper);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
     padding: 20px 24px;
     display: flex;
     align-items: center;
@@ -760,16 +761,17 @@
     font-size: 64px;
     font-weight: 800;
     line-height: 1;
+    color: var(--ink);
   }
-  .score-grade.grade-a { color: #5cc888; }
-  .score-grade.grade-b { color: #a8d870; }
-  .score-grade.grade-c { color: #f0c040; }
-  .score-grade.grade-d { color: #f08040; }
-  .score-grade.grade-e, .score-grade.grade-f { color: #e85840; }
+  .score-grade.grade-a { color: #2a7a4a; }
+  .score-grade.grade-b { color: #5a7a20; }
+  .score-grade.grade-c { color: #8a6010; }
+  .score-grade.grade-d { color: #9a4812; }
+  .score-grade.grade-e, .score-grade.grade-f { color: #a83020; }
   .score-number {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    color: rgba(251,249,244,0.5);
+    color: var(--muted);
     margin-top: 3px;
   }
   .score-label-tag {
@@ -777,7 +779,7 @@
     font-size: 9px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: rgba(251,249,244,0.4);
+    color: rgba(107,99,89,0.65);
     margin-bottom: 12px;
   }
   .score-dims { display: flex; gap: 18px; flex-wrap: wrap; flex: 1; }
@@ -787,29 +789,29 @@
     font-size: 9px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(251,249,244,0.5);
+    color: var(--muted);
     margin-bottom: 5px;
   }
   .score-dim-track {
     height: 4px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(42,39,32,0.1);
     margin-bottom: 5px;
   }
-  .score-dim-fill { height: 100%; background: var(--paper); transition: width 0.4s ease; }
+  .score-dim-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; }
   .score-dim-val {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    color: var(--paper);
+    color: var(--ink);
     font-weight: 600;
   }
 
   /* ── KPI PULSE ANIMATION ── */
   @keyframes kpi-pulse {
     0%   { background: transparent; }
-    20%  { background: rgba(200,64,31,0.13); }
+    30%  { background: rgba(180,150,80,0.14); }
     100% { background: transparent; }
   }
-  .kpi.kpi-changed { animation: kpi-pulse 0.7s ease-out; }
+  .kpi.kpi-changed { animation: kpi-pulse 0.9s ease-out; }
 
   /* ── UNDO BUTTON DISABLED ── */
   #undo-btn:disabled { opacity: 0.35; cursor: not-allowed; }
