@@ -200,6 +200,87 @@
   .section-body { padding-bottom: 8px; }
   .section-title.collapsed + .section-body { display: none; }
 
+  /* ── SCENARIO MODE INDICATOR ── */
+  .scenario-mode-bar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    margin-bottom: 16px;
+    border-left: 3px solid transparent;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .scenario-mode-bar.mode-a {
+    display: flex;
+    background: rgba(42,77,122,0.09);
+    border-left-color: var(--accent3);
+    color: var(--accent3);
+  }
+  .scenario-mode-bar.mode-b {
+    display: flex;
+    background: rgba(30,95,58,0.09);
+    border-left-color: var(--accent2);
+    color: var(--accent2);
+  }
+  .scenario-mode-bar-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+    animation: pulse-dot 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .scenario-mode-bar-exit {
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: currentColor;
+    font-size: 14px;
+    opacity: 0.6;
+    padding: 0 2px;
+    line-height: 1;
+  }
+  .scenario-mode-bar-exit:hover { opacity: 1; }
+
+  /* ── SCENARIO ACTION BUTTONS ── */
+  .scenario-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 6px 13px;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .scenario-btn-a {
+    background: transparent;
+    border-color: var(--accent3);
+    color: var(--accent3);
+  }
+  .scenario-btn-a:hover, .scenario-btn-a.active {
+    background: var(--accent3);
+    color: var(--paper);
+  }
+  .scenario-btn-b {
+    background: transparent;
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+  .scenario-btn-b:hover, .scenario-btn-b.active {
+    background: var(--accent2);
+    color: var(--paper);
+  }
+
   .slider-row {
     margin-bottom: 14px;
   }
@@ -824,9 +905,9 @@
 
 <nav class="site-nav-bar">
   <div class="site-nav-bar-inner">
-    <a href="index.html" class="active">Haushaltsspiel</a>
+    <a href="/" class="active">Haushaltsspiel</a>
     <span class="site-nav-bar-sep">·</span>
-    <a href="finanz.html">Finanztools</a>
+    <a href="/finanz.html">Finanztools</a>
   </div>
 </nav>
 
@@ -849,6 +930,13 @@
 
   <!-- ============ CONTROLS ============ -->
   <aside class="controls" id="controls-sidebar">
+
+    <!-- SCENARIO MODE INDICATOR -->
+    <div class="scenario-mode-bar" id="scenario-mode-bar">
+      <div class="scenario-mode-bar-dot"></div>
+      <span id="scenario-mode-label">Szenario A aktiv</span>
+      <button class="scenario-mode-bar-exit" title="Modus verlassen" onclick="exitScenarioMode()">✕</button>
+    </div>
 
     <div class="preset-group">
       <div class="preset-label">Szenario laden</div>
@@ -1053,8 +1141,8 @@
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
       <button id="card-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:var(--accent);border:1px solid var(--accent);color:var(--paper);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.borderColor='var(--ink)'" onmouseout="this.style.background='var(--accent)';this.style.borderColor='var(--accent)'">Bild speichern</button>
       <button id="share-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">⇥ Link kopieren</button>
-      <button id="save-a-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--accent3);color:var(--accent3);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--accent3)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--accent3)'">▣ Szenario A</button>
-      <button id="save-b-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--accent2);color:var(--accent2);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--accent2)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--accent2)'">▣ Szenario B</button>
+      <button id="save-a-btn" class="scenario-btn scenario-btn-a" title="Klicken um Szenario A zu bearbeiten">▣ Szenario A</button>
+      <button id="save-b-btn" class="scenario-btn scenario-btn-b" title="Klicken um Szenario B zu bearbeiten">▣ Szenario B</button>
       <button id="csv-export-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">↓ CSV Export</button>
     </div>
     <canvas id="share-canvas"></canvas>
@@ -2534,6 +2622,12 @@ function render() {
 
   _lastResult = r;
   _lastParams  = p;
+
+  // Live scenario update
+  if (activeScenarioSlot) {
+    SZENARIO[activeScenarioSlot] = { p, r };
+    renderSzenarioVergleich();
+  }
 }
 
 // ============================================================
@@ -3465,20 +3559,64 @@ function copyShareLink() {
 }
 
 // ============================================================
-// SZENARIO-VERGLEICH
+// SZENARIO-VERGLEICH — Live-Edit-Modus
 // ============================================================
 
 const SZENARIO = { A: null, B: null };
+let activeScenarioSlot = null; // null | 'A' | 'B'
 
-function saveScenario(slot) {
-  const p = getParams();
-  const r = berechne(p);
-  SZENARIO[slot] = { p, r };
-  const btn = document.getElementById(`save-${slot.toLowerCase()}-btn`);
-  const base = slot === 'A' ? '▣ Szenario A' : '▣ Szenario B';
-  btn.textContent = `✓ ${slot} gespeichert`;
-  setTimeout(() => { btn.textContent = base; }, 2000);
-  renderSzenarioVergleich();
+function enterScenarioMode(slot) {
+  if (activeScenarioSlot === slot) {
+    // Toggle off: exit mode, keep data
+    activeScenarioSlot = null;
+    updateScenarioModeUI();
+    return;
+  }
+  // If switching from other slot: save current state there first
+  if (activeScenarioSlot && activeScenarioSlot !== slot) {
+    const cp = getParams();
+    SZENARIO[activeScenarioSlot] = { p: cp, r: berechne(cp) };
+    // Load the other slot's params if they exist
+    if (SZENARIO[slot]) setParams(SZENARIO[slot].p);
+  } else if (!SZENARIO[slot]) {
+    // First time entering this slot: snapshot current state as starting point
+    const cp = getParams();
+    SZENARIO[slot] = { p: cp, r: berechne(cp) };
+  } else {
+    // Re-entering a slot that already has data: reload its params
+    setParams(SZENARIO[slot].p);
+  }
+  activeScenarioSlot = slot;
+  updateScenarioModeUI();
+  render();
+}
+
+function exitScenarioMode() {
+  activeScenarioSlot = null;
+  updateScenarioModeUI();
+}
+
+function updateScenarioModeUI() {
+  const bar   = document.getElementById('scenario-mode-bar');
+  const label = document.getElementById('scenario-mode-label');
+  const btnA  = document.getElementById('save-a-btn');
+  const btnB  = document.getElementById('save-b-btn');
+  const sidebar = document.getElementById('controls-sidebar');
+
+  bar.className = 'scenario-mode-bar';
+  btnA.classList.remove('active');
+  btnB.classList.remove('active');
+  sidebar.style.borderLeft = '';
+
+  if (activeScenarioSlot === 'A') {
+    bar.classList.add('mode-a');
+    label.textContent = 'Szenario A aktiv — Regler anpassen';
+    btnA.classList.add('active');
+  } else if (activeScenarioSlot === 'B') {
+    bar.classList.add('mode-b');
+    label.textContent = 'Szenario B aktiv — Regler anpassen';
+    btnB.classList.add('active');
+  }
 }
 
 function renderSzenarioVergleich() {
@@ -3487,7 +3625,10 @@ function renderSzenarioVergleich() {
   const { A, B } = SZENARIO;
   if (!A || !B) {
     el.style.display = A ? 'block' : 'none';
-    if (A && !B) el.innerHTML = '<div class="panel" style="border-top:3px solid var(--accent3);padding:16px 20px;color:var(--muted);font-family:\'JetBrains Mono\',monospace;font-size:11px;">Szenario A gespeichert — jetzt Szenario B speichern um den Vergleich zu sehen.</div>';
+    if (A && !B) el.innerHTML = `<div class="panel" style="border-top:3px solid var(--accent3);padding:16px 20px;display:flex;align-items:center;gap:12px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent3);">▣ Szenario A gespeichert</span>
+      <span style="font-size:13px;color:var(--muted);">Klicke „▣ Szenario B" um ein zweites Szenario zu bearbeiten und zu vergleichen.</span>
+    </div>`;
     return;
   }
   el.style.display = 'block';
@@ -3551,8 +3692,8 @@ injectTooltips();
 // Rechenweg-Panel: bei Aufklappen rendern
 document.getElementById('csv-export-btn').addEventListener('click', exportCSV);
 document.getElementById('share-btn').addEventListener('click', copyShareLink);
-document.getElementById('save-a-btn').addEventListener('click', () => saveScenario('A'));
-document.getElementById('save-b-btn').addEventListener('click', () => saveScenario('B'));
+document.getElementById('save-a-btn').addEventListener('click', () => enterScenarioMode('A'));
+document.getElementById('save-b-btn').addEventListener('click', () => enterScenarioMode('B'));
 
 // Mobile Controls Toggle
 document.getElementById('mobile-toggle-btn').addEventListener('click', () => {
@@ -3764,7 +3905,7 @@ function downloadResultCard() {
 document.getElementById('card-btn').addEventListener('click', downloadResultCard);
 
 document.getElementById('to-finanztools-btn').addEventListener('click', function() {
-  window.location.href = 'finanz.html';
+  window.location.href = '/finanz.html';
 });
 
 </script>
