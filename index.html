@@ -3678,6 +3678,32 @@ function renderSzenarioVergleich() {
   </div>`;
 }
 
+// ── KPI BENCHMARKS & CHALLENGE CONTEXT ──────────────────────
+// Must be defined BEFORE render() is called (const = no hoisting)
+const KPI_BENCH = {
+  saldo:  'DE 2024: −85 Mrd. · EU-Ø: −180 Mrd.',
+  einn:   'DE 2024: ~1.450 Mrd. · Steuerquote 22 % BIP',
+  gini:   'DE: 0,295 · DK: 0,281 · SE: 0,273 · US: 0,395',
+  admin:  'DE ~2 % Steueraufkommen (OECD-Ø)',
+  nst:    'DE aktuell: ~40 Steuerarten',
+  arb:    'Elastizitäten: Saez/Chetty/Gruber',
+  armut:  'DE 2023: 14,8 % (EU-SILC) · EU-Ø: 16,5 %',
+  schuld: 'DE Schuldenquote 2024: ~63 % BIP',
+  dwl:    'Schätzung: 5–15 % des Steueraufkommens',
+};
+const CHALLENGE_CTX = {
+  'Saldo':            'DE 2024: ca. −85 Mrd. €',
+  'Gini':             'DE heute: 0,295 · Dänemark: 0,281',
+  'Armutsrisiko':     'DE 2023: 14,8 % (EU-SILC)',
+  'Verwaltungskosten':'DE ~2 % Steueraufkommen (OECD)',
+  'Arbeitsangebot':   'Indexbasis = 100 (Status quo)',
+  'Einnahmen':        'DE Steuerquote ~22 % BIP',
+  'Steuerarten':      'Kirchhof-Ideal: 4–5 Steuerarten',
+  'CO₂':              'DE 2030-Ziel: −65 % ggü. 1990',
+  'Schuldenquote':    'Verfassungsgrenze: 0,35 % BIP/Jahr',
+  'Wohlfahrtsverlust':'ca. 5–15 % des Steueraufkommens (Lit.)',
+};
+
 // Capture hash state BEFORE render() modifies window.location via replaceState
 const _hadInitialHash = !!window.location.hash;
 
@@ -3756,38 +3782,6 @@ function startWith(preset) {
   }
 })();
 
-// ============================================================
-// KPI BENCHMARKS
-// ============================================================
-
-const KPI_BENCH = {
-  saldo:  'DE 2024: −85 Mrd. · EU-Ø: −180 Mrd.',
-  einn:   'DE 2024: ~1.450 Mrd. · Steuerquote 22 % BIP',
-  gini:   'DE: 0,295 · DK: 0,281 · SE: 0,273 · US: 0,395',
-  admin:  'DE ~2 % Steueraufkommen (OECD-Ø)',
-  nst:    'DE aktuell: ~40 Steuerarten',
-  arb:    'Elastizitäten: Saez/Chetty/Gruber',
-  armut:  'DE 2023: 14,8 % (EU-SILC) · EU-Ø: 16,5 %',
-  schuld: 'DE Schuldenquote 2024: ~63 % BIP',
-  dwl:    'Schätzung: 5–15 % des Steueraufkommens',
-};
-
-// ============================================================
-// CHALLENGE CONTEXT
-// ============================================================
-
-const CHALLENGE_CTX = {
-  'Saldo':            'DE 2024: ca. −85 Mrd. €',
-  'Gini':             'DE heute: 0,295 · Dänemark: 0,281',
-  'Armutsrisiko':     'DE 2023: 14,8 % (EU-SILC)',
-  'Verwaltungskosten':'DE ~2 % Steueraufkommen (OECD)',
-  'Arbeitsangebot':   'Indexbasis = 100 (Status quo)',
-  'Einnahmen':        'DE Steuerquote ~22 % BIP',
-  'Steuerarten':      'Kirchhof-Ideal: 4–5 Steuerarten',
-  'CO₂':              'DE 2030-Ziel: −65 % ggü. 1990',
-  'Schuldenquote':    'Verfassungsgrenze: 0,35 % BIP/Jahr',
-  'Wohlfahrtsverlust':'ca. 5–15 % des Steueraufkommens (Lit.)',
-};
 
 // ============================================================
 // RESULT CARD (Canvas export)
