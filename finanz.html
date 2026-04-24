@@ -346,6 +346,36 @@
   .tool-tab.active { color: var(--ink); border-bottom-color: var(--accent3); font-weight: 600; }
   .tool-pane { display: none; }
   .tool-pane.active { display: block; }
+  .hs-banner {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .hs-banner-tag {
+    background: var(--accent);
+    color: var(--paper);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 2px 7px;
+    white-space: nowrap;
+  }
+  .hs-banner-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--paper);
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0.6;
+  }
+  .hs-banner-close:hover { opacity: 1; }
 
   /* ── LAYOUT (sidebar + dashboard) same as main game ── */
   .layout {
@@ -747,6 +777,12 @@
         <span class="profile-strip-alloc" id="strip-alloc"></span>
       </div>
       <button class="profile-strip-btn" onclick="retakeQuiz()">Profil ändern</button>
+    </div>
+
+    <div class="hs-banner" id="hs-banner" style="display:none">
+      <span class="hs-banner-tag">Haushaltsspiel</span>
+      <span id="hs-banner-text">Steuersätze aus deinem Szenario geladen.</span>
+      <button class="hs-banner-close" onclick="document.getElementById('hs-banner').style.display='none'">×</button>
     </div>
 
     <div class="tool-tabs-bar">
@@ -1760,6 +1796,23 @@ document.querySelectorAll('.section-title[data-toggle]').forEach(el => {
     prefillSliders(p);
     // Show quiz with "Sie haben bereits ein Profil" option? For now just show quiz fresh.
   }
+  // Load params from Haushaltsspiel if available
+  const hsRaw = localStorage.getItem('haushaltsspiel_params');
+  if (hsRaw) {
+    try {
+      const hsP = JSON.parse(hsRaw);
+      if (typeof hsP.abgeltung === 'number') {
+        const slider = document.getElementById('invest_steuer');
+        slider.value = hsP.abgeltung;
+        document.getElementById('v_invest_steuer').textContent = hsP.abgeltung + ' %';
+        const banner = document.getElementById('hs-banner');
+        document.getElementById('hs-banner-text').textContent =
+          `Abgeltungsteuer ${hsP.abgeltung} % aus deinem Haushaltsspiel-Szenario geladen.`;
+        banner.style.display = 'flex';
+      }
+    } catch(e) {}
+  }
+
   // Initial renders so tools work even if quiz is skipped
   renderInvest();
   renderKredit();

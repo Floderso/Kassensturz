@@ -526,6 +526,60 @@
   /* ── SHARE CARD ── */
   #share-canvas { display: none; }
 
+  /* ── KPI BENCHMARK LINE ── */
+  .kpi-bench {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: rgba(107,99,89,0.65);
+    margin-top: 5px;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── CHALLENGE CONTEXT ── */
+  .challenge-context {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 3px;
+    opacity: 0.75;
+  }
+
+  /* ── FINANZTOOLS LINK PANEL ── */
+  .ft-link-panel {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 16px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .ft-link-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .ft-link-text { font-size: 14px; font-style: italic; }
+  .ft-link-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 9px 20px;
+    background: var(--accent);
+    color: var(--paper);
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .ft-link-btn:hover { background: #a03318; }
+
   /* ── SITE NAV ── */
   .site-nav-bar {
     background: var(--ink);
@@ -1035,47 +1089,65 @@
         <div class="kpi-label">Staatssaldo</div>
         <div class="kpi-value" id="kpi_saldo">—</div>
         <div class="kpi-delta" id="kpi_saldo_d">—</div>
+        <div class="kpi-bench" id="kpi_saldo_bench"></div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Einnahmen gesamt</div>
         <div class="kpi-value" id="kpi_einn">—</div>
         <div class="kpi-delta neutral">Mrd. € / Jahr</div>
+        <div class="kpi-bench" id="kpi_einn_bench"></div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Gini-Koeffizient</div>
         <div class="kpi-value" id="kpi_gini">—</div>
         <div class="kpi-delta" id="kpi_gini_d">—</div>
+        <div class="kpi-bench" id="kpi_gini_bench"></div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Verwaltungskosten</div>
         <div class="kpi-value" id="kpi_admin">—</div>
         <div class="kpi-delta" id="kpi_admin_d">—</div>
+        <div class="kpi-bench" id="kpi_admin_bench"></div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Aktive Steuerarten</div>
         <div class="kpi-value" id="kpi_nst">—</div>
         <div class="kpi-delta neutral">Anzahl</div>
+        <div class="kpi-bench" id="kpi_nst_bench"></div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Arbeitsangebot</div>
         <div class="kpi-value" id="kpi_arb">—</div>
         <div class="kpi-delta" id="kpi_arb_d">vs. Basis</div>
+        <div class="kpi-bench" id="kpi_arb_bench"></div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Armutsrisikoquote</div>
         <div class="kpi-value" id="kpi_armut">—</div>
         <div class="kpi-delta" id="kpi_armut_d">—</div>
+        <div class="kpi-bench" id="kpi_armut_bench"></div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Schuldenquote Δ/Jahr</div>
         <div class="kpi-value" id="kpi_schuld">—</div>
         <div class="kpi-delta" id="kpi_schuld_d">% des BIP</div>
+        <div class="kpi-bench" id="kpi_schuld_bench"></div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Wohlfahrtsverlust</div>
         <div class="kpi-value" id="kpi_dwl">—</div>
         <div class="kpi-delta" id="kpi_dwl_d">Mrd. € / Jahr</div>
+        <div class="kpi-bench" id="kpi_dwl_bench"></div>
       </div>
+    </div>
+
+    <!-- FINANZTOOLS LINK PANEL -->
+    <div class="ft-link-panel">
+      <div>
+        <div class="ft-link-eyebrow">Nächster Schritt</div>
+        <div class="ft-link-text">Was bedeutet dein Szenario für deine persönlichen Finanzen?</div>
+      </div>
+      <button class="ft-link-btn" id="to-finanztools-btn">Finanztools öffnen →</button>
     </div>
 
     <div class="warning-box" id="warnbox" style="display:none">
@@ -2408,6 +2480,20 @@ function render() {
   dwlDEl.textContent = (dDwl >= 0 ? '+' : '') + dDwl.toFixed(0) + ' Mrd. vs. Basis';
   dwlDEl.className = 'kpi-delta ' + (dDwl > 5 ? 'bad' : dDwl < -5 ? 'good' : 'neutral');
 
+  // KPI BENCHMARKS
+  document.getElementById('kpi_saldo_bench').textContent = KPI_BENCH.saldo;
+  document.getElementById('kpi_einn_bench').textContent = KPI_BENCH.einn;
+  document.getElementById('kpi_gini_bench').textContent = KPI_BENCH.gini;
+  document.getElementById('kpi_admin_bench').textContent = KPI_BENCH.admin;
+  document.getElementById('kpi_nst_bench').textContent = KPI_BENCH.nst;
+  document.getElementById('kpi_arb_bench').textContent = KPI_BENCH.arb;
+  document.getElementById('kpi_armut_bench').textContent = KPI_BENCH.armut;
+  document.getElementById('kpi_schuld_bench').textContent = KPI_BENCH.schuld;
+  document.getElementById('kpi_dwl_bench').textContent = KPI_BENCH.dwl;
+
+  // Cross-page param sync
+  localStorage.setItem('haushaltsspiel_params', JSON.stringify(p));
+
   // ESt-TARIFKURVE
   renderEstKurve(p);
 
@@ -2604,6 +2690,7 @@ function renderChallenges(r) {
     const subsHtml = c.subs.map(sub => {
       const pct = challengeProgress(sub, r);
       const done = sub.check(r);
+      const ctx = CHALLENGE_CTX[sub.label] ? `<div class="challenge-context">${CHALLENGE_CTX[sub.label]}</div>` : '';
       return `<div class="challenge-bar-wrap">
         <div class="challenge-bar-label">
           <span>${sub.label}</span>
@@ -2612,6 +2699,7 @@ function renderChallenges(r) {
         <div class="challenge-track">
           <div class="challenge-fill" style="width:${pct}%;background:${done ? slot.accent : 'rgba(42,39,32,0.35)'}"></div>
         </div>
+        ${ctx}
       </div>`;
     }).join('');
 
@@ -3503,6 +3591,39 @@ function startWith(preset) {
 })();
 
 // ============================================================
+// KPI BENCHMARKS
+// ============================================================
+
+const KPI_BENCH = {
+  saldo:  'DE 2024: −85 Mrd. · EU-Ø: −180 Mrd.',
+  einn:   'DE 2024: ~1.450 Mrd. · Steuerquote 22 % BIP',
+  gini:   'DE: 0,295 · DK: 0,281 · SE: 0,273 · US: 0,395',
+  admin:  'DE ~2 % Steueraufkommen (OECD-Ø)',
+  nst:    'DE aktuell: ~40 Steuerarten',
+  arb:    'Elastizitäten: Saez/Chetty/Gruber',
+  armut:  'DE 2023: 14,8 % (EU-SILC) · EU-Ø: 16,5 %',
+  schuld: 'DE Schuldenquote 2024: ~63 % BIP',
+  dwl:    'Schätzung: 5–15 % des Steueraufkommens',
+};
+
+// ============================================================
+// CHALLENGE CONTEXT
+// ============================================================
+
+const CHALLENGE_CTX = {
+  'Saldo':            'DE 2024: ca. −85 Mrd. €',
+  'Gini':             'DE heute: 0,295 · Dänemark: 0,281',
+  'Armutsrisiko':     'DE 2023: 14,8 % (EU-SILC)',
+  'Verwaltungskosten':'DE ~2 % Steueraufkommen (OECD)',
+  'Arbeitsangebot':   'Indexbasis = 100 (Status quo)',
+  'Einnahmen':        'DE Steuerquote ~22 % BIP',
+  'Steuerarten':      'Kirchhof-Ideal: 4–5 Steuerarten',
+  'CO₂':              'DE 2030-Ziel: −65 % ggü. 1990',
+  'Schuldenquote':    'Verfassungsgrenze: 0,35 % BIP/Jahr',
+  'Wohlfahrtsverlust':'ca. 5–15 % des Steueraufkommens (Lit.)',
+};
+
+// ============================================================
 // RESULT CARD (Canvas export)
 // ============================================================
 
@@ -3629,6 +3750,10 @@ function downloadResultCard() {
 }
 
 document.getElementById('card-btn').addEventListener('click', downloadResultCard);
+
+document.getElementById('to-finanztools-btn').addEventListener('click', function() {
+  window.location.href = 'finanz.html';
+});
 
 </script>
 
