@@ -3678,6 +3678,9 @@ function renderSzenarioVergleich() {
   </div>`;
 }
 
+// Capture hash state BEFORE render() modifies window.location via replaceState
+const _hadInitialHash = !!window.location.hash;
+
 computeRef();
 setParams(PRESETS.status_quo);
 if (window.location.hash) {
@@ -3688,6 +3691,7 @@ render();
 // Laffer-Kurve sofort beim Start berechnen (kein Debounce-Delay)
 _renderLafferNow(getParams());
 injectTooltips();
+updateScenarioModeUI();
 
 // Rechenweg-Panel: bei Aufklappen rendern
 document.getElementById('csv-export-btn').addEventListener('click', exportCSV);
@@ -3719,9 +3723,19 @@ document.getElementById('rw-details').addEventListener('toggle', function() {
 // ============================================================
 
 function closeOnboarding() {
-  document.getElementById('onboarding-overlay').style.display = 'none';
-  localStorage.setItem('kassensturz_visited', '1');
+  const el = document.getElementById('onboarding-overlay');
+  if (el) el.style.display = 'none';
+  localStorage.setItem('kassensturz_visited_v2', '1');
 }
+
+// Close onboarding by clicking the dark backdrop (not the card itself)
+// Must use setTimeout 0 — overlay element is parsed AFTER this script block
+setTimeout(() => {
+  const ov = document.getElementById('onboarding-overlay');
+  if (ov) ov.addEventListener('click', function(e) {
+    if (e.target === this) closeOnboarding();
+  });
+}, 0);
 
 function startWith(preset) {
   closeOnboarding();
@@ -3733,10 +3747,12 @@ function startWith(preset) {
 }
 
 (function initOnboarding() {
-  if (!localStorage.getItem('kassensturz_visited') && !window.location.hash) {
+  // Use _hadInitialHash (captured before render() adds a hash via replaceState)
+  if (!localStorage.getItem('kassensturz_visited_v2') && !_hadInitialHash) {
     setTimeout(() => {
-      document.getElementById('onboarding-overlay').style.display = 'flex';
-    }, 250);
+      const el = document.getElementById('onboarding-overlay');
+      if (el) el.style.display = 'flex';
+    }, 300);
   }
 })();
 
