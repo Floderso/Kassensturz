@@ -3678,6 +3678,10 @@ function renderSzenarioVergleich() {
   </div>`;
 }
 
+// ── ALL LET/CONST USED INSIDE render() ──────────────────────
+// Must be declared BEFORE render() is called (no hoisting for let/const)
+let _lastResult = null, _lastParams = null;
+
 // ── KPI BENCHMARKS & CHALLENGE CONTEXT ──────────────────────
 // Must be defined BEFORE render() is called (const = no hoisting)
 const KPI_BENCH = {
@@ -3787,7 +3791,7 @@ function startWith(preset) {
 // RESULT CARD (Canvas export)
 // ============================================================
 
-let _lastResult = null, _lastParams = null;
+// _lastResult/_lastParams declared near top (before render() call) — see init block
 
 function downloadResultCard() {
   const r = _lastResult, p = _lastParams;
