@@ -437,6 +437,95 @@
     line-height: 1.7;
   }
 
+  /* ── ONBOARDING OVERLAY ── */
+  .onboarding-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,24,20,0.93);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: obFadeIn 0.35s ease;
+  }
+  @keyframes obFadeIn { from { opacity:0; } to { opacity:1; } }
+  .onboarding-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-left: 5px solid var(--accent);
+    max-width: 600px;
+    width: 100%;
+    padding: 36px 40px;
+    animation: obSlideUp 0.35s ease;
+  }
+  @keyframes obSlideUp { from { transform:translateY(16px); opacity:0; } to { transform:none; opacity:1; } }
+  .onboarding-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .onboarding-title {
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .onboarding-sub {
+    font-size: 14px;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 28px;
+    line-height: 1.55;
+  }
+  .onboarding-choices { display: flex; flex-direction: column; gap: 10px; }
+  .onboarding-choice {
+    background: var(--paper);
+    border: 1.5px solid rgba(42,39,32,0.28);
+    padding: 14px 18px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    color: var(--ink);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.13s;
+  }
+  .onboarding-choice:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .onboarding-choice-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.5;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .onboarding-skip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-top: 18px;
+    text-decoration: underline;
+    display: block;
+  }
+  .onboarding-skip:hover { color: var(--ink); }
+
+  /* ── SHARE CARD ── */
+  #share-canvas { display: none; }
+
   /* ── SITE NAV ── */
   .site-nav-bar {
     background: var(--ink);
@@ -907,12 +996,14 @@
   <!-- ============ DASHBOARD ============ -->
   <main class="dashboard">
 
-    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;">
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+      <button id="card-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:var(--accent);border:1px solid var(--accent);color:var(--paper);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.borderColor='var(--ink)'" onmouseout="this.style.background='var(--accent)';this.style.borderColor='var(--accent)'">Bild speichern</button>
       <button id="share-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">⇥ Link kopieren</button>
       <button id="save-a-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--accent3);color:var(--accent3);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--accent3)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--accent3)'">▣ Szenario A</button>
       <button id="save-b-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--accent2);color:var(--accent2);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--accent2)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--accent2)'">▣ Szenario B</button>
       <button id="csv-export-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">↓ CSV Export</button>
     </div>
+    <canvas id="share-canvas"></canvas>
     <!-- Szenario-Vergleich Panel (erscheint wenn A+B gespeichert) -->
     <div id="szenario-panel" style="display:none"></div>
 
@@ -2354,6 +2445,9 @@ function render() {
   window.history.replaceState(null, '', paramsToHash(p));
 
   renderRechenweg(r, p);
+
+  _lastResult = r;
+  _lastParams  = p;
 }
 
 // ============================================================
@@ -3382,6 +3476,189 @@ document.getElementById('rw-details').addEventListener('toggle', function() {
     hint.textContent = '▸ aufklappen';
   }
 });
+// ============================================================
+// ONBOARDING
+// ============================================================
+
+function closeOnboarding() {
+  document.getElementById('onboarding-overlay').style.display = 'none';
+  localStorage.setItem('kassensturz_visited', '1');
+}
+
+function startWith(preset) {
+  closeOnboarding();
+  document.querySelectorAll('#presets button').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`[data-preset="${preset}"]`);
+  if (btn) btn.classList.add('active');
+  setParams(PRESETS[preset]);
+  render();
+}
+
+(function initOnboarding() {
+  if (!localStorage.getItem('kassensturz_visited') && !window.location.hash) {
+    setTimeout(() => {
+      document.getElementById('onboarding-overlay').style.display = 'flex';
+    }, 250);
+  }
+})();
+
+// ============================================================
+// RESULT CARD (Canvas export)
+// ============================================================
+
+let _lastResult = null, _lastParams = null;
+
+function downloadResultCard() {
+  const r = _lastResult, p = _lastParams;
+  if (!r || !p) return;
+
+  const W = 1200, H = 630;
+  const canvas = document.getElementById('share-canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#1a1814';
+  ctx.fillRect(0, 0, W, H);
+
+  // Accent bar left
+  ctx.fillStyle = '#c8401f';
+  ctx.fillRect(0, 0, 6, H);
+
+  // Subtle radial glow
+  const g1 = ctx.createRadialGradient(200, 150, 0, 200, 150, 500);
+  g1.addColorStop(0, 'rgba(200,64,31,0.07)');
+  g1.addColorStop(1, 'transparent');
+  ctx.fillStyle = g1;
+  ctx.fillRect(0, 0, W, H);
+
+  const mono = 'JetBrains Mono, monospace';
+  const serif = 'Fraunces, Georgia, serif';
+
+  // Header — brand
+  ctx.fillStyle = '#c8401f';
+  ctx.font = `600 12px ${mono}`;
+  ctx.fillText('KASSENSTURZ', 48, 52);
+
+  ctx.fillStyle = '#6b6359';
+  ctx.font = `11px ${mono}`;
+  ctx.textAlign = 'right';
+  ctx.fillText('kassensturz.de', W - 48, 52);
+  ctx.textAlign = 'left';
+
+  // Rule
+  ctx.strokeStyle = 'rgba(251,249,244,0.12)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(48, 66); ctx.lineTo(W - 48, 66); ctx.stroke();
+
+  // Scenario name
+  const activeBtn = document.querySelector('#presets button.active');
+  const scenarioName = activeBtn ? activeBtn.textContent.trim().replace(/\u00A0/g, ' ') : 'Eigenes Szenario';
+
+  ctx.fillStyle = '#fbf9f4';
+  ctx.font = `800 54px ${serif}`;
+  ctx.fillText(scenarioName, 48, 148);
+
+  ctx.fillStyle = '#6b6359';
+  ctx.font = `italic 15px ${serif}`;
+  ctx.fillText('Dein Steuersystem · Kassensturz Haushaltsspiel Deutschland 2025', 48, 176);
+
+  // Rule 2
+  ctx.strokeStyle = 'rgba(251,249,244,0.08)';
+  ctx.beginPath(); ctx.moveTo(48, 196); ctx.lineTo(W - 48, 196); ctx.stroke();
+
+  // KPI grid — 3 × 2
+  const kpis = [
+    { label: 'STAATSSALDO',      val: (r.saldo >= 0 ? '+' : '') + r.saldo.toFixed(0) + ' Mrd. €',  good: r.saldo > -30, bad: r.saldo < -80 },
+    { label: 'GINI-KOEFFIZIENT', val: r.gini.toFixed(3).replace('.', ','),                          good: r.gini < 0.28, bad: r.gini > 0.32 },
+    { label: 'ARMUTSRISIKOQUOTE',val: r.armutsrisiko.toFixed(1).replace('.', ',') + ' %',           good: r.armutsrisiko < 8, bad: r.armutsrisiko > 14 },
+    { label: 'VERWALTUNGSKOSTEN',val: r.admin_kosten.toFixed(0) + ' Mrd. €',                        good: r.admin_kosten < 110, bad: r.admin_kosten > 140 },
+    { label: 'SPITZENSTEUERSATZ',val: p.spitze + ' %',                                              good: null, bad: null },
+    { label: 'CO₂-PREIS',        val: p.co2 + ' €/Tonne',                                          good: p.co2 >= 80, bad: p.co2 < 30 },
+  ];
+
+  const colW = Math.floor((W - 96 - 32) / 3);
+  const rowH = 148;
+  const gridTop = 216;
+
+  kpis.forEach((kpi, i) => {
+    const col = i % 3, row = Math.floor(i / 3);
+    const x = 48 + col * (colW + 16);
+    const y = gridTop + row * (rowH + 12);
+
+    // Box
+    ctx.fillStyle = 'rgba(251,249,244,0.04)';
+    ctx.fillRect(x, y, colW, rowH);
+    ctx.strokeStyle = 'rgba(251,249,244,0.09)';
+    ctx.lineWidth = 0.8;
+    ctx.strokeRect(x, y, colW, rowH);
+
+    // Label
+    ctx.fillStyle = '#6b6359';
+    ctx.font = `500 10px ${mono}`;
+    ctx.fillText(kpi.label, x + 14, y + 26);
+
+    // Value
+    let color = '#fbf9f4';
+    if (kpi.good === true)  color = '#1e5f3a';
+    if (kpi.bad  === true)  color = '#c8401f';
+    ctx.fillStyle = color;
+    ctx.font = `800 30px ${serif}`;
+    ctx.fillText(kpi.val, x + 14, y + 88);
+  });
+
+  // Bottom rule + URL
+  ctx.strokeStyle = 'rgba(251,249,244,0.10)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(48, H - 44); ctx.lineTo(W - 48, H - 44); ctx.stroke();
+
+  const shareUrl = window.location.href.length > 80
+    ? window.location.origin + window.location.pathname
+    : window.location.href;
+  ctx.fillStyle = 'rgba(107,99,89,0.75)';
+  ctx.font = `11px ${mono}`;
+  ctx.fillText(shareUrl, 48, H - 20);
+
+  // Download
+  document.fonts.ready.then(() => {
+    const link = document.createElement('a');
+    link.download = 'kassensturz-' + scenarioName.toLowerCase().replace(/\s+/g, '-') + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+}
+
+document.getElementById('card-btn').addEventListener('click', downloadResultCard);
+
 </script>
+
+<!-- ONBOARDING OVERLAY -->
+<div class="onboarding-overlay" id="onboarding-overlay" style="display:none">
+  <div class="onboarding-card">
+    <div class="onboarding-eyebrow">Kassensturz · Haushaltsspiel Deutschland</div>
+    <div class="onboarding-title">Du bist Finanzminister.<br>Das Defizit: 85 Mrd. €.</div>
+    <div class="onboarding-sub">Was ist dein erster Zug? Wähle einen Ausgangspunkt — du kannst danach jeden Regler frei anpassen.</div>
+    <div class="onboarding-choices">
+      <button class="onboarding-choice" onclick="startWith('radikal')">
+        Reiche stärker besteuern — Umverteilung von oben nach unten
+        <span class="onboarding-choice-tag">Umverteilung</span>
+      </button>
+      <button class="onboarding-choice" onclick="startWith('kirchhof')">
+        Radikal vereinfachen — Flat Tax, nur 4 Steuerarten
+        <span class="onboarding-choice-tag">Vereinfachung</span>
+      </button>
+      <button class="onboarding-choice" onclick="startWith('synthetisch')">
+        Synthetisch progressiv — Kapital wie Arbeit besteuern
+        <span class="onboarding-choice-tag">Reform</span>
+      </button>
+      <button class="onboarding-choice" onclick="startWith('nordisch')">
+        Nordisches Modell — hohe MwSt, niedrige Unternehmensteuer
+        <span class="onboarding-choice-tag">Skandinavien</span>
+      </button>
+    </div>
+    <button class="onboarding-skip" onclick="closeOnboarding()">Lieber selbst erkunden →</button>
+  </div>
+</div>
+
 </body>
 </html>
