@@ -607,6 +607,123 @@
   /* ── SHARE CARD ── */
   #share-canvas { display: none; }
 
+  /* ── CARD STYLE PICKER MODAL ── */
+  .csp-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(26,24,20,0.72);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .csp-picker {
+    background: var(--paper);
+    border: 2px solid var(--rule);
+    padding: 26px 26px 22px;
+    max-width: 500px;
+    width: 94%;
+  }
+  .csp-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 20px;
+  }
+  .csp-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+  }
+  .csp-close {
+    background: none; border: none; cursor: pointer;
+    font-size: 15px; color: var(--muted); padding: 0; line-height: 1;
+  }
+  .csp-close:hover { color: var(--ink); }
+  .csp-formats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .csp-fmt {
+    border: 1px solid rgba(42,39,32,0.22);
+    background: transparent;
+    cursor: pointer;
+    padding: 14px 8px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.13s;
+  }
+  .csp-fmt:hover { border-color: var(--ink); background: rgba(42,39,32,0.03); }
+  .csp-preview-wrap {
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .csp-preview {
+    border: 1px solid rgba(42,39,32,0.18);
+    transition: background 0.2s;
+  }
+  .csp-landscape { width: 80px; height: 42px; }
+  .csp-square    { width: 58px; height: 58px; }
+  .csp-story     { width: 36px; height: 64px; }
+  .csp-fmt-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    text-align: center;
+    line-height: 1.4;
+  }
+  .csp-fmt-plat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.4;
+  }
+  .csp-divider {
+    border: none;
+    border-top: 1px solid rgba(42,39,32,0.12);
+    margin: 0 0 16px;
+  }
+  .csp-theme-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .csp-theme-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-right: 4px;
+  }
+  .csp-theme-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 5px 14px;
+    background: transparent;
+    border: 1px solid rgba(42,39,32,0.22);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .csp-theme-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .csp-hint {
+    font-size: 11px; color: var(--muted); font-style: italic; margin-left: auto;
+  }
+
   /* ── KPI BENCHMARK LINE ── */
   .kpi-bench {
     font-family: 'JetBrains Mono', monospace;
@@ -1319,7 +1436,7 @@
     </div>
 
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-      <button id="card-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:var(--accent);border:1px solid var(--accent);color:var(--paper);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.borderColor='var(--ink)'" onmouseout="this.style.background='var(--accent)';this.style.borderColor='var(--accent)'">Bild speichern</button>
+      <button id="card-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:var(--accent);border:1px solid var(--accent);color:var(--paper);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.borderColor='var(--ink)'" onmouseout="this.style.background='var(--accent)';this.style.borderColor='var(--accent)'">↓ Bild speichern</button>
       <button id="share-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">⇥ Link kopieren</button>
       <button id="undo-btn" disabled style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="if(!this.disabled){this.style.background='var(--ink)';this.style.color='var(--paper)'}" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">↩ Rückgängig</button>
       <button id="save-a-btn" class="scenario-btn scenario-btn-a" title="Klicken um Szenario A zu bearbeiten">▣ Szenario A</button>
@@ -4160,141 +4277,329 @@ function startWith(preset) {
 
 
 // ============================================================
-// RESULT CARD (Canvas export)
+// RESULT CARD (Canvas export) — multi-format, multi-theme
 // ============================================================
 
-// _lastResult/_lastParams declared near top (before render() call) — see init block
+let _cardTheme = 'dark';
 
-function downloadResultCard() {
+function openCardModal() {
+  document.getElementById('csp-modal').style.display = 'flex';
+}
+function closeCardModal() {
+  document.getElementById('csp-modal').style.display = 'none';
+}
+function setCardTheme(theme) {
+  _cardTheme = theme;
+  document.getElementById('csp-dark').classList.toggle('active', theme === 'dark');
+  document.getElementById('csp-light').classList.toggle('active', theme === 'light');
+  const bg = theme === 'dark' ? '#1a1814' : '#f4f1ea';
+  document.querySelectorAll('.csp-preview').forEach(el => { el.style.background = bg; });
+}
+function pickCardStyle(fmt) {
+  closeCardModal();
+  downloadResultCard(fmt, _cardTheme);
+}
+
+function _cardColors(theme) {
+  if (theme === 'light') return {
+    bg: '#f4f1ea', text: '#1a1814', muted: '#6b6359', accent: '#c8401f',
+    good: '#1e5f3a', bad: '#c8401f',
+    cellBg: 'rgba(26,24,20,0.04)', cellBorder: 'rgba(26,24,20,0.10)',
+    rule: 'rgba(26,24,20,0.14)', subrule: 'rgba(26,24,20,0.08)',
+    url: 'rgba(107,99,89,0.7)',
+  };
+  return {
+    bg: '#1a1814', text: '#fbf9f4', muted: '#6b6359', accent: '#c8401f',
+    good: '#5cc888', bad: '#e85840',
+    cellBg: 'rgba(251,249,244,0.04)', cellBorder: 'rgba(251,249,244,0.09)',
+    rule: 'rgba(251,249,244,0.12)', subrule: 'rgba(251,249,244,0.07)',
+    url: 'rgba(107,99,89,0.75)',
+  };
+}
+
+function _cardKpis(r, p) {
+  return [
+    { label: 'STAATSSALDO',      val: (r.saldo >= 0 ? '+' : '') + r.saldo.toFixed(0) + ' Mrd. €',    good: r.saldo > -30,          bad: r.saldo < -80 },
+    { label: 'GINI-KOEFFIZIENT', val: r.gini.toFixed(3).replace('.', ','),                            good: r.gini < 0.28,          bad: r.gini > 0.32 },
+    { label: 'ARMUTSRISIKO',     val: r.armutsrisiko.toFixed(1).replace('.', ',') + ' %',             good: r.armutsrisiko < 8,     bad: r.armutsrisiko > 14 },
+    { label: 'VERWALTUNG',       val: r.admin_kosten.toFixed(0) + ' Mrd. €',                          good: r.admin_kosten < 110,   bad: r.admin_kosten > 140 },
+    { label: 'SPITZENSTEUERSATZ',val: p.spitze + ' %',                                                good: null,                   bad: null },
+    { label: 'CO₂-PREIS',        val: p.co2 + ' €/t',                                                good: p.co2 >= 80,            bad: p.co2 < 30 },
+  ];
+}
+
+function downloadResultCard(fmt = 'landscape', theme = 'dark') {
   const r = _lastResult, p = _lastParams;
   if (!r || !p) return;
 
   const activeBtn = document.querySelector('#presets button.active');
   const scenarioName = activeBtn ? activeBtn.textContent.trim().replace(/\u00A0/g, ' ') : 'Eigenes Szenario';
-
   const btn = document.getElementById('card-btn');
-  btn.textContent = '…';
-  btn.disabled = true;
+  btn.textContent = '…'; btn.disabled = true;
+
+  const SIZES = { landscape: [1200, 628], square: [1080, 1080], story: [720, 1280] };
+  const [W, H] = SIZES[fmt];
 
   document.fonts.ready.then(() => {
-    const W = 1200, H = 630;
     const canvas = document.getElementById('share-canvas');
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
-
+    const C = _cardColors(theme);
     const mono = '"JetBrains Mono", monospace';
-    const serif = 'Fraunces, Georgia, serif';
+    const serif = '"Fraunces", Georgia, serif';
+    const kpis = _cardKpis(r, p);
+    const shareUrl = 'kassensturz.de';
+    const note = berechneGesamtnote(r);
 
-    // Background
-    ctx.fillStyle = '#1a1814';
+    // ── BACKGROUND ──
+    ctx.fillStyle = C.bg;
     ctx.fillRect(0, 0, W, H);
 
-    // Accent bar left
-    ctx.fillStyle = '#c8401f';
-    ctx.fillRect(0, 0, 6, H);
+    // Radial glow accent
+    const glow = ctx.createRadialGradient(W * 0.18, H * 0.28, 0, W * 0.18, H * 0.28, W * 0.5);
+    glow.addColorStop(0, theme === 'dark' ? 'rgba(200,64,31,0.07)' : 'rgba(200,64,31,0.05)');
+    glow.addColorStop(1, 'transparent');
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
 
-    // Subtle radial glow
-    const g1 = ctx.createRadialGradient(200, 150, 0, 200, 150, 500);
-    g1.addColorStop(0, 'rgba(200,64,31,0.07)');
-    g1.addColorStop(1, 'transparent');
-    ctx.fillStyle = g1;
-    ctx.fillRect(0, 0, W, H);
+    // Left accent bar
+    ctx.fillStyle = C.accent;
+    ctx.fillRect(0, 0, Math.round(W * 0.004), H);
 
-    // Header — brand
-    ctx.fillStyle = '#c8401f';
-    ctx.font = `600 12px ${mono}`;
-    ctx.fillText('KASSENSTURZ', 48, 52);
+    const pad = Math.round(W * 0.04);
 
-    ctx.fillStyle = '#6b6359';
-    ctx.font = `11px ${mono}`;
-    ctx.textAlign = 'right';
-    ctx.fillText('kassensturz.de', W - 48, 52);
-    ctx.textAlign = 'left';
+    if (fmt === 'landscape') {
+      // ── LANDSCAPE LAYOUT ──
+      const lPad = 48;
 
-    // Rule
-    ctx.strokeStyle = 'rgba(251,249,244,0.12)';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(48, 66); ctx.lineTo(W - 48, 66); ctx.stroke();
+      ctx.fillStyle = C.accent;
+      ctx.font = `600 11px ${mono}`;
+      ctx.fillText('KASSENSTURZ · HAUSHALTSSPIEL', lPad, 50);
+      ctx.fillStyle = C.muted; ctx.textAlign = 'right';
+      ctx.font = `10px ${mono}`;
+      ctx.fillText(shareUrl, W - lPad, 50);
+      ctx.textAlign = 'left';
 
-    // Scenario name
-    ctx.fillStyle = '#fbf9f4';
-    ctx.font = `800 54px ${serif}`;
-    ctx.fillText(scenarioName, 48, 148);
+      ctx.strokeStyle = C.rule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(lPad, 64); ctx.lineTo(W - lPad, 64); ctx.stroke();
 
-    ctx.fillStyle = '#6b6359';
-    ctx.font = `italic 15px ${serif}`;
-    ctx.fillText('Dein Steuersystem · Kassensturz Haushaltsspiel Deutschland 2025', 48, 176);
+      // Scenario name
+      ctx.fillStyle = C.text;
+      const nameSize = scenarioName.length > 20 ? 44 : 54;
+      ctx.font = `800 ${nameSize}px ${serif}`;
+      ctx.fillText(scenarioName, lPad, 140);
 
-    // Rule 2
-    ctx.strokeStyle = 'rgba(251,249,244,0.08)';
-    ctx.beginPath(); ctx.moveTo(48, 196); ctx.lineTo(W - 48, 196); ctx.stroke();
+      ctx.fillStyle = C.muted;
+      ctx.font = `italic 14px ${serif}`;
+      ctx.fillText('Dein Steuersystem für Deutschland 2025', lPad, 166);
 
-    // KPI grid — 3 × 2
-    const kpis = [
-      { label: 'STAATSSALDO',      val: (r.saldo >= 0 ? '+' : '') + r.saldo.toFixed(0) + ' Mrd. €',  good: r.saldo > -30, bad: r.saldo < -80 },
-      { label: 'GINI-KOEFFIZIENT', val: r.gini.toFixed(3).replace('.', ','),                          good: r.gini < 0.28, bad: r.gini > 0.32 },
-      { label: 'ARMUTSRISIKOQUOTE',val: r.armutsrisiko.toFixed(1).replace('.', ',') + ' %',           good: r.armutsrisiko < 8, bad: r.armutsrisiko > 14 },
-      { label: 'VERWALTUNGSKOSTEN',val: r.admin_kosten.toFixed(0) + ' Mrd. €',                        good: r.admin_kosten < 110, bad: r.admin_kosten > 140 },
-      { label: 'SPITZENSTEUERSATZ',val: p.spitze + ' %',                                              good: null, bad: null },
-      { label: 'CO₂-PREIS',        val: p.co2 + ' €/Tonne',                                          good: p.co2 >= 80, bad: p.co2 < 30 },
-    ];
+      // Grade badge top-right
+      const gx = W - lPad - 80, gy = 90;
+      ctx.fillStyle = C.cellBg; ctx.fillRect(gx, gy, 80, 68);
+      ctx.strokeStyle = C.cellBorder; ctx.lineWidth = 0.8; ctx.strokeRect(gx, gy, 80, 68);
+      ctx.fillStyle = C.muted; ctx.font = `9px ${mono}`; ctx.textAlign = 'center';
+      ctx.fillText('GESAMTNOTE', gx + 40, gy + 17);
+      ctx.fillStyle = C.text; ctx.font = `800 36px ${serif}`;
+      ctx.fillText(note.grade, gx + 40, gy + 54);
+      ctx.textAlign = 'left';
 
-    const colW = Math.floor((W - 96 - 32) / 3);
-    const rowH = 148;
-    const gridTop = 216;
+      ctx.strokeStyle = C.subrule;
+      ctx.beginPath(); ctx.moveTo(lPad, 184); ctx.lineTo(W - lPad, 184); ctx.stroke();
 
-    kpis.forEach((kpi, i) => {
-      const col = i % 3, row = Math.floor(i / 3);
-      const x = 48 + col * (colW + 16);
-      const y = gridTop + row * (rowH + 12);
+      // KPI grid 3×2
+      const colW = Math.floor((W - lPad * 2 - 32) / 3);
+      const rowH = 142; const gridTop = 200;
+      kpis.forEach((kpi, i) => {
+        const col = i % 3, row = Math.floor(i / 3);
+        const x = lPad + col * (colW + 16), y = gridTop + row * (rowH + 10);
+        ctx.fillStyle = C.cellBg; ctx.fillRect(x, y, colW, rowH);
+        ctx.strokeStyle = C.cellBorder; ctx.lineWidth = 0.8; ctx.strokeRect(x, y, colW, rowH);
+        ctx.fillStyle = C.muted; ctx.font = `500 9px ${mono}`; ctx.fillText(kpi.label, x + 14, y + 24);
+        let color = C.text;
+        if (kpi.good === true) color = C.good;
+        if (kpi.bad === true)  color = C.bad;
+        ctx.fillStyle = color; ctx.font = `800 28px ${serif}`; ctx.fillText(kpi.val, x + 14, y + 82);
+      });
 
-      ctx.fillStyle = 'rgba(251,249,244,0.04)';
-      ctx.fillRect(x, y, colW, rowH);
-      ctx.strokeStyle = 'rgba(251,249,244,0.09)';
-      ctx.lineWidth = 0.8;
-      ctx.strokeRect(x, y, colW, rowH);
+      ctx.strokeStyle = C.rule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(lPad, H - 38); ctx.lineTo(W - lPad, H - 38); ctx.stroke();
+      ctx.fillStyle = C.url; ctx.font = `10px ${mono}`;
+      ctx.fillText('kassensturz.de · Jetzt selbst ausprobieren', lPad, H - 18);
 
-      ctx.fillStyle = '#6b6359';
-      ctx.font = `500 10px ${mono}`;
-      ctx.fillText(kpi.label, x + 14, y + 26);
+    } else if (fmt === 'square') {
+      // ── SQUARE LAYOUT ──
+      const sp = 54;
 
-      let color = '#fbf9f4';
-      if (kpi.good === true)  color = '#1e5f3a';
-      if (kpi.bad  === true)  color = '#c8401f';
-      ctx.fillStyle = color;
-      ctx.font = `800 30px ${serif}`;
-      ctx.fillText(kpi.val, x + 14, y + 88);
-    });
+      ctx.fillStyle = C.accent; ctx.font = `600 11px ${mono}`;
+      ctx.fillText('KASSENSTURZ', sp, 54);
+      ctx.fillStyle = C.muted; ctx.textAlign = 'right'; ctx.font = `10px ${mono}`;
+      ctx.fillText(shareUrl, W - sp, 54);
+      ctx.textAlign = 'left';
 
-    // Bottom rule + URL
-    ctx.strokeStyle = 'rgba(251,249,244,0.10)';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(48, H - 44); ctx.lineTo(W - 48, H - 44); ctx.stroke();
+      ctx.strokeStyle = C.rule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sp, 70); ctx.lineTo(W - sp, 70); ctx.stroke();
 
-    const shareUrl = window.location.origin + window.location.pathname;
-    ctx.fillStyle = 'rgba(107,99,89,0.75)';
-    ctx.font = `11px ${mono}`;
-    ctx.fillText(shareUrl, 48, H - 20);
+      // Big grade left, score right
+      ctx.fillStyle = C.text; ctx.font = `800 120px ${serif}`;
+      ctx.fillText(note.grade, sp, 212);
 
-    // Download
+      ctx.fillStyle = C.muted; ctx.font = `italic 14px ${serif}`;
+      ctx.fillText('Gesamtnote', sp, 240);
+
+      // Score bar area right side
+      const scoreX = W / 2 + 10;
+      ctx.fillStyle = C.text; ctx.font = `800 56px ${serif}`;
+      ctx.textAlign = 'right';
+      ctx.fillText(note.score, W - sp, 185);
+      ctx.fillStyle = C.muted; ctx.font = `11px ${mono}`;
+      ctx.fillText('/ 100 PUNKTE', W - sp, 210);
+      ctx.textAlign = 'left';
+
+      // Scenario name
+      ctx.fillStyle = C.text;
+      ctx.font = `italic 800 28px ${serif}`;
+      const snFit = scenarioName.length > 22 ? 22 : 28;
+      ctx.font = `italic 800 ${snFit}px ${serif}`;
+      ctx.fillText('"' + scenarioName + '"', sp, 290);
+
+      ctx.strokeStyle = C.subrule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sp, 310); ctx.lineTo(W - sp, 310); ctx.stroke();
+
+      // 4 KPIs in 2×2 grid
+      const kpi4 = kpis.slice(0, 4);
+      const colW2 = Math.floor((W - sp * 2 - 16) / 2);
+      const rowH2 = 148; const gt2 = 328;
+      kpi4.forEach((kpi, i) => {
+        const col = i % 2, row = Math.floor(i / 2);
+        const x = sp + col * (colW2 + 16), y = gt2 + row * (rowH2 + 12);
+        ctx.fillStyle = C.cellBg; ctx.fillRect(x, y, colW2, rowH2);
+        ctx.strokeStyle = C.cellBorder; ctx.lineWidth = 0.8; ctx.strokeRect(x, y, colW2, rowH2);
+        ctx.fillStyle = C.muted; ctx.font = `9px ${mono}`; ctx.fillText(kpi.label, x + 14, y + 26);
+        let color = C.text;
+        if (kpi.good === true) color = C.good;
+        if (kpi.bad === true)  color = C.bad;
+        ctx.fillStyle = color; ctx.font = `800 34px ${serif}`; ctx.fillText(kpi.val, x + 14, y + 96);
+      });
+
+      ctx.strokeStyle = C.rule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sp, H - 40); ctx.lineTo(W - sp, H - 40); ctx.stroke();
+      ctx.fillStyle = C.url; ctx.font = `10px ${mono}`;
+      ctx.fillText('kassensturz.de · Haushaltsspiel Deutschland 2025', sp, H - 18);
+
+    } else {
+      // ── STORY / PORTRAIT LAYOUT ──
+      const sp = 54;
+
+      // Accent header band
+      ctx.fillStyle = C.accent;
+      ctx.fillRect(0, 0, W, 8);
+
+      ctx.fillStyle = C.accent; ctx.font = `600 11px ${mono}`; ctx.textAlign = 'center';
+      ctx.fillText('KASSENSTURZ · HAUSHALTSSPIEL DEUTSCHLAND', W / 2, 56);
+      ctx.textAlign = 'left';
+
+      ctx.strokeStyle = C.rule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sp, 72); ctx.lineTo(W - sp, 72); ctx.stroke();
+
+      // Big grade centered
+      ctx.fillStyle = C.text; ctx.font = `800 140px ${serif}`; ctx.textAlign = 'center';
+      ctx.fillText(note.grade, W / 2, 240);
+      ctx.fillStyle = C.muted; ctx.font = `600 13px ${mono}`; ctx.textAlign = 'center';
+      ctx.fillText(note.score + ' VON 100 PUNKTEN', W / 2, 272);
+      ctx.textAlign = 'left';
+
+      ctx.strokeStyle = C.subrule;
+      ctx.beginPath(); ctx.moveTo(sp, 292); ctx.lineTo(W - sp, 292); ctx.stroke();
+
+      // Scenario name
+      ctx.fillStyle = C.text; ctx.textAlign = 'center';
+      const szS = scenarioName.length > 18 ? 30 : 38;
+      ctx.font = `800 italic ${szS}px ${serif}`;
+      ctx.fillText('"' + scenarioName + '"', W / 2, 360);
+      ctx.fillStyle = C.muted; ctx.font = `italic 13px ${serif}`;
+      ctx.fillText('Dein Steuersystem für Deutschland', W / 2, 390);
+      ctx.textAlign = 'left';
+
+      ctx.strokeStyle = C.subrule;
+      ctx.beginPath(); ctx.moveTo(sp, 416); ctx.lineTo(W - sp, 416); ctx.stroke();
+
+      // 6 KPIs stacked
+      const kpiH = 114, kpiTop = 436;
+      kpis.forEach((kpi, i) => {
+        const y = kpiTop + i * (kpiH + 8);
+        ctx.fillStyle = C.cellBg; ctx.fillRect(sp, y, W - sp * 2, kpiH);
+        ctx.strokeStyle = C.cellBorder; ctx.lineWidth = 0.8;
+        ctx.strokeRect(sp, y, W - sp * 2, kpiH);
+        ctx.fillStyle = C.muted; ctx.font = `9px ${mono}`; ctx.fillText(kpi.label, sp + 16, y + 26);
+        let color = C.text;
+        if (kpi.good === true) color = C.good;
+        if (kpi.bad === true)  color = C.bad;
+        ctx.fillStyle = color; ctx.font = `800 30px ${serif}`; ctx.fillText(kpi.val, sp + 16, y + 76);
+      });
+
+      ctx.strokeStyle = C.rule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sp, H - 48); ctx.lineTo(W - sp, H - 48); ctx.stroke();
+      ctx.fillStyle = C.url; ctx.font = `10px ${mono}`; ctx.textAlign = 'center';
+      ctx.fillText('kassensturz.de · Jetzt dein Steuersystem gestalten', W / 2, H - 24);
+      ctx.textAlign = 'left';
+    }
+
     const link = document.createElement('a');
-    link.download = 'kassensturz-' + scenarioName.toLowerCase().replace(/[\s/]+/g, '-') + '.png';
+    link.download = `kassensturz-${fmt}-${theme}-${scenarioName.toLowerCase().replace(/[\s/]+/g, '-')}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
 
-    btn.textContent = '✓ Gespeichert';
-    btn.disabled = false;
-    setTimeout(() => btn.textContent = 'Bild speichern', 2000);
+    btn.textContent = '✓ Gespeichert'; btn.disabled = false;
+    setTimeout(() => { btn.textContent = '↓ Bild speichern'; }, 2000);
   });
 }
 
-document.getElementById('card-btn').addEventListener('click', downloadResultCard);
+document.getElementById('card-btn').addEventListener('click', openCardModal);
 
 document.getElementById('to-finanztools-btn').addEventListener('click', function() {
   window.location.href = '/finanz.html';
 });
 
 </script>
+
+<!-- CARD STYLE PICKER MODAL -->
+<div class="csp-backdrop" id="csp-modal" style="display:none" onclick="if(event.target===this)closeCardModal()">
+  <div class="csp-picker">
+    <div class="csp-head">
+      <span class="csp-title">Format & Stil wählen</span>
+      <button class="csp-close" onclick="closeCardModal()">✕</button>
+    </div>
+    <div class="csp-formats">
+      <button class="csp-fmt" onclick="pickCardStyle('landscape')">
+        <div class="csp-preview-wrap">
+          <div class="csp-preview csp-landscape" id="csp-prev-landscape"></div>
+        </div>
+        <div class="csp-fmt-name">Querformat</div>
+        <div class="csp-fmt-plat">Twitter · X<br>LinkedIn · Facebook</div>
+      </button>
+      <button class="csp-fmt" onclick="pickCardStyle('square')">
+        <div class="csp-preview-wrap">
+          <div class="csp-preview csp-square" id="csp-prev-square"></div>
+        </div>
+        <div class="csp-fmt-name">Quadrat</div>
+        <div class="csp-fmt-plat">Instagram · Facebook<br>1080 × 1080</div>
+      </button>
+      <button class="csp-fmt" onclick="pickCardStyle('story')">
+        <div class="csp-preview-wrap">
+          <div class="csp-preview csp-story" id="csp-prev-story"></div>
+        </div>
+        <div class="csp-fmt-name">Story</div>
+        <div class="csp-fmt-plat">Instagram Story<br>TikTok · Reels</div>
+      </button>
+    </div>
+    <hr class="csp-divider">
+    <div class="csp-theme-row">
+      <span class="csp-theme-label">Stil:</span>
+      <button class="csp-theme-btn active" id="csp-dark" onclick="setCardTheme('dark')">◼ Dunkel</button>
+      <button class="csp-theme-btn" id="csp-light" onclick="setCardTheme('light')">◻ Hell</button>
+      <span class="csp-hint">Klicke ein Format um sofort zu speichern</span>
+    </div>
+  </div>
+</div>
 
 <!-- ONBOARDING OVERLAY -->
 <div class="onboarding-overlay" id="onboarding-overlay" style="display:none">
