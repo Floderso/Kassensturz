@@ -1224,6 +1224,7 @@
         <button data-preset="simpel">5-Steuern-System</button>
         <button data-preset="nordisch">Nordisches&nbsp;Modell</button>
         <button data-preset="koalition27">Koalition&nbsp;2027</button>
+        <button data-preset="bge">BGE-Modell</button>
       </div>
     </div>
 
@@ -1362,6 +1363,12 @@
     <!-- Transfers -->
     <div class="section-title" data-toggle>Transfers · Sozialstaat</div>
     <div class="section-body">
+      <div class="slider-row" style="border-left:2px solid var(--accent);padding-left:10px;">
+        <label>BGE Monatsbetrag <span class="value" id="v_bge"></span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);display:block;margin-top:1px;">DIW·RWI·ifo 2021–2024 · 0 = deaktiviert · ersetzt Bürgergeld ab BGE≥BG</span>
+        </label>
+        <input type="range" id="bge" min="0" max="2000" step="50" value="0">
+      </div>
       <div class="slider-row">
         <label>Bürgergeld-Regelsatz <span class="value" id="v_bg"></span></label>
         <input type="range" id="bg" min="0" max="1500" step="10" value="563">
@@ -1859,7 +1866,14 @@ function berechne(params) {
   // Basisgrenzsteuersatz-Vergleich zum Status Quo
   const sqGrenze = dez => grenzsteuersatz(dez.brutto*(1-dez.kapital), 12084, 14, 45, 277826);
 
-  const dezile = DEZILE.map(d => {
+  // BGE-Arbeitsangebotseffekt (Substitutionseffekt: höherer Reservationslohn)
+  // Quellen: RWI 2024 (bis −30 % bei 1.500 €), DIW Pilot 2024 (−2 % kurzfristig, n=107),
+  // ZEW Heim et al. (extensiver Margin D1–D4), ifo Mikrosimulation 2021.
+  // Kompromiss: deutlicher Effekt bei unteren Dezilen, minimal bei oberen.
+  const BGE_LABOR_EFF = [0.15, 0.12, 0.09, 0.06, 0.04, 0.025, 0.015, 0.01, 0.005, 0.00, 0.00, 0.00];
+  const bge_labor_scale = Math.min(1.67, (params.bge || 0) / 1200);
+
+  const dezile = DEZILE.map((d, idx) => {
     const gs_neu = grenzsteuersatz(d.brutto * (1-d.kapital), params.freibetrag, params.eingang, params.spitze, params.grenze);
     const gs_sq = sqGrenze(d);
     const delta_nettolohn = (1 - gs_neu) - (1 - gs_sq);
@@ -1881,7 +1895,9 @@ function berechne(params) {
     }
 
     const labor_factor_raw = 1 + elas * (delta_nettolohn / Math.max(0.0001, 1 - gs_sq));
-    const lf = Math.max(0.55, Math.min(1.25, labor_factor_raw)) * avoidance;
+    const lf_tax = Math.max(0.55, Math.min(1.25, labor_factor_raw)) * avoidance;
+    // BGE: Substitutionseffekt — skaliert mit BGE/1200 und Dezil (RWI/ZEW)
+    const lf = Math.max(0.55, lf_tax * (1 - BGE_LABOR_EFF[idx] * bge_labor_scale));
     return { ...d, labor_factor: lf, brutto_adj: d.brutto * lf, gs_neu, avoidance };
   });
 
@@ -1975,15 +1991,19 @@ function berechne(params) {
     (BASIS_AUFKOMMEN.energie + BASIS_AUFKOMMEN.tabak + BASIS_AUFKOMMEN.kfz + BASIS_AUFKOMMEN.sonstige + BASIS_AUFKOMMEN.solz_abgelt) : 0;
 
   // ---------- 9. TRANSFERS ----------
-  // Bürgergeld: ca. 5,5 Mio Empfänger
-  const bg_auszahlung = 5.5 * params.bg * 12 / 1000; // Mrd.
+  const bge = params.bge || 0;
+  // Bürgergeld: wenn BGE >= BG-Niveau, vollständig durch BGE ersetzt (RWI 2024)
+  const bg_effektiv = bge >= params.bg ? 0 : params.bg;
+  const bg_auszahlung = 5.5 * bg_effektiv * 12 / 1000; // Mrd.
   // Kindergeld: ca. 17 Mio Kinder
   const kg_auszahlung = 17 * params.kg * 12 / 1000;
-  // Negative ESt falls aktiviert: zusätzliche Auszahlung an untere 3 Dezile
+  // Negative ESt falls aktiviert
   let neg_est_auszahlung = 0;
-  if (params.neg_est) {
-    neg_est_auszahlung = 30; // grobe Schätzung: 30 Mrd. zusätzlich
-  }
+  if (params.neg_est) neg_est_auszahlung = 30;
+
+  // BGE Bruttokosten: ~70 Mio. Erwachsene (Destatis Mikrozensus 2024)
+  // Quelle: RWI 2024, ifo Mikrosimulation 2021 (Blömer/Peichl)
+  const bge_brutto = bge * 12 * 70 / 1000; // Mrd. — bei 1.200 € = ~1.008 Mrd./Jahr
 
   // ---------- 10. GESAMTEINNAHMEN ----------
   const rev = {
@@ -2017,10 +2037,11 @@ function berechne(params) {
     zucman_auf * ADMIN_QUOTE.verm +
     klein_auf * ADMIN_QUOTE.klein +
     (rv_auf + kv_auf + al_auf) * ADMIN_QUOTE.sv +
-    (bg_auszahlung + kg_auszahlung + neg_est_auszahlung) * ADMIN_QUOTE.transfer;
+    (bg_auszahlung + kg_auszahlung + neg_est_auszahlung) * ADMIN_QUOTE.transfer +
+    bge_brutto * 0.008; // BGE: 0,8% Verwaltungskosten — kein Bedürftigkeitstest (RWI 2024)
 
   // ---------- 12. AUSGABEN inkl. Transfers ----------
-  const ausgaben_total = AUSGABEN_TOTAL + bg_auszahlung + kg_auszahlung + neg_est_auszahlung + admin_kosten - 140; // Verwaltung aus Basis ersetzen
+  const ausgaben_total = AUSGABEN_TOTAL + bg_auszahlung + kg_auszahlung + neg_est_auszahlung + bge_brutto + admin_kosten - 140;
 
   // ---------- 13. SALDO ----------
   const saldo = einnahmen_total - ausgaben_total;
@@ -2080,7 +2101,9 @@ function berechne(params) {
     // SV: nur bis BBG fällig, AN-Anteil ~50%
     const sv_grenz = arbeit < (params.bbg ?? 90000) ? (params.rv + params.kv + params.alpf) / 100 * 0.5 : 0;
     // Transfer-Entzug: Bürgergeld-Empfänger verlieren 80% des Zusatzeinkommens (§ 11b SGB II)
-    const bg_entzug = [0.80, 0.70, 0.20, 0, 0, 0, 0, 0, 0, 0, 0, 0][i];
+    // Bei BGE >= Bürgergeld: kein Entzug mehr (BGE ist bedingungslos, kein Anrechnungsprinzip)
+    const bg_entzug_arr = [0.80, 0.70, 0.20, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const bg_entzug = bge >= params.bg ? 0 : bg_entzug_arr[i];
     return Math.min(0.99, gs_est + sv_grenz + bg_entzug);
   });
 
@@ -2130,9 +2153,13 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg) {
     const bg_quote = [0.60, 0.25, 0.08, 0.02, 0, 0, 0, 0, 0, 0, 0, 0];
     // Kindergeld: Mikrozensus 2024; D10a/b/c: 0,45/0,35/0,20 Kinder im Schnitt
     const kg_quote = [0.80, 1.10, 1.20, 1.15, 1.05, 0.95, 0.85, 0.75, 0.65, 0.50, 0.35, 0.20];
+    const bge_p = params.bge || 0;
+    // Bürgergeld effektiv: 0 wenn BGE >= BG-Niveau (BGE ersetzt es, RWI 2024)
+    const bg_effektiv_hh = bge_p >= params.bg ? 0 : params.bg;
     let transfers = 0;
-    transfers += params.bg * 12 * bg_quote[i];
+    transfers += bg_effektiv_hh * 12 * bg_quote[i];
     transfers += params.kg * 12 * kg_quote[i];
+    transfers += bge_p * 12; // BGE: jeder Erwachsene erhält vollen Betrag (bedingungslos)
     if (params.neg_est && i < 3) transfers += 3000;
 
     const netto_final = brutto - est - sv - mwst - co2_last + klimageld_per_hh + transfers;
@@ -2522,7 +2549,7 @@ const PRESETS = {
     rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
     bg: 563, kg: 255, neg_est: false, kleine_st: true,
     kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
-    pkv_abschaffen: false, anzahl_kv: 95, praevention: 0
+    pkv_abschaffen: false, anzahl_kv: 95, praevention: 0, bge: 0
   },
   synthetisch: {
     freibetrag: 15000, eingang: 14, spitze: 50, grenze: 300000,
@@ -2534,7 +2561,7 @@ const PRESETS = {
     rv: 18.6, kv: 14, alpf: 6.2, buergerv: true, bbg: 115000,
     bg: 650, kg: 300, neg_est: false, kleine_st: false,
     kapitalquote: 5, rendite_fonds: 7, startjahr: 2015,
-    pkv_abschaffen: false, anzahl_kv: 95, praevention: 3
+    pkv_abschaffen: false, anzahl_kv: 95, praevention: 3, bge: 0
   },
   kirchhof: {
     freibetrag: 10000, eingang: 25, spitze: 25, grenze: 60000,
@@ -2546,7 +2573,7 @@ const PRESETS = {
     rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
     bg: 563, kg: 255, neg_est: false, kleine_st: false,
     kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
-    pkv_abschaffen: false, anzahl_kv: 95, praevention: 0
+    pkv_abschaffen: false, anzahl_kv: 95, praevention: 0, bge: 0
   },
   radikal: {
     freibetrag: 18000, eingang: 20, spitze: 60, grenze: 200000,
@@ -2558,7 +2585,7 @@ const PRESETS = {
     rv: 20, kv: 14, alpf: 6.2, buergerv: true, bbg: 150000,
     bg: 800, kg: 350, neg_est: true, kleine_st: false,
     kapitalquote: 10, rendite_fonds: 7, startjahr: 2010,
-    pkv_abschaffen: true, anzahl_kv: 20, praevention: 10
+    pkv_abschaffen: true, anzahl_kv: 20, praevention: 10, bge: 0
   },
   simpel: {
     freibetrag: 15000, eingang: 20, spitze: 50, grenze: 250000,
@@ -2570,7 +2597,7 @@ const PRESETS = {
     rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
     bg: 600, kg: 280, neg_est: false, kleine_st: false,
     kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
-    pkv_abschaffen: false, anzahl_kv: 95, praevention: 0
+    pkv_abschaffen: false, anzahl_kv: 95, praevention: 0, bge: 0
   },
   nordisch: {
     freibetrag: 14000, eingang: 20, spitze: 52, grenze: 120000,
@@ -2582,22 +2609,36 @@ const PRESETS = {
     rv: 22, kv: 12, alpf: 7.0, buergerv: true, bbg: 120000,
     bg: 750, kg: 350, neg_est: false, kleine_st: true,
     kapitalquote: 15, rendite_fonds: 7, startjahr: 2005,
-    pkv_abschaffen: true, anzahl_kv: 30, praevention: 8
+    pkv_abschaffen: true, anzahl_kv: 30, praevention: 8, bge: 0
   },
   koalition27: {
-    // Basis: Koalitionsvertrag CDU/CSU+SPD 2025 — projizierte Wirkung 2027
-    // KSt-Reform: Gesamtlast auf 25% (KSt 13% + GewSt 12%), Mittelstandsentlastung
-    // Freibetrag 13.000 €, Eingang 12%, Kindergeld 259 €, Rentenpaket II (kapitalquote 10%)
     freibetrag: 13000, eingang: 12, spitze: 44, grenze: 290000,
     synthetisch: false, abgeltung: 25,
-    kst: 13, gewst: 12, gewst_aus: false,  // KSt-Reform: Gesamtlast 25% (KSt 13 + GewSt 12)
+    kst: 13, gewst: 12, gewst_aus: false,
     mwst: 19, mwst_erm: 7,
     co2: 65, klimageld: true,
     erb: 20, betriebs: true, boden: 0.4, verm: 0, zucman: 0,
     rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
     bg: 550, kg: 259, neg_est: false, kleine_st: true,
-    kapitalquote: 10, rendite_fonds: 7, startjahr: 2024,  // Rentenpaket II: höhere Aktienquote
-    pkv_abschaffen: false, anzahl_kv: 95, praevention: 3
+    kapitalquote: 10, rendite_fonds: 7, startjahr: 2024,
+    pkv_abschaffen: false, anzahl_kv: 95, praevention: 3, bge: 0
+  },
+  bge: {
+    // BGE 1.200 €/Monat für alle Erwachsenen (~70 Mio.)
+    // Finanzierungsmodell: ifo Mikrosimulation 2021 (Blömer/Peichl)
+    // Freibetrag 0: BGE dient als effektiver Grundfreibetrag (14.400 €/Jahr)
+    // Spitzensteuersatz 60% nötig laut ifo; synthetische ESt auf Kapital
+    // Bürgergeld abgeschafft (BGE > 563 €); MwSt leicht erhöht
+    freibetrag: 0, eingang: 30, spitze: 60, grenze: 277826,
+    synthetisch: true, abgeltung: 30,
+    kst: 25, gewst: 14, gewst_aus: false,
+    mwst: 22, mwst_erm: 7,
+    co2: 80, klimageld: false,
+    erb: 30, betriebs: false, boden: 1.0, verm: 0, zucman: 0,
+    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
+    bg: 0, kg: 255, neg_est: false, kleine_st: false,
+    kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
+    pkv_abschaffen: false, anzahl_kv: 95, praevention: 0, bge: 1200
   }
 };
 
@@ -2639,7 +2680,8 @@ function getParams() {
     anzahl_kv:      +document.getElementById('anzahl_kv').value,
     praevention:    +document.getElementById('praevention').value,
     bbg:            +document.getElementById('bbg').value,
-    zucman:         +document.getElementById('zucman').value
+    zucman:         +document.getElementById('zucman').value,
+    bge:            +document.getElementById('bge').value
   };
 }
 
@@ -2677,6 +2719,7 @@ function setParams(p) {
   document.getElementById('praevention').value = p.praevention ?? 0;
   document.getElementById('bbg').value = p.bbg ?? 90000;
   document.getElementById('zucman').value = p.zucman ?? 0;
+  document.getElementById('bge').value = p.bge ?? 0;
 }
 
 function fmtEUR(x) {
@@ -2716,6 +2759,7 @@ function render() {
   document.getElementById('v_rv').textContent = p.rv.toFixed(1) + ' %';
   document.getElementById('v_kv').textContent = p.kv.toFixed(1) + ' %';
   document.getElementById('v_alpf').textContent = p.alpf.toFixed(1) + ' %';
+  document.getElementById('v_bge').textContent = p.bge > 0 ? p.bge + ' €/Monat' : 'aus';
   document.getElementById('v_bg').textContent = p.bg + ' €';
   document.getElementById('v_kg').textContent = p.kg + ' €';
   document.getElementById('v_kapitalquote').textContent = p.kapitalquote + ' %';
