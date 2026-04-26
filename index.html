@@ -199,6 +199,102 @@
   .section-title.collapsed::after { content: '+'; }
   .section-body { padding-bottom: 8px; }
   .section-title.collapsed + .section-body { display: none; }
+  .section-title.bge-section { color: var(--accent); border-bottom-color: var(--accent); }
+  .section-title.bge-section.bge-on { background: rgba(200,64,31,0.06); padding: 4px 6px; margin-left: -6px; margin-right: -6px; }
+
+  /* ── BGE SIDEBAR ── */
+  .bge-slider-wrap { padding: 4px 0 2px; }
+  .bge-slider-wrap input[type="range"] { accent-color: var(--accent); }
+  .bge-live-cost {
+    display: none;
+    margin-top: 10px;
+    background: rgba(200,64,31,0.07);
+    border-left: 2px solid var(--accent);
+    padding: 8px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .bge-live-cost strong { color: var(--accent); font-weight: 600; }
+  .bge-live-cost .bge-save { color: var(--good); }
+
+  /* ── BGE DASHBOARD PANEL ── */
+  .bge-impact-panel {
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--accent);
+    background: var(--paper);
+    padding: 20px 22px 18px;
+  }
+  .bge-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+  }
+  @media (max-width: 900px) { .bge-kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  .bge-kpi { border: 1px solid rgba(42,39,32,0.12); padding: 12px 14px; }
+  .bge-kpi-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .bge-kpi-val {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 5px;
+  }
+  .bge-kpi-val.bad  { color: var(--bad); }
+  .bge-kpi-val.good { color: var(--good); }
+  .bge-kpi-val.neutral { color: var(--ink); }
+  .bge-kpi-note {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .bge-source-note {
+    margin-top: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: rgba(107,99,89,0.6);
+    border-top: 1px solid rgba(42,39,32,0.08);
+    padding-top: 10px;
+  }
+  .bge-financing-bar {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .bge-financing-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .bge-financing-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(42,39,32,0.1);
+    min-width: 100px;
+  }
+  .bge-financing-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; }
+  .bge-financing-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--bad);
+    white-space: nowrap;
+  }
 
   /* ── SCENARIO MODE INDICATOR ── */
   .scenario-mode-bar {
@@ -1360,15 +1456,31 @@
       </div>
     </div>
 
+    <!-- BGE -->
+    <div class="section-title bge-section collapsed" id="bge-section-title" data-toggle>BGE · Grundeinkommen</div>
+    <div class="section-body">
+      <div class="bge-slider-wrap">
+        <label class="slider-row" style="margin-bottom:4px;">
+          <span>Monatsbetrag <span class="value" id="v_bge" style="color:var(--accent);font-weight:600;">aus</span></span>
+        </label>
+        <input type="range" id="bge" min="0" max="2000" step="50" value="0" style="width:100%;margin-bottom:6px;">
+        <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);">
+          <span>0 €</span><span>1.000 €</span><span>2.000 €</span>
+        </div>
+      </div>
+      <div class="bge-live-cost" id="bge-live-cost">
+        <div>Bruttokosten: <strong id="bge-cost-gross">—</strong></div>
+        <div class="bge-save">Bürgergeld-Ersatz: <strong id="bge-cost-save">—</strong></div>
+        <div>Nettokosten: <strong id="bge-cost-net">—</strong></div>
+      </div>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:8px;line-height:1.5;">
+        Quellen: DIW Pilot 2024 · RWI 2024<br>ifo Mikrosimulation 2021 (Blömer/Peichl)
+      </p>
+    </div>
+
     <!-- Transfers -->
     <div class="section-title" data-toggle>Transfers · Sozialstaat</div>
     <div class="section-body">
-      <div class="slider-row" style="border-left:2px solid var(--accent);padding-left:10px;">
-        <label>BGE Monatsbetrag <span class="value" id="v_bge"></span>
-          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);display:block;margin-top:1px;">DIW·RWI·ifo 2021–2024 · 0 = deaktiviert · ersetzt Bürgergeld ab BGE≥BG</span>
-        </label>
-        <input type="range" id="bge" min="0" max="2000" step="50" value="0">
-      </div>
       <div class="slider-row">
         <label>Bürgergeld-Regelsatz <span class="value" id="v_bg"></span></label>
         <input type="range" id="bg" min="0" max="1500" step="10" value="563">
@@ -1546,6 +1658,24 @@
         <div class="score-number" id="score-number">— / 100</div>
       </div>
       <div class="score-dims" id="score-dims"></div>
+    </div>
+
+    <!-- BGE IMPACT PANEL (nur wenn BGE > 0) -->
+    <div class="bge-impact-panel" id="bge-impact-panel" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;">
+        <div>
+          <h2>Grundeinkommen — Wirkungsanalyse</h2>
+          <div class="panel-sub">Fiskalische und soziale Effekte · basierend auf Mikrosimulation</div>
+        </div>
+        <span id="bge-panel-badge" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;padding:4px 10px;background:var(--accent);color:var(--paper);">— €/Monat</span>
+      </div>
+      <div class="bge-kpi-row" id="bge-kpi-row"></div>
+      <div class="bge-financing-bar">
+        <span class="bge-financing-label">Finanzierungslücke:</span>
+        <div class="bge-financing-track"><div class="bge-financing-fill" id="bge-fin-fill" style="width:0%"></div></div>
+        <span class="bge-financing-pct" id="bge-fin-pct">—</span>
+      </div>
+      <div class="bge-source-note">Quellen: RWI 2024 · DIW Pilotprojekt Grundeinkommen 2021–2024 · ifo Mikrosimulation (Blömer/Peichl 2021) · ZEW Heim et al.</div>
     </div>
 
     <!-- FINANZTOOLS LINK PANEL -->
@@ -2995,6 +3125,52 @@ function render() {
     }
     _prevKpiValues[id] = cur;
   });
+
+  // BGE PANEL
+  (function() {
+    const bge_p = p.bge || 0;
+    const bgePanel = document.getElementById('bge-impact-panel');
+    const bgeSectionTitle = document.getElementById('bge-section-title');
+    const bgeLiveCost = document.getElementById('bge-live-cost');
+    if (!bgePanel) return;
+    if (bge_p > 0) {
+      bgePanel.style.display = 'block';
+      if (bgeLiveCost) bgeLiveCost.style.display = 'block';
+      if (bgeSectionTitle) bgeSectionTitle.classList.add('bge-on');
+      document.getElementById('bge-panel-badge').textContent = bge_p + ' €/Monat';
+
+      const bge_brutto = bge_p * 12 * 70 / 1000;
+      const bg_saved = bge_p >= p.bg ? 5.5 * p.bg * 12 / 1000 : 0;
+      const bge_netto = bge_brutto - bg_saved;
+      const total_rev = 1450; // Mrd. Gesamtsteuereinnahmen Referenz
+      const fin_pct = Math.min(100, (bge_netto / total_rev) * 100);
+
+      document.getElementById('bge-cost-gross').textContent = bge_brutto.toFixed(0) + ' Mrd. €/Jahr';
+      document.getElementById('bge-cost-save').textContent = bg_saved > 0 ? '−' + bg_saved.toFixed(0) + ' Mrd.' : '—';
+      document.getElementById('bge-cost-net').textContent = bge_netto.toFixed(0) + ' Mrd. €/Jahr';
+
+      const BGE_EFF_r = [0.15,0.12,0.09,0.06,0.04,0.025,0.015,0.01,0.005,0,0,0];
+      const bge_sc = Math.min(1.67, bge_p / 1200);
+      const avg_eff = BGE_EFF_r.reduce((a,v) => a + v, 0) / BGE_EFF_r.length * bge_sc * 100;
+
+      const kpiNetClass = bge_netto > 300 ? 'bad' : bge_netto > 100 ? 'neutral' : 'good';
+      document.getElementById('bge-kpi-row').innerHTML = [
+        { label:'Bruttokosten', val: bge_brutto.toFixed(0)+' Mrd. €', note:'70 Mio. × '+bge_p+' € × 12', cls:'bad' },
+        { label:'Bürgergeld-Ersatz', val: bg_saved > 0 ? '−'+bg_saved.toFixed(0)+' Mrd.' : '—', note: bg_saved > 0 ? 'vollständig ersetzt' : 'BGE < Bürgergeld-Niveau', cls: bg_saved > 0 ? 'good' : 'neutral' },
+        { label:'Nettokosten', val: bge_netto.toFixed(0)+' Mrd. €', note:'zu finanzieren', cls: kpiNetClass },
+        { label:'Arbeitsangebot Ø', val: '−'+avg_eff.toFixed(1)+' %', note:'RWI/ZEW Kompromiss', cls:'neutral' },
+      ].map(k => `<div class="bge-kpi"><div class="bge-kpi-label">${k.label}</div><div class="bge-kpi-val ${k.cls}">${k.val}</div><div class="bge-kpi-note">${k.note}</div></div>`).join('');
+
+      const finFill = document.getElementById('bge-fin-fill');
+      if (finFill) finFill.style.width = fin_pct.toFixed(0) + '%';
+      const finPct = document.getElementById('bge-fin-pct');
+      if (finPct) finPct.textContent = bge_netto.toFixed(0) + ' Mrd. € (' + fin_pct.toFixed(0) + ' % der Einnahmen)';
+    } else {
+      bgePanel.style.display = 'none';
+      if (bgeLiveCost) bgeLiveCost.style.display = 'none';
+      if (bgeSectionTitle) bgeSectionTitle.classList.remove('bge-on');
+    }
+  })();
 
   _lastResult = r;
   _lastParams  = p;
