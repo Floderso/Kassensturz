@@ -1361,6 +1361,12 @@
       </div>
     </div>
 
+    <!-- Slider-Tipps Toggle -->
+    <div class="toggle-row" style="margin-bottom:16px;padding-top:4px;border-top:1px dashed var(--rule);">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Regler-Tipps</span>
+      <input type="checkbox" id="toggle_slider_tips" checked>
+    </div>
+
     <!-- Einkommensteuer -->
     <div class="section-title" data-toggle>Einkommensteuer</div>
     <div class="section-body">
@@ -4915,9 +4921,11 @@ document.getElementById('to-finanztools-btn').addEventListener('click', function
   };
 
   const tooltip = document.getElementById('slider-tooltip');
+  const toggleEl = document.getElementById('toggle_slider_tips');
   let hideTimer;
 
   function show(input) {
+    if (toggleEl && !toggleEl.checked) return;
     const text = TIPS[input.id];
     if (!text) return;
     clearTimeout(hideTimer);
@@ -4939,6 +4947,10 @@ document.getElementById('to-finanztools-btn').addEventListener('click', function
 
   function hide() {
     hideTimer = setTimeout(() => tooltip.classList.remove('visible'), 80);
+  }
+
+  if (toggleEl) {
+    toggleEl.addEventListener('change', () => { if (!toggleEl.checked) hide(); });
   }
 
   document.querySelectorAll('input[type="range"]').forEach(input => {
