@@ -92,11 +92,34 @@
     overflow-y: auto;
   }
 
-  /* MOBILE */
+  /* MOBILE TOGGLE — standardmäßig versteckt, nur auf Phones sichtbar */
   .mobile-toggle {
     display: none;
   }
-  @media (max-width: 900px) {
+
+  /* ── TABLET (601px – 1024px) ── */
+  @media (min-width: 601px) and (max-width: 1024px) {
+    body { padding: 12px 14px 60px; }
+    .layout { grid-template-columns: 270px 1fr; gap: 18px; }
+    .controls {
+      max-height: calc(100vh - 24px);
+    }
+    /* Größere Touch-Targets für Finger */
+    input[type="range"] { height: 6px; }
+    input[type="range"]::-webkit-slider-thumb { width: 22px; height: 22px; }
+    input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .two-col { grid-template-columns: 1fr !important; }
+    .kpi-value { font-size: 20px !important; }
+    h1 { font-size: clamp(28px, 5vw, 52px) !important; }
+    .panel { padding: 14px 16px; }
+    svg { touch-action: none; }
+    .bar-row { grid-template-columns: 65px 1fr 80px; }
+    .bar-label { font-size: 10px; }
+  }
+
+  /* ── PHONE (≤ 600px) ── */
+  @media (max-width: 600px) {
     body { padding: 12px 10px 60px; }
     .layout { grid-template-columns: 1fr; gap: 16px; }
     .controls {
@@ -130,7 +153,6 @@
     h1 { font-size: clamp(28px, 8vw, 48px) !important; }
     .panel { padding: 14px 16px; }
     svg { touch-action: none; }
-    /* Prevent bar-row label overflow on small screens */
     .bar-row { grid-template-columns: 60px 1fr 70px; }
     .bar-label { font-size: 10px; }
   }
@@ -232,7 +254,7 @@
     gap: 12px;
     margin-top: 16px;
   }
-  @media (max-width: 900px) { .bge-kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 1024px) { .bge-kpi-row { grid-template-columns: repeat(2, 1fr); } }
   .bge-kpi { border: 1px solid rgba(42,39,32,0.12); padding: 12px 14px; }
   .bge-kpi-label {
     font-family: 'JetBrains Mono', monospace;
@@ -1124,7 +1146,7 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
   }
-  @media (max-width: 900px) { .challenge-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 1024px) { .challenge-grid { grid-template-columns: 1fr; } }
   .challenge-card {
     border: 1px solid var(--rule);
     padding: 14px 16px;
