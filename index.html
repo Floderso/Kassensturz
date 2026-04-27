@@ -79,9 +79,6 @@
     grid-template-columns: minmax(320px, 380px) 1fr;
     gap: 32px;
   }
-  @media (max-width: 900px) {
-    .layout { grid-template-columns: 1fr; }
-  }
 
   /* CONTROLS */
   .controls {
@@ -93,6 +90,49 @@
     top: 16px;
     max-height: calc(100vh - 32px);
     overflow-y: auto;
+  }
+
+  /* MOBILE */
+  .mobile-toggle {
+    display: none;
+  }
+  @media (max-width: 900px) {
+    body { padding: 12px 10px 60px; }
+    .layout { grid-template-columns: 1fr; gap: 16px; }
+    .controls {
+      position: relative;
+      top: 0;
+      max-height: 65vh;
+      overflow-y: auto;
+    }
+    .controls.mobile-hidden { display: none; }
+    .mobile-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      grid-column: 1 / -1;
+      padding: 10px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: var(--ink);
+      color: var(--paper);
+      border: none;
+      cursor: pointer;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .two-col { grid-template-columns: 1fr !important; }
+    .kpi-value { font-size: 20px !important; }
+    h1 { font-size: clamp(28px, 8vw, 48px) !important; }
+    .panel { padding: 14px 16px; }
+    svg { touch-action: none; }
+    /* Prevent bar-row label overflow on small screens */
+    .bar-row { grid-template-columns: 60px 1fr 70px; }
+    .bar-label { font-size: 10px; }
   }
   .controls::-webkit-scrollbar { width: 6px; }
   .controls::-webkit-scrollbar-track { background: transparent; }
@@ -159,6 +199,183 @@
   .section-title.collapsed::after { content: '+'; }
   .section-body { padding-bottom: 8px; }
   .section-title.collapsed + .section-body { display: none; }
+  .section-title.bge-section { color: var(--accent); border-bottom-color: var(--accent); }
+  .section-title.bge-section.bge-on { background: rgba(200,64,31,0.06); padding: 4px 6px; margin-left: -6px; margin-right: -6px; }
+
+  /* ── BGE SIDEBAR ── */
+  .bge-slider-wrap { padding: 4px 0 2px; }
+  .bge-slider-wrap input[type="range"] { accent-color: var(--accent); }
+  .bge-live-cost {
+    display: none;
+    margin-top: 10px;
+    background: rgba(200,64,31,0.07);
+    border-left: 2px solid var(--accent);
+    padding: 8px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .bge-live-cost strong { color: var(--accent); font-weight: 600; }
+  .bge-live-cost .bge-save { color: var(--good); }
+
+  /* ── BGE DASHBOARD PANEL ── */
+  .bge-impact-panel {
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--accent);
+    background: var(--paper);
+    padding: 20px 22px 18px;
+  }
+  .bge-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+  }
+  @media (max-width: 900px) { .bge-kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  .bge-kpi { border: 1px solid rgba(42,39,32,0.12); padding: 12px 14px; }
+  .bge-kpi-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .bge-kpi-val {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 5px;
+  }
+  .bge-kpi-val.bad  { color: var(--bad); }
+  .bge-kpi-val.good { color: var(--good); }
+  .bge-kpi-val.neutral { color: var(--ink); }
+  .bge-kpi-note {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .bge-source-note {
+    margin-top: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: rgba(107,99,89,0.6);
+    border-top: 1px solid rgba(42,39,32,0.08);
+    padding-top: 10px;
+  }
+  .bge-financing-bar {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .bge-financing-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .bge-financing-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(42,39,32,0.1);
+    min-width: 100px;
+  }
+  .bge-financing-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; }
+  .bge-financing-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--bad);
+    white-space: nowrap;
+  }
+
+  /* ── SCENARIO MODE INDICATOR ── */
+  .scenario-mode-bar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    margin-bottom: 16px;
+    border-left: 3px solid transparent;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .scenario-mode-bar.mode-a {
+    display: flex;
+    background: rgba(42,77,122,0.09);
+    border-left-color: var(--accent3);
+    color: var(--accent3);
+  }
+  .scenario-mode-bar.mode-b {
+    display: flex;
+    background: rgba(30,95,58,0.09);
+    border-left-color: var(--accent2);
+    color: var(--accent2);
+  }
+  .scenario-mode-bar-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+    animation: pulse-dot 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .scenario-mode-bar-exit {
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: currentColor;
+    font-size: 14px;
+    opacity: 0.6;
+    padding: 0 2px;
+    line-height: 1;
+  }
+  .scenario-mode-bar-exit:hover { opacity: 1; }
+
+  /* ── SCENARIO ACTION BUTTONS ── */
+  .scenario-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 6px 13px;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .scenario-btn-a {
+    background: transparent;
+    border-color: var(--accent3);
+    color: var(--accent3);
+  }
+  .scenario-btn-a:hover, .scenario-btn-a.active {
+    background: var(--accent3);
+    color: var(--paper);
+  }
+  .scenario-btn-b {
+    background: transparent;
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+  .scenario-btn-b:hover, .scenario-btn-b.active {
+    background: var(--accent2);
+    color: var(--paper);
+  }
 
   .slider-row {
     margin-bottom: 14px;
@@ -200,6 +417,33 @@
     border: 2px solid var(--paper);
     border-radius: 0;
   }
+  /* ── SLIDER TOOLTIP ── */
+  .slider-tooltip {
+    position: fixed;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.55;
+    padding: 9px 13px;
+    max-width: 260px;
+    pointer-events: none;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.12s;
+    border-left: 3px solid var(--accent);
+  }
+  .slider-tooltip.visible { opacity: 1; }
+  .slider-tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 20px;
+    border: 6px solid transparent;
+    border-top-color: var(--ink);
+    border-bottom: none;
+  }
+
   .toggle-row {
     display: flex;
     justify-content: space-between;
@@ -397,6 +641,453 @@
     line-height: 1.7;
   }
 
+  /* ── ONBOARDING OVERLAY ── */
+  .onboarding-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,24,20,0.93);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: obFadeIn 0.35s ease;
+  }
+  @keyframes obFadeIn { from { opacity:0; } to { opacity:1; } }
+  .onboarding-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-left: 5px solid var(--accent);
+    max-width: 600px;
+    width: 100%;
+    padding: 36px 40px;
+    animation: obSlideUp 0.35s ease;
+  }
+  @keyframes obSlideUp { from { transform:translateY(16px); opacity:0; } to { transform:none; opacity:1; } }
+  .onboarding-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .onboarding-title {
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .onboarding-sub {
+    font-size: 14px;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 28px;
+    line-height: 1.55;
+  }
+  .onboarding-choices { display: flex; flex-direction: column; gap: 10px; }
+  .onboarding-choice {
+    background: var(--paper);
+    border: 1.5px solid rgba(42,39,32,0.28);
+    padding: 14px 18px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    color: var(--ink);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.13s;
+  }
+  .onboarding-choice:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .onboarding-choice-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.5;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .onboarding-skip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-top: 18px;
+    text-decoration: underline;
+    display: block;
+  }
+  .onboarding-skip:hover { color: var(--ink); }
+
+  /* ── SHARE CARD ── */
+  #share-canvas { display: none; }
+
+  /* ── CARD STYLE PICKER MODAL ── */
+  .csp-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(26,24,20,0.72);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .csp-picker {
+    background: var(--paper);
+    border: 2px solid var(--rule);
+    padding: 26px 26px 22px;
+    max-width: 500px;
+    width: 94%;
+  }
+  .csp-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 20px;
+  }
+  .csp-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+  }
+  .csp-close {
+    background: none; border: none; cursor: pointer;
+    font-size: 15px; color: var(--muted); padding: 0; line-height: 1;
+  }
+  .csp-close:hover { color: var(--ink); }
+  .csp-formats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .csp-fmt {
+    border: 1px solid rgba(42,39,32,0.22);
+    background: transparent;
+    cursor: pointer;
+    padding: 14px 8px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.13s;
+  }
+  .csp-fmt:hover { border-color: var(--ink); background: rgba(42,39,32,0.03); }
+  .csp-preview-wrap {
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .csp-preview {
+    border: 1px solid rgba(42,39,32,0.18);
+    transition: background 0.2s;
+  }
+  .csp-landscape { width: 80px; height: 42px; }
+  .csp-square    { width: 58px; height: 58px; }
+  .csp-story     { width: 36px; height: 64px; }
+  .csp-fmt-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    text-align: center;
+    line-height: 1.4;
+  }
+  .csp-fmt-plat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.4;
+  }
+  .csp-divider {
+    border: none;
+    border-top: 1px solid rgba(42,39,32,0.12);
+    margin: 0 0 16px;
+  }
+  .csp-theme-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .csp-theme-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-right: 4px;
+  }
+  .csp-theme-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 5px 14px;
+    background: transparent;
+    border: 1px solid rgba(42,39,32,0.22);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .csp-theme-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .csp-hint {
+    font-size: 11px; color: var(--muted); font-style: italic; margin-left: auto;
+  }
+
+  /* ── KPI BENCHMARK LINE ── */
+  .kpi-bench {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: rgba(107,99,89,0.65);
+    margin-top: 5px;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── CHALLENGE CONTEXT ── */
+  .challenge-context {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 3px;
+    opacity: 0.75;
+  }
+
+  /* ── GESAMTNOTE / SCORE ── */
+  .score-panel {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin-top: 0;
+  }
+  .score-left { flex-shrink: 0; text-align: center; min-width: 80px; }
+  .score-grade {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .score-grade.grade-a { color: #2a7a4a; }
+  .score-grade.grade-b { color: #5a7a20; }
+  .score-grade.grade-c { color: #8a6010; }
+  .score-grade.grade-d { color: #9a4812; }
+  .score-grade.grade-e, .score-grade.grade-f { color: #a83020; }
+  .score-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .score-label-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(107,99,89,0.65);
+    margin-bottom: 12px;
+  }
+  .score-dims { display: flex; gap: 18px; flex-wrap: wrap; flex: 1; }
+  .score-dim { flex: 1; min-width: 100px; }
+  .score-dim-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+  .score-dim-track {
+    height: 4px;
+    background: rgba(42,39,32,0.1);
+    margin-bottom: 5px;
+  }
+  .score-dim-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; }
+  .score-dim-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ── KPI PULSE ANIMATION ── */
+  @keyframes kpi-pulse {
+    0%   { background: transparent; }
+    30%  { background: rgba(180,150,80,0.14); }
+    100% { background: transparent; }
+  }
+  .kpi.kpi-changed { animation: kpi-pulse 0.9s ease-out; }
+
+  /* ── UNDO BUTTON DISABLED ── */
+  #undo-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── REFORM TOUR BAR ── */
+  .reform-tour-bar {
+    background: var(--accent3);
+    color: var(--paper);
+    padding: 12px 20px;
+    display: none;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .reform-tour-bar.active { display: flex; }
+  .reform-tour-info { flex: 1; min-width: 200px; }
+  .reform-tour-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(251,249,244,0.65);
+    margin-bottom: 3px;
+  }
+  .reform-tour-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+  .reform-tour-desc { font-size: 12px; font-style: italic; color: rgba(251,249,244,0.78); }
+  .reform-tour-step {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(251,249,244,0.55);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .reform-tour-nav { display: flex; gap: 6px; flex-shrink: 0; }
+  .reform-tour-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 6px 14px;
+    background: rgba(255,255,255,0.15);
+    color: var(--paper);
+    border: 1px solid rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .reform-tour-btn:hover:not(:disabled) { background: rgba(255,255,255,0.3); }
+  .reform-tour-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .reform-tour-close {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: none;
+    border: none;
+    color: rgba(251,249,244,0.65);
+    cursor: pointer;
+    padding: 0 2px;
+    flex-shrink: 0;
+  }
+  .reform-tour-close:hover { color: var(--paper); }
+
+  /* ── TOUR BUTTONS IN SIDEBAR ── */
+  .tour-group { margin-top: 12px; }
+  .tour-group-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .tour-buttons { display: flex; flex-direction: column; gap: 4px; }
+  .tour-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 7px 10px;
+    background: transparent;
+    border: 1px solid rgba(42,39,32,0.25);
+    color: var(--muted);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.13s;
+  }
+  .tour-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+  /* ── FINANZTOOLS LINK PANEL ── */
+  .ft-link-panel {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 16px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .ft-link-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .ft-link-text { font-size: 14px; font-style: italic; }
+  .ft-link-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 9px 20px;
+    background: var(--accent);
+    color: var(--paper);
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .ft-link-btn:hover { background: #a03318; }
+
+  /* ── SITE NAV ── */
+  .site-nav-bar {
+    background: var(--ink);
+    margin: -24px -16px 28px;
+    padding: 0 16px;
+  }
+  .site-nav-bar-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+  }
+  .site-nav-bar a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(251,249,244,0.55);
+    text-decoration: none;
+    padding: 11px 16px;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.15s;
+    display: inline-block;
+  }
+  .site-nav-bar a:hover { color: var(--paper); }
+  .site-nav-bar a.active { color: var(--paper); border-bottom-color: var(--accent); }
+  .site-nav-bar-sep { color: rgba(251,249,244,0.2); padding: 0 2px; font-size: 12px; }
+
   details.about {
     background: var(--paper);
     border: 1px solid var(--rule);
@@ -426,6 +1117,74 @@
   .badge.good { background: var(--good); color: var(--paper); border-color: var(--good); }
   .badge.bad { background: var(--bad); color: var(--paper); border-color: var(--bad); }
   .badge.warn { background: var(--warn); color: var(--paper); border-color: var(--warn); }
+
+  /* CHALLENGES */
+  .challenge-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 900px) { .challenge-grid { grid-template-columns: 1fr; } }
+  .challenge-card {
+    border: 1px solid var(--rule);
+    padding: 14px 16px;
+    background: var(--paper);
+    position: relative;
+  }
+  .challenge-card.done { opacity: 0.75; }
+  .challenge-period {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+  .challenge-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    line-height: 1.2;
+  }
+  .challenge-desc {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+  .challenge-bar-wrap { margin-bottom: 6px; }
+  .challenge-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  .challenge-bar-label .cur { font-weight: 600; color: var(--ink); }
+  .challenge-track {
+    height: 5px;
+    background: rgba(42,39,32,0.12);
+    overflow: hidden;
+  }
+  .challenge-fill { height: 100%; transition: width 0.4s ease; }
+  .challenge-done-badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    margin-top: 8px;
+    border: 1px solid;
+  }
+  .challenge-accent-bar {
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+  }
 
   /* TOOLTIPS */
   .tt-btn {
@@ -541,6 +1300,16 @@
 <body>
 <div class="wrap">
 
+<nav class="site-nav-bar">
+  <div class="site-nav-bar-inner">
+    <a href="/" class="active">Haushaltsspiel</a>
+    <span class="site-nav-bar-sep">·</span>
+    <a href="/finanz.html">Finanztools</a>
+    <span class="site-nav-bar-sep">·</span>
+    <a href="/impressum.html">Impressum</a>
+  </div>
+</nav>
+
 <header>
   <div class="masthead">
     <span>Ausgabe Nº 01 — Prototyp</span>
@@ -552,8 +1321,21 @@
 
 <div class="layout">
 
+  <!-- MOBILE TOGGLE (nur auf kleinen Screens sichtbar) -->
+  <button class="mobile-toggle" id="mobile-toggle-btn">
+    <span id="mobile-toggle-label">⚙ Regler ausblenden</span>
+    <span style="font-size:16px" id="mobile-toggle-icon">−</span>
+  </button>
+
   <!-- ============ CONTROLS ============ -->
-  <aside class="controls">
+  <aside class="controls" id="controls-sidebar">
+
+    <!-- SCENARIO MODE INDICATOR -->
+    <div class="scenario-mode-bar" id="scenario-mode-bar">
+      <div class="scenario-mode-bar-dot"></div>
+      <span id="scenario-mode-label">Szenario A aktiv</span>
+      <button class="scenario-mode-bar-exit" title="Modus verlassen" onclick="exitScenarioMode()">✕</button>
+    </div>
 
     <div class="preset-group">
       <div class="preset-label">Szenario laden</div>
@@ -563,6 +1345,19 @@
         <button data-preset="kirchhof">Kirchhof&nbsp;Flat</button>
         <button data-preset="radikal">Stark&nbsp;Umverteilend</button>
         <button data-preset="simpel">5-Steuern-System</button>
+        <button data-preset="nordisch">Nordisches&nbsp;Modell</button>
+        <button data-preset="koalition27">Koalition&nbsp;2027</button>
+        <button data-preset="bge">BGE-Modell</button>
+      </div>
+    </div>
+
+    <!-- REFORM TOURS -->
+    <div class="tour-group">
+      <div class="tour-group-label">▶ Reform-Tour starten</div>
+      <div class="tour-buttons">
+        <button class="tour-btn" onclick="startTour('kirchhof')">Kirchhof-Reform (Flat Tax)</button>
+        <button class="tour-btn" onclick="startTour('skandinavisch')">Skandinavisches Modell</button>
+        <button class="tour-btn" onclick="startTour('umverteilung')">Starke Umverteilung</button>
       </div>
     </div>
 
@@ -657,6 +1452,10 @@
         <label>Vermögensteuer (ab 2 Mio) <span class="value" id="v_verm"></span></label>
         <input type="range" id="verm" min="0" max="3" step="0.1" value="0">
       </div>
+      <div class="slider-row">
+        <label>Zucman-Mindeststeuer (Mrd.) <span class="value" id="v_zucman"></span></label>
+        <input type="range" id="zucman" min="0" max="3" step="0.1" value="0">
+      </div>
     </div>
 
     <!-- Sozialversicherung -->
@@ -674,10 +1473,36 @@
         <label>Arbeitslosen+Pflege <span class="value" id="v_alpf"></span></label>
         <input type="range" id="alpf" min="2" max="10" step="0.1" value="6.2">
       </div>
+      <div class="slider-row">
+        <label>Beitr.-Bemessungsgrenze <span class="value" id="v_bbg"></span></label>
+        <input type="range" id="bbg" min="40000" max="160000" step="5000" value="90000">
+      </div>
       <div class="toggle-row">
         <span>Bürgerversicherung (alle zahlen)</span>
         <input type="checkbox" id="buergerv">
       </div>
+    </div>
+
+    <!-- BGE -->
+    <div class="section-title bge-section collapsed" id="bge-section-title" data-toggle>BGE · Grundeinkommen</div>
+    <div class="section-body">
+      <div class="bge-slider-wrap">
+        <label class="slider-row" style="margin-bottom:4px;">
+          <span>Monatsbetrag <span class="value" id="v_bge" style="color:var(--accent);font-weight:600;">aus</span></span>
+        </label>
+        <input type="range" id="bge" min="0" max="2000" step="50" value="0" style="width:100%;margin-bottom:6px;">
+        <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);">
+          <span>0 €</span><span>1.000 €</span><span>2.000 €</span>
+        </div>
+      </div>
+      <div class="bge-live-cost" id="bge-live-cost">
+        <div>Bruttokosten: <strong id="bge-cost-gross">—</strong></div>
+        <div class="bge-save">Bürgergeld-Ersatz: <strong id="bge-cost-save">—</strong></div>
+        <div>Nettokosten: <strong id="bge-cost-net">—</strong></div>
+      </div>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:8px;line-height:1.5;">
+        Quellen: DIW Pilot 2024 · RWI 2024<br>ifo Mikrosimulation 2021 (Blömer/Peichl)
+      </p>
     </div>
 
     <!-- Transfers -->
@@ -706,10 +1531,86 @@
       </div>
     </div>
 
+    <!-- Rentenreform -->
+    <div class="section-title collapsed" data-toggle>Rentenreform · Generationenkapital</div>
+    <div class="section-body">
+      <div class="slider-row">
+        <label>Fondsquote (% des RV-Aufkommens) <span class="value" id="v_kapitalquote"></span></label>
+        <input type="range" id="kapitalquote" min="0" max="30" step="1" value="0">
+      </div>
+      <div class="slider-row">
+        <label>Erwartete Jahresrendite <span class="value" id="v_rendite_fonds"></span></label>
+        <input type="range" id="rendite_fonds" min="2" max="10" step="0.5" value="7">
+      </div>
+      <div class="slider-row">
+        <label>Investition ab Jahr <span class="value" id="v_startjahr"></span></label>
+        <input type="range" id="startjahr" min="2000" max="2025" step="1" value="2020">
+      </div>
+    </div>
+
+    <!-- GKV Reform -->
+    <div class="section-title collapsed" data-toggle>Gesundheitsreform · GKV</div>
+    <div class="section-body">
+      <div class="toggle-row">
+        <span>PKV abschaffen (alle in GKV)</span>
+        <input type="checkbox" id="pkv_abschaffen">
+      </div>
+      <div class="slider-row">
+        <label>Anzahl Krankenkassen <span class="value" id="v_anzahl_kv"></span></label>
+        <input type="range" id="anzahl_kv" min="5" max="105" step="5" value="95">
+      </div>
+      <div class="slider-row">
+        <label>Prävention-Invest. (Mrd. €) <span class="value" id="v_praevention"></span></label>
+        <input type="range" id="praevention" min="0" max="20" step="1" value="0">
+      </div>
+    </div>
+
   </aside>
 
   <!-- ============ DASHBOARD ============ -->
   <main class="dashboard">
+
+    <!-- REFORM TOUR BAR -->
+    <div class="reform-tour-bar" id="reform-tour-bar">
+      <div class="reform-tour-info">
+        <div class="reform-tour-eyebrow" id="reform-tour-eyebrow"></div>
+        <div class="reform-tour-title" id="reform-tour-title"></div>
+        <div class="reform-tour-desc" id="reform-tour-desc"></div>
+      </div>
+      <div class="reform-tour-step" id="reform-tour-step"></div>
+      <div class="reform-tour-nav">
+        <button class="reform-tour-btn" id="reform-tour-back" onclick="tourPrev()">← Zurück</button>
+        <button class="reform-tour-btn" id="reform-tour-next" onclick="tourNext()">Weiter →</button>
+      </div>
+      <button class="reform-tour-close" onclick="endTour()" title="Tour beenden">✕</button>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+      <button id="card-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:var(--accent);border:1px solid var(--accent);color:var(--paper);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.borderColor='var(--ink)'" onmouseout="this.style.background='var(--accent)';this.style.borderColor='var(--accent)'">↓ Bild speichern</button>
+      <button id="share-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">⇥ Link kopieren</button>
+      <button id="undo-btn" disabled style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="if(!this.disabled){this.style.background='var(--ink)';this.style.color='var(--paper)'}" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">↩ Rückgängig</button>
+      <button id="save-a-btn" class="scenario-btn scenario-btn-a" title="Klicken um Szenario A zu bearbeiten">▣ Szenario A</button>
+      <button id="save-b-btn" class="scenario-btn scenario-btn-b" title="Klicken um Szenario B zu bearbeiten">▣ Szenario B</button>
+      <button id="csv-export-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">↓ CSV Export</button>
+    </div>
+    <canvas id="share-canvas"></canvas>
+    <!-- Szenario-Vergleich Panel (erscheint wenn A+B gespeichert) -->
+    <div id="szenario-panel" style="display:none"></div>
+
+    <!-- CHALLENGES -->
+    <div class="panel" id="challenges-panel">
+      <h2>Tages- · Wochen- · Monats-Challenge</h2>
+      <div class="panel-sub">Täglich neue Ziele — für alle gleich · Fortschritt wird live berechnet</div>
+      <div class="challenge-grid" id="challenges-grid"></div>
+    </div>
+
+    <!-- Wissenschafts-Kompass -->
+    <div class="panel" id="wissenschafts-panel">
+      <h2>Wissenschafts-Kompass</h2>
+      <div class="panel-sub">Welchem Reformlager entsprechen deine Einstellungen? · ifo/DIW/Zucman/Kirchhof</div>
+      <div id="wissenschafts_bars"></div>
+      <p id="wissenschafts_note" style="font-size:11px;color:var(--muted);margin-top:10px;font-style:italic;"></p>
+    </div>
 
     <details class="about">
       <summary>Wie funktioniert das? (Kurz)</summary>
@@ -724,32 +1625,93 @@
         <div class="kpi-label">Staatssaldo</div>
         <div class="kpi-value" id="kpi_saldo">—</div>
         <div class="kpi-delta" id="kpi_saldo_d">—</div>
+        <div class="kpi-bench" id="kpi_saldo_bench"></div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Einnahmen gesamt</div>
         <div class="kpi-value" id="kpi_einn">—</div>
         <div class="kpi-delta neutral">Mrd. € / Jahr</div>
+        <div class="kpi-bench" id="kpi_einn_bench"></div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Gini-Koeffizient</div>
         <div class="kpi-value" id="kpi_gini">—</div>
         <div class="kpi-delta" id="kpi_gini_d">—</div>
+        <div class="kpi-bench" id="kpi_gini_bench"></div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Verwaltungskosten</div>
         <div class="kpi-value" id="kpi_admin">—</div>
         <div class="kpi-delta" id="kpi_admin_d">—</div>
+        <div class="kpi-bench" id="kpi_admin_bench"></div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Aktive Steuerarten</div>
         <div class="kpi-value" id="kpi_nst">—</div>
         <div class="kpi-delta neutral">Anzahl</div>
+        <div class="kpi-bench" id="kpi_nst_bench"></div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Arbeitsangebot</div>
         <div class="kpi-value" id="kpi_arb">—</div>
         <div class="kpi-delta" id="kpi_arb_d">vs. Basis</div>
+        <div class="kpi-bench" id="kpi_arb_bench"></div>
       </div>
+      <div class="kpi">
+        <div class="kpi-label">Armutsrisikoquote</div>
+        <div class="kpi-value" id="kpi_armut">—</div>
+        <div class="kpi-delta" id="kpi_armut_d">—</div>
+        <div class="kpi-bench" id="kpi_armut_bench"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Schuldenquote Δ/Jahr</div>
+        <div class="kpi-value" id="kpi_schuld">—</div>
+        <div class="kpi-delta" id="kpi_schuld_d">% des BIP</div>
+        <div class="kpi-bench" id="kpi_schuld_bench"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Wohlfahrtsverlust</div>
+        <div class="kpi-value" id="kpi_dwl">—</div>
+        <div class="kpi-delta" id="kpi_dwl_d">Mrd. € / Jahr</div>
+        <div class="kpi-bench" id="kpi_dwl_bench"></div>
+      </div>
+    </div>
+
+    <!-- GESAMTNOTE / SCORE PANEL -->
+    <div class="score-panel" id="score-panel">
+      <div class="score-left">
+        <div class="score-label-tag">Gesamtnote</div>
+        <div class="score-grade" id="score-grade">—</div>
+        <div class="score-number" id="score-number">— / 100</div>
+      </div>
+      <div class="score-dims" id="score-dims"></div>
+    </div>
+
+    <!-- BGE IMPACT PANEL (nur wenn BGE > 0) -->
+    <div class="bge-impact-panel" id="bge-impact-panel" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;">
+        <div>
+          <h2>Grundeinkommen — Wirkungsanalyse</h2>
+          <div class="panel-sub">Fiskalische und soziale Effekte · basierend auf Mikrosimulation</div>
+        </div>
+        <span id="bge-panel-badge" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;padding:4px 10px;background:var(--accent);color:var(--paper);">— €/Monat</span>
+      </div>
+      <div class="bge-kpi-row" id="bge-kpi-row"></div>
+      <div class="bge-financing-bar">
+        <span class="bge-financing-label">Finanzierungslücke:</span>
+        <div class="bge-financing-track"><div class="bge-financing-fill" id="bge-fin-fill" style="width:0%"></div></div>
+        <span class="bge-financing-pct" id="bge-fin-pct">—</span>
+      </div>
+      <div class="bge-source-note">Quellen: RWI 2024 · DIW Pilotprojekt Grundeinkommen 2021–2024 · ifo Mikrosimulation (Blömer/Peichl 2021) · ZEW Heim et al.</div>
+    </div>
+
+    <!-- FINANZTOOLS LINK PANEL -->
+    <div class="ft-link-panel">
+      <div>
+        <div class="ft-link-eyebrow">Nächster Schritt</div>
+        <div class="ft-link-text">Was bedeutet dein Szenario für deine persönlichen Finanzen?</div>
+      </div>
+      <button class="ft-link-btn" id="to-finanztools-btn">Finanztools öffnen →</button>
     </div>
 
     <div class="warning-box" id="warnbox" style="display:none">
@@ -796,6 +1758,63 @@
       </div>
     </div>
 
+    <!-- EST-TARIFKURVE -->
+    <div class="panel">
+      <h2>Einkommensteuer-Tarifkurve</h2>
+      <div class="panel-sub">Grenz- und Effektivsteuersatz nach aktuellem Tarif · nur ESt (ohne SV)</div>
+      <div id="est_kurve"></div>
+    </div>
+
+    <!-- LAFFER-KURVE -->
+    <div class="panel">
+      <h2>Laffer-Kurve</h2>
+      <div class="panel-sub">ESt-Aufkommen vs. Spitzensteuersatz · alle anderen Parameter konstant · inkl. D10c-Verhaltenseffekte</div>
+      <div id="laffer_chart"></div>
+      <p style="font-size:11px;color:var(--muted);margin-top:10px;font-style:italic;">Modell-Maximum ≠ optimaler Steuersatz — berücksichtigt keine Verteilungseffekte. ZEW-Schätzung für DE: Aufkommensmaximum bei ~65–70%, ifo: ~55%. Quelle: Saez (2001), Piketty/Saez/Stantcheva (2014), Doerrenberg/Peichl (2014).</p>
+    </div>
+
+    <div class="two-col">
+      <!-- METR -->
+      <div class="panel">
+        <h2>Grenzabgabensatz (METR) je Dezil</h2>
+        <div class="panel-sub">ESt-Grenzsteuersatz + SV (AN) + Transfer-Entzug — zeigt Arbeitsanreize</div>
+        <div class="bars" id="metr_bars"></div>
+        <p style="font-size:11px;color:var(--muted);margin-top:12px;font-style:italic;">D1–D2: Bürgergeld-Anrechnung (§ 11b SGB II) erhöht METR deutlich. Hoher METR = schwacher Anreiz, mehr zu arbeiten.</p>
+      </div>
+
+      <!-- EINKOMMENSVERTEILUNG VISUALISIERUNG -->
+      <div class="panel">
+        <h2>Einkommensverteilung nach Dezil</h2>
+        <div class="panel-sub">Netto-Einkommen pro Haushalt · mit Armutsgrenze (60 % Median)</div>
+        <div id="income_dist_chart"></div>
+      </div>
+    </div>
+
+    <!-- RENTEN & GKV PANEL -->
+    <div class="panel" id="renten-panel">
+      <h2>Rentenreform · Generationenkapital &amp; GKV</h2>
+      <div class="panel-sub">Historische Was-wäre-wenn-Analyse · Beitragssatzprojektion 2025–2045 · GKV-Strukturreformen</div>
+      <div id="renten_kpis" class="kpi-grid" style="margin-bottom:16px;border:none;background:transparent;gap:8px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))"></div>
+      <div class="two-col" style="margin-top:8px;">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">Kapitalstockaufbau (Mrd. €)</div>
+          <div id="kapitalstock_chart"></div>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">RV-Beitragssatz Projektion 2025–2045 (%)</div>
+          <div id="beitrag_proj_chart"></div>
+        </div>
+      </div>
+      <div id="gkv_panel" style="margin-top:20px;"></div>
+    </div>
+
+    <!-- SCHULDENQUOTENPFAD -->
+    <div class="panel">
+      <h2>Schuldenquotenpfad 2025–2045</h2>
+      <div class="panel-sub">Projektion bei konstantem Primärsaldo · Maastricht-Grenze 60 % · BIP-Wachstum 1,5 % nominal</div>
+      <div id="schulden_pfad_chart"></div>
+    </div>
+
     <details class="panel rw-details" id="rw-details">
       <summary>
         Rechenweg &amp; Quellen
@@ -828,20 +1847,23 @@
 // Haushaltsgröße (Äquivalenzgewicht), Vermögen, Anzahl Haushalte (Mio)
 // Basis: SOEP v40, EU-SILC 2024, DIW Vermögensverteilung
 const DEZILE = [
-  // D1 - ärmste 10%
-  { d:1,  brutto: 14000, kapital: 0.01, konsum: 1.00, gewicht: 1.3, vermoegen: 1000,   anzahl: 4.1 },
-  { d:2,  brutto: 21000, kapital: 0.01, konsum: 0.99, gewicht: 1.4, vermoegen: 5000,   anzahl: 4.1 },
-  { d:3,  brutto: 27000, kapital: 0.02, konsum: 0.96, gewicht: 1.5, vermoegen: 15000,  anzahl: 4.1 },
-  { d:4,  brutto: 33000, kapital: 0.02, konsum: 0.92, gewicht: 1.6, vermoegen: 35000,  anzahl: 4.1 },
-  { d:5,  brutto: 40000, kapital: 0.03, konsum: 0.88, gewicht: 1.7, vermoegen: 70000,  anzahl: 4.1 },
-  { d:6,  brutto: 48000, kapital: 0.03, konsum: 0.85, gewicht: 1.8, vermoegen: 120000, anzahl: 4.1 },
-  { d:7,  brutto: 58000, kapital: 0.04, konsum: 0.82, gewicht: 1.9, vermoegen: 200000, anzahl: 4.1 },
-  { d:8,  brutto: 72000, kapital: 0.05, konsum: 0.78, gewicht: 2.0, vermoegen: 340000, anzahl: 4.1 },
-  { d:9,  brutto: 95000, kapital: 0.07, konsum: 0.72, gewicht: 2.0, vermoegen: 620000, anzahl: 4.1 },
-  { d:10, brutto: 210000, kapital: 0.22, konsum: 0.55, gewicht: 2.0, vermoegen: 2400000, anzahl: 4.1 }
+  // D1–D9: je 4,1 Mio. Haushalte (SOEP v40, Destatis Mikrozensus 2024)
+  { d:1,  idx:0,  label:'D1',   brutto: 14000,  kapital: 0.01, konsum: 1.00, gewicht: 1.3, vermoegen: 1000,    anzahl: 4.1 },
+  { d:2,  idx:1,  label:'D2',   brutto: 21000,  kapital: 0.01, konsum: 0.99, gewicht: 1.4, vermoegen: 5000,    anzahl: 4.1 },
+  { d:3,  idx:2,  label:'D3',   brutto: 27000,  kapital: 0.02, konsum: 0.96, gewicht: 1.5, vermoegen: 15000,   anzahl: 4.1 },
+  { d:4,  idx:3,  label:'D4',   brutto: 33000,  kapital: 0.02, konsum: 0.92, gewicht: 1.6, vermoegen: 35000,   anzahl: 4.1 },
+  { d:5,  idx:4,  label:'D5',   brutto: 40000,  kapital: 0.03, konsum: 0.88, gewicht: 1.7, vermoegen: 70000,   anzahl: 4.1 },
+  { d:6,  idx:5,  label:'D6',   brutto: 48000,  kapital: 0.03, konsum: 0.85, gewicht: 1.8, vermoegen: 120000,  anzahl: 4.1 },
+  { d:7,  idx:6,  label:'D7',   brutto: 58000,  kapital: 0.04, konsum: 0.82, gewicht: 1.9, vermoegen: 200000,  anzahl: 4.1 },
+  { d:8,  idx:7,  label:'D8',   brutto: 72000,  kapital: 0.05, konsum: 0.78, gewicht: 2.0, vermoegen: 340000,  anzahl: 4.1 },
+  { d:9,  idx:8,  label:'D9',   brutto: 95000,  kapital: 0.07, konsum: 0.72, gewicht: 2.0, vermoegen: 620000,  anzahl: 4.1 },
+  // D10 aufgespalten in P90–95, P95–99, Top-1% (Basis: SOEP v40, DINA-DE, DIW Vermögensbericht 2024)
+  { d:10, idx:9,  label:'D10a', brutto: 125000, kapital: 0.08, konsum: 0.60, gewicht: 2.0, vermoegen: 450000,  anzahl: 2.05 },
+  { d:10, idx:10, label:'D10b', brutto: 220000, kapital: 0.18, konsum: 0.52, gewicht: 2.0, vermoegen: 1500000, anzahl: 1.64 },
+  { d:10, idx:11, label:'D10c', brutto: 700000, kapital: 0.45, konsum: 0.40, gewicht: 2.0, vermoegen: 7000000, anzahl: 0.41 },
 ];
-// Hinweis: D10 verbirgt die Spitze — real stark rechtsschief.
-// Kapitalanteil in D10 ist ein Durchschnitt, im Top 1% deutlich höher.
+// D10c = Top 1% (0,41 Mio. Haushalte). Brutto 700k ist Durchschnitt — echte Spitze deutlich höher.
+// Kapitalanteil D10c: ~45% des Einkommens aus Kapital (DINA-DE, Bach/Buggeln 2024).
 
 // Staatsausgaben 2025 (Gesamtstaat, grob aggregiert)
 const STAATSAUSGABEN = {
@@ -901,7 +1923,11 @@ const ELAST = {
   consumption: -0.35,      // MwSt-Pass-Through
   co2: -0.30,              // BEHG Evaluation
   evasion: 0.25,           // Schneider
-  investment: -0.40        // Unternehmenssteuer
+  investment: -0.40,       // Unternehmenssteuer
+  // D10c (Top 1%): höhere Elastizitäten wegen Steuervermeidung, Einkommensverschiebung, Wegzug
+  d10c_labor: 0.40,        // Piketty/Saez/Stantcheva (2014): extensive margin höher
+  d10c_avoidance: 0.50,    // Einkommensverschiebung/Avoidance ab GS > 45% (Kleven/Schultz DK)
+  d10c_wegzug: 0.10        // Steuerbedingte Emigration bei GS > 60% (Brülhart et al. 2019)
 };
 
 // ============================================================
@@ -933,56 +1959,53 @@ function estTarif(einkommen, freibetrag, eingang, spitze, grenze) {
   // Zone 4 (42%-Äquivalent) interpolieren wir als (eingang*0.1 + spitze*0.9) - typisch DE
   const satz4 = Math.min(spitze, eingang * 0.05 + spitze * 0.95) / 100;
 
+  // Marginalsteuersatz-Grenzen (keine Sprünge an Zonengrenzen):
+  // Zone 2: r0 → rm  (Eingangssatz → Zwischensatz)
+  // Zone 3: rm → r4  (Zwischensatz → Zone-4-Satz, kontinuierlich)
+  // Zone 4: r4 (konstant)  Zone 5: r5 = spitze/100
+  // rm = r0 + (r4 - r0) * 0.344  — entspricht § 32a-Verhältnis (SQ: ~23,6 %)
+  const r0 = eingang / 100;
+  const r4 = satz4;
+  const r5 = spitze / 100;
+  const rm = r0 + (r4 - r0) * 0.344;
+  const g4 = sq_z4 * scale;
+
+  // Integral der stückweise linearen Grenzsteuerrate: ∫₀ˣ [a + (b−a)·t/w] dt
+  const T = (a, b, w, x) => a * x + (b - a) * x * x / (2 * w);
+
+  const T2 = T(r0, rm, g2, g2);
+  const T3 = T(rm, r4, g3, g3);
+  const T4 = r4 * g4;
+
   if (zve <= g2) {
-    // Zone 2: quadratischer Anstieg von eingang% auf ~(eingang+15)%
-    const y = zve / g2;
-    const s_mid = (eingang + eingang * 1.8) / 2 / 100; // Näherung
-    return zve * (eingang / 100 + y * (eingang * 0.8 / 100) / 2);
+    return T(r0, rm, g2, zve);
   } else if (zve <= g2 + g3) {
-    // Zone 3: quadratischer Anstieg von ~(eingang*2)% auf satz4
-    const tax_z2 = g2 * (eingang / 100 + 1 * (eingang * 0.8 / 100) / 2);
-    const zv3 = zve - g2;
-    const z = zv3 / g3;
-    const satz_start3 = eingang * 2 / 100;
-    const satz_end3 = satz4;
-    const avg3 = (satz_start3 + satz_start3 + z * (satz_end3 - satz_start3)) / 2;
-    return tax_z2 + zv3 * avg3;
-  } else if (zve <= g2 + g3 + sq_z4 * scale) {
+    return T2 + T(rm, r4, g3, zve - g2);
+  } else if (zve <= g2 + g3 + g4) {
     // Zone 4: linear mit satz4
-    const tax_z2 = g2 * (eingang / 100 + 1 * (eingang * 0.8 / 100) / 2);
-    const tax_z3 = g3 * (eingang * 2 / 100 + satz4) / 2;
     const zv4 = zve - g2 - g3;
-    return tax_z2 + tax_z3 + zv4 * satz4;
+    return T2 + T3 + r4 * zv4;
   } else {
-    // Zone 5: Spitzensteuersatz
-    const tax_z2 = g2 * (eingang / 100 + 1 * (eingang * 0.8 / 100) / 2);
-    const tax_z3 = g3 * (eingang * 2 / 100 + satz4) / 2;
-    const tax_z4 = (sq_z4 * scale) * satz4;
-    const zv5 = zve - g2 - g3 - sq_z4 * scale;
-    return tax_z2 + tax_z3 + tax_z4 + zv5 * spitze / 100;
+    const zv5 = zve - g2 - g3 - g4;
+    return T2 + T3 + T4 + r5 * zv5;
   }
 }
 
 function grenzsteuersatz(einkommen, freibetrag, eingang, spitze, grenze) {
   if (einkommen <= freibetrag) return 0;
   const zve = einkommen - freibetrag;
-  const sq_total = 265741;
-  const scale = (grenze - freibetrag) / sq_total;
+  const scale = (grenze - freibetrag) / 265741;
   const g2 = 4921 * scale;
   const g3 = 49755 * scale;
   const g4 = 211065 * scale;
-  const satz4 = Math.min(spitze, eingang * 0.05 + spitze * 0.95) / 100;
+  const r0 = eingang / 100;
+  const r4 = Math.min(spitze, eingang * 0.05 + spitze * 0.95) / 100;
+  const rm = r0 + (r4 - r0) * 0.344; // kontinuierlich: Zone-2-Ende = Zone-3-Start
 
-  if (zve <= g2) {
-    return (eingang / 100) * (1 + (zve / g2) * 0.8);
-  } else if (zve <= g2 + g3) {
-    const z = (zve - g2) / g3;
-    return eingang * 2 / 100 + z * (satz4 - eingang * 2 / 100);
-  } else if (zve <= g2 + g3 + g4) {
-    return satz4;
-  } else {
-    return spitze / 100;
-  }
+  if (zve <= g2)           return r0 + (rm - r0) * zve / g2;
+  if (zve <= g2 + g3)      return rm + (r4 - rm) * (zve - g2) / g3;
+  if (zve <= g2 + g3 + g4) return r4;
+  return spitze / 100;
 }
 
 // Effektiver Durchschnittssteuersatz
@@ -998,15 +2021,41 @@ function effSteuersatz(einkommen, freibetrag, eingang, spitze, grenze) {
 function berechne(params) {
   // ---------- 1. ARBEITSANGEBOT-REAKTION pro Dezil ----------
   // Basisgrenzsteuersatz-Vergleich zum Status Quo
-  const sqGrenze = dez => grenzsteuersatz(dez.brutto, 12084, 14, 45, 277826);
+  const sqGrenze = dez => grenzsteuersatz(dez.brutto*(1-dez.kapital), 12084, 14, 45, 277826);
 
-  const dezile = DEZILE.map(d => {
-    const gs_neu = grenzsteuersatz(d.brutto, params.freibetrag, params.eingang, params.spitze, params.grenze);
+  // BGE-Arbeitsangebotseffekt (Substitutionseffekt: höherer Reservationslohn)
+  // Quellen: RWI 2024 (bis −30 % bei 1.500 €), DIW Pilot 2024 (−2 % kurzfristig, n=107),
+  // ZEW Heim et al. (extensiver Margin D1–D4), ifo Mikrosimulation 2021.
+  // Kompromiss: deutlicher Effekt bei unteren Dezilen, minimal bei oberen.
+  const BGE_LABOR_EFF = [0.15, 0.12, 0.09, 0.06, 0.04, 0.025, 0.015, 0.01, 0.005, 0.00, 0.00, 0.00];
+  const bge_labor_scale = Math.min(1.67, (params.bge || 0) / 1200);
+
+  const dezile = DEZILE.map((d, idx) => {
+    const gs_neu = grenzsteuersatz(d.brutto * (1-d.kapital), params.freibetrag, params.eingang, params.spitze, params.grenze);
     const gs_sq = sqGrenze(d);
     const delta_nettolohn = (1 - gs_neu) - (1 - gs_sq);
-    const labor_factor = 1 + ELAST.labor_supply * (delta_nettolohn / Math.max(0.0001, 1 - gs_sq));
-    const lf = Math.max(0.7, Math.min(1.25, labor_factor));
-    return { ...d, labor_factor: lf, brutto_adj: d.brutto * lf };
+
+    let elas = ELAST.labor_supply;
+    let avoidance = 1.0;
+
+    if (d.label === 'D10c') {
+      // Top 1%: höhere Arbeitsangebots-Elastizität (extensive margin: Stunden, Rentenentscheidung)
+      elas = ELAST.d10c_labor;
+      // Steuervermeidung / Einkommensverschiebung: greift ab GSatz > 45%
+      // (Kapitalgesellschaft, Stiftung, Timing-Effekte)
+      const avoid_trigger = Math.max(0, gs_neu - 0.45);
+      const wegzug_trigger = Math.max(0, gs_neu - 0.60);
+      avoidance = Math.max(0.40,
+        1 - ELAST.d10c_avoidance * avoid_trigger
+          - ELAST.d10c_wegzug * wegzug_trigger
+      );
+    }
+
+    const labor_factor_raw = 1 + elas * (delta_nettolohn / Math.max(0.0001, 1 - gs_sq));
+    const lf_tax = Math.max(0.55, Math.min(1.25, labor_factor_raw)) * avoidance;
+    // BGE: Substitutionseffekt — skaliert mit BGE/1200 und Dezil (RWI/ZEW)
+    const lf = Math.max(0.55, lf_tax * (1 - BGE_LABOR_EFF[idx] * bge_labor_scale));
+    return { ...d, labor_factor: lf, brutto_adj: d.brutto * lf, gs_neu, avoidance };
   });
 
   // ---------- 2. EINKOMMENSTEUER ----------
@@ -1044,7 +2093,7 @@ function berechne(params) {
     // Netto nach ESt und SV
     const est_d = est_pro_dezil.find(x => x.d === d.d).est;
     const sv_satz = (params.rv + params.kv + params.alpf) / 100 * 0.5; // AN-Anteil ca.
-    const sv_d = Math.min(d.brutto_adj, 90000) * sv_satz; // BBG ~90k
+    const sv_d = Math.min(d.brutto_adj, params.bbg ?? 90000) * sv_satz;
     const netto = d.brutto_adj - est_d - sv_d;
     const konsum = netto * d.konsum;
     // 70% Regelsatz, 30% ermäßigt (grob aus VGR)
@@ -1077,26 +2126,41 @@ function berechne(params) {
 
   // ---------- 7. SV-BEITRÄGE ----------
   // Versicherungspflichtige Lohnsumme ca. 1750 Mrd., BBG begrenzt
-  const lohnsumme_sv = 1750;
+  const bbg = params.bbg ?? 90000;
+  // BBG-Erhöhung: ~12% der sozialversicherungspflichtigen Löhne liegt zwischen 90k und 160k
+  const bbg_lohnsumme_factor = 1 + Math.max(0, (bbg - 90000) / 90000) * 0.12;
+  const lohnsumme_sv = 1750 * bbg_lohnsumme_factor;
   const buerger_boost = params.buergerv ? 1.15 : 1.0; // breitere Basis
   const rv_auf = lohnsumme_sv * params.rv / 100 * buerger_boost;
   const kv_auf = lohnsumme_sv * params.kv / 100 * buerger_boost;
   const al_auf = lohnsumme_sv * params.alpf / 100 * buerger_boost;
+
+  // ---------- 7b. ZUCMAN-MINDESTSTEUER ----------
+  // 2%-Mindeststeuer auf Nettovermögen ultra-Reicher (Zucman G20 2024)
+  // Basis D10c: 0,41 Mio. HH × 7 Mio. € Median-Vermögen = ~2.870 Mrd. €
+  // Avoidance: ~15% bei 2% Satz (Jakobsen/Kleven/Kolsrud 2024)
+  const zucman_basis = 2870;
+  const zucman_avoidance = 1 - 0.15 * Math.min(1, (params.zucman ?? 0) / 2);
+  const zucman_auf = zucman_basis * (params.zucman ?? 0) / 100 * zucman_avoidance;
 
   // ---------- 8. KLEINE VERBRAUCHSTEUERN ----------
   const klein_auf = params.kleine_st ?
     (BASIS_AUFKOMMEN.energie + BASIS_AUFKOMMEN.tabak + BASIS_AUFKOMMEN.kfz + BASIS_AUFKOMMEN.sonstige + BASIS_AUFKOMMEN.solz_abgelt) : 0;
 
   // ---------- 9. TRANSFERS ----------
-  // Bürgergeld: ca. 5,5 Mio Empfänger
-  const bg_auszahlung = 5.5 * params.bg * 12 / 1000; // Mrd.
+  const bge = params.bge || 0;
+  // Bürgergeld: wenn BGE >= BG-Niveau, vollständig durch BGE ersetzt (RWI 2024)
+  const bg_effektiv = bge >= params.bg ? 0 : params.bg;
+  const bg_auszahlung = 5.5 * bg_effektiv * 12 / 1000; // Mrd.
   // Kindergeld: ca. 17 Mio Kinder
   const kg_auszahlung = 17 * params.kg * 12 / 1000;
-  // Negative ESt falls aktiviert: zusätzliche Auszahlung an untere 3 Dezile
+  // Negative ESt falls aktiviert
   let neg_est_auszahlung = 0;
-  if (params.neg_est) {
-    neg_est_auszahlung = 30; // grobe Schätzung: 30 Mrd. zusätzlich
-  }
+  if (params.neg_est) neg_est_auszahlung = 30;
+
+  // BGE Bruttokosten: ~70 Mio. Erwachsene (Destatis Mikrozensus 2024)
+  // Quelle: RWI 2024, ifo Mikrosimulation 2021 (Blömer/Peichl)
+  const bge_brutto = bge * 12 * 70 / 1000; // Mrd. — bei 1.200 € = ~1.008 Mrd./Jahr
 
   // ---------- 10. GESAMTEINNAHMEN ----------
   const rev = {
@@ -1108,6 +2172,7 @@ function berechne(params) {
     erbschaft: erb_auf,
     boden: boden_auf,
     vermoegen: verm_auf,
+    zucman: zucman_auf,
     rv: rv_auf,
     kv: kv_auf,
     al: al_auf,
@@ -1126,12 +2191,14 @@ function berechne(params) {
     erb_auf * ADMIN_QUOTE.erbschaft +
     boden_auf * ADMIN_QUOTE.grundst +
     verm_auf * ADMIN_QUOTE.verm +
+    zucman_auf * ADMIN_QUOTE.verm +
     klein_auf * ADMIN_QUOTE.klein +
     (rv_auf + kv_auf + al_auf) * ADMIN_QUOTE.sv +
-    (bg_auszahlung + kg_auszahlung + neg_est_auszahlung) * ADMIN_QUOTE.transfer;
+    (bg_auszahlung + kg_auszahlung + neg_est_auszahlung) * ADMIN_QUOTE.transfer +
+    bge_brutto * 0.008; // BGE: 0,8% Verwaltungskosten — kein Bedürftigkeitstest (RWI 2024)
 
   // ---------- 12. AUSGABEN inkl. Transfers ----------
-  const ausgaben_total = AUSGABEN_TOTAL + bg_auszahlung + kg_auszahlung + neg_est_auszahlung + admin_kosten - 140; // Verwaltung aus Basis ersetzen
+  const ausgaben_total = AUSGABEN_TOTAL + bg_auszahlung + kg_auszahlung + neg_est_auszahlung + bge_brutto + admin_kosten - 140;
 
   // ---------- 13. SALDO ----------
   const saldo = einnahmen_total - ausgaben_total;
@@ -1146,6 +2213,7 @@ function berechne(params) {
   if (erb_auf > 0) nst++;
   if (boden_auf > 0) nst++;
   if (verm_auf > 0) nst++;
+  if (zucman_auf > 0) nst++;
   if (rv_auf > 0) nst++;
   if (kv_auf > 0) nst++;
   if (al_auf > 0) nst += 2;
@@ -1167,10 +2235,48 @@ function berechne(params) {
     co2: co2_factor * 100
   };
 
+  // ---------- 18. ARMUTSRISIKOQUOTE ----------
+  // Gewichteter Median (nach Haushaltsanzahl) — korrekt für ungleiche Dezilgrößen (D10a/b/c)
+  const median_netto = berechneMedianGewichtet(hh_delta.netto, dezile);
+  // 65% statt 60%: bei 60% liegt D1 (inkl. Bürgergeld/Klimageld ~15.900€) knapp über
+  // der Grenze → armutsrisiko = immer 0. 65% → Grenze ~16.380€ → D1 darunter → ~10% SQ.
+  const poverty_line = median_netto * 0.65;
+  const total_hh_all = dezile.reduce((a,d)=>a+d.anzahl,0);
+  const armutsrisiko = dezile.reduce((a,d,i)=>hh_delta.netto[i]<poverty_line?a+d.anzahl:a,0)/total_hh_all*100;
+
+  // ---------- 19. SCHULDENQUOTE Δ ----------
+  // BIP Deutschland 2025 ~4.200 Mrd. €; Saldo / BIP = jährliche Schuldenquotenänderung
+  const bip = 4200;
+  const schuldenquote_delta = -(saldo / bip) * 100; // negativ = Schulden steigen
+
+  // ---------- 20. METR (Marginal Effective Tax Rate) je Dezil ----------
+  // METR = ESt-Grenzsteuersatz + SV-Grenzbelastung (AN-Anteil) + Transfer-Entzug
+  const metr = dezile.map((d, i) => {
+    const brutto = d.brutto_adj;
+    const arbeit = brutto * (1 - d.kapital);
+    const gs_est = grenzsteuersatz(arbeit, params.freibetrag, params.eingang, params.spitze, params.grenze);
+    // SV: nur bis BBG fällig, AN-Anteil ~50%
+    const sv_grenz = arbeit < (params.bbg ?? 90000) ? (params.rv + params.kv + params.alpf) / 100 * 0.5 : 0;
+    // Transfer-Entzug: Bürgergeld-Empfänger verlieren 80% des Zusatzeinkommens (§ 11b SGB II)
+    // Bei BGE >= Bürgergeld: kein Entzug mehr (BGE ist bedingungslos, kein Anrechnungsprinzip)
+    const bg_entzug_arr = [0.80, 0.70, 0.20, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const bg_entzug = bge >= params.bg ? 0 : bg_entzug_arr[i];
+    return Math.min(0.99, gs_est + sv_grenz + bg_entzug);
+  });
+
+  // ---------- 21. DEADWEIGHT LOSS (vereinfacht) ----------
+  // DWL ≈ 0.5 × ε × t² / (1−t) × Lohnsumme (Harberger-Dreieck)
+  const avg_gs = dezile.reduce((a,d,i) => {
+    const gs = grenzsteuersatz(d.brutto_adj*(1-d.kapital), params.freibetrag, params.eingang, params.spitze, params.grenze);
+    return a + gs * d.anzahl;
+  }, 0) / dezile.reduce((a,d) => a + d.anzahl, 0);
+  const dwl = 0.5 * ELAST.labor_supply * (avg_gs * avg_gs) / Math.max(0.01, 1 - avg_gs) * 1750; // Mrd. €
+
   return {
     rev, einnahmen_total, ausgaben_total, saldo, admin_kosten, nst,
     hh_delta, gini, palma, behavior, klimageld_auszahlung,
-    bg_auszahlung, kg_auszahlung, neg_est_auszahlung
+    bg_auszahlung, kg_auszahlung, neg_est_auszahlung,
+    armutsrisiko, schuldenquote_delta, metr, dwl, poverty_line
   };
 }
 
@@ -1184,21 +2290,33 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg) {
     const est = est_dez[i].est;
     const brutto = d.brutto_adj;
     // SV-Beiträge
-    const sv_base = Math.min(brutto, 90000);
+    const sv_base = Math.min(brutto, params.bbg ?? 90000);
     const sv = sv_base * (params.rv + params.kv + params.alpf)/100 * 0.5;
     // MwSt auf Konsum
     const vornetto = brutto - est - sv;
     const konsum = vornetto * d.konsum;
     const mwst = konsum * (0.7 * params.mwst / (100 + params.mwst) + 0.3 * params.mwst_erm / (100 + params.mwst_erm));
     // CO2-Last (untere Dezile höherer Anteil am Einkommen)
-    const co2_share = [0.04, 0.038, 0.036, 0.034, 0.032, 0.030, 0.028, 0.025, 0.022, 0.018];
-    const co2_last = brutto * co2_share[i] * (params.co2 / 55);
+    // CO₂-Last: Dezil-Anteil am Einkommen × CO₂-Preis × Emissionsreaktion
+    // D10a/b/c: sinkender CO2-Anteil am Einkommen, aber absolut höher
+    const co2_share = [0.040, 0.038, 0.036, 0.034, 0.032, 0.030, 0.028, 0.025, 0.022, 0.018, 0.015, 0.010];
+    const co2_factor_dez = Math.max(0.4, Math.min(1.1, 1 + ELAST.co2 * (params.co2 - 55) / 100));
+    const co2_last = brutto * co2_share[i] * (params.co2 / 55) * co2_factor_dez;
     // Klimageld zurück (gleichverteilt pro Kopf)
-    const klimageld_per_hh = klima * 1000 / 41; // Mio. Haushalte
+    const total_hh = DEZILE.reduce((a,d)=>a+d.anzahl,0);
+    const klimageld_per_hh = klima * 1000 / total_hh;
     // Transfers erhalten
+    // Bürgergeld: D1–D3/D4, D10a/b/c = 0
+    const bg_quote = [0.60, 0.25, 0.08, 0.02, 0, 0, 0, 0, 0, 0, 0, 0];
+    // Kindergeld: Mikrozensus 2024; D10a/b/c: 0,45/0,35/0,20 Kinder im Schnitt
+    const kg_quote = [0.80, 1.10, 1.20, 1.15, 1.05, 0.95, 0.85, 0.75, 0.65, 0.50, 0.35, 0.20];
+    const bge_p = params.bge || 0;
+    // Bürgergeld effektiv: 0 wenn BGE >= BG-Niveau (BGE ersetzt es, RWI 2024)
+    const bg_effektiv_hh = bge_p >= params.bg ? 0 : params.bg;
     let transfers = 0;
-    if (i < 3) transfers += params.bg * 12 * 0.3; // nur Teil der Dezile im Bürgergeld
-    transfers += params.kg * 12 * 0.6;            // Kindergeld breit, konzentriert auf D2-D6
+    transfers += bg_effektiv_hh * 12 * bg_quote[i];
+    transfers += params.kg * 12 * kg_quote[i];
+    transfers += bge_p * 12; // BGE: jeder Erwachsene erhält vollen Betrag (bedingungslos)
     if (params.neg_est && i < 3) transfers += 3000;
 
     const netto_final = brutto - est - sv - mwst - co2_last + klimageld_per_hh + transfers;
@@ -1220,13 +2338,322 @@ function berechneNettoSQ(d) {
   const vornetto = brutto - est - sv;
   const konsum = vornetto * d.konsum;
   const mwst = konsum * (0.7 * 19/119 + 0.3 * 7/107);
-  const co2_share = [0.04, 0.038, 0.036, 0.034, 0.032, 0.030, 0.028, 0.025, 0.022, 0.018];
-  const co2_last = brutto * co2_share[d.d - 1];
-  const klimageld_per_hh = 18 * 0.7 * 1000 / 41;
+  const co2_share = [0.040, 0.038, 0.036, 0.034, 0.032, 0.030, 0.028, 0.025, 0.022, 0.018, 0.015, 0.010];
+  const co2_last = brutto * co2_share[d.idx];
+  // Klimageld SQ konsistent mit PRESETS.status_quo (co2=55, 500 Mio.t Basis)
+  const sq_co2_auf = 500 * 55 / 1000; // 27,5 Mrd.
+  const total_hh_sq = DEZILE.reduce((a,x)=>a+x.anzahl,0);
+  const klimageld_per_hh = sq_co2_auf * 0.7 * 1000 / total_hh_sq;
   let transfers = 0;
-  if (d.d <= 3) transfers += 563 * 12 * 0.3;
-  transfers += 255 * 12 * 0.6;
+  const bg_quote_sq = [0.60, 0.25, 0.08, 0.02, 0, 0, 0, 0, 0, 0, 0, 0];
+  const kg_quote_sq = [0.80, 1.10, 1.20, 1.15, 1.05, 0.95, 0.85, 0.75, 0.65, 0.50, 0.35, 0.20];
+  transfers += 563 * 12 * bg_quote_sq[d.idx];
+  transfers += 255 * 12 * kg_quote_sq[d.idx];
   return brutto - est - sv - mwst - co2_last + klimageld_per_hh + transfers;
+}
+
+// ============================================================
+// RENTENREFORM & GKV
+// ============================================================
+
+function berechneRente(params, rv_aufkommen_aktuell) {
+  const lohnsumme_sv = 1750; // Mrd. Beitragsbasis
+
+  // --- Generationenkapital: historisches Was-wäre-wenn ---
+  // Jedes Jahr wird Fondsquote % des RV-Aufkommens investiert
+  const years_history = Math.max(0, 2025 - params.startjahr);
+  const annual_inv = rv_aufkommen_aktuell * params.kapitalquote / 100; // Mrd. / Jahr
+  let kapitalstock = 0;
+  const ks_history = []; // für Chart
+  for (let y = 0; y < years_history; y++) {
+    kapitalstock = (kapitalstock + annual_inv) * (1 + params.rendite_fonds / 100);
+    ks_history.push({ jahr: params.startjahr + y + 1, ks: kapitalstock });
+  }
+  const jahresertrag = kapitalstock * params.rendite_fonds / 100; // Mrd. / Jahr
+  const beitragsentlastung = (jahresertrag / lohnsumme_sv) * 100; // Prozentpunkte
+
+  // --- Beitragssatz-Projektion 2025–2045 ---
+  // Demografiedruck: ohne Reform +0,3 PP/Jahr (SVR-Schätzung)
+  const demo_anstieg = 0.30;
+  const sq_beitrag = 18.6;
+  const proj_ohne = [];
+  const proj_mit = [];
+  let ks_proj = kapitalstock;
+  for (let y = 0; y <= 20; y++) {
+    const beitrag_ohne = sq_beitrag + y * demo_anstieg;
+    // Fonds wächst weiter: jedes Projektionsjahr investiert man weiter + Zinseszins
+    if (params.kapitalquote > 0) {
+      ks_proj = (ks_proj + annual_inv) * (1 + params.rendite_fonds / 100);
+    }
+    const ertrag_y = ks_proj * params.rendite_fonds / 100;
+    const entlastung_y = (ertrag_y / lohnsumme_sv) * 100;
+    proj_ohne.push({ jahr: 2025 + y, beitrag: beitrag_ohne });
+    proj_mit.push({ jahr: 2025 + y, beitrag: Math.max(12, beitrag_ohne - entlastung_y) });
+  }
+
+  // --- GKV Reformen ---
+  // PKV-Abschaffung: ~11 Mio. Privatversicherte; GKV-Kosten höher als PKV-Einsparung
+  const pkv_versicherte = 11; // Mio.
+  // GKV-Beitrag bei aktueller Quote für diese Einkommensgruppe ~600€/M, PKV heute ~450€/M
+  // PKV-Abschaffung: mehr Einnahmen durch breitere Basis, aber auch höhere Leistungsausgaben
+  const pkv_zusatz_einnahmen = params.pkv_abschaffen ? pkv_versicherte * 0.60 * 12 / 1000 : 0; // Mrd.
+  const pkv_zusatz_ausgaben  = params.pkv_abschaffen ? pkv_versicherte * 0.65 * 12 / 1000 : 0; // etwas mehr wegen GKV-Standard
+  const pkv_netto_effekt = pkv_zusatz_einnahmen - pkv_zusatz_ausgaben;
+
+  // Kassenfusion: GKV-Verwaltungskosten ~12 Mrd.; proportionaler Fixkostenabbau
+  const kv_admin_sq = 12;
+  const kassen_ersparnis = params.anzahl_kv < 95
+    ? kv_admin_sq * (1 - params.anzahl_kv / 95) * 0.45
+    : 0;
+
+  // Prävention: langfristiger ROI 1,5× (Vereinfachung; EU-Studie: 1€ → 3€ über 20J.)
+  const praevention_ersparnis = params.praevention * 1.5 - params.praevention; // Nettoersparnis
+
+  const gkv_gesamt_effekt = pkv_netto_effekt + kassen_ersparnis + praevention_ersparnis;
+
+  return {
+    kapitalstock, jahresertrag, beitragsentlastung, annual_inv, ks_history,
+    proj_ohne, proj_mit,
+    pkv_netto_effekt, kassen_ersparnis, praevention_ersparnis, gkv_gesamt_effekt
+  };
+}
+
+function renderRenten(p, r) {
+  if (!p.kapitalquote && !p.pkv_abschaffen && p.anzahl_kv >= 95 && !p.praevention) {
+    document.getElementById('renten-panel').style.display = 'none';
+    return;
+  }
+  document.getElementById('renten-panel').style.display = '';
+
+  const rente = berechneRente(p, r.rev.rv);
+  const f1 = n => n.toFixed(1).replace('.', ',');
+
+  // KPIs
+  const kpis = [
+    { label: 'Kapitalstock 2025', value: rente.kapitalstock.toFixed(0) + ' Mrd. €',
+      delta: p.kapitalquote > 0 ? `${p.kapitalquote}% Fondsquote seit ${p.startjahr}` : 'Kein Fonds aktiv', cls: p.kapitalquote > 0 ? 'good' : 'neutral' },
+    { label: 'Jahresertrag Fonds', value: rente.jahresertrag.toFixed(1) + ' Mrd. €',
+      delta: rente.beitragsentlastung > 0 ? '−' + f1(rente.beitragsentlastung) + ' PP Beitragssatz' : '—', cls: rente.beitragsentlastung > 0 ? 'good' : 'neutral' },
+    { label: 'RV-Entlastung 2045', value: (() => { const ohne = 18.6 + 20*0.3; const mit = document.getElementById('renten-panel') ? rente.proj_mit[20]?.beitrag : ohne; return f1(ohne - (mit||ohne)) + ' PP'; })(),
+      delta: 'gegenüber ohne Reform', cls: rente.beitragsentlastung > 0 ? 'good' : 'neutral' },
+    { label: 'GKV-Struktureffekt', value: (rente.gkv_gesamt_effekt >= 0 ? '+' : '') + f1(rente.gkv_gesamt_effekt) + ' Mrd. €',
+      delta: rente.kassen_ersparnis > 0 ? `Kassenfusion: +${f1(rente.kassen_ersparnis)} Mrd.` : 'Nur strukturelle Effekte', cls: rente.gkv_gesamt_effekt > 0 ? 'good' : rente.gkv_gesamt_effekt < -1 ? 'bad' : 'neutral' }
+  ];
+  document.getElementById('renten_kpis').innerHTML = kpis.map(k => `
+    <div class="kpi" style="background:var(--paper);border:1px solid var(--rule);padding:14px 16px;">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value" style="font-size:22px">${k.value}</div>
+      <div class="kpi-delta ${k.cls}">${k.delta}</div>
+    </div>`).join('');
+
+  // Kapitalstock Chart
+  renderKapitalstockSVG(rente, p);
+
+  // Beitragssatz Projektion
+  renderBeitragProjSVG(rente, p);
+
+  // GKV Panel
+  const gkvItems = [
+    { label: 'PKV-Abschaffung (Netto)', v: rente.pkv_netto_effekt, aktiv: p.pkv_abschaffen,
+      note: p.pkv_abschaffen ? '11 Mio. PKV → GKV; Mehrausgaben überwiegen leicht' : 'inaktiv' },
+    { label: 'Kassenfusion (Verwalt.)', v: rente.kassen_ersparnis, aktiv: p.anzahl_kv < 95,
+      note: p.anzahl_kv < 95 ? `${p.anzahl_kv} statt 95 Kassen; Fixkostenabbau 45%` : 'inaktiv' },
+    { label: 'Prävention (Nettonutzen)', v: rente.praevention_ersparnis, aktiv: p.praevention > 0,
+      note: p.praevention > 0 ? `${p.praevention} Mrd. Invest × 1,5 ROI (vereinf.)` : 'inaktiv' }
+  ].filter(x => x.aktiv);
+
+  if (gkvItems.length === 0) {
+    document.getElementById('gkv_panel').innerHTML = '';
+    return;
+  }
+
+  const maxAbs = Math.max(1, ...gkvItems.map(x => Math.abs(x.v)));
+  document.getElementById('gkv_panel').innerHTML = `
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px;">GKV-Struktureffekte (Mrd. € / Jahr)</div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+    ${gkvItems.map(item => {
+      const pct = Math.max(2, Math.abs(item.v) / maxAbs * 100);
+      const cls = item.v >= 0 ? 'pos' : 'neg';
+      return `<div>
+        <div style="display:grid;grid-template-columns:180px 1fr 72px;align-items:center;gap:10px;margin-bottom:4px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${item.label}">${item.label}</div>
+          <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;white-space:nowrap;">${item.v >= 0 ? '+' : ''}${f1(item.v)} Mrd.</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);font-style:italic;padding-left:4px;">${item.note}</div>
+      </div>`;
+    }).join('')}
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:14px;font-style:italic;">Quelle: GKV-SV Jahresbericht 2025, PKV-Verband, WHO Prevention ROI Report 2017, BMG.</p>`;
+}
+
+function renderKapitalstockSVG(rente, p) {
+  const el = document.getElementById('kapitalstock_chart');
+  if (!el) return;
+  if (p.kapitalquote === 0 || rente.ks_history.length === 0) {
+    el.innerHTML = '<p style="color:var(--muted);font-style:italic;font-size:13px;padding:12px 0;">Fondsquote = 0 % — kein Kapitalstock aufgebaut.<br>Setze Fondsquote > 0 und ein Startjahr um die historische Simulation zu sehen.</p>';
+    return;
+  }
+  const W = 580, H = 160, pl = 52, pr = 16, pt = 12, pb = 28;
+  const iW = W - pl - pr, iH = H - pt - pb;
+  const data = rente.ks_history;
+  const maxKS = Math.max(1, ...data.map(d => d.ks));
+  const minJahr = data[0].jahr, maxJahr = data[data.length-1].jahr;
+  const xOf = j => pl + ((j - minJahr) / Math.max(1, maxJahr - minJahr)) * iW;
+  const yOf = v => pt + iH - (v / maxKS) * iH;
+
+  const pts = data.map(d => xOf(d.jahr) + ',' + yOf(d.ks)).join(' ');
+  const area = `${pl},${pt+iH} ` + pts + ` ${xOf(maxJahr)},${pt+iH}`;
+
+  const yVals = [0, 0.25, 0.5, 0.75, 1.0].map(f => {
+    const v = f * maxKS;
+    const y = yOf(v);
+    const label = v >= 1000 ? (v/1000).toFixed(1).replace('.',',') + 'k' : Math.round(v);
+    return `<line x1="${pl}" y1="${y}" x2="${pl+iW}" y2="${y}" stroke="rgba(42,39,32,0.08)" stroke-width="1"/>
+            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${label}</text>`;
+  }).join('');
+
+  const xLabels = [];
+  for (let j = minJahr; j <= maxJahr; j += Math.max(1, Math.ceil((maxJahr - minJahr) / 5))) {
+    xLabels.push(`<text x="${xOf(j)}" y="${pt+iH+16}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${j}</text>`);
+  }
+
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
+    ${yVals}${xLabels.join('')}
+    <line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
+    <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
+    <polygon points="${area}" fill="var(--accent2)" opacity="0.15"/>
+    <polyline points="${pts}" fill="none" stroke="var(--accent2)" stroke-width="2.5"/>
+    <text x="${xOf(maxJahr)-4}" y="${yOf(data[data.length-1].ks)-8}" text-anchor="end" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="var(--accent2)">${Math.round(rente.kapitalstock)} Mrd. €</text>
+  </svg>`;
+}
+
+function renderBeitragProjSVG(rente, p) {
+  const el = document.getElementById('beitrag_proj_chart');
+  if (!el) return;
+  const W = 580, H = 160, pl = 48, pr = 16, pt = 12, pb = 28;
+  const iW = W - pl - pr, iH = H - pt - pb;
+
+  const allVals = [...rente.proj_ohne.map(d => d.beitrag), ...rente.proj_mit.map(d => d.beitrag)];
+  const minV = Math.min(15, ...allVals), maxV = Math.max(25, ...allVals);
+  const xOf = j => pl + ((j - 2025) / 20) * iW;
+  const yOf = v => pt + iH - ((v - minV) / (maxV - minV)) * iH;
+
+  const pts_ohne = rente.proj_ohne.map(d => xOf(d.jahr) + ',' + yOf(d.beitrag)).join(' ');
+  const pts_mit  = rente.proj_mit.map(d => xOf(d.jahr) + ',' + yOf(d.beitrag)).join(' ');
+
+  const yVals = [Math.ceil(minV), Math.round((minV+maxV)/2), Math.floor(maxV)].map(v => {
+    const y = yOf(v);
+    return `<line x1="${pl}" y1="${y}" x2="${pl+iW}" y2="${y}" stroke="rgba(42,39,32,0.08)" stroke-width="1"/>
+            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${v}%</text>`;
+  }).join('');
+
+  const xLabels = [2025,2030,2035,2040,2045].map(j =>
+    `<text x="${xOf(j)}" y="${pt+iH+16}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${j}</text>`
+  ).join('');
+
+  const legend = p.kapitalquote > 0
+    ? `<line x1="${pl+8}" y1="${pt+8}" x2="${pl+26}" y2="${pt+8}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4,2"/>
+       <text x="${pl+30}" y="${pt+12}" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">ohne Reform</text>
+       <line x1="${pl+130}" y1="${pt+8}" x2="${pl+148}" y2="${pt+8}" stroke="var(--accent2)" stroke-width="2.5"/>
+       <text x="${pl+152}" y="${pt+12}" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--accent2)">mit Reform</text>`
+    : `<text x="${pl+8}" y="${pt+14}" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--muted)" font-style="italic">Fondsquote = 0 — kein Unterschied sichtbar</text>`;
+
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
+    ${yVals}${xLabels}
+    <line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
+    <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
+    <polyline points="${pts_ohne}" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.7"/>
+    <polyline points="${pts_mit}"  fill="none" stroke="var(--accent2)" stroke-width="2.5"/>
+    ${legend}
+  </svg>`;
+}
+
+// ============================================================
+// LAFFER-KURVE
+// ============================================================
+
+let _lafferTimer = null;
+let _lafferPCache = null;
+let _lafferPts = null;
+
+function renderLaffer(p) {
+  const el = document.getElementById('laffer_chart');
+  if (!el) return;
+
+  // Debounce: compute only 200ms after last change
+  clearTimeout(_lafferTimer);
+  _lafferTimer = setTimeout(() => _renderLafferNow(p), 200);
+}
+
+function _renderLafferNow(p) {
+  const el = document.getElementById('laffer_chart');
+  if (!el) return;
+
+  // Cache: skip recompute if only spitze changed (curve shape is driven by other params)
+  const cacheKey = JSON.stringify({...p, spitze: 0});
+  if (_lafferPCache !== cacheKey) {
+    _lafferPts = [];
+    for (let s = 5; s <= 75; s += 2.5) {
+      const rr = berechne({ ...p, spitze: s });
+      _lafferPts.push({ s, est: rr.rev.est });
+    }
+    _lafferPCache = cacheKey;
+  }
+  const pts = _lafferPts;
+
+  const maxEst = Math.max(...pts.map(x => x.est));
+  const peakPt = pts.reduce((a, b) => b.est > a.est ? b : a);
+  const curPt = pts.reduce((a, b) => Math.abs(b.s - p.spitze) < Math.abs(a.s - p.spitze) ? b : a);
+
+  const W = 640, H = 180, pl = 52, pr = 20, pt2 = 16, pb = 30;
+  const iW = W - pl - pr, iH = H - pt2 - pb;
+  const minEst = Math.min(...pts.map(x => x.est)) * 0.97;
+  const xOf = s  => pl + ((s - 5) / 70) * iW;
+  const yOf = v  => pt2 + iH - ((v - minEst) / (maxEst * 1.05 - minEst)) * iH;
+
+  const line = pts.map(x => xOf(x.s) + ',' + yOf(x.est)).join(' ');
+  const area = `${xOf(pts[0].s)},${pt2+iH} ` + line + ` ${xOf(pts[pts.length-1].s)},${pt2+iH}`;
+
+  // Y-axis: deduplicated labels
+  const yTickSet = new Set([Math.round(minEst/50)*50, Math.round((minEst+maxEst)/2/50)*50, Math.round(maxEst/50)*50]);
+  const yVals = [...yTickSet].filter(v => v >= minEst && v <= maxEst*1.1).map(v => {
+    const y = yOf(v);
+    return `<line x1="${pl}" y1="${y}" x2="${pl+iW}" y2="${y}" stroke="rgba(42,39,32,0.08)" stroke-width="1"/>
+            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${Math.round(v)}</text>`;
+  }).join('');
+
+  const xVals = [10,20,30,40,50,60,70].map(s => {
+    const x = xOf(s);
+    return `<line x1="${x}" y1="${pt2}" x2="${x}" y2="${pt2+iH}" stroke="rgba(42,39,32,0.08)" stroke-width="1"/>
+            <text x="${x}" y="${pt2+iH+16}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${s}%</text>`;
+  }).join('');
+
+  // Peak-Markierung — text-anchor rechts wenn zu nah am Rand
+  const px = xOf(peakPt.s), py = yOf(peakPt.est);
+  const peakNearRight = px > pl + iW * 0.6;
+  const peakMark = `
+    <line x1="${px}" y1="${pt2}" x2="${px}" y2="${pt2+iH}" stroke="var(--accent2)" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
+    <circle cx="${px}" cy="${py}" r="5" fill="var(--accent2)" opacity="0.9"/>
+    <text x="${peakNearRight ? px-8 : px+8}" y="${py-8}" text-anchor="${peakNearRight ? 'end' : 'start'}" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="var(--accent2)">Max: ${peakPt.s}% → ${Math.round(peakPt.est)} Mrd.</text>`;
+
+  // Aktuelle Position
+  const cx = xOf(p.spitze), cy = yOf(curPt.est);
+  const curNearRight = cx > pl + iW * 0.75;
+  const curMark = `
+    <line x1="${cx}" y1="${pt2}" x2="${cx}" y2="${pt2+iH}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3,2"/>
+    <circle cx="${cx}" cy="${cy}" r="5" fill="var(--accent)"/>
+    <text x="${curNearRight ? cx-8 : cx+8}" y="${cy-6}" text-anchor="${curNearRight ? 'end' : 'start'}" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--accent)">${p.spitze}%</text>`;
+
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
+    ${yVals}${xVals}
+    <line x1="${pl}" y1="${pt2}" x2="${pl}" y2="${pt2+iH}" stroke="var(--rule)" stroke-width="1.5"/>
+    <line x1="${pl}" y1="${pt2+iH}" x2="${pl+iW}" y2="${pt2+iH}" stroke="var(--rule)" stroke-width="1.5"/>
+    <polygon points="${area}" fill="var(--accent)" opacity="0.07"/>
+    <polyline points="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    ${peakMark}${curMark}
+    <text x="${pl+8}" y="${pt2+14}" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">ESt-Aufkommen (Mrd. €)</text>
+  </svg>`;
 }
 
 function berechneGini(werte) {
@@ -1240,11 +2667,28 @@ function berechneGini(werte) {
   return Math.max(0, Math.min(1, gini));
 }
 
+function berechneMedianGewichtet(werte, dez) {
+  // Gewichteter Median: Hälfte der Haushalte liegt darunter
+  const pairs = werte.map((v,i) => ({v, n: dez[i].anzahl})).sort((a,b)=>a.v-b.v);
+  const half = pairs.reduce((a,p)=>a+p.n,0) / 2;
+  let cum = 0;
+  for (const p of pairs) { cum += p.n; if (cum >= half) return p.v; }
+  return pairs[pairs.length-1].v;
+}
+
 function berechnePalma(werte) {
-  const sorted = [...werte].sort((a,b)=>a-b);
-  const top10 = sorted[sorted.length - 1];
-  const bot40 = sorted.slice(0, 4).reduce((a,b)=>a+b,0);
-  return bot40 > 0 ? top10 / bot40 : 0;
+  // Palma-Ratio: Durchschnittseinkommen Top-10% / Durchschnitt Bottom-40%
+  // Mit D10-Split: top 10% = D10a+D10b+D10c (je nach Anzahl genau 10%)
+  const pairs = werte.map((v,i) => ({v, n: DEZILE[i].anzahl})).sort((a,b)=>a.v-b.v);
+  const total_n = pairs.reduce((a,p)=>a+p.n,0);
+  let bot_sum=0, bot_n=0, top_sum=0, top_n=0, cum_bot=0, cum_top=0;
+  for (const p of pairs) {
+    if (cum_bot < total_n*0.40+0.05) { bot_sum+=p.v*p.n; bot_n+=p.n; cum_bot+=p.n; }
+  }
+  for (let j=pairs.length-1; j>=0; j--) {
+    if (cum_top < total_n*0.10+0.05) { top_sum+=pairs[j].v*pairs[j].n; top_n+=pairs[j].n; cum_top+=pairs[j].n; }
+  }
+  return (bot_n>0&&top_n>0) ? (top_sum/top_n)/(bot_sum/bot_n) : 0;
 }
 
 // ============================================================
@@ -1258,10 +2702,11 @@ const PRESETS = {
     kst: 15, gewst: 14, gewst_aus: false,
     mwst: 19, mwst_erm: 7,
     co2: 55, klimageld: true,
-    erb: 20, betriebs: true, boden: 0.4, verm: 0,
-    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false,
-    bg: 563, kg: 255, neg_est: false,
-    kleine_st: true
+    erb: 20, betriebs: true, boden: 0.4, verm: 0, zucman: 0,
+    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
+    bg: 563, kg: 255, neg_est: false, kleine_st: true,
+    kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
+    pkv_abschaffen: false, anzahl_kv: 95, praevention: 0, bge: 0
   },
   synthetisch: {
     freibetrag: 15000, eingang: 14, spitze: 50, grenze: 300000,
@@ -1269,10 +2714,11 @@ const PRESETS = {
     kst: 25, gewst: 0, gewst_aus: true,
     mwst: 19, mwst_erm: 7,
     co2: 80, klimageld: true,
-    erb: 30, betriebs: false, boden: 1.0, verm: 0,
-    rv: 18.6, kv: 14, alpf: 6.2, buergerv: true,
-    bg: 650, kg: 300, neg_est: false,
-    kleine_st: false
+    erb: 30, betriebs: false, boden: 1.0, verm: 0.5, zucman: 0,
+    rv: 18.6, kv: 14, alpf: 6.2, buergerv: true, bbg: 115000,
+    bg: 650, kg: 300, neg_est: false, kleine_st: false,
+    kapitalquote: 5, rendite_fonds: 7, startjahr: 2015,
+    pkv_abschaffen: false, anzahl_kv: 95, praevention: 3, bge: 0
   },
   kirchhof: {
     freibetrag: 10000, eingang: 25, spitze: 25, grenze: 60000,
@@ -1280,10 +2726,11 @@ const PRESETS = {
     kst: 25, gewst: 0, gewst_aus: true,
     mwst: 19, mwst_erm: 7,
     co2: 55, klimageld: true,
-    erb: 10, betriebs: true, boden: 0.4, verm: 0,
-    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false,
-    bg: 563, kg: 255, neg_est: false,
-    kleine_st: false
+    erb: 10, betriebs: true, boden: 0.4, verm: 0, zucman: 0,
+    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
+    bg: 563, kg: 255, neg_est: false, kleine_st: false,
+    kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
+    pkv_abschaffen: false, anzahl_kv: 95, praevention: 0, bge: 0
   },
   radikal: {
     freibetrag: 18000, eingang: 20, spitze: 60, grenze: 200000,
@@ -1291,22 +2738,64 @@ const PRESETS = {
     kst: 30, gewst: 0, gewst_aus: true,
     mwst: 19, mwst_erm: 5,
     co2: 150, klimageld: true,
-    erb: 50, betriebs: false, boden: 2.0, verm: 1.5,
-    rv: 20, kv: 14, alpf: 6.2, buergerv: true,
-    bg: 800, kg: 350, neg_est: true,
-    kleine_st: false
+    erb: 50, betriebs: false, boden: 2.0, verm: 1.5, zucman: 2,
+    rv: 20, kv: 14, alpf: 6.2, buergerv: true, bbg: 150000,
+    bg: 800, kg: 350, neg_est: true, kleine_st: false,
+    kapitalquote: 10, rendite_fonds: 7, startjahr: 2010,
+    pkv_abschaffen: true, anzahl_kv: 20, praevention: 10, bge: 0
   },
   simpel: {
-    // 5-Steuern-System: ESt, MwSt, CO2, Erbschaft, Boden + SV
     freibetrag: 15000, eingang: 20, spitze: 50, grenze: 250000,
     synthetisch: true, abgeltung: 25,
     kst: 20, gewst: 0, gewst_aus: true,
     mwst: 19, mwst_erm: 7,
     co2: 100, klimageld: true,
-    erb: 30, betriebs: false, boden: 1.5, verm: 0,
-    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false,
-    bg: 600, kg: 280, neg_est: false,
-    kleine_st: false
+    erb: 30, betriebs: false, boden: 1.5, verm: 0, zucman: 0,
+    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
+    bg: 600, kg: 280, neg_est: false, kleine_st: false,
+    kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
+    pkv_abschaffen: false, anzahl_kv: 95, praevention: 0, bge: 0
+  },
+  nordisch: {
+    freibetrag: 14000, eingang: 20, spitze: 52, grenze: 120000,
+    synthetisch: false, abgeltung: 30,
+    kst: 22, gewst: 0, gewst_aus: true,
+    mwst: 25, mwst_erm: 12,
+    co2: 120, klimageld: true,
+    erb: 15, betriebs: true, boden: 0.8, verm: 0, zucman: 0,
+    rv: 22, kv: 12, alpf: 7.0, buergerv: true, bbg: 120000,
+    bg: 750, kg: 350, neg_est: false, kleine_st: true,
+    kapitalquote: 15, rendite_fonds: 7, startjahr: 2005,
+    pkv_abschaffen: true, anzahl_kv: 30, praevention: 8, bge: 0
+  },
+  koalition27: {
+    freibetrag: 13000, eingang: 12, spitze: 44, grenze: 290000,
+    synthetisch: false, abgeltung: 25,
+    kst: 13, gewst: 12, gewst_aus: false,
+    mwst: 19, mwst_erm: 7,
+    co2: 65, klimageld: true,
+    erb: 20, betriebs: true, boden: 0.4, verm: 0, zucman: 0,
+    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
+    bg: 550, kg: 259, neg_est: false, kleine_st: true,
+    kapitalquote: 10, rendite_fonds: 7, startjahr: 2024,
+    pkv_abschaffen: false, anzahl_kv: 95, praevention: 3, bge: 0
+  },
+  bge: {
+    // BGE 1.200 €/Monat für alle Erwachsenen (~70 Mio.)
+    // Finanzierungsmodell: ifo Mikrosimulation 2021 (Blömer/Peichl)
+    // Freibetrag 0: BGE dient als effektiver Grundfreibetrag (14.400 €/Jahr)
+    // Spitzensteuersatz 60% nötig laut ifo; synthetische ESt auf Kapital
+    // Bürgergeld abgeschafft (BGE > 563 €); MwSt leicht erhöht
+    freibetrag: 0, eingang: 30, spitze: 60, grenze: 277826,
+    synthetisch: true, abgeltung: 30,
+    kst: 25, gewst: 14, gewst_aus: false,
+    mwst: 22, mwst_erm: 7,
+    co2: 80, klimageld: false,
+    erb: 30, betriebs: false, boden: 1.0, verm: 0, zucman: 0,
+    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
+    bg: 0, kg: 255, neg_est: false, kleine_st: false,
+    kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
+    pkv_abschaffen: false, anzahl_kv: 95, praevention: 0, bge: 1200
   }
 };
 
@@ -1340,7 +2829,16 @@ function getParams() {
     bg:         +document.getElementById('bg').value,
     kg:         +document.getElementById('kg').value,
     neg_est:    document.getElementById('neg_est').checked,
-    kleine_st:  document.getElementById('kleine_st').checked
+    kleine_st:  document.getElementById('kleine_st').checked,
+    kapitalquote:   +document.getElementById('kapitalquote').value,
+    rendite_fonds:  +document.getElementById('rendite_fonds').value,
+    startjahr:      +document.getElementById('startjahr').value,
+    pkv_abschaffen: document.getElementById('pkv_abschaffen').checked,
+    anzahl_kv:      +document.getElementById('anzahl_kv').value,
+    praevention:    +document.getElementById('praevention').value,
+    bbg:            +document.getElementById('bbg').value,
+    zucman:         +document.getElementById('zucman').value,
+    bge:            +document.getElementById('bge').value
   };
 }
 
@@ -1370,6 +2868,15 @@ function setParams(p) {
   document.getElementById('kg').value = p.kg;
   document.getElementById('neg_est').checked = p.neg_est;
   document.getElementById('kleine_st').checked = p.kleine_st;
+  document.getElementById('kapitalquote').value = p.kapitalquote ?? 0;
+  document.getElementById('rendite_fonds').value = p.rendite_fonds ?? 7;
+  document.getElementById('startjahr').value = p.startjahr ?? 2020;
+  document.getElementById('pkv_abschaffen').checked = p.pkv_abschaffen ?? false;
+  document.getElementById('anzahl_kv').value = p.anzahl_kv ?? 95;
+  document.getElementById('praevention').value = p.praevention ?? 0;
+  document.getElementById('bbg').value = p.bbg ?? 90000;
+  document.getElementById('zucman').value = p.zucman ?? 0;
+  document.getElementById('bge').value = p.bge ?? 0;
 }
 
 function fmtEUR(x) {
@@ -1409,8 +2916,16 @@ function render() {
   document.getElementById('v_rv').textContent = p.rv.toFixed(1) + ' %';
   document.getElementById('v_kv').textContent = p.kv.toFixed(1) + ' %';
   document.getElementById('v_alpf').textContent = p.alpf.toFixed(1) + ' %';
+  document.getElementById('v_bge').textContent = p.bge > 0 ? p.bge + ' €/Monat' : 'aus';
   document.getElementById('v_bg').textContent = p.bg + ' €';
   document.getElementById('v_kg').textContent = p.kg + ' €';
+  document.getElementById('v_kapitalquote').textContent = p.kapitalquote + ' %';
+  document.getElementById('v_rendite_fonds').textContent = p.rendite_fonds + ' %';
+  document.getElementById('v_startjahr').textContent = p.startjahr;
+  document.getElementById('v_anzahl_kv').textContent = p.anzahl_kv;
+  document.getElementById('v_praevention').textContent = p.praevention + ' Mrd.';
+  document.getElementById('v_bbg').textContent = (p.bbg / 1000).toFixed(0) + '.000 €';
+  document.getElementById('v_zucman').textContent = p.zucman.toFixed(1) + ' %';
 
   // Abgeltungsteuer-Row nur zeigen wenn nicht synthetisch
   document.getElementById('row_abgeltung').style.opacity = p.synthetisch ? 0.3 : 1;
@@ -1465,7 +2980,7 @@ function render() {
   const revLabels = {
     est: 'Einkommensteuer', kst: 'Körperschaftst.', gewst: 'Gewerbest.',
     mwst: 'Mehrwertsteuer', co2: 'CO₂ (netto)', erbschaft: 'Erbschaftst.',
-    boden: 'Bodenwertst.', vermoegen: 'Vermögenst.',
+    boden: 'Bodenwertst.', vermoegen: 'Vermögenst.', zucman: 'Zucman-Mindestst.',
     rv: 'Rentenvers.', kv: 'Krankenvers.', al: 'AL+Pflege',
     klein: 'Kleine Verbrauchst.'
   };
@@ -1487,7 +3002,7 @@ function render() {
     const rightPct = v > 0 ? (v / maxAbsDelta) * 100 : 0;
     return `
       <div class="divergent-row">
-        <div class="div-label">D${i+1}</div>
+        <div class="div-label">${DEZILE[i].label}</div>
         <div class="div-track-left"><div class="div-fill-left" style="width:${leftPct}%"></div></div>
         <div class="div-center">0</div>
         <div class="div-track-right"><div class="div-fill-right" style="width:${rightPct}%"></div></div>
@@ -1520,7 +3035,7 @@ function render() {
   const burdenMax = Math.max(...r.hh_delta.belastung_pct.map(Math.abs));
   const bHtml = r.hh_delta.belastung_pct.map((v, i) => `
     <div class="bar-row">
-      <div class="bar-label">Dezil ${i+1}</div>
+      <div class="bar-label">${DEZILE[i].label}</div>
       <div class="bar-track"><div class="bar-fill ${v<0?'pos':'neg'}" style="width:${Math.min(100,Math.abs(v)/burdenMax*100)}%"></div></div>
       <div class="bar-value">${v>=0?'+':'−'}${Math.abs(v).toFixed(1)} %</div>
     </div>`).join('');
@@ -1545,7 +3060,410 @@ function render() {
   }).join('');
   document.getElementById('behavior_bars').innerHTML = bhvHtml;
 
+  // NEUE KPIs
+  const armutEl = document.getElementById('kpi_armut');
+  const armutDEl = document.getElementById('kpi_armut_d');
+  armutEl.textContent = r.armutsrisiko.toFixed(1).replace('.', ',') + ' %';
+  const dArmut = r.armutsrisiko - REF.armutsrisiko;
+  armutDEl.textContent = (dArmut >= 0 ? '+' : '') + dArmut.toFixed(1).replace('.', ',') + ' PP vs. Basis';
+  armutDEl.className = 'kpi-delta ' + (dArmut < -0.5 ? 'good' : dArmut > 0.5 ? 'bad' : 'neutral');
+
+  const schuldEl = document.getElementById('kpi_schuld');
+  const schuldDEl = document.getElementById('kpi_schuld_d');
+  schuldEl.textContent = (r.schuldenquote_delta >= 0 ? '+' : '') + r.schuldenquote_delta.toFixed(2).replace('.', ',') + ' %';
+  schuldEl.style.color = r.schuldenquote_delta > 0.5 ? 'var(--bad)' : r.schuldenquote_delta < -0.2 ? 'var(--good)' : 'var(--ink)';
+  schuldDEl.textContent = r.schuldenquote_delta > 0 ? 'Schulden steigen' : r.schuldenquote_delta < 0 ? 'Schulden sinken' : 'Ausgeglichen';
+  schuldDEl.className = 'kpi-delta ' + (r.schuldenquote_delta > 0.5 ? 'bad' : r.schuldenquote_delta < 0 ? 'good' : 'neutral');
+
+  document.getElementById('kpi_dwl').textContent = r.dwl.toFixed(0) + ' Mrd.';
+  const dwlDEl = document.getElementById('kpi_dwl_d');
+  const dDwl = r.dwl - REF.dwl;
+  dwlDEl.textContent = (dDwl >= 0 ? '+' : '') + dDwl.toFixed(0) + ' Mrd. vs. Basis';
+  dwlDEl.className = 'kpi-delta ' + (dDwl > 5 ? 'bad' : dDwl < -5 ? 'good' : 'neutral');
+
+  // KPI BENCHMARKS
+  document.getElementById('kpi_saldo_bench').textContent = KPI_BENCH.saldo;
+  document.getElementById('kpi_einn_bench').textContent = KPI_BENCH.einn;
+  document.getElementById('kpi_gini_bench').textContent = KPI_BENCH.gini;
+  document.getElementById('kpi_admin_bench').textContent = KPI_BENCH.admin;
+  document.getElementById('kpi_nst_bench').textContent = KPI_BENCH.nst;
+  document.getElementById('kpi_arb_bench').textContent = KPI_BENCH.arb;
+  document.getElementById('kpi_armut_bench').textContent = KPI_BENCH.armut;
+  document.getElementById('kpi_schuld_bench').textContent = KPI_BENCH.schuld;
+  document.getElementById('kpi_dwl_bench').textContent = KPI_BENCH.dwl;
+
+  // Cross-page param sync
+  localStorage.setItem('haushaltsspiel_params', JSON.stringify(p));
+
+  // ESt-TARIFKURVE
+  renderEstKurve(p);
+
+  // LAFFER-KURVE (debounced — sofort beim ersten Aufruf, danach 200ms nach letzter Änderung)
+  renderLaffer(p);
+
+  // METR-BARS
+  const metrHtml = r.metr.map((m, i) => {
+    const pct = Math.min(100, m * 100);
+    const cls = m > 0.70 ? 'neg' : m > 0.50 ? 'neu' : 'pos';
+    return `<div class="bar-row">
+      <div class="bar-label">${DEZILE[i].label}</div>
+      <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
+      <div class="bar-value">${Math.round(m * 100)} %</div>
+    </div>`;
+  }).join('');
+  document.getElementById('metr_bars').innerHTML = metrHtml;
+
+  // EINKOMMENSVERTEILUNG
+  renderIncomeDist(r, p);
+
+  // RENTEN & GKV
+  renderRenten(p, r);
+
+  // SCHULDENQUOTENPFAD
+  renderSchuldenpfad(r);
+
+  // CHALLENGES
+  renderChallenges(r);
+
+  // WISSENSCHAFTS-KOMPASS
+  renderWissenschaftsPanel(p);
+
+  // URL-Hash aktualisieren
+  window.history.replaceState(null, '', paramsToHash(p));
+
   renderRechenweg(r, p);
+
+  // SCORE PANEL
+  renderScore(r);
+
+  // KPI PULSE — detect changed KPI values and flash them
+  const _kpiPulseIds = ['kpi_saldo','kpi_einn','kpi_gini','kpi_admin','kpi_nst','kpi_arb','kpi_armut','kpi_schuld','kpi_dwl'];
+  _kpiPulseIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.textContent;
+    if (_prevKpiValues[id] !== undefined && _prevKpiValues[id] !== cur) {
+      const tile = el.closest('.kpi');
+      if (tile) {
+        tile.classList.remove('kpi-changed');
+        void tile.offsetWidth;
+        tile.classList.add('kpi-changed');
+      }
+    }
+    _prevKpiValues[id] = cur;
+  });
+
+  // BGE PANEL
+  (function() {
+    const bge_p = p.bge || 0;
+    const bgePanel = document.getElementById('bge-impact-panel');
+    const bgeSectionTitle = document.getElementById('bge-section-title');
+    const bgeLiveCost = document.getElementById('bge-live-cost');
+    if (!bgePanel) return;
+    if (bge_p > 0) {
+      bgePanel.style.display = 'block';
+      if (bgeLiveCost) bgeLiveCost.style.display = 'block';
+      if (bgeSectionTitle) bgeSectionTitle.classList.add('bge-on');
+      document.getElementById('bge-panel-badge').textContent = bge_p + ' €/Monat';
+
+      const bge_brutto = bge_p * 12 * 70 / 1000;
+      const bg_saved = bge_p >= p.bg ? 5.5 * p.bg * 12 / 1000 : 0;
+      const bge_netto = bge_brutto - bg_saved;
+      const total_rev = 1450; // Mrd. Gesamtsteuereinnahmen Referenz
+      const fin_pct = Math.min(100, (bge_netto / total_rev) * 100);
+
+      document.getElementById('bge-cost-gross').textContent = bge_brutto.toFixed(0) + ' Mrd. €/Jahr';
+      document.getElementById('bge-cost-save').textContent = bg_saved > 0 ? '−' + bg_saved.toFixed(0) + ' Mrd.' : '—';
+      document.getElementById('bge-cost-net').textContent = bge_netto.toFixed(0) + ' Mrd. €/Jahr';
+
+      const BGE_EFF_r = [0.15,0.12,0.09,0.06,0.04,0.025,0.015,0.01,0.005,0,0,0];
+      const bge_sc = Math.min(1.67, bge_p / 1200);
+      const avg_eff = BGE_EFF_r.reduce((a,v) => a + v, 0) / BGE_EFF_r.length * bge_sc * 100;
+
+      const kpiNetClass = bge_netto > 300 ? 'bad' : bge_netto > 100 ? 'neutral' : 'good';
+      document.getElementById('bge-kpi-row').innerHTML = [
+        { label:'Bruttokosten', val: bge_brutto.toFixed(0)+' Mrd. €', note:'70 Mio. × '+bge_p+' € × 12', cls:'bad' },
+        { label:'Bürgergeld-Ersatz', val: bg_saved > 0 ? '−'+bg_saved.toFixed(0)+' Mrd.' : '—', note: bg_saved > 0 ? 'vollständig ersetzt' : 'BGE < Bürgergeld-Niveau', cls: bg_saved > 0 ? 'good' : 'neutral' },
+        { label:'Nettokosten', val: bge_netto.toFixed(0)+' Mrd. €', note:'zu finanzieren', cls: kpiNetClass },
+        { label:'Arbeitsangebot Ø', val: '−'+avg_eff.toFixed(1)+' %', note:'RWI/ZEW Kompromiss', cls:'neutral' },
+      ].map(k => `<div class="bge-kpi"><div class="bge-kpi-label">${k.label}</div><div class="bge-kpi-val ${k.cls}">${k.val}</div><div class="bge-kpi-note">${k.note}</div></div>`).join('');
+
+      const finFill = document.getElementById('bge-fin-fill');
+      if (finFill) finFill.style.width = fin_pct.toFixed(0) + '%';
+      const finPct = document.getElementById('bge-fin-pct');
+      if (finPct) finPct.textContent = bge_netto.toFixed(0) + ' Mrd. € (' + fin_pct.toFixed(0) + ' % der Einnahmen)';
+    } else {
+      bgePanel.style.display = 'none';
+      if (bgeLiveCost) bgeLiveCost.style.display = 'none';
+      if (bgeSectionTitle) bgeSectionTitle.classList.remove('bge-on');
+    }
+  })();
+
+  _lastResult = r;
+  _lastParams  = p;
+
+  // Live scenario update
+  if (activeScenarioSlot) {
+    SZENARIO[activeScenarioSlot] = { p, r };
+    renderSzenarioVergleich();
+  }
+}
+
+// ============================================================
+// CHALLENGES
+// ============================================================
+
+const CHALLENGES = [
+  // ── TÄGLICH (leicht, ein Ziel) ──────────────────────────
+  { id:'gini_285', diff:'daily', title:'Soziale Balance',
+    desc:'Gini-Koeffizient unter 0,285 senken',
+    subs:[{ label:'Gini', check:r=>r.gini<0.285, cur:r=>r.gini, tgt:0.285, refFn:()=>REF.gini, dir:'down', fmt:v=>v.toFixed(3).replace('.',',') }]},
+  { id:'saldo_50', diff:'daily', title:'Haushaltsdisziplin',
+    desc:'Defizit unter 50 Mrd. € drücken',
+    subs:[{ label:'Saldo', check:r=>r.saldo>-50, cur:r=>r.saldo, tgt:-50, refFn:()=>REF.saldo, dir:'up', fmt:v=>v.toFixed(0)+' Mrd.' }]},
+  { id:'admin_120', diff:'daily', title:'Schlankerer Staat',
+    desc:'Verwaltungskosten unter 120 Mrd. €',
+    subs:[{ label:'Verwaltung', check:r=>r.admin_kosten<120, cur:r=>r.admin_kosten, tgt:120, refFn:()=>REF.admin_kosten, dir:'down', fmt:v=>v.toFixed(0)+' Mrd.' }]},
+  { id:'labor_101', diff:'daily', title:'Beschäftigungsimpuls',
+    desc:'Arbeitsangebot-Index über 101',
+    subs:[{ label:'Arbeit-Index', check:r=>r.behavior.labor>101, cur:r=>r.behavior.labor, tgt:101, refFn:()=>100, dir:'up', fmt:v=>v.toFixed(1) }]},
+  { id:'armut_16', diff:'daily', title:'Armutsreduktion',
+    desc:'Armutsrisikoquote unter 8 %',
+    subs:[{ label:'Armutsrisiko', check:r=>r.armutsrisiko<8, cur:r=>r.armutsrisiko, tgt:8, refFn:()=>REF.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' }]},
+  { id:'co2_85', diff:'daily', title:'Klimakurs',
+    desc:'CO₂-Emissionen auf Index unter 85',
+    subs:[{ label:'CO₂-Index', check:r=>r.behavior.co2<85, cur:r=>r.behavior.co2, tgt:85, refFn:()=>100, dir:'down', fmt:v=>v.toFixed(1) }]},
+  { id:'nst_12', diff:'daily', title:'Steuervereinfachung',
+    desc:'Höchstens 12 aktive Steuerarten',
+    subs:[{ label:'Steuerarten', check:r=>r.nst<=12, cur:r=>r.nst, tgt:12, refFn:()=>REF.nst, dir:'down', fmt:v=>v+' Arten' }]},
+  { id:'invest_101', diff:'daily', title:'Standortpflege',
+    desc:'Investitionsindex über 101',
+    subs:[{ label:'Investition', check:r=>r.behavior.invest>101, cur:r=>r.behavior.invest, tgt:101, refFn:()=>100, dir:'up', fmt:v=>v.toFixed(1) }]},
+
+  // ── WÖCHENTLICH (mittel, anspruchsvoller) ───────────────
+  { id:'gini_270', diff:'weekly', title:'Starke Umverteilung',
+    desc:'Gini-Koeffizient unter 0,270',
+    subs:[{ label:'Gini', check:r=>r.gini<0.270, cur:r=>r.gini, tgt:0.270, refFn:()=>REF.gini, dir:'down', fmt:v=>v.toFixed(3).replace('.',',') }]},
+  { id:'saldo_0', diff:'weekly', title:'Schwarze Null',
+    desc:'Staatssaldo auf ≥ 0 Mrd. bringen',
+    subs:[{ label:'Saldo', check:r=>r.saldo>=0, cur:r=>r.saldo, tgt:0, refFn:()=>REF.saldo, dir:'up', fmt:v=>v.toFixed(0)+' Mrd.' }]},
+  { id:'nst_7', diff:'weekly', title:'Kirchhof-Schüler',
+    desc:'Maximal 7 aktive Steuerarten',
+    subs:[{ label:'Steuerarten', check:r=>r.nst<=7, cur:r=>r.nst, tgt:7, refFn:()=>REF.nst, dir:'down', fmt:v=>v+' Arten' }]},
+  { id:'invest_104', diff:'weekly', title:'Investitionsoffensive',
+    desc:'Investitionsindex über 104',
+    subs:[{ label:'Investition', check:r=>r.behavior.invest>104, cur:r=>r.behavior.invest, tgt:104, refFn:()=>100, dir:'up', fmt:v=>v.toFixed(1) }]},
+  { id:'armut_14', diff:'weekly', title:'Soziale Gerechtigkeit',
+    desc:'Armutsrisikoquote unter 5 %',
+    subs:[{ label:'Armutsrisiko', check:r=>r.armutsrisiko<5, cur:r=>r.armutsrisiko, tgt:5, refFn:()=>REF.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' }]},
+  { id:'schuld_neg', diff:'weekly', title:'Schuldenabbau',
+    desc:'Schuldenquote jährlich sinkend (Δ < 0)',
+    subs:[{ label:'Schulden-Δ', check:r=>r.schuldenquote_delta<0, cur:r=>r.schuldenquote_delta, tgt:0, refFn:()=>REF.schuldenquote_delta, dir:'down', fmt:v=>v.toFixed(2)+' %' }]},
+  { id:'co2_70', diff:'weekly', title:'Klimaführerschaft',
+    desc:'CO₂-Emissionen auf Index unter 70',
+    subs:[{ label:'CO₂-Index', check:r=>r.behavior.co2<70, cur:r=>r.behavior.co2, tgt:70, refFn:()=>100, dir:'down', fmt:v=>v.toFixed(1) }]},
+  { id:'admin_100', diff:'weekly', title:'Effizienzreform',
+    desc:'Verwaltungskosten unter 100 Mrd. €',
+    subs:[{ label:'Verwaltung', check:r=>r.admin_kosten<100, cur:r=>r.admin_kosten, tgt:100, refFn:()=>REF.admin_kosten, dir:'down', fmt:v=>v.toFixed(0)+' Mrd.' }]},
+
+  // ── MONATLICH (schwer, Kombinationen) ───────────────────
+  { id:'gini_saldo', diff:'monthly', title:'Quadratur des Kreises',
+    desc:'Gini < 0,280 UND Saldo > −30 Mrd.',
+    subs:[
+      { label:'Gini < 0,280',    check:r=>r.gini<0.280,   cur:r=>r.gini,          tgt:0.280,  refFn:()=>REF.gini,         dir:'down', fmt:v=>v.toFixed(3).replace('.',',') },
+      { label:'Saldo > −30',     check:r=>r.saldo>-30,    cur:r=>r.saldo,         tgt:-30,    refFn:()=>REF.saldo,        dir:'up',   fmt:v=>v.toFixed(0)+' Mrd.' }
+    ]},
+  { id:'labor_co2', diff:'monthly', title:'Grünes Wachstum',
+    desc:'Arbeitsangebot > 101 UND CO₂-Index < 80',
+    subs:[
+      { label:'Arbeit > 101',   check:r=>r.behavior.labor>101,  cur:r=>r.behavior.labor, tgt:101, refFn:()=>100, dir:'up',   fmt:v=>v.toFixed(1) },
+      { label:'CO₂ < 80',       check:r=>r.behavior.co2<80,     cur:r=>r.behavior.co2,   tgt:80,  refFn:()=>100, dir:'down', fmt:v=>v.toFixed(1) }
+    ]},
+  { id:'invest_admin', diff:'monthly', title:'Effizienz & Kapital',
+    desc:'Investitionen > 103 UND Verwaltung < 105 Mrd.',
+    subs:[
+      { label:'Invest. > 103',  check:r=>r.behavior.invest>103, cur:r=>r.behavior.invest, tgt:103, refFn:()=>100, dir:'up',   fmt:v=>v.toFixed(1) },
+      { label:'Verwalt. < 105', check:r=>r.admin_kosten<105,    cur:r=>r.admin_kosten,    tgt:105, refFn:()=>REF.admin_kosten, dir:'down', fmt:v=>v.toFixed(0)+' Mrd.' }
+    ]},
+  { id:'triple_klima', diff:'monthly', title:'Klimasozialpakt',
+    desc:'Gini < 0,285, Saldo > −50 Mrd., CO₂ < 80',
+    subs:[
+      { label:'Gini < 0,285',   check:r=>r.gini<0.285,         cur:r=>r.gini,          tgt:0.285, refFn:()=>REF.gini,  dir:'down', fmt:v=>v.toFixed(3).replace('.',',') },
+      { label:'Saldo > −50',    check:r=>r.saldo>-50,          cur:r=>r.saldo,         tgt:-50,   refFn:()=>REF.saldo, dir:'up',   fmt:v=>v.toFixed(0)+' Mrd.' },
+      { label:'CO₂ < 80',       check:r=>r.behavior.co2<80,    cur:r=>r.behavior.co2,  tgt:80,    refFn:()=>100,       dir:'down', fmt:v=>v.toFixed(1) }
+    ]},
+  { id:'sozmark', diff:'monthly', title:'Soziale Marktwirtschaft',
+    desc:'Armut < 14%, Investitionen > 101, Saldo > −40 Mrd.',
+    subs:[
+      { label:'Armut < 6 %',    check:r=>r.armutsrisiko<6,      cur:r=>r.armutsrisiko,   tgt:6,   refFn:()=>REF.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' },
+      { label:'Invest. > 101',  check:r=>r.behavior.invest>101, cur:r=>r.behavior.invest, tgt:101, refFn:()=>100,              dir:'up',   fmt:v=>v.toFixed(1) },
+      { label:'Saldo > −40',    check:r=>r.saldo>-40,           cur:r=>r.saldo,           tgt:-40, refFn:()=>REF.saldo,        dir:'up',   fmt:v=>v.toFixed(0)+' Mrd.' }
+    ]},
+  { id:'gini_invest_schuld', diff:'monthly', title:'Aufstieg ohne Schulden',
+    desc:'Gini < 0,278, Investitionen > 102, Schuldenquote Δ < 0',
+    subs:[
+      { label:'Gini < 0,278',   check:r=>r.gini<0.278,          cur:r=>r.gini,            tgt:0.278, refFn:()=>REF.gini,              dir:'down', fmt:v=>v.toFixed(3).replace('.',',') },
+      { label:'Invest. > 102',  check:r=>r.behavior.invest>102, cur:r=>r.behavior.invest,  tgt:102,   refFn:()=>100,                  dir:'up',   fmt:v=>v.toFixed(1) },
+      { label:'Schulden-Δ < 0', check:r=>r.schuldenquote_delta<0, cur:r=>r.schuldenquote_delta, tgt:0, refFn:()=>REF.schuldenquote_delta, dir:'down', fmt:v=>v.toFixed(2)+' %' }
+    ]},
+];
+
+function dateSeed(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(h ^ s.charCodeAt(i), 16777619)) >>> 0;
+  return h;
+}
+
+function isoWeek(d) {
+  const dt = new Date(d); dt.setHours(0,0,0,0);
+  dt.setDate(dt.getDate() + 3 - (dt.getDay() + 6) % 7);
+  const w1 = new Date(dt.getFullYear(), 0, 4);
+  return 1 + Math.round(((dt - w1) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7);
+}
+
+function challengeKey(diff) {
+  const now = new Date();
+  if (diff === 'daily')   return now.toISOString().slice(0, 10);
+  if (diff === 'weekly')  return now.getFullYear() + '-W' + String(isoWeek(now)).padStart(2,'0');
+  if (diff === 'monthly') return now.toISOString().slice(0, 7);
+}
+
+function pickChallenge(diff) {
+  const pool = CHALLENGES.filter(c => c.diff === diff);
+  return pool[dateSeed(challengeKey(diff)) % pool.length];
+}
+
+function challengeProgress(sub, r) {
+  const cur = sub.cur(r), ref = sub.refFn(), tgt = sub.tgt;
+  if (sub.dir === 'down') {
+    if (ref <= tgt) return 100; // already at/below target in ref
+    return Math.max(0, Math.min(100, (ref - cur) / (ref - tgt) * 100));
+  } else {
+    if (ref >= tgt) return 100;
+    return Math.max(0, Math.min(100, (cur - ref) / (tgt - ref) * 100));
+  }
+}
+
+function lsKey(diff) { return 'challenge_done_' + diff + '_' + challengeKey(diff); }
+
+function renderChallenges(r) {
+  const slots = [
+    { diff:'daily',   label:'TAGES-CHALLENGE',   period: new Date().toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long'}), accent:'var(--accent)' },
+    { diff:'weekly',  label:'WOCHEN-CHALLENGE',   period: 'KW ' + isoWeek(new Date()) + ' · ' + new Date().getFullYear(), accent:'var(--accent3)' },
+    { diff:'monthly', label:'MONATS-CHALLENGE',   period: new Date().toLocaleDateString('de-DE', {month:'long', year:'numeric'}), accent:'var(--accent2)' },
+  ];
+
+  const html = slots.map(slot => {
+    const c = pickChallenge(slot.diff);
+    const allDone = c.subs.every(s => s.check(r));
+    const wasAlreadyDone = localStorage.getItem(lsKey(slot.diff)) === c.id;
+
+    if (allDone && !wasAlreadyDone) localStorage.setItem(lsKey(slot.diff), c.id);
+
+    const subsHtml = c.subs.map(sub => {
+      const pct = challengeProgress(sub, r);
+      const done = sub.check(r);
+      const ctx = CHALLENGE_CTX[sub.label] ? `<div class="challenge-context">${CHALLENGE_CTX[sub.label]}</div>` : '';
+      return `<div class="challenge-bar-wrap">
+        <div class="challenge-bar-label">
+          <span>${sub.label}</span>
+          <span class="cur" style="color:${done ? slot.accent : 'var(--ink)'}">${sub.fmt(sub.cur(r))}</span>
+        </div>
+        <div class="challenge-track">
+          <div class="challenge-fill" style="width:${pct}%;background:${done ? slot.accent : 'rgba(42,39,32,0.35)'}"></div>
+        </div>
+        ${ctx}
+      </div>`;
+    }).join('');
+
+    const badge = allDone
+      ? `<div class="challenge-done-badge" style="color:${slot.accent};border-color:${slot.accent}">✓ Geschafft!</div>`
+      : `<div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px;">${c.subs.filter(s=>s.check(r)).length}/${c.subs.length} Ziele erreicht</div>`;
+
+    return `<div class="challenge-card${allDone ? ' done' : ''}">
+      <div class="challenge-accent-bar" style="background:${slot.accent}"></div>
+      <div class="challenge-period">${slot.label} · ${slot.period}</div>
+      <div class="challenge-title">${c.title}</div>
+      <div class="challenge-desc">${c.desc}</div>
+      ${subsHtml}
+      ${badge}
+    </div>`;
+  }).join('');
+
+  document.getElementById('challenges-grid').innerHTML = html;
+}
+
+// ============================================================
+// WISSENSCHAFTS-KOMPASS
+// ============================================================
+
+function berechneWissenschaftsScore(p) {
+  const kst_total = p.kst + (p.gewst_aus ? 0 : p.gewst);
+
+  // ifo-Linie: niedrige Unternehmensteuern, keine Vermögensteuer, Angebotsorientierung
+  const ifo = Math.min(100, Math.round(
+    25 * Math.max(0, 1 - (kst_total - 20) / 15) +   // KSt+GewSt nah an 20%: max
+    20 * (p.verm === 0 && (p.zucman ?? 0) === 0 ? 1 : 0.2) +
+    20 * (!p.synthetisch ? 1 : 0) +
+    20 * (p.gewst_aus ? 1 : p.gewst <= 10 ? 0.6 : 0.2) +
+    15 * Math.max(0, 1 - Math.abs(p.spitze - 42) / 20)  // Spitze nah bei 42%
+  ));
+
+  // DIW-Linie: synthetisch, hoher Spitzensteuersatz, Erb-Reform, Vermögensteuer, hohe BBG
+  const diw = Math.min(100, Math.round(
+    25 * (p.synthetisch ? 1 : 0) +
+    20 * Math.max(0, Math.min(1, (p.spitze - 42) / 18)) +  // Spitze 42–60%
+    15 * (!p.betriebs ? 1 : 0) +
+    20 * Math.min(1, ((p.verm ?? 0) + (p.zucman ?? 0) * 0.5) / 1.5) +
+    10 * Math.max(0, (p.erb - 20) / 30) +
+    10 * Math.min(1, Math.max(0, ((p.bbg ?? 90000) - 90000) / 70000))
+  ));
+
+  // Zucman-Linie: internationale Koordination, Milliardärssteuer, CO₂, Steuertransparenz
+  const zucman_s = Math.min(100, Math.round(
+    40 * Math.min(1, (p.zucman ?? 0) / 2) +
+    20 * Math.min(1, ((p.verm ?? 0) + (p.erb > 30 ? 0.5 : 0)) / 1.5) +
+    25 * Math.min(1, Math.max(0, (p.co2 - 55) / 150)) +
+    15 * (!p.kleine_st ? 1 : 0)
+  ));
+
+  // Kirchhof-Linie: Flat Tax, Vereinfachung, wenig Steuerarten
+  const kirchhof = Math.min(100, Math.round(
+    30 * Math.max(0, 1 - Math.abs(p.eingang - p.spitze) / 25) +  // je flacher, desto mehr
+    25 * (!p.kleine_st ? 1 : 0) +
+    20 * (p.gewst_aus ? 1 : 0) +
+    15 * (p.verm === 0 && (p.zucman ?? 0) === 0 ? 1 : 0) +
+    10 * (!p.neg_est && !p.buergerv ? 1 : 0)   // Vereinfachung Sozialstaat
+  ));
+
+  return { ifo, diw, zucman: zucman_s, kirchhof };
+}
+
+function renderWissenschaftsPanel(p) {
+  const scores = berechneWissenschaftsScore(p);
+  const lager = [
+    { key: 'ifo',      label: 'ifo/Fuest · Angebotsorientiert',   score: scores.ifo,      color: 'var(--accent)',  desc: 'Niedrige Unternehmensteuern, keine Vermögensteuer, Entlastung Mitte' },
+    { key: 'diw',      label: 'DIW/Bach · Verteilungsorientiert',  score: scores.diw,      color: 'var(--accent3)', desc: 'Synthetisch, höhere Spitze, Erbschafts-/Vermögensteuer, hohe BBG' },
+    { key: 'zucman',   label: 'Zucman · Internationalistisch',     score: scores.zucman,   color: 'var(--accent2)', desc: 'Zucman-Mindeststeuer, CO₂-Preis, internationale Koordination' },
+    { key: 'kirchhof', label: 'Kirchhof · Vereinfachung',          score: scores.kirchhof, color: 'var(--warn)',    desc: 'Flat Tax, wenige Steuerarten, GewSt abschaffen' }
+  ];
+
+  const dominant = lager.reduce((a, b) => b.score > a.score ? b : a);
+
+  const barsHtml = lager.map(l => `
+    <div style="margin-bottom:10px;">
+      <div style="display:grid;grid-template-columns:220px 1fr 42px;align-items:center;gap:10px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${l.desc}">${l.label}</div>
+        <div class="bar-track"><div class="bar-fill neu" style="width:${l.score}%;background:${l.color};opacity:${l.score > 0 ? 0.8 : 0.2}"></div></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;">${l.score}%</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('wissenschafts_bars').innerHTML = barsHtml;
+  document.getElementById('wissenschafts_note').textContent =
+    dominant.score >= 40
+      ? `Deine Einstellungen ähneln am stärksten dem ${dominant.label.split('·')[1].trim()}-Lager (${dominant.score}%). ${dominant.desc}.`
+      : 'Deine Einstellungen lassen sich keinem Lager klar zuordnen — ein eklektischer Mix.';
 }
 
 // ============================================================
@@ -1555,128 +3473,168 @@ function render() {
 const TOOLTIPS = {
   freibetrag: {
     title: "Grundfreibetrag",
-    text: "Bis zu diesem Betrag bleibt Einkommen vollständig steuerfrei. Das BVerfG verlangt, dass das sächliche Existenzminimum nicht besteuert wird. Wird jährlich angepasst.",
-    quelle: "§ 32a Abs. 1 EStG · 2025: 12.084 € · Quelle: BMF"
+    text: "Bis zu diesem Betrag bleibt Einkommen vollständig steuerfrei. BVerfG: sächliches Existenzminimum darf nicht besteuert werden. 2026 auf 12.348 € angehoben (Steueränderungsgesetz 2025). Alle Lager fordern Erhöhung — Einigkeit ist selten.",
+    quelle: "§ 32a Abs. 1 EStG · 2026: 12.348 € · Steueränderungsgesetz Okt. 2025 · BMF"
   },
   eingang: {
     title: "Eingangssteuersatz",
-    text: "Grenzsteuersatz auf den ersten steuerpflichtigen Euro über dem Grundfreibetrag. Steigt im deutschen Formeltarif (§ 32a) quadratisch an — kein harter Knick, sondern gleitender Übergang.",
-    quelle: "§ 32a Abs. 1 Nr. 2 EStG · 2025: 14%"
+    text: "Grenzsteuersatz auf den ersten Euro über dem Freibetrag. Im § 32a-Formeltarif quadratisch steigend — kein harter Knick. ifo (Blömer/Fuest/Peichl 2025): 'Mittelstandsbauch' entsteht, wenn Eingangssatz zu nah am Spitzensatz liegt.",
+    quelle: "§ 32a Abs. 1 Nr. 2 EStG · 2025: 14% · ifo Schnelldienst 01/2025"
   },
   spitze: {
     title: "Spitzensteuersatz",
-    text: "Höchster Grenzsteuersatz. Im deutschen Recht: 42% ab ~66.760 € ('Eckwert'), 45% ab 277.826 € ('Reichensteuer'). Das Modell vereinfacht auf einen Spitzensatz, bildet den Tarif aber mit echter Formel nach.",
-    quelle: "§ 32a Abs. 1 Nr. 4+5 EStG · 2025: 45% · Eckwert: 42%"
+    text: "42% ab ~66.760 € (Eckwert), 45% ab 277.826 € (Reichensteuer). DIW/Bach: Erhöhung auf 49–52% kaum Aufkommensverlust, hoher Verteilungseffekt. ifo/Fuest: ab ~55% sinkt Aufkommen durch Verhaltensreaktion (Laffer-Kurve sichtbar im Modell).",
+    quelle: "§ 32a Nr. 4+5 EStG · Piketty/Saez/Stantcheva (2014) AER · ifo Schnelldienst 01/2025"
   },
   grenze: {
     title: "Einkommen ab Spitzensatz",
-    text: "Ab diesem Bruttoeinkommen gilt der volle Spitzensteuersatz. 2025: 277.826 € (Reichensteuer). Die Zonen des Formeltarifs werden proportional zu diesem Wert skaliert.",
-    quelle: "§ 32a Abs. 1 Nr. 5 EStG · 2025: 277.826 € · Quelle: BMF"
+    text: "Ab diesem Brutto greift der volle Spitzensatz. 2025: 277.826 €. Das Modell skaliert alle Tarifzonen proportional zu diesem Wert — Änderungen simulieren eine Verschiebung des gesamten Progressionsverlaufs.",
+    quelle: "§ 32a Abs. 1 Nr. 5 EStG · 2025: 277.826 € · BMF Steuerschätzung 2025"
   },
   synthetisch: {
     title: "Synthetisch vs. Dual",
-    text: "Synthetisch: Kapital- und Arbeitseinkommen werden zusammen progressiv besteuert (historisch in DE bis 2008). Dual (aktuell): Kapitalerträge pauschal per Abgeltungsteuer. Ökonomen streiten — synthetisch ist gerechter, dual vermeidet Kapitalflucht.",
-    quelle: "§§ 32d, 43 EStG · Duales System seit 2009 · OECD: dual in DE, AT, DK"
+    text: "Synthetisch: Kapital- und Arbeitseinkommen zusammen progressiv besteuert (DE bis 2008). Dual (aktuell): Kapitalerträge pauschal mit Abgeltungsteuer. DIW (Bach/Sinclair 2026): synthetisch gerechter, mehr Aufkommen aus D10b/c. ifo: dual vermeidet Kapitalflucht (Elastizität 0,5).",
+    quelle: "§§ 32d, 43 EStG · Bach/Sinclair DIW Wochenbericht 4/2026 · Kleven/Schultz (2014)"
   },
   abgeltung: {
     title: "Abgeltungsteuer",
-    text: "Pauschaler Steuersatz auf Dividenden, Zinsen und Kursgewinne. Gilt nur bei dualem System. Kapitalerträge über dem Sparerpauschbetrag (1.000 €) werden pauschal besteuert, unabhängig vom persönlichen ESt-Satz.",
-    quelle: "§ 32d EStG · 2025: 25% + 5,5% Soli = 26,375% · Sparerpauschbetrag: § 20 Abs. 9"
+    text: "Pauschalsteuer auf Dividenden, Zinsen, Kursgewinne. Gilt nur im dualen System. Seit 2009 in DE. Sparerpauschbetrag: 1.000 €/Jahr. Kritik: Kapital wird deutlich niedriger besteuert als Spitzenlohn. Profitiert fast ausschließlich D10b/c.",
+    quelle: "§ 32d EStG · 2025: 25% + Soli · Bach/Wichers DIW 2026: Abschaffung → +15 Mrd. Aufkommen"
   },
   kst: {
     title: "Körperschaftsteuer",
-    text: "Steuer auf Gewinne von Kapitalgesellschaften (GmbH, AG). Gilt auf einbehaltene Gewinne. Ausschüttungen unterliegen zusätzlich der Abgeltungsteuer beim Gesellschafter. Zusammen mit GewSt: Gesamtbelastung ~30%.",
-    quelle: "§ 23 KStG · 2025: 15% + 5,5% Soli = 15,825% · Quelle: BMF"
+    text: "Steuer auf Gewinne von Kapitalgesellschaften. KSt (15%) + Soli + GewSt (~14%) = ~30% Gesamtbelastung. ifo/Fuest (2025): Senkung auf 25% würde Investitionen signifikant steigern. Meta-Analyse Gechert/Heimberger (2022, Eur. Econ. Rev.): Effekte kleiner als behauptet.",
+    quelle: "§ 23 KStG · 15% + 5,5% Soli · Blömer/Fuest/Peichl ifo 01/2025 · Gechert/Heimberger 2022"
   },
   gewst: {
     title: "Gewerbesteuer",
-    text: "Kommunalsteuer auf Gewerbeerträge. Formel: Gewerbertrag × 3,5% × Hebesatz. Ø Hebesatz 2024: ~432%. Anrechnung auf ESt ab Hebesatz 400%. Stark kritisiert: komplex, kommunal ungleich, wirtschaftsfeindlich.",
-    quelle: "GewStG · Ø effektiv ~14% · Ø Hebesatz: 432% · Quelle: Destatis 2024"
+    text: "Kommunalsteuer: Gewerbertrag × 3,5% × Hebesatz (Ø 432%). Stark kritisiert: komplex, wirtschaftsfeindlich, kommunal ungleich. Sachverständigenrat 2020/21: Abschaffung empfohlen. Koalitionsvertrag 2025: Reformdiskussion angekündigt, aber noch kein Beschluss.",
+    quelle: "GewStG · Ø Hebesatz 432% · SVR Jahresgutachten 2020/21 · Koalitionsvertrag CDU/SPD 2025"
   },
   gewst_aus: {
     title: "Gewerbesteuer abschaffen",
-    text: "Seit Jahrzehnten diskutiert. Vorteil: Vereinfachung, mehr Standortattraktivität, geringere Befolgungskosten. Nachteil: Kommunen verlieren ~75 Mrd. € — Ersatz über höheren Gemeindeanteil an ESt/USt nötig.",
-    quelle: "Sachverständigenrat Jahresgutachten 2020/21 · Kommunalanteil: Art. 106 GG"
+    text: "Kommunen verlieren ~75 Mrd. € — Ersatz nötig (höherer Gemeindeanteil ESt/USt). BDI und ifo befürworten Abschaffung für mehr Standortattraktivität. Kommunalverbände lehnen ab wegen Eigenfinanzierungsanspruch (Art. 28 GG).",
+    quelle: "Art. 28 Abs. 2 GG · SVR 2020/21 · Koalitionsvertrag 2025: 'prüfen' · BDI Positionspapier 2025"
   },
   mwst: {
     title: "Mehrwertsteuer Regelsatz",
-    text: "Gilt für ~70% des privaten Konsums. Wichtigste Einzelsteuer (303 Mrd. €). Wirkt regressiv: Ärmere Haushalte konsumieren fast ihr gesamtes Einkommen, Reiche sparen einen Großteil. Verhaltensreaktion: ε = −0,35.",
-    quelle: "§ 12 UStG · 2025: 19% · Quelle: BMF, Destatis VGR"
+    text: "~70% des Konsums. Größte Einzelsteuer: 303 Mrd. €. Wirkt regressiv — D1 gibt fast 100% des Einkommens aus, D10c nur ~40%. ifo/Peichl: MwSt-Erhöhung als 'wachstumsfreundliche' Gegenfinanzierung für ESt-Senkung diskutiert.",
+    quelle: "§ 12 UStG · 2025: 19% · BMF Steuerschätzung 2025 · ifo Schnelldienst 01/2025"
   },
   mwst_erm: {
     title: "Ermäßigter MwSt-Satz",
-    text: "Gilt für Lebensmittel, Bücher, ÖPNV, Kulturveranstaltungen (~30% des Konsums). Soll regressiven Effekt der MwSt dämpfen. Kritik: teuer, oft durch Lobbyismus erweitert, schlecht zielgerichtet.",
-    quelle: "§ 12 Abs. 2 UStG · 2025: 7% · Kosten Ermäßigung: ~30 Mrd. €/Jahr"
+    text: "Lebensmittel, Bücher, ÖPNV, Gastronomie (dauerhaft 7% ab 2026). ~30% des Konsums. Dämpft Regressivität der MwSt, aber schlecht zielgerichtet: Reiche profitieren absolut mehr. Kosten der Ermäßigung: ~30 Mrd. €/Jahr.",
+    quelle: "§ 12 Abs. 2 UStG · Gastronomie: Steueränderungsgesetz 2025 · BMF Steuerschätzung 2025"
   },
   co2: {
     title: "CO₂-Preis (BEHG)",
-    text: "Preis je Tonne CO₂ im nationalen Brennstoffemissionshandel (BEHG) für Wärme und Verkehr. EU-ETS deckt Industrie und Strom separat. Emissionen reagieren mit Elastizität −0,30 auf Preisänderungen (DIW/EWI).",
-    quelle: "BEHG § 10 · 2025: 55 €/t · Bereich: ~500 Mio. t CO₂ · Quelle: DEHSt, UBA"
+    text: "Nationaler Emissionshandel (BEHG) für Wärme und Verkehr. EU-ETS deckt Industrie/Strom separat. Emissionselastizität: −0,30 (EWI/DIW). Klima-Konsens: höherer CO₂-Preis ist effizientestes Klimainstrument, wenn sozial ausgeglichen (Klimageld).",
+    quelle: "BEHG § 10 · 2025: 55 €/t · EU-ETS ab 2027 fusioniert · Edenhofer/PIK 2024"
   },
   klimageld: {
     title: "Klimageld (Pro-Kopf-Rückzahlung)",
-    text: "70% der CO₂-Steuereinnahmen werden gleichmäßig pro Kopf an alle Haushalte zurückgezahlt. Macht die CO₂-Steuer insgesamt progressiv: Arme emittieren weniger, bekommen genauso viel zurück. Konzept: PIK/Edenhofer.",
-    quelle: "Konzept: PIK Potsdam, Edenhofer · Im Modell: 70% gleichverteilt"
+    text: "70% der CO₂-Einnahmen pro Kopf zurück. Macht CO₂-Steuer insgesamt progressiv: Arme emittieren weniger, bekommen gleich viel. Ökonomen-Konsens (ifo, DIW, PIK): CO₂-Preis + Klimageld ist effizient UND gerecht. Im Modell: 70% gleichverteilt.",
+    quelle: "PIK Potsdam · Edenhofer/Franks/Kalkuhl (2021) Nature Climate Change · Koalitionsvertrag 2025"
   },
   erb: {
     title: "Erbschaftsteuer",
-    text: "Steuer auf Vermögensübertragungen bei Tod. Progressiver Tarif, abhängig von Verwandtschaftsgrad und Betrag. Effektiver Satz weit unter Nominalwert durch Betriebsvermögens-Ausnahmen (BFH-Urteile). Aufkommen: ~8 Mrd. €.",
-    quelle: "§§ 10, 19 ErbStG · 2025: bis 30% (Klasse I, Kinder) · Quelle: Destatis"
+    text: "Progressiver Tarif je nach Verwandtschaft. Effektiver Satz weit unter Nominal durch Betriebsvermögens-Ausnahmen (BFH). Bach/Sinclair/Bührle/Wichers (DIW 2025): Reform-Szenarien 10–30% Flat Tax nach Abbau der Privilegien zeigen +10–40 Mrd. Aufkommen.",
+    quelle: "§§ 10, 19 ErbStG · Bach/Sinclair/Bührle/Wichers DIW 2025 · Finanzausschuss BT Juli 2025"
   },
   betriebs: {
     title: "Betriebsvermögens-Ausnahme",
-    text: "§§ 13a/13b ErbStG: Bis 100% Steuerbefreiung für vererbtes Betriebsvermögen bei Einhaltung von Behaltefristen. BRH 2016: 'Haupteinfallstor zur Steuervermeidung.' BVerfG 2014 forderte Einschränkung — Reform blieb schwach.",
-    quelle: "§§ 13a, 13b ErbStG · BVerfG 2014 · BRH-Bericht 2016"
+    text: "§§ 13a/13b: bis 100% Steuerbefreiung für Betriebsvermögen. BRH 2016: 'Haupteinfallstor zur Steuervermeidung'. Bach/Sinclair (DIW 2025): Privilegien erlaubten 2024 Steuererlasse von 3,4 Mrd. €. Abschaffung = Kern aller DIW/Grünen-Reformvorschläge.",
+    quelle: "§§ 13a, 13b ErbStG · BVerfG 2014 · BRH-Bericht 2016 · Bach/Sinclair DIW 2025"
   },
   boden: {
     title: "Bodenwertsteuer",
-    text: "Grundsteuer nur auf den Bodenwert, nicht auf Gebäude. Schafft Anreize zur Bebauung, wirkt gegen Spekulation mit brachliegendem Land. Idee: Henry George (1879). Einzelne Bundesländer prüfen dies nach der Grundsteuerreform 2025.",
-    quelle: "Konzept: Henry George · Empfehlung: DIW, IW · Akt. Aufkommen Grundsteuer: 16 Mrd."
+    text: "Grundsteuer nur auf Bodenwert, nicht Gebäude. Anreiz zur Bebauung, gegen Spekulation. Henry George (1879). DIW und IW empfehlen nach Grundsteuerreform 2025. Einige Bundesländer (Hamburg, Bayern) prüfen eigene Modelle.",
+    quelle: "Henry George (1879) · DIW Diskussionspapier 2025 · IW Köln 2024 · Akt. GrSt: 16 Mrd."
   },
   verm: {
     title: "Vermögensteuer",
-    text: "Jährliche Steuer auf Nettovermögen. In Deutschland seit 1997 ausgesetzt (BVerfG: ungleiche Bewertung). Steuerbasis im Modell: ~3.500 Mrd. € (Vermögen über 2 Mio. €). International aktiv: Schweiz, Norwegen, Spanien.",
-    quelle: "BVerfG-Urteil 1995 · BVerfGE 93, 121 · DIW Verteilungsbericht 2023"
+    text: "Jährliche Steuer auf Nettovermögen. In DE seit 1997 ausgesetzt. Bach/Wichers/Mudrack (DIW 2026): Linke-Modell erzielt ~100 Mrd./Jahr; bei Freibetrag 10–20 Mio. immer noch 110–125 Mrd. Nur ~1,9% der Bevölkerung betroffen. Migrationseffekte kleiner als oft behauptet (Kleven/Landais 2024).",
+    quelle: "BVerfGE 93, 121 · Bach/Wichers/Mudrack DIW 2026 · Jakobsen/Kleven/Kolsrud NBER 2024"
   },
   rv: {
     title: "Rentenversicherungsbeitrag",
-    text: "Gesamtbeitrag (AN + AG je hälftig). Nur bis zur Beitragsbemessungsgrenze (BBG) fällig — darüber kein Beitrag. Das wirkt regressiv: Wer mehr als 90.600 € verdient, zahlt keinen Marginalanteil mehr.",
-    quelle: "§ 158 SGB VI · 2025: 18,6% · BBG West: 90.600 € · Quelle: DRV"
+    text: "AN+AG je hälftig. Nur bis BBG (90.600 € West 2025) fällig — wirkt regressiv. SVR-Projektion: ohne Reform steigt Beitragssatz bis 2045 auf ~25%. Generationenkapital (Rentenpaket II 2024): 12 Mrd./Jahr in Staatsfonds ab 2024.",
+    quelle: "§ 158 SGB VI · 2025: 18,6% · BBG 90.600 € · Rentenpaket II BT-Drs. 20/10749 · DRV"
   },
   kv: {
     title: "Krankenversicherungsbeitrag",
-    text: "GKV-Beitrag inkl. einkommensabh. Zusatzbeitrag. BBG 2025: 66.150 €. PKV-Versicherte (meist höhere Einkommen) zahlen separat, nicht in GKV. Bürgerversicherung würde alle einbeziehen und Basis verbreitern.",
-    quelle: "§ 241 SGB V · 2025: 14,6% + ⌀1,7% Zusatz = 16,3% · Quelle: GKV-SV"
+    text: "GKV-Beitrag inkl. Zusatzbeitrag (~1,7%). BBG: 66.150 € (2025). Demografiedruck: GKV-Finanzierungslücke ~50 Mrd. bis 2030 (GKV-SV). Bürgerversicherung würde Basis verbreitern. PKV-Abschaffung: per Saldo leicht negativ (Mehrausgaben > Mehreinnahmen).",
+    quelle: "§ 241 SGB V · 2025: 16,3% · GKV-SV Jahresbericht 2025 · BMG Kassenstatistik"
   },
   alpf: {
     title: "Arbeitslosen- + Pflegeversicherung",
-    text: "ALV: 2,6% (je 1,3% AN/AG) bis BBG 90.600 €. PV: 3,6% (Kinderlose +0,6%) bis BBG 66.150 €. Zusammen: 6,2%. Pflegeversicherung unter starkem Reformdruck durch Demographie.",
-    quelle: "§ 341 SGB III · § 55 SGB XI · 2025: 2,6% + 3,6% · Quelle: BA, BMG"
+    text: "ALV: 2,6% bis BBG 90.600 €. Pflegeversicherung: 3,6% (Kinderlose +0,6%) bis BBG 66.150 €. Pflegeversicherung unter massivem Reformdruck: Pflegebedürftige wachsen demografisch stark. Koalitionsvertrag 2025: Pflegereform für 2026 angekündigt.",
+    quelle: "§ 341 SGB III · § 55 SGB XI · 2025: 6,2% · Koalitionsvertrag CDU/SPD 2025 · BMG"
   },
   buergerv: {
     title: "Bürgerversicherung",
-    text: "Alle Einkommensarten (Kapital, Mieten, Selbstständige) werden beitragspflichtig; PKV-Versicherte zahlen in GKV ein. Im Modell: Beitragsbasis wächst um 15% (~+262 Mrd. €). Stark politisch umstritten.",
-    quelle: "Konzept: Bofinger, SVR · SPD/Grüne-Programm · Schätzung: +15% Beitragsbasis"
+    text: "Alle Einkommensarten beitragspflichtig, PKV-Versicherte in GKV. Im Modell: Beitragsbasis +15%. Befürworter (SPD, Grüne, Lauterbach): mehr Solidarität und Finanzierungssicherheit. Gegner (CDU, PKV): Qualitätsverlust, Ärzteschwund. Wissenschaftlich umstritten.",
+    quelle: "Lauterbach et al. (2005) · IGES Institut 2021 · SPD-Grundsatzprogramm 2023"
   },
   bg: {
     title: "Bürgergeld-Regelsatz",
-    text: "Monatlicher Regelsatz für Alleinstehende. Deckt Nahrung, Kleidung, Hygiene, Haushalt. Unterkunftskosten werden zusätzlich übernommen. ~5,5 Mio. Empfänger 2025. Jährliche Anpassung nach Mischindex.",
-    quelle: "§ 20 SGB II · 2025: 563 €/Monat · ~5,5 Mio. Bedarfsgemeinschaften · Quelle: BA"
+    text: "563 €/Monat für Alleinstehende (2025). ~5,5 Mio. Bedarfsgemeinschaften. ifo/Peichl (2025): Schlüsselreform ist METR-Senkung (Anrechnung 80% → 65%), nicht Regelsatz selbst. Simulation zeigt: METR D1 liegt bei 80%+ — stärkstes Arbeitsmarkthemmnis.",
+    quelle: "§ 20 SGB II · 2025: 563 € · Blömer/Fuest/Peichl ifo 01/2025 · BA Statistik 2025"
   },
   kg: {
     title: "Kindergeld",
-    text: "Monatliche Zahlung pro Kind. Wirkt als Vorauszahlung auf den Kinderfreibetrag (§ 31 EStG) — bei hohen Einkommen wird die steuergünstigere Variante verrechnet. ~17 Mio. Kinder anspruchsberechtigt.",
-    quelle: "§ 66 EStG · 2025: 255 €/Monat · ~17 Mio. Kinder · Quelle: Familienkasse"
+    text: "Vorauszahlung auf Kinderfreibetrag (§ 31 EStG) — bei hohen Einkommen wird steuerlich günstigere Variante verrechnet. Ab 2025: 259 € (Steueränderungsgesetz Okt. 2025). ~17 Mio. Kinder. Alle Parteien einig: Kindergeld gehört erhöht.",
+    quelle: "§ 66 EStG · 259 €/Monat ab 2025 · Steueränderungsgesetz 2025 · Familienkasse"
   },
   neg_est: {
     title: "Negative Einkommensteuer",
-    text: "Unterhalb eines Schwellwerts zahlt der Staat statt Steuer einzuziehen einen Betrag aus. Idee: Milton Friedman (1962). Vorteil: ein einheitliches System statt vieler Transfers, weniger Bürokratie. Im Modell: +30 Mrd. für D1–D3.",
-    quelle: "Friedman (1962) 'Capitalism and Freedom' · Verwandt: Earned Income Tax Credit (USA)"
+    text: "Unterhalb eines Schwellwerts zahlt Staat einen Betrag aus statt Steuer einzuziehen. Friedman (1962). Vorteil: ein einheitliches System, weniger Bürokratie, kein Transferentzug-Cliff. Im Modell: +30 Mrd. für D1–D3. Verwandt: US Earned Income Tax Credit.",
+    quelle: "Friedman (1962) · Bürgergeld-Reform Vorschlag ifo 2025 · OECD Taxing Wages 2025"
   },
   kleine_st: {
     title: "Kleine Verbrauchsteuern",
-    text: "Energiesteuer (37 Mrd.), Tabaksteuer (15 Mrd.), Kfz-Steuer (10 Mrd.), Versicherungsteuer, Stromsteuer, Luftverkehrsteuer u.a. Zusammen ~109 Mrd. €. BRH-Kritik: Verwaltungskosten 15–30% des Aufkommens.",
-    quelle: "BMF Steuerschätzung 2025 · BRH: Verwaltungskosten unverhältnismäßig hoch"
+    text: "Energie (37), Tabak (15), Kfz (10), Versicherung, Strom, Luftverkehr u.a. — zusammen ~109 Mrd. €. BRH: Verwaltungskosten 15–30% des Aufkommens (ineffizient). Kirchhof-Modell: alle abschaffen. Koalition 2025: kein Beschluss zur Abschaffung.",
+    quelle: "BMF Steuerschätzung 2025 · BRH Jahresberichte · Kirchhof Einkommensteuergesetzbuch 2011"
+  },
+  kapitalquote: {
+    title: "Fondsquote Rentenversicherung",
+    text: "Anteil RV-Aufkommen in Staatsfonds (Generationenkapital). Rentenpaket II 2024: 12 Mrd./Jahr ab 2024 beschlossen (~4% des RV-Aufkommens). Modell zeigt: früherer Start hätte durch Zinseszins erheblich mehr Puffer erzeugt.",
+    quelle: "Rentenpaket II · BT-Drs. 20/10749 · Norges Bank NBIM 2024 · DRV Rentenversicherungsbericht"
+  },
+  rendite_fonds: {
+    title: "Erwartete Jahresrendite",
+    text: "Nominalrendite des Staatsfonds. MSCI World historisch ~7% nominal, ~5% real. Norwegischer Staatsfonds (GPF-G): Ø 6,3% seit 1998. Konservativ: 4–5%. Das Modell rechnet nominell — Inflationsabzug für reale Interpretation nötig.",
+    quelle: "Norges Bank NBIM Annual Report 2024 · Shiller historische Returns · KfW-Research 2025"
+  },
+  startjahr: {
+    title: "Startjahr der Fondsinvestition",
+    text: "Je früher, desto mehr Zinseszins-Effekt. Rürup-Kommission (2003) empfahl bereits Kapitaldeckungs-Element — nicht umgesetzt. Schweden: Premiumpension seit 1994 (2,5% der Löhne). Deutschland hat erst 2024 begonnen.",
+    quelle: "Rürup-Kommission 2003 · SVR Jahresgutachten 2004 · Rentenpaket II 2024 · OECD Pensions 2024"
+  },
+  pkv_abschaffen: {
+    title: "PKV abschaffen",
+    text: "~11 Mio. PKV-Versicherte in GKV. Pro: breitere Einkommensbasis, Solidarausgleich. Contra: GKV-Ausgaben steigen (PKV-Klientel kostenintensiv), Ärzteabwanderung, Qualitätsrisiken. Im Modell: leicht negativer Nettoeffekt.",
+    quelle: "PKV-Verband 2025 · IGES Institut 2021 · GKV-SV Schätzung · Lauterbach et al. 2005"
+  },
+  anzahl_kv: {
+    title: "Anzahl Krankenkassen",
+    text: "2025: ~95 GKV-Kassen (1995: ~1.200). Fusionen senken Verwaltungskosten (Fixkostendegression ~45%). Einheitskasse (Taiwan/Kanada): sehr niedrige Verwaltungskosten, weniger Wettbewerb. Koalition 2025: keine Fusionspflicht geplant.",
+    quelle: "GKV-SV Jahresbericht 2025 · BMG Kassenstatistik · Reinhardt et al. Health Affairs 2004"
+  },
+  praevention: {
+    title: "Prävention-Investitionen",
+    text: "Zusatzinvestitionen in Vorsorge, Früherkennung, betriebliche Gesundheit. WHO (2017): ROI 3–5 € pro 1 € über 20 Jahre. Im Modell: vereinfacht 1,5× Nettonutzen (konservativ). GKV-Präventionsbericht 2024: aktuell ~700 Mio. €/Jahr.",
+    quelle: "WHO (2017) 'Return on investment of public health interventions' · GKV-SV Präventionsbericht 2024"
+  },
+  bbg: {
+    title: "Beitragsbemessungsgrenze (BBG)",
+    text: "Bis zu dieser Einkommenshöhe werden SV-Beiträge fällig — darüber nicht. Wirkt stark regressiv: Wer mehr verdient als die BBG, zahlt keinen Grenzanteil mehr. Erhöhung würde Finanzierungsbasis verbreitern und Progressivität erhöhen. DIW: BBG-Anhebung = günstigste Reform zur SV-Finanzierung.",
+    quelle: "§ 6 SGB IV · RV-BBG 2025: 90.600 € · KV-BBG: 66.150 € · DIW Wochenbericht 2025"
+  },
+  zucman: {
+    title: "Zucman-Mindeststeuer (Milliardäre)",
+    text: "2%-Mindeststeuer auf Nettovermögen ultra-Reicher — Vorschlag von Gabriel Zucman im Auftrag der G20-Präsidentschaft (Brasilien 2024). Weltweites Aufkommen: 200–250 Mrd. $. Deutschland war 2024 Hauptblockierer (zusammen mit USA). Im Modell: Basis ~2.870 Mrd. € (D10c-Vermögen); Avoidance-Abschlag ~15% bei 2% Satz.",
+    quelle: "Zucman G20 Report 2024 · EU Tax Observatory 2024 · Jakobsen/Kleven/Kolsrud NBER 2024"
   }
 };
 
@@ -1747,7 +3705,7 @@ function positionTooltip(target) {
   if (left + 310 > window.innerWidth) left = window.innerWidth - 315;
   if (left < 4) left = 4;
   if (top + 180 > window.innerHeight) top = rect.top - 185;
-  popup.style.top = top + window.scrollY + 'px';
+  popup.style.top = top + 'px';
   popup.style.left = left + 'px';
 }
 
@@ -1787,12 +3745,12 @@ function renderRechenweg(r, p) {
   panel.innerHTML = `
     <div class="rw-section">
       <div class="rw-section-title">1 · Einkommensteuer — § 32a EStG Formeltarif</div>
-      <div class="rw-text">Das deutsche Einkommensteuerrecht kennt 5 Zonen mit gleitendem Übergang (kein harter Knick). Die Modellformel bildet diesen Tarif nach und skaliert die Zonengrenzen proportional zu den Slider-Werten.</div>
+      <div class="rw-text">Das Modell verwendet einen parametrischen Formeltarif mit 5 Zonen analog § 32a EStG. In Zonen 2 und 3 steigt der Grenzsteuersatz <em>linear</em> an (Integral der Grenzrate = exakte Steuer). Die Zonengrenzen skalieren proportional zu den Slider-Werten. Kein Sprung an Zonengrenzen.</div>
       <table class="rw-zone-table">
         <tr><th>Zone</th><th>ZVE-Bereich</th><th>Grenzsteuersatz</th><th>Formeltyp</th></tr>
         <tr class="${d5_zone===1?'active-zone':''}"><td>1</td><td>0 – ${fk(p.freibetrag)} €</td><td>0 %</td><td>Grundfreibetrag</td></tr>
-        <tr class="${d5_zone===2?'active-zone':''}"><td>2</td><td>${fk(p.freibetrag)} – ${fk(z2_end)} €</td><td>${p.eingang} → ${Math.round(p.eingang*1.8)} %</td><td>quadratisch (§ 32a Nr. 2)</td></tr>
-        <tr class="${d5_zone===3?'active-zone':''}"><td>3</td><td>${fk(z2_end)} – ${fk(z3_end)} €</td><td>${Math.round(p.eingang*2)} → ${Math.round(satz4)} %</td><td>quadratisch (§ 32a Nr. 3)</td></tr>
+        <tr class="${d5_zone===2?'active-zone':''}"><td>2</td><td>${fk(p.freibetrag)} – ${fk(z2_end)} €</td><td>${p.eingang} → ${(p.eingang + (satz4*100 - p.eingang)*0.344).toFixed(1)} %</td><td>linear ansteigend (§ 32a Nr. 2)</td></tr>
+        <tr class="${d5_zone===3?'active-zone':''}"><td>3</td><td>${fk(z2_end)} – ${fk(z3_end)} €</td><td>${(p.eingang + (satz4*100 - p.eingang)*0.344).toFixed(1)} → ${(satz4*100).toFixed(1)} %</td><td>linear ansteigend (§ 32a Nr. 3)</td></tr>
         <tr class="${d5_zone===4?'active-zone':''}"><td>4</td><td>${fk(z3_end)} – ${fk(z4_end)} €</td><td>${Math.round(satz4)} %</td><td>linear (§ 32a Nr. 4)</td></tr>
         <tr class="${d5_zone===5?'active-zone':''}"><td>5</td><td>ab ${fk(z4_end)} €</td><td>${p.spitze} %</td><td>Spitzensteuersatz (§ 32a Nr. 5)</td></tr>
       </table>
@@ -1808,11 +3766,15 @@ function renderRechenweg(r, p) {
     <div class="rw-section">
       <div class="rw-section-title">2 · Verhaltensreaktion — Arbeitsangebot</div>
       <div class="rw-formula">Δ_Arbeit = ε × Δ(1 − GSatz_neu) / (1 − GSatz_Basis)
-ε = ${ELAST.labor_supply} (intensive margin, Saez/Chetty Konsens)
-Arbeit_neu = Arbeit_Basis × (1 + Δ_Arbeit)
-Begrenzung: 0,70 – 1,25 (plausibles Reaktionsband)</div>
+D1–D10b: ε = ${ELAST.labor_supply} (intensive margin, Saez/Chetty Konsens)
+D10c (Top 1%): ε = ${ELAST.d10c_labor} + Avoidance-Effekt ab GSatz > 45%
+  Avoidance = 1 − ${ELAST.d10c_avoidance} × max(0, GSatz−0,45) − ${ELAST.d10c_wegzug} × max(0, GSatz−0,60)
+  (Einkommensverschiebung: Kapitalgesellschaft, Stiftung, Timing)
+  (Wegzug: steuerbedingte Emigration bei sehr hohen Sätzen)
+Begrenzung: 0,55 – 1,25 (D10c: 0,40 Minimum)</div>
       <div class="rw-text">Arbeitsangebots-Index: <span class="${r.behavior.labor >= 99.5 ? 'rw-good' : r.behavior.labor < 97 ? 'rw-bad' : ''}">${f(r.behavior.labor)} (Basis: 100,0)</span>
-        · Quelle: Saez/Chetty/Gruber (2012), ZEW 2020</div>
+        · D10c-Avoidance: ${p.spitze > 45 ? `aktiv (GS ${p.spitze}% > 45% Schwelle)` : `inaktiv (GS ${p.spitze}% ≤ 45% Schwelle)`}
+        · Quellen: Saez/Chetty/Gruber (2012), Piketty/Saez/Stantcheva (2014), Kleven/Schultz (2014), Brülhart et al. (2019)</div>
     </div>
 
     <div class="rw-section">
@@ -1892,6 +3854,7 @@ document.querySelectorAll('.section-title[data-toggle]').forEach(el => {
 // Preset buttons
 document.querySelectorAll('#presets button').forEach(btn => {
   btn.addEventListener('click', () => {
+    pushHistory();
     document.querySelectorAll('#presets button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     setParams(PRESETS[btn.dataset.preset]);
@@ -1902,17 +3865,619 @@ document.querySelectorAll('#presets button').forEach(btn => {
 // Listen on all inputs
 document.querySelectorAll('input[type="range"], input[type="checkbox"]').forEach(inp => {
   inp.addEventListener('input', () => {
+    pushHistory();
     document.querySelectorAll('#presets button').forEach(b => b.classList.remove('active'));
     render();
   });
 });
 
+function renderEstKurve(p) {
+  const el = document.getElementById('est_kurve');
+  if (!el) return;
+  const W = 640, H = 200, pl = 48, pr = 16, pt = 12, pb = 32;
+  const iW = W - pl - pr, iH = H - pt - pb;
+  const maxInc = 350000, maxRate = 55;
+
+  const pts_grenz = [], pts_eff = [];
+  for (let i = 0; i <= 280; i++) {
+    const inc = (i / 280) * maxInc;
+    const gs = grenzsteuersatz(inc, p.freibetrag, p.eingang, p.spitze, p.grenze) * 100;
+    const es = effSteuersatz(inc, p.freibetrag, p.eingang, p.spitze, p.grenze) * 100;
+    const x = pl + (inc / maxInc) * iW;
+    const yg = pt + iH - Math.min(iH, (gs / maxRate) * iH);
+    const ye = pt + iH - Math.min(iH, (es / maxRate) * iH);
+    pts_grenz.push(x + ',' + yg);
+    pts_eff.push(x + ',' + ye);
+  }
+
+  const yGrid = [0,10,20,30,40,50].map(v => {
+    const y = pt + iH - (v / maxRate) * iH;
+    return `<line x1="${pl}" y1="${y}" x2="${pl+iW}" y2="${y}" stroke="rgba(42,39,32,0.1)" stroke-width="1"/>
+            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${v}%</text>`;
+  }).join('');
+  const xGrid = [50,100,150,200,250,300,350].map(v => {
+    const x = pl + (v*1000 / maxInc) * iW;
+    return `<line x1="${x}" y1="${pt}" x2="${x}" y2="${pt+iH}" stroke="rgba(42,39,32,0.1)" stroke-width="1"/>
+            <text x="${x}" y="${pt+iH+18}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${v}k</text>`;
+  }).join('');
+
+  // Dezil-Markierungen
+  const dezilMarks = DEZILE.map(d => {
+    const x = pl + (Math.min(d.brutto, maxInc) / maxInc) * iW;
+    const gs = grenzsteuersatz(d.brutto*(1-d.kapital), p.freibetrag, p.eingang, p.spitze, p.grenze)*100;
+    const y = pt + iH - Math.min(iH, (gs / maxRate) * iH);
+    return `<circle cx="${x}" cy="${y}" r="3" fill="var(--accent)" opacity="0.7"/>
+            <text x="${x}" y="${pt+iH+28}" text-anchor="middle" font-size="9" font-family="JetBrains Mono,monospace" fill="var(--muted)">${d.label}</text>`;
+  }).join('');
+
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+10}" style="width:100%;overflow:visible">
+    ${yGrid}${xGrid}
+    <line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
+    <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
+    <polyline points="${pts_eff.join(' ')}" fill="none" stroke="var(--accent3)" stroke-width="2" stroke-dasharray="5,3" opacity="0.8"/>
+    <polyline points="${pts_grenz.join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    ${dezilMarks}
+    <g transform="translate(${pl+8},${pt+10})">
+      <line x1="0" y1="0" x2="18" y2="0" stroke="var(--accent)" stroke-width="2.5"/>
+      <text x="22" y="4" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--ink)">Grenzsteuersatz</text>
+      <line x1="0" y1="16" x2="18" y2="16" stroke="var(--accent3)" stroke-width="2" stroke-dasharray="5,3"/>
+      <text x="22" y="20" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--ink)">Effektivsteuersatz</text>
+    </g>
+  </svg>`;
+}
+
+function renderIncomeDist(r, p) {
+  const el = document.getElementById('income_dist_chart');
+  if (!el) return;
+  const W = 640, H = 180, pl = 48, pr = 16, pt = 12, pb = 32;
+  const iW = W - pl - pr, iH = H - pt - pb;
+  const maxNetto = Math.max(...r.hh_delta.netto) * 1.05;
+
+  const nBars = r.hh_delta.netto.length;
+  const bars = r.hh_delta.netto.map((n, i) => {
+    const barW = Math.max(2, (iW / nBars) - 3);
+    const x = pl + i * (iW / nBars) + 1.5;
+    const barH = Math.max(2, (n / maxNetto) * iH);
+    const y = pt + iH - barH;
+    const isPoor = n < r.poverty_line;
+    const fill = isPoor ? 'var(--bad)' : (r.hh_delta.delta[i] > 100 ? 'var(--good)' : 'var(--ink)');
+    const nStr = n >= 1000 ? Math.round(n/1000) + 'k' : Math.round(n);
+    const lbl = DEZILE[i].label;
+    const fontSize = nBars > 10 ? '8' : '9';
+    return `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" fill="${fill}" opacity="${isPoor?'1':'0.75'}"/>
+            <text x="${x+barW/2}" y="${y-4}" text-anchor="middle" font-size="${fontSize}" font-family="JetBrains Mono,monospace" fill="var(--muted)">${nStr}</text>
+            <text x="${x+barW/2}" y="${pt+iH+18}" text-anchor="middle" font-size="${fontSize}" font-family="JetBrains Mono,monospace" fill="var(--muted)">${lbl}</text>`;
+  }).join('');
+
+  // Armutsgrenze
+  const povertyY = pt + iH - (r.poverty_line / maxNetto) * iH;
+  const povertyLine = r.poverty_line > 0 ?
+    `<line x1="${pl}" y1="${povertyY}" x2="${pl+iW}" y2="${povertyY}" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="6,3"/>
+     <text x="${pl+iW-4}" y="${povertyY-5}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--bad)">Armutsgrenze ${Math.round(r.poverty_line/1000)}k €</text>` : '';
+
+  const yLabels = [0, 0.25, 0.5, 0.75, 1.0].map(f => {
+    const v = Math.round(f * maxNetto / 1000);
+    const y = pt + iH - f * iH;
+    return `<line x1="${pl}" y1="${y}" x2="${pl+iW}" y2="${y}" stroke="rgba(42,39,32,0.08)" stroke-width="1"/>
+            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${v}k</text>`;
+  }).join('');
+
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+10}" style="width:100%;overflow:visible">
+    ${yLabels}
+    <line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
+    <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
+    ${bars}${povertyLine}
+  </svg>`;
+}
+
+function exportCSV() {
+  const p = getParams();
+  const r = berechne(p);
+  const rows = [];
+  const sep = ';';
+
+  rows.push(['Haushaltsspiel Deutschland — Export', new Date().toLocaleDateString('de-DE')].join(sep));
+  rows.push([]);
+
+  rows.push(['=== PARAMETER ===']);
+  rows.push(['Grundfreibetrag', p.freibetrag + ' €']);
+  rows.push(['Eingangssteuersatz', p.eingang + ' %']);
+  rows.push(['Spitzensteuersatz', p.spitze + ' %']);
+  rows.push(['Einkommen ab Spitzensatz', p.grenze + ' €']);
+  rows.push(['Kapital synthetisch', p.synthetisch ? 'Ja' : 'Nein']);
+  rows.push(['Abgeltungsteuer', p.abgeltung + ' %']);
+  rows.push(['Körperschaftsteuer', p.kst + ' %']);
+  rows.push(['Gewerbesteuer', p.gewst_aus ? 'abgeschafft' : p.gewst + ' %']);
+  rows.push(['MwSt Regelsatz', p.mwst + ' %']);
+  rows.push(['MwSt ermäßigt', p.mwst_erm + ' %']);
+  rows.push(['CO₂-Preis', p.co2 + ' €/t']);
+  rows.push(['Klimageld', p.klimageld ? 'Ja' : 'Nein']);
+  rows.push(['Erbschaftsteuer Spitze', p.erb + ' %']);
+  rows.push(['Bodenwertsteuer', p.boden + ' %']);
+  rows.push(['Vermögensteuer', p.verm + ' %']);
+  rows.push(['Rentenversicherung', p.rv + ' %']);
+  rows.push(['Krankenversicherung', p.kv + ' %']);
+  rows.push(['AL+Pflege', p.alpf + ' %']);
+  rows.push(['Bürgerversicherung', p.buergerv ? 'Ja' : 'Nein']);
+  rows.push(['Bürgergeld-Regelsatz', p.bg + ' €/Monat']);
+  rows.push(['Kindergeld', p.kg + ' €/Monat']);
+  rows.push([]);
+
+  rows.push(['=== FISKAL-KENNZAHLEN (Mrd. €) ===']);
+  rows.push(['Einnahmen gesamt', r.einnahmen_total.toFixed(1)]);
+  rows.push(['Ausgaben gesamt', r.ausgaben_total.toFixed(1)]);
+  rows.push(['Saldo', r.saldo.toFixed(1)]);
+  rows.push(['Verwaltungskosten', r.admin_kosten.toFixed(1)]);
+  rows.push([]);
+
+  rows.push(['=== EINNAHMEN NACH STEUERART (Mrd. €) ===']);
+  const rLabels = {est:'Einkommensteuer',kst:'Körperschaftsteuer',gewst:'Gewerbesteuer',mwst:'Mehrwertsteuer',co2:'CO₂ (netto)',erbschaft:'Erbschaftsteuer',boden:'Bodenwertsteuer',vermoegen:'Vermögensteuer',rv:'Rentenversicherung',kv:'Krankenversicherung',al:'AL+Pflege',klein:'Kleine Verbrauchsteuern'};
+  Object.entries(r.rev).forEach(([k,v]) => rows.push([rLabels[k]||k, v.toFixed(1)]));
+  rows.push([]);
+
+  rows.push(['=== VERTEILUNG NACH DEZIL ===']);
+  rows.push(['Dezil', 'Netto-Einkommen (€)', 'Δ vs. Status Quo (€)', 'Steuerbelastung (%)']);
+  r.hh_delta.netto.forEach((n, i) => rows.push([
+    'D' + (i+1), Math.round(n), Math.round(r.hh_delta.delta[i]), r.hh_delta.belastung_pct[i].toFixed(1)
+  ]));
+  rows.push([]);
+
+  rows.push(['=== VERTEILUNGS- & VERHALTENSKENNZAHLEN ===']);
+  rows.push(['Gini-Koeffizient (neu)', r.gini.toFixed(4)]);
+  rows.push(['Gini-Koeffizient (Basis)', REF.gini.toFixed(4)]);
+  rows.push(['Palma-Ratio', r.palma.toFixed(3)]);
+  rows.push(['Arbeitsangebot Index', r.behavior.labor.toFixed(1)]);
+  rows.push(['Konsum Index', r.behavior.konsum.toFixed(1)]);
+  rows.push(['Investitionen Index', r.behavior.invest.toFixed(1)]);
+  rows.push(['CO₂-Emissionen Index', r.behavior.co2.toFixed(1)]);
+
+  const csvStr = rows.map(r => Array.isArray(r) ? r.join(sep) : r).join('\n');
+  const blob = new Blob(['\uFEFF' + csvStr], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'haushaltsspiel_export_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// SCHULDENQUOTENPFAD
+// ============================================================
+
+function berechneSchuldenpfad(saldo_neu, saldo_sq) {
+  const bip_g = 0.015; // nominal 1,5 % BIP-Wachstum
+  const zins  = 0.025; // Ø-Zins auf Bestandsschulden (Rollover-Effekt ~2,5 %)
+  let bip     = 4200;
+  let schuld_neu = 63.0 / 100 * bip;  // Startpunkt: 63 % Schuldenquote 2025
+  let schuld_sq  = 63.0 / 100 * bip;
+  const pfad = [{jahr:2025, neu:63.0, sq:63.0}];
+
+  for (let y = 1; y <= 20; y++) {
+    bip *= (1 + bip_g);
+    // Zinsdynamik: wenn neue Schulden > SQ-Schulden, fallen Mehrzinsen an
+    const extra_zins = (schuld_neu - schuld_sq) * zins;
+    schuld_neu -= (saldo_neu - extra_zins);
+    schuld_sq  -= saldo_sq;
+    pfad.push({ jahr: 2025+y, neu: schuld_neu/bip*100, sq: schuld_sq/bip*100 });
+  }
+  return pfad;
+}
+
+function renderSchuldenpfad(r) {
+  const el = document.getElementById('schulden_pfad_chart');
+  if (!el) return;
+  const pfad = berechneSchuldenpfad(r.saldo, REF.saldo);
+  const W=640, H=160, pl=48, pr=16, pt=12, pb=28;
+  const iW=W-pl-pr, iH=H-pt-pb;
+  const allV = pfad.flatMap(p=>[p.neu,p.sq]);
+  const minV = Math.min(30, ...allV), maxV = Math.max(80, ...allV);
+  const xOf = j => pl + ((j-2025)/20)*iW;
+  const yOf = v => pt + iH - ((v-minV)/(maxV-minV))*iH;
+
+  const pts_neu = pfad.map(p=>xOf(p.jahr)+','+yOf(p.neu)).join(' ');
+  const pts_sq  = pfad.map(p=>xOf(p.jahr)+','+yOf(p.sq)).join(' ');
+
+  const yVals = [40,50,60,70,80,90].filter(v=>v>=minV-5&&v<=maxV+5).map(v => {
+    const y = yOf(v);
+    const isM = v===60, isR = v===90;
+    const col = isM ? 'rgba(200,64,31,0.5)' : isR ? 'rgba(200,64,31,0.8)' : 'rgba(42,39,32,0.08)';
+    return `<line x1="${pl}" y1="${y}" x2="${pl+iW}" y2="${y}" stroke="${col}" stroke-width="${isM||isR?1.5:1}" stroke-dasharray="${isM||isR?'6,3':''}"/>
+            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="${isM||isR?'var(--bad)':'var(--muted)'}">
+              ${v}%${isM?' ←Maas.':isR?' ←R/R':''}
+            </text>`;
+  }).join('');
+  const xLabels = [2025,2030,2035,2040,2045].map(j=>
+    `<text x="${xOf(j)}" y="${pt+iH+16}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${j}</text>`
+  ).join('');
+
+  const endNeu = pfad[pfad.length-1].neu.toFixed(1);
+  const endSQ  = pfad[pfad.length-1].sq.toFixed(1).replace('.',',');
+  const sameScenario = Math.abs(r.saldo - REF.saldo) < 0.5;
+
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
+    ${yVals}${xLabels}
+    <line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
+    <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
+    ${!sameScenario?`<polyline points="${pts_sq}" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.6"/>`:'' }
+    <polyline points="${pts_neu}" fill="none" stroke="${r.saldo>0?'var(--good)':'var(--bad)'}" stroke-width="2.5"/>
+    <text x="${xOf(2045)-4}" y="${yOf(pfad[20].neu)-8}" text-anchor="end" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="${r.saldo>0?'var(--good)':'var(--bad)'}">${(+endNeu).toFixed(1).replace('.',',')} %</text>
+    ${!sameScenario?`<text x="${xOf(2045)-4}" y="${yOf(pfad[20].sq)+14}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">SQ: ${endSQ} %</text>`:''}
+    <g transform="translate(${pl+8},${pt+8})">
+      <line x1="0" y1="0" x2="18" y2="0" stroke="${r.saldo>0?'var(--good)':'var(--bad)'}" stroke-width="2.5"/>
+      <text x="22" y="4" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--ink)">Aktuelles Szenario</text>
+      ${!sameScenario?`<line x1="0" y1="14" x2="18" y2="14" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4,2"/>
+      <text x="22" y="18" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">Status Quo</text>`:''}
+    </g>
+  </svg>`;
+}
+
+// ============================================================
+// SHARE-URL
+// ============================================================
+
+function paramsToHash(p) {
+  try { return '#' + btoa(JSON.stringify(p)); } catch { return ''; }
+}
+function hashToParams(hash) {
+  try { return JSON.parse(atob(hash.slice(1))); } catch { return null; }
+}
+function copyShareLink() {
+  const p = getParams();
+  const url = window.location.origin + window.location.pathname + paramsToHash(p);
+  const btn = document.getElementById('share-btn');
+  const fallback = () => { prompt('Link kopieren (Strg+C):', url); };
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        btn.textContent = '✓ Kopiert!';
+        setTimeout(() => btn.textContent = '⇥ Link kopieren', 1800);
+      }).catch(fallback);
+    } else {
+      fallback();
+    }
+  } catch(e) { fallback(); }
+}
+
+// ============================================================
+// SZENARIO-VERGLEICH — Live-Edit-Modus
+// ============================================================
+
+const SZENARIO = { A: null, B: null };
+let activeScenarioSlot = null; // null | 'A' | 'B'
+
+function enterScenarioMode(slot) {
+  if (activeScenarioSlot === slot) {
+    // Toggle off: exit mode, keep data
+    activeScenarioSlot = null;
+    updateScenarioModeUI();
+    return;
+  }
+  // If switching from other slot: save current state there first
+  if (activeScenarioSlot && activeScenarioSlot !== slot) {
+    const cp = getParams();
+    SZENARIO[activeScenarioSlot] = { p: cp, r: berechne(cp) };
+    // Load the other slot's params if they exist
+    if (SZENARIO[slot]) setParams(SZENARIO[slot].p);
+  } else if (!SZENARIO[slot]) {
+    // First time entering this slot: snapshot current state as starting point
+    const cp = getParams();
+    SZENARIO[slot] = { p: cp, r: berechne(cp) };
+  } else {
+    // Re-entering a slot that already has data: reload its params
+    setParams(SZENARIO[slot].p);
+  }
+  activeScenarioSlot = slot;
+  updateScenarioModeUI();
+  render();
+}
+
+function exitScenarioMode() {
+  activeScenarioSlot = null;
+  updateScenarioModeUI();
+}
+
+function updateScenarioModeUI() {
+  const bar   = document.getElementById('scenario-mode-bar');
+  const label = document.getElementById('scenario-mode-label');
+  const btnA  = document.getElementById('save-a-btn');
+  const btnB  = document.getElementById('save-b-btn');
+  const sidebar = document.getElementById('controls-sidebar');
+
+  bar.className = 'scenario-mode-bar';
+  btnA.classList.remove('active');
+  btnB.classList.remove('active');
+  sidebar.style.borderLeft = '';
+
+  if (activeScenarioSlot === 'A') {
+    bar.classList.add('mode-a');
+    label.textContent = 'Szenario A aktiv — Regler anpassen';
+    btnA.classList.add('active');
+  } else if (activeScenarioSlot === 'B') {
+    bar.classList.add('mode-b');
+    label.textContent = 'Szenario B aktiv — Regler anpassen';
+    btnB.classList.add('active');
+  }
+}
+
+function renderSzenarioVergleich() {
+  const el = document.getElementById('szenario-panel');
+  if (!el) return;
+  const { A, B } = SZENARIO;
+  if (!A || !B) {
+    el.style.display = A ? 'block' : 'none';
+    if (A && !B) el.innerHTML = `<div class="panel" style="border-top:3px solid var(--accent3);padding:16px 20px;display:flex;align-items:center;gap:12px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent3);">▣ Szenario A gespeichert</span>
+      <span style="font-size:13px;color:var(--muted);">Klicke „▣ Szenario B" um ein zweites Szenario zu bearbeiten und zu vergleichen.</span>
+    </div>`;
+    return;
+  }
+  el.style.display = 'block';
+
+  const metrics = [
+    { label: 'Staatssaldo',       fA: A.r.saldo,              fB: B.r.saldo,              fmt: v=>(v>=0?'+':'')+v.toFixed(1).replace('.',',')+' Mrd.',   good: v=>v>0 },
+    { label: 'Einnahmen',         fA: A.r.einnahmen_total,    fB: B.r.einnahmen_total,    fmt: v=>Math.round(v)+' Mrd.',                                  good: null },
+    { label: 'Gini-Koeffizient',  fA: A.r.gini,               fB: B.r.gini,               fmt: v=>v.toFixed(3).replace('.',','),                          good: v=>v<0 },
+    { label: 'Armutsrisiko',      fA: A.r.armutsrisiko,       fB: B.r.armutsrisiko,       fmt: v=>v.toFixed(1).replace('.',',')+' %',                     good: v=>v<0 },
+    { label: 'Arbeitsangebot',    fA: A.r.behavior.labor,     fB: B.r.behavior.labor,     fmt: v=>v.toFixed(1),                                           good: v=>v>0 },
+    { label: 'CO₂-Index',         fA: A.r.behavior.co2,       fB: B.r.behavior.co2,       fmt: v=>v.toFixed(1),                                           good: v=>v<0 },
+    { label: 'Verwaltungskosten', fA: A.r.admin_kosten,       fB: B.r.admin_kosten,       fmt: v=>v.toFixed(1).replace('.',',')+' Mrd.',                  good: v=>v<0 },
+    { label: 'Wohlfahrtsverlust', fA: A.r.dwl,                fB: B.r.dwl,                fmt: v=>v.toFixed(0)+' Mrd.',                                   good: v=>v<0 },
+    { label: 'Schuldenq. Δ/Jahr', fA: A.r.schuldenquote_delta,fB: B.r.schuldenquote_delta,fmt: v=>(v>=0?'+':'')+v.toFixed(2).replace('.',',')+' %',      good: v=>v<0 },
+  ];
+
+  const rows = metrics.map(m => {
+    const delta = m.fB - m.fA;
+    const cls = m.good ? (m.good(delta) ? 'good' : delta===0 ? 'neutral' : 'bad') : 'neutral';
+    const sign = delta >= 0 ? '+' : '';
+    const deltaFmt = m.fmt(delta).replace(m.fmt(0).replace(/[+\-]/, ''), ''); // rough delta fmt
+    const deltaStr = (delta >= 0 ? '+' : '') + (Math.abs(delta) < 0.005 ? '0' :
+      Math.abs(delta) < 1 ? delta.toFixed(3).replace('.',',') :
+      Math.abs(delta) < 100 ? delta.toFixed(1).replace('.',',') :
+      Math.round(delta).toString());
+    return `<tr>
+      <td style="padding:6px 12px;font-size:13px;border-bottom:1px solid rgba(42,39,32,0.08)">${m.label}</td>
+      <td style="padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent3);border-bottom:1px solid rgba(42,39,32,0.08)">${m.fmt(m.fA)}</td>
+      <td style="padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent2);border-bottom:1px solid rgba(42,39,32,0.08)">${m.fmt(m.fB)}</td>
+      <td style="padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--${cls});border-bottom:1px solid rgba(42,39,32,0.08)">${deltaStr}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `<div class="panel" style="border-top:3px solid var(--accent3)">
+    <h2>Szenario-Vergleich A vs. B</h2>
+    <div class="panel-sub">Spalte Δ = B minus A · Grün = Verbesserung nach Szenario B</div>
+    <table style="width:100%;border-collapse:collapse;margin-top:12px;">
+      <thead><tr>
+        <th style="padding:6px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);border-bottom:2px solid var(--rule)">Kennzahl</th>
+        <th style="padding:6px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent3);border-bottom:2px solid var(--rule)">Szenario A</th>
+        <th style="padding:6px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent2);border-bottom:2px solid var(--rule)">Szenario B</th>
+        <th style="padding:6px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);border-bottom:2px solid var(--rule)">Δ (B−A)</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p style="margin-top:10px;font-size:11px;color:var(--muted);font-style:italic">Aktuelles Szenario überschreibt beim nächsten Speichern.</p>
+  </div>`;
+}
+
+// ============================================================
+// GESAMTNOTE / SCORE
+// ============================================================
+function berechneGesamtnote(r) {
+  // Fiskal: saldo ≥ 0 = 100, −200 = 0
+  const fiskal  = Math.max(0, Math.min(100, (r.saldo + 200) / 200 * 100));
+  // Gleichheit: gini 0.265 = 100, 0.38 = 0
+  const gleich  = Math.max(0, Math.min(100, (0.38 - r.gini) / (0.38 - 0.265) * 100));
+  // Effizienz: admin_kosten 80 = 100, 230 = 0
+  const effiz   = Math.max(0, Math.min(100, (230 - r.admin_kosten) / 150 * 100));
+  // Arbeit: labor 103 = 100, 96 = 0
+  const arbeit  = Math.max(0, Math.min(100, (r.behavior.labor - 96) / 7 * 100));
+
+  const score = Math.round(fiskal * 0.30 + gleich * 0.30 + effiz * 0.20 + arbeit * 0.20);
+
+  let grade, gradeClass;
+  if      (score >= 93) { grade = 'A+'; gradeClass = 'grade-a'; }
+  else if (score >= 87) { grade = 'A';  gradeClass = 'grade-a'; }
+  else if (score >= 80) { grade = 'B+'; gradeClass = 'grade-b'; }
+  else if (score >= 73) { grade = 'B';  gradeClass = 'grade-b'; }
+  else if (score >= 67) { grade = 'C+'; gradeClass = 'grade-c'; }
+  else if (score >= 60) { grade = 'C';  gradeClass = 'grade-c'; }
+  else if (score >= 53) { grade = 'D+'; gradeClass = 'grade-d'; }
+  else if (score >= 47) { grade = 'D';  gradeClass = 'grade-d'; }
+  else if (score >= 33) { grade = 'E';  gradeClass = 'grade-e'; }
+  else                  { grade = 'F';  gradeClass = 'grade-f'; }
+
+  return { score, grade, gradeClass, dims: { fiskal, gleich, effiz, arbeit } };
+}
+
+function renderScore(r) {
+  const n = berechneGesamtnote(r);
+  const gradeEl = document.getElementById('score-grade');
+  gradeEl.textContent = n.grade;
+  gradeEl.className = 'score-grade ' + n.gradeClass;
+  document.getElementById('score-number').textContent = n.score + ' / 100';
+
+  const dims = [
+    { key: 'fiskal',  label: 'Fiskal',     val: n.dims.fiskal },
+    { key: 'gleich',  label: 'Gleichheit', val: n.dims.gleich },
+    { key: 'effiz',   label: 'Effizienz',  val: n.dims.effiz  },
+    { key: 'arbeit',  label: 'Arbeit',     val: n.dims.arbeit },
+  ];
+  document.getElementById('score-dims').innerHTML = dims.map(d => `
+    <div class="score-dim">
+      <div class="score-dim-label">${d.label}</div>
+      <div class="score-dim-track"><div class="score-dim-fill" style="width:${d.val.toFixed(0)}%"></div></div>
+      <div class="score-dim-val">${d.val.toFixed(0)} Pkt.</div>
+    </div>`).join('');
+}
+
+// ============================================================
+// UNDO HISTORY
+// ============================================================
+function pushHistory() {
+  if (!_lastParams) return;
+  _history.push(JSON.stringify(_lastParams));
+  if (_history.length > 10) _history.shift();
+  document.getElementById('undo-btn').disabled = false;
+}
+
+function undoHistory() {
+  if (!_history.length) return;
+  const prev = JSON.parse(_history.pop());
+  setParams(prev);
+  render();
+  document.getElementById('undo-btn').disabled = _history.length === 0;
+}
+
+// ============================================================
+// REFORM TOURS (Guided)
+// ============================================================
+const REFORM_TOURS = [
+  {
+    id: 'kirchhof',
+    name: 'Kirchhof-Reform',
+    steps: [
+      { title: 'Flat Tax einführen',           desc: 'Einheitlicher Steuersatz von 25 % für alle Einkommen.',        params: { eingang: 25, spitze: 25 } },
+      { title: 'Grundfreibetrag erhöhen',      desc: 'Schutz für niedrige Einkommen: Freibetrag auf 18.000 €.',      params: { freibetrag: 18000 } },
+      { title: 'Gewerbesteuer abschaffen',     desc: 'Vereinfachung: Gewerbesteuer auf 0 — nur Körperschaftsteuer.', params: { gewst: 0 } },
+      { title: 'Auf 4 Steuern reduzieren',     desc: 'Erbschaft-, Boden-, Vermögenssteuer abschaffen.',              params: { erb: 0, boden: 0.0, verm: 0.0, zucman: 0.0 } },
+    ]
+  },
+  {
+    id: 'skandinavisch',
+    name: 'Skandinavisches Modell',
+    steps: [
+      { title: 'MwSt erhöhen',                 desc: 'Höhere Konsumsteuer — 25 % wie in Dänemark/Schweden.',         params: { mwst: 25 } },
+      { title: 'Duale Einkommensteuer',         desc: 'Kapital separat mit 27 % besteuert (NK-Modell).',              params: { synthetisch: false, abgeltung: 27 } },
+      { title: 'Niedrige Körperschaftsteuer',  desc: 'Attraktiv für Unternehmen: KSt auf 20 %.',                     params: { kst: 20 } },
+      { title: 'Hohe Transferleistungen',      desc: 'Bürgergeld 700 €, Kindergeld 300 € für Umverteilung.',         params: { bg: 700, kg: 300 } },
+    ]
+  },
+  {
+    id: 'umverteilung',
+    name: 'Starke Umverteilung',
+    steps: [
+      { title: 'Spitzensteuer erhöhen',         desc: 'Spitzensteuersatz von 42 % auf 58 % für Top-Einkommen.',      params: { spitze: 58 } },
+      { title: 'Kapital wie Arbeit besteuern',  desc: 'Abgeltungsteuer abschaffen — synthetisches System.',           params: { synthetisch: true } },
+      { title: 'Erbschaftsteuer stärken',       desc: 'Erbschaftsteuersatz auf 35 % — weniger Ausnahmen.',            params: { erb: 35 } },
+      { title: 'Vermögensteuer einführen',      desc: 'Zucman-Modell: 1,5 % Steuer auf sehr hohe Vermögen.',         params: { verm: 1.5, zucman: 1.5 } },
+    ]
+  },
+];
+
+function startTour(tourId) {
+  const tour = REFORM_TOURS.find(t => t.id === tourId);
+  if (!tour) return;
+  pushHistory();
+  _tourActive = tourId;
+  _tourStep = 0;
+  _tourBaseParams = getParams();
+  applyTourStep();
+}
+
+function applyTourStep() {
+  const tour = REFORM_TOURS.find(t => t.id === _tourActive);
+  if (!tour) return;
+  const accumulated = Object.assign({}, _tourBaseParams);
+  for (let i = 0; i <= _tourStep; i++) {
+    Object.assign(accumulated, tour.steps[i].params);
+  }
+  setParams(accumulated);
+  render();
+
+  const bar = document.getElementById('reform-tour-bar');
+  const step = tour.steps[_tourStep];
+  bar.classList.add('active');
+  document.getElementById('reform-tour-eyebrow').textContent = tour.name + ' · Schritt ' + (_tourStep + 1);
+  document.getElementById('reform-tour-title').textContent = step.title;
+  document.getElementById('reform-tour-desc').textContent = step.desc;
+  document.getElementById('reform-tour-step').textContent = (_tourStep + 1) + ' / ' + tour.steps.length;
+  document.getElementById('reform-tour-back').disabled = _tourStep === 0;
+  document.getElementById('reform-tour-next').textContent =
+    _tourStep < tour.steps.length - 1 ? 'Weiter →' : 'Fertig ✓';
+}
+
+function tourNext() {
+  const tour = REFORM_TOURS.find(t => t.id === _tourActive);
+  if (!tour) return;
+  if (_tourStep < tour.steps.length - 1) { _tourStep++; applyTourStep(); }
+  else endTour();
+}
+
+function tourPrev() {
+  if (_tourStep > 0) { _tourStep--; applyTourStep(); }
+}
+
+function endTour() {
+  _tourActive = null;
+  _tourBaseParams = null;
+  document.getElementById('reform-tour-bar').classList.remove('active');
+}
+
+// ── ALL LET/CONST USED INSIDE render() ──────────────────────
+// Must be declared BEFORE render() is called (no hoisting for let/const)
+let _lastResult = null, _lastParams = null;
+let _prevKpiValues = {};
+let _history = [];
+let _tourActive = null, _tourStep = 0, _tourBaseParams = null;
+
+// ── KPI BENCHMARKS & CHALLENGE CONTEXT ──────────────────────
+// Must be defined BEFORE render() is called (const = no hoisting)
+const KPI_BENCH = {
+  saldo:  'DE 2024: −85 Mrd. · EU-Ø: −180 Mrd.',
+  einn:   'DE 2024: ~1.450 Mrd. · Steuerquote 22 % BIP',
+  gini:   'DE: 0,295 · DK: 0,281 · SE: 0,273 · US: 0,395',
+  admin:  'DE ~2 % Steueraufkommen (OECD-Ø)',
+  nst:    'DE aktuell: ~40 Steuerarten',
+  arb:    'Elastizitäten: Saez/Chetty/Gruber',
+  armut:  'DE 2023: 14,8 % (EU-SILC) · EU-Ø: 16,5 %',
+  schuld: 'DE Schuldenquote 2024: ~63 % BIP',
+  dwl:    'Schätzung: 5–15 % des Steueraufkommens',
+};
+const CHALLENGE_CTX = {
+  'Saldo':            'DE 2024: ca. −85 Mrd. €',
+  'Gini':             'DE heute: 0,295 · Dänemark: 0,281',
+  'Armutsrisiko':     'DE 2023: 14,8 % (EU-SILC)',
+  'Verwaltungskosten':'DE ~2 % Steueraufkommen (OECD)',
+  'Arbeitsangebot':   'Indexbasis = 100 (Status quo)',
+  'Einnahmen':        'DE Steuerquote ~22 % BIP',
+  'Steuerarten':      'Kirchhof-Ideal: 4–5 Steuerarten',
+  'CO₂':              'DE 2030-Ziel: −65 % ggü. 1990',
+  'Schuldenquote':    'Verfassungsgrenze: 0,35 % BIP/Jahr',
+  'Wohlfahrtsverlust':'ca. 5–15 % des Steueraufkommens (Lit.)',
+};
+
+// Capture hash state BEFORE render() modifies window.location via replaceState
+const _hadInitialHash = !!window.location.hash;
+
 computeRef();
 setParams(PRESETS.status_quo);
+if (window.location.hash) {
+  const fromHash = hashToParams(window.location.hash);
+  if (fromHash) setParams(fromHash);
+}
 render();
+// Laffer-Kurve sofort beim Start berechnen (kein Debounce-Delay)
+_renderLafferNow(getParams());
 injectTooltips();
+updateScenarioModeUI();
 
 // Rechenweg-Panel: bei Aufklappen rendern
+document.getElementById('csv-export-btn').addEventListener('click', exportCSV);
+document.getElementById('share-btn').addEventListener('click', copyShareLink);
+document.getElementById('undo-btn').addEventListener('click', undoHistory);
+document.getElementById('save-a-btn').addEventListener('click', () => enterScenarioMode('A'));
+document.getElementById('save-b-btn').addEventListener('click', () => enterScenarioMode('B'));
+
+// Mobile Controls Toggle
+document.getElementById('mobile-toggle-btn').addEventListener('click', () => {
+  const sidebar = document.getElementById('controls-sidebar');
+  const label = document.getElementById('mobile-toggle-label');
+  const icon = document.getElementById('mobile-toggle-icon');
+  const hidden = sidebar.classList.toggle('mobile-hidden');
+  label.textContent = hidden ? '⚙ Regler anzeigen' : '⚙ Regler ausblenden';
+  icon.textContent = hidden ? '+' : '−';
+});
+
 document.getElementById('rw-details').addEventListener('toggle', function() {
   const hint = this.querySelector('.rw-hint');
   if (this.open) {
@@ -1922,6 +4487,473 @@ document.getElementById('rw-details').addEventListener('toggle', function() {
     hint.textContent = '▸ aufklappen';
   }
 });
+// ============================================================
+// ONBOARDING
+// ============================================================
+
+function closeOnboarding() {
+  const el = document.getElementById('onboarding-overlay');
+  if (el) el.style.display = 'none';
+  localStorage.setItem('kassensturz_visited_v2', '1');
+}
+
+// Close onboarding by clicking the dark backdrop (not the card itself)
+// Must use setTimeout 0 — overlay element is parsed AFTER this script block
+setTimeout(() => {
+  const ov = document.getElementById('onboarding-overlay');
+  if (ov) ov.addEventListener('click', function(e) {
+    if (e.target === this) closeOnboarding();
+  });
+}, 0);
+
+function startWith(preset) {
+  closeOnboarding();
+  pushHistory();
+  document.querySelectorAll('#presets button').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`[data-preset="${preset}"]`);
+  if (btn) btn.classList.add('active');
+  setParams(PRESETS[preset]);
+  render();
+}
+
+(function initOnboarding() {
+  // Use _hadInitialHash (captured before render() adds a hash via replaceState)
+  if (!localStorage.getItem('kassensturz_visited_v2') && !_hadInitialHash) {
+    setTimeout(() => {
+      const el = document.getElementById('onboarding-overlay');
+      if (el) el.style.display = 'flex';
+    }, 300);
+  }
+})();
+
+
+// ============================================================
+// RESULT CARD (Canvas export) — multi-format, multi-theme
+// ============================================================
+
+let _cardTheme = 'dark';
+
+function openCardModal() {
+  document.getElementById('csp-modal').style.display = 'flex';
+}
+function closeCardModal() {
+  document.getElementById('csp-modal').style.display = 'none';
+}
+function setCardTheme(theme) {
+  _cardTheme = theme;
+  document.getElementById('csp-dark').classList.toggle('active', theme === 'dark');
+  document.getElementById('csp-light').classList.toggle('active', theme === 'light');
+  const bg = theme === 'dark' ? '#1a1814' : '#f4f1ea';
+  document.querySelectorAll('.csp-preview').forEach(el => { el.style.background = bg; });
+}
+function pickCardStyle(fmt) {
+  closeCardModal();
+  downloadResultCard(fmt, _cardTheme);
+}
+
+function _cardColors(theme) {
+  if (theme === 'light') return {
+    bg: '#f4f1ea', text: '#1a1814', muted: '#6b6359', accent: '#c8401f',
+    good: '#1e5f3a', bad: '#c8401f',
+    cellBg: 'rgba(26,24,20,0.04)', cellBorder: 'rgba(26,24,20,0.10)',
+    rule: 'rgba(26,24,20,0.14)', subrule: 'rgba(26,24,20,0.08)',
+    url: 'rgba(107,99,89,0.7)',
+  };
+  return {
+    bg: '#1a1814', text: '#fbf9f4', muted: '#6b6359', accent: '#c8401f',
+    good: '#5cc888', bad: '#e85840',
+    cellBg: 'rgba(251,249,244,0.04)', cellBorder: 'rgba(251,249,244,0.09)',
+    rule: 'rgba(251,249,244,0.12)', subrule: 'rgba(251,249,244,0.07)',
+    url: 'rgba(107,99,89,0.75)',
+  };
+}
+
+function _cardKpis(r, p) {
+  return [
+    { label: 'STAATSSALDO',      val: (r.saldo >= 0 ? '+' : '') + r.saldo.toFixed(0) + ' Mrd. €',    good: r.saldo > -30,          bad: r.saldo < -80 },
+    { label: 'GINI-KOEFFIZIENT', val: r.gini.toFixed(3).replace('.', ','),                            good: r.gini < 0.28,          bad: r.gini > 0.32 },
+    { label: 'ARMUTSRISIKO',     val: r.armutsrisiko.toFixed(1).replace('.', ',') + ' %',             good: r.armutsrisiko < 8,     bad: r.armutsrisiko > 14 },
+    { label: 'VERWALTUNG',       val: r.admin_kosten.toFixed(0) + ' Mrd. €',                          good: r.admin_kosten < 110,   bad: r.admin_kosten > 140 },
+    { label: 'SPITZENSTEUERSATZ',val: p.spitze + ' %',                                                good: null,                   bad: null },
+    { label: 'CO₂-PREIS',        val: p.co2 + ' €/t',                                                good: p.co2 >= 80,            bad: p.co2 < 30 },
+  ];
+}
+
+function downloadResultCard(fmt = 'landscape', theme = 'dark') {
+  const r = _lastResult, p = _lastParams;
+  if (!r || !p) return;
+
+  const activeBtn = document.querySelector('#presets button.active');
+  const scenarioName = activeBtn ? activeBtn.textContent.trim().replace(/\u00A0/g, ' ') : 'Eigenes Szenario';
+  const btn = document.getElementById('card-btn');
+  btn.textContent = '…'; btn.disabled = true;
+
+  const SIZES = { landscape: [1200, 628], square: [1080, 1080], story: [720, 1280] };
+  const [W, H] = SIZES[fmt];
+
+  document.fonts.ready.then(() => {
+    const canvas = document.getElementById('share-canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    const C = _cardColors(theme);
+    const mono = '"JetBrains Mono", monospace';
+    const serif = '"Fraunces", Georgia, serif';
+    const kpis = _cardKpis(r, p);
+    const shareUrl = 'kassensturz.de';
+    const note = berechneGesamtnote(r);
+
+    // ── BACKGROUND ──
+    ctx.fillStyle = C.bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Radial glow accent
+    const glow = ctx.createRadialGradient(W * 0.18, H * 0.28, 0, W * 0.18, H * 0.28, W * 0.5);
+    glow.addColorStop(0, theme === 'dark' ? 'rgba(200,64,31,0.07)' : 'rgba(200,64,31,0.05)');
+    glow.addColorStop(1, 'transparent');
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+
+    // Left accent bar
+    ctx.fillStyle = C.accent;
+    ctx.fillRect(0, 0, Math.round(W * 0.004), H);
+
+    const pad = Math.round(W * 0.04);
+
+    if (fmt === 'landscape') {
+      // ── LANDSCAPE LAYOUT ──
+      const lPad = 48;
+
+      ctx.fillStyle = C.accent;
+      ctx.font = `600 11px ${mono}`;
+      ctx.fillText('KASSENSTURZ · HAUSHALTSSPIEL', lPad, 50);
+      ctx.fillStyle = C.muted; ctx.textAlign = 'right';
+      ctx.font = `10px ${mono}`;
+      ctx.fillText(shareUrl, W - lPad, 50);
+      ctx.textAlign = 'left';
+
+      ctx.strokeStyle = C.rule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(lPad, 64); ctx.lineTo(W - lPad, 64); ctx.stroke();
+
+      // Scenario name
+      ctx.fillStyle = C.text;
+      const nameSize = scenarioName.length > 20 ? 44 : 54;
+      ctx.font = `800 ${nameSize}px ${serif}`;
+      ctx.fillText(scenarioName, lPad, 140);
+
+      ctx.fillStyle = C.muted;
+      ctx.font = `italic 14px ${serif}`;
+      ctx.fillText('Dein Steuersystem für Deutschland 2025', lPad, 166);
+
+      // Grade badge top-right
+      const gx = W - lPad - 80, gy = 90;
+      ctx.fillStyle = C.cellBg; ctx.fillRect(gx, gy, 80, 68);
+      ctx.strokeStyle = C.cellBorder; ctx.lineWidth = 0.8; ctx.strokeRect(gx, gy, 80, 68);
+      ctx.fillStyle = C.muted; ctx.font = `9px ${mono}`; ctx.textAlign = 'center';
+      ctx.fillText('GESAMTNOTE', gx + 40, gy + 17);
+      ctx.fillStyle = C.text; ctx.font = `800 36px ${serif}`;
+      ctx.fillText(note.grade, gx + 40, gy + 54);
+      ctx.textAlign = 'left';
+
+      ctx.strokeStyle = C.subrule;
+      ctx.beginPath(); ctx.moveTo(lPad, 184); ctx.lineTo(W - lPad, 184); ctx.stroke();
+
+      // KPI grid 3×2
+      const colW = Math.floor((W - lPad * 2 - 32) / 3);
+      const rowH = 142; const gridTop = 200;
+      kpis.forEach((kpi, i) => {
+        const col = i % 3, row = Math.floor(i / 3);
+        const x = lPad + col * (colW + 16), y = gridTop + row * (rowH + 10);
+        ctx.fillStyle = C.cellBg; ctx.fillRect(x, y, colW, rowH);
+        ctx.strokeStyle = C.cellBorder; ctx.lineWidth = 0.8; ctx.strokeRect(x, y, colW, rowH);
+        ctx.fillStyle = C.muted; ctx.font = `500 9px ${mono}`; ctx.fillText(kpi.label, x + 14, y + 24);
+        let color = C.text;
+        if (kpi.good === true) color = C.good;
+        if (kpi.bad === true)  color = C.bad;
+        ctx.fillStyle = color; ctx.font = `800 28px ${serif}`; ctx.fillText(kpi.val, x + 14, y + 82);
+      });
+
+      ctx.strokeStyle = C.rule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(lPad, H - 38); ctx.lineTo(W - lPad, H - 38); ctx.stroke();
+      ctx.fillStyle = C.url; ctx.font = `10px ${mono}`;
+      ctx.fillText('kassensturz.de · Jetzt selbst ausprobieren', lPad, H - 18);
+
+    } else if (fmt === 'square') {
+      // ── SQUARE LAYOUT ──
+      const sp = 54;
+
+      ctx.fillStyle = C.accent; ctx.font = `600 11px ${mono}`;
+      ctx.fillText('KASSENSTURZ', sp, 54);
+      ctx.fillStyle = C.muted; ctx.textAlign = 'right'; ctx.font = `10px ${mono}`;
+      ctx.fillText(shareUrl, W - sp, 54);
+      ctx.textAlign = 'left';
+
+      ctx.strokeStyle = C.rule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sp, 70); ctx.lineTo(W - sp, 70); ctx.stroke();
+
+      // Big grade left, score right
+      ctx.fillStyle = C.text; ctx.font = `800 120px ${serif}`;
+      ctx.fillText(note.grade, sp, 212);
+
+      ctx.fillStyle = C.muted; ctx.font = `italic 14px ${serif}`;
+      ctx.fillText('Gesamtnote', sp, 240);
+
+      // Score bar area right side
+      const scoreX = W / 2 + 10;
+      ctx.fillStyle = C.text; ctx.font = `800 56px ${serif}`;
+      ctx.textAlign = 'right';
+      ctx.fillText(note.score, W - sp, 185);
+      ctx.fillStyle = C.muted; ctx.font = `11px ${mono}`;
+      ctx.fillText('/ 100 PUNKTE', W - sp, 210);
+      ctx.textAlign = 'left';
+
+      // Scenario name
+      ctx.fillStyle = C.text;
+      ctx.font = `italic 800 28px ${serif}`;
+      const snFit = scenarioName.length > 22 ? 22 : 28;
+      ctx.font = `italic 800 ${snFit}px ${serif}`;
+      ctx.fillText('"' + scenarioName + '"', sp, 290);
+
+      ctx.strokeStyle = C.subrule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sp, 310); ctx.lineTo(W - sp, 310); ctx.stroke();
+
+      // 4 KPIs in 2×2 grid
+      const kpi4 = kpis.slice(0, 4);
+      const colW2 = Math.floor((W - sp * 2 - 16) / 2);
+      const rowH2 = 148; const gt2 = 328;
+      kpi4.forEach((kpi, i) => {
+        const col = i % 2, row = Math.floor(i / 2);
+        const x = sp + col * (colW2 + 16), y = gt2 + row * (rowH2 + 12);
+        ctx.fillStyle = C.cellBg; ctx.fillRect(x, y, colW2, rowH2);
+        ctx.strokeStyle = C.cellBorder; ctx.lineWidth = 0.8; ctx.strokeRect(x, y, colW2, rowH2);
+        ctx.fillStyle = C.muted; ctx.font = `9px ${mono}`; ctx.fillText(kpi.label, x + 14, y + 26);
+        let color = C.text;
+        if (kpi.good === true) color = C.good;
+        if (kpi.bad === true)  color = C.bad;
+        ctx.fillStyle = color; ctx.font = `800 34px ${serif}`; ctx.fillText(kpi.val, x + 14, y + 96);
+      });
+
+      ctx.strokeStyle = C.rule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sp, H - 40); ctx.lineTo(W - sp, H - 40); ctx.stroke();
+      ctx.fillStyle = C.url; ctx.font = `10px ${mono}`;
+      ctx.fillText('kassensturz.de · Haushaltsspiel Deutschland 2025', sp, H - 18);
+
+    } else {
+      // ── STORY / PORTRAIT LAYOUT ──
+      const sp = 54;
+
+      // Accent header band
+      ctx.fillStyle = C.accent;
+      ctx.fillRect(0, 0, W, 8);
+
+      ctx.fillStyle = C.accent; ctx.font = `600 11px ${mono}`; ctx.textAlign = 'center';
+      ctx.fillText('KASSENSTURZ · HAUSHALTSSPIEL DEUTSCHLAND', W / 2, 56);
+      ctx.textAlign = 'left';
+
+      ctx.strokeStyle = C.rule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sp, 72); ctx.lineTo(W - sp, 72); ctx.stroke();
+
+      // Big grade centered
+      ctx.fillStyle = C.text; ctx.font = `800 140px ${serif}`; ctx.textAlign = 'center';
+      ctx.fillText(note.grade, W / 2, 240);
+      ctx.fillStyle = C.muted; ctx.font = `600 13px ${mono}`; ctx.textAlign = 'center';
+      ctx.fillText(note.score + ' VON 100 PUNKTEN', W / 2, 272);
+      ctx.textAlign = 'left';
+
+      ctx.strokeStyle = C.subrule;
+      ctx.beginPath(); ctx.moveTo(sp, 292); ctx.lineTo(W - sp, 292); ctx.stroke();
+
+      // Scenario name
+      ctx.fillStyle = C.text; ctx.textAlign = 'center';
+      const szS = scenarioName.length > 18 ? 30 : 38;
+      ctx.font = `800 italic ${szS}px ${serif}`;
+      ctx.fillText('"' + scenarioName + '"', W / 2, 360);
+      ctx.fillStyle = C.muted; ctx.font = `italic 13px ${serif}`;
+      ctx.fillText('Dein Steuersystem für Deutschland', W / 2, 390);
+      ctx.textAlign = 'left';
+
+      ctx.strokeStyle = C.subrule;
+      ctx.beginPath(); ctx.moveTo(sp, 416); ctx.lineTo(W - sp, 416); ctx.stroke();
+
+      // 6 KPIs stacked
+      const kpiH = 114, kpiTop = 436;
+      kpis.forEach((kpi, i) => {
+        const y = kpiTop + i * (kpiH + 8);
+        ctx.fillStyle = C.cellBg; ctx.fillRect(sp, y, W - sp * 2, kpiH);
+        ctx.strokeStyle = C.cellBorder; ctx.lineWidth = 0.8;
+        ctx.strokeRect(sp, y, W - sp * 2, kpiH);
+        ctx.fillStyle = C.muted; ctx.font = `9px ${mono}`; ctx.fillText(kpi.label, sp + 16, y + 26);
+        let color = C.text;
+        if (kpi.good === true) color = C.good;
+        if (kpi.bad === true)  color = C.bad;
+        ctx.fillStyle = color; ctx.font = `800 30px ${serif}`; ctx.fillText(kpi.val, sp + 16, y + 76);
+      });
+
+      ctx.strokeStyle = C.rule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sp, H - 48); ctx.lineTo(W - sp, H - 48); ctx.stroke();
+      ctx.fillStyle = C.url; ctx.font = `10px ${mono}`; ctx.textAlign = 'center';
+      ctx.fillText('kassensturz.de · Jetzt dein Steuersystem gestalten', W / 2, H - 24);
+      ctx.textAlign = 'left';
+    }
+
+    const link = document.createElement('a');
+    link.download = `kassensturz-${fmt}-${theme}-${scenarioName.toLowerCase().replace(/[\s/]+/g, '-')}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+
+    btn.textContent = '✓ Gespeichert'; btn.disabled = false;
+    setTimeout(() => { btn.textContent = '↓ Bild speichern'; }, 2000);
+  });
+}
+
+document.getElementById('card-btn').addEventListener('click', openCardModal);
+
+document.getElementById('to-finanztools-btn').addEventListener('click', function() {
+  window.location.href = '/finanz.html';
+});
+
 </script>
+
+<!-- CARD STYLE PICKER MODAL -->
+<div class="csp-backdrop" id="csp-modal" style="display:none" onclick="if(event.target===this)closeCardModal()">
+  <div class="csp-picker">
+    <div class="csp-head">
+      <span class="csp-title">Format & Stil wählen</span>
+      <button class="csp-close" onclick="closeCardModal()">✕</button>
+    </div>
+    <div class="csp-formats">
+      <button class="csp-fmt" onclick="pickCardStyle('landscape')">
+        <div class="csp-preview-wrap">
+          <div class="csp-preview csp-landscape" id="csp-prev-landscape"></div>
+        </div>
+        <div class="csp-fmt-name">Querformat</div>
+        <div class="csp-fmt-plat">Twitter · X<br>LinkedIn · Facebook</div>
+      </button>
+      <button class="csp-fmt" onclick="pickCardStyle('square')">
+        <div class="csp-preview-wrap">
+          <div class="csp-preview csp-square" id="csp-prev-square"></div>
+        </div>
+        <div class="csp-fmt-name">Quadrat</div>
+        <div class="csp-fmt-plat">Instagram · Facebook<br>1080 × 1080</div>
+      </button>
+      <button class="csp-fmt" onclick="pickCardStyle('story')">
+        <div class="csp-preview-wrap">
+          <div class="csp-preview csp-story" id="csp-prev-story"></div>
+        </div>
+        <div class="csp-fmt-name">Story</div>
+        <div class="csp-fmt-plat">Instagram Story<br>TikTok · Reels</div>
+      </button>
+    </div>
+    <hr class="csp-divider">
+    <div class="csp-theme-row">
+      <span class="csp-theme-label">Stil:</span>
+      <button class="csp-theme-btn active" id="csp-dark" onclick="setCardTheme('dark')">◼ Dunkel</button>
+      <button class="csp-theme-btn" id="csp-light" onclick="setCardTheme('light')">◻ Hell</button>
+      <span class="csp-hint">Klicke ein Format um sofort zu speichern</span>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING OVERLAY -->
+<div class="onboarding-overlay" id="onboarding-overlay" style="display:none">
+  <div class="onboarding-card">
+    <div class="onboarding-eyebrow">Kassensturz · Haushaltsspiel Deutschland</div>
+    <div class="onboarding-title">Du bist Finanzminister.<br>Das Defizit: 85 Mrd. €.</div>
+    <div class="onboarding-sub">Was ist dein erster Zug? Wähle einen Ausgangspunkt — du kannst danach jeden Regler frei anpassen.</div>
+    <div class="onboarding-choices">
+      <button class="onboarding-choice" onclick="startWith('radikal')">
+        Reiche stärker besteuern — Umverteilung von oben nach unten
+        <span class="onboarding-choice-tag">Umverteilung</span>
+      </button>
+      <button class="onboarding-choice" onclick="startWith('kirchhof')">
+        Radikal vereinfachen — Flat Tax, nur 4 Steuerarten
+        <span class="onboarding-choice-tag">Vereinfachung</span>
+      </button>
+      <button class="onboarding-choice" onclick="startWith('synthetisch')">
+        Synthetisch progressiv — Kapital wie Arbeit besteuern
+        <span class="onboarding-choice-tag">Reform</span>
+      </button>
+      <button class="onboarding-choice" onclick="startWith('nordisch')">
+        Nordisches Modell — hohe MwSt, niedrige Unternehmensteuer
+        <span class="onboarding-choice-tag">Skandinavien</span>
+      </button>
+    </div>
+    <button class="onboarding-skip" onclick="closeOnboarding()">Lieber selbst erkunden →</button>
+  </div>
+</div>
+
+<!-- ── SLIDER TOOLTIP ── -->
+<div class="slider-tooltip" id="slider-tooltip"></div>
+
+<script>
+(function() {
+  const TIPS = {
+    freibetrag: "Bis zu diesem Betrag bleibt Einkommen steuerfrei. Ein höherer Freibetrag entlastet alle Steuerpflichtigen – relativ am meisten profitieren Geringverdiener.",
+    eingang:    "Der erste Steuersatz auf Einkommen über dem Freibetrag. Laut IZA-Studien dämpfen hohe Eingangssätze besonders die Arbeitsbereitschaft bei Geringverdienern.",
+    spitze:     "Höchster Steuersatz für Topverdiener. OECD-Analysen zeigen: Sätze bis ~60 % beeinflussen das Wirtschaftswachstum kaum, erhöhen aber die Staatseinnahmen spürbar.",
+    grenze:     "Ab diesem Einkommen gilt der Spitzensteuersatz. Eine niedrigere Grenze erfasst mehr Menschen – sie liegt derzeit bei ca. dem 4-fachen Medianeinkommen.",
+    abgeltung:  "Pauschalsteuer auf Kapitalerträge statt des persönlichen Steuersatzes. Ökonomen kritisieren: das begünstigt Kapitaleinkommen strukturell gegenüber Arbeitseinkommen.",
+    kst:        "Steuer auf Unternehmensgewinne. Bei zu hohen Sätzen verlagern Konzerne Gewinne ins Ausland – die OECD-Mindeststeuer von 15 % soll das eindämmen.",
+    gewst:      "Kommunale Unternehmenssteuer – wichtigste eigene Einnahmequelle der Gemeinden. Sie variiert je nach gemeindlichem Hebesatz erheblich.",
+    mwst:       "Konsumsteuer auf fast alle Waren und Dienstleistungen. Wirkt regressiv: einkommensschwache Haushalte zahlen anteilig deutlich mehr davon als Gutverdiener.",
+    mwst_erm:   "Gilt für Lebensmittel, Bücher und andere Grundbedürfnisse. Niedrigere Sätze hier entlasten einkommensschwache Haushalte überproportional stark.",
+    co2:        "Preis pro Tonne CO₂-Ausstoß. Laut Klimaökonomen der kosteneffizienteste Hebel zur Emissionsreduktion – eine Rückerstattung als Klimageld macht ihn sozial ausgewogen.",
+    erb:        "Steuer auf geerbtes Vermögen. Studien zeigen: Erbschaften sind heute die größte Quelle von Vermögensungleichheit – höhere Sätze könnten das bremsen.",
+    boden:      "Jahressteuer auf den reinen Grundstückswert ohne Bebauung. Gilt als besonders effizient, da Boden nicht vermehrt werden kann – fördert Nutzung statt Spekulation.",
+    verm:       "Jährliche Steuer auf Gesamtvermögen ab 2 Mio. €. Kann Vermögensungleichheit bremsen, erfordert aber aufwändige Bewertung von Immobilien und Betriebsvermögen.",
+    zucman:     "Globale Mindeststeuer auf Milliardärsvermögen nach Gabriel Zucman. Würde Kapitalflucht erschweren – setzt jedoch internationale Kooperation voraus.",
+    rv:         "Gesamter Rentenbeitrag von Arbeitnehmer und Arbeitgeber zusammen. Höhere Beiträge sichern Renten, erhöhen aber die Lohnnebenkosten und senken den Nettolohn.",
+    kv:         "Beitragssatz zur gesetzlichen Krankenversicherung. Steigende Kosten durch Alterung und medizinischen Fortschritt treiben diesen Satz langfristig nach oben.",
+    alpf:       "Kombinierter Beitrag für Arbeitslosen- und Pflegeversicherung. Der Pflegeanteil wächst demografisch besonders stark – Experten erwarten bis 2035 deutliche Anstiege.",
+    bbg:        "Bis zu diesem Einkommen werden Sozialbeiträge erhoben. Darüber zahlt man nichts mehr – was Gutverdiener relativ stark entlastet gegenüber Normalverdienern.",
+    bge:        "Monatlicher Grundeinkommensbetrag pro Person. Pilotstudien in Finnland und den USA zeigen: BGE verbessert psychisches Wohlbefinden mit kaum negativem Effekt auf Arbeitsbereitschaft.",
+    bg:         "Monatliche Grundsicherung für Menschen ohne ausreichendes Einkommen. Studien belegen: ausreichende Grundsicherung reduziert Armut und Obdachlosigkeit effektiv.",
+    kg:         "Monatliche Zahlung pro Kind, unabhängig vom Einkommen. Direktes Kindergeld gilt laut Forschung als eines der kosteneffizientesten Mittel gegen Kinderarmut.",
+    kapitalquote: "Anteil der Rentenbeiträge, der am Kapitalmarkt angelegt wird. Höhere Rendite möglich, aber auch Marktrisiko – Schweden und Norwegen setzen solche Modelle ein.",
+    rendite_fonds: "Langfristig erwartete Rendite eines breit diversifizierten Aktienportfolios. Der MSCI World erzielte historisch ~7–8 % p.a. – für die Zukunft ist das nicht garantiert.",
+    startjahr:  "Ab diesem Jahr werden Fondsmittel angespart. Früherer Start nutzt den Zinseszinseffekt stärker – selbst wenige Jahre Unterschied machen Milliarden aus.",
+    anzahl_kv:  "Weniger Kassen bedeuten geringere Verwaltungskosten, aber weniger Wettbewerb. Aktuelle Forschung legt eine optimale Zahl von ca. 20–40 Kassen nahe.",
+    praevention: "Investitionen in Gesundheitsprävention senken langfristig Behandlungskosten. WHO-Analysen zeigen: 1 € Prävention spart langfristig 3–5 € an Folgekosten."
+  };
+
+  const tooltip = document.getElementById('slider-tooltip');
+  let hideTimer;
+
+  function show(input) {
+    const text = TIPS[input.id];
+    if (!text) return;
+    clearTimeout(hideTimer);
+    tooltip.textContent = text;
+    tooltip.classList.add('visible');
+    reposition(input);
+  }
+
+  function reposition(input) {
+    const rect = input.getBoundingClientRect();
+    const tw = tooltip.offsetWidth || 240;
+    const th = tooltip.offsetHeight || 60;
+    let left = rect.left + 12;
+    left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+    const top = rect.top - th - 10;
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = (top < 8 ? rect.bottom + 10 : top) + 'px';
+  }
+
+  function hide() {
+    hideTimer = setTimeout(() => tooltip.classList.remove('visible'), 80);
+  }
+
+  document.querySelectorAll('input[type="range"]').forEach(input => {
+    if (!TIPS[input.id]) return;
+    input.addEventListener('mouseenter', () => show(input));
+    input.addEventListener('mousemove',  () => reposition(input));
+    input.addEventListener('mouseleave', hide);
+    input.addEventListener('focus',      () => show(input));
+    input.addEventListener('blur',       hide);
+    input.addEventListener('input',      () => reposition(input));
+    input.addEventListener('touchstart', () => show(input), { passive: true });
+    input.addEventListener('touchend',   () => setTimeout(hide, 1200));
+  });
+})();
+</script>
+
 </body>
 </html>
