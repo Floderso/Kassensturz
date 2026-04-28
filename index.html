@@ -1528,8 +1528,32 @@
       <div class="bge-live-cost" id="bge-live-cost">
         <div>Bruttokosten: <strong id="bge-cost-gross">—</strong></div>
         <div class="bge-save">Bürgergeld-Ersatz: <strong id="bge-cost-save">—</strong></div>
+        <div class="bge-save">RV-Einsparung: <strong id="bge-cost-rv">—</strong></div>
         <div>Nettokosten: <strong id="bge-cost-net">—</strong></div>
       </div>
+
+      <!-- Rentensystem bei BGE — nur sichtbar wenn BGE > 0 -->
+      <div id="bge-rente-box" style="display:none;margin-top:14px;border-top:1px dashed var(--accent);padding-top:12px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:10px;font-weight:600;">
+          Aufstockungs-Rente bei BGE
+        </div>
+        <div class="slider-row">
+          <label>Rentenniveau Geringverdiener <span class="value" id="v_rente_niveau_gering"></span></label>
+          <input type="range" id="rente_niveau_gering" min="60" max="100" step="5" value="80">
+        </div>
+        <div class="slider-row">
+          <label>Rentenniveau Gutverdiener <span class="value" id="v_rente_niveau_hoch"></span></label>
+          <input type="range" id="rente_niveau_hoch" min="30" max="70" step="5" value="50">
+        </div>
+        <div class="slider-row">
+          <label>Einkommensgrenze <span class="value" id="v_rente_grenze"></span></label>
+          <input type="range" id="rente_grenze" min="20000" max="60000" step="5000" value="35000">
+        </div>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px;line-height:1.5;">
+          BGE = Sockel · Rente = Aufstockung<br>auf % des früheren Nettoeinkommens
+        </p>
+      </div>
+
       <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:8px;line-height:1.5;">
         Quellen: DIW Pilot 2024 · RWI 2024<br>ifo Mikrosimulation 2021 (Blömer/Peichl)
       </p>
@@ -2179,6 +2203,26 @@ function berechne(params) {
 
   // ---------- 9. TRANSFERS ----------
   const bge = params.bge || 0;
+
+  // BGE + Rentenreform: Einsparung weil BGE als Sockel die Rentenzahlung reduziert
+  // Quelle: Rentenbericht 2024 — RV-Gesamtausgaben inkl. Bundeszuschuss ~430 Mrd. €/J.
+  // Bei BGE wird nur noch auf ein Zielniveau aufgestockt (einkommensabhängig).
+  const RV_GESAMT_AUSGABEN = 430; // Mrd. €/Jahr
+  let rv_einsparung = 0;
+  if (bge > 0) {
+    const rl = params.rente_grenze || 35000;              // €/Jahr Einkommensgrenze
+    const avg_g = (rl * 0.55) / 12;                      // avg monatl. Nettoeink. Geringverdiener
+    const avg_h = (rl * 1.80) / 12;                      // avg monatl. Nettoeink. Gutverdiener
+    const rentner_h = Math.min(15, Math.max(2, (rl - 15000) / 3000)); // Mio. Gutverdiener-Rentner
+    const rentner_g = 21 - rentner_h;                    // Mio. Geringverdiener-Rentner
+    const ziel_g = ((params.rente_niveau_gering || 80) / 100) * avg_g;
+    const ziel_h = ((params.rente_niveau_hoch   || 50) / 100) * avg_h;
+    const topup_g = Math.max(0, ziel_g - bge);           // monatl. Aufstockung Geringverdiener
+    const topup_h = Math.max(0, ziel_h - bge);           // monatl. Aufstockung Gutverdiener
+    const rv_neu = (rentner_g * topup_g + rentner_h * topup_h) * 12 / 1000; // Mrd./Jahr
+    rv_einsparung = Math.max(0, RV_GESAMT_AUSGABEN - rv_neu);
+  }
+
   // Bürgergeld: wenn BGE >= BG-Niveau, vollständig durch BGE ersetzt (RWI 2024)
   const bg_effektiv = bge >= params.bg ? 0 : params.bg;
   const bg_auszahlung = 5.5 * bg_effektiv * 12 / 1000; // Mrd.
@@ -2228,7 +2272,7 @@ function berechne(params) {
     bge_brutto * 0.008; // BGE: 0,8% Verwaltungskosten — kein Bedürftigkeitstest (RWI 2024)
 
   // ---------- 12. AUSGABEN inkl. Transfers ----------
-  const ausgaben_total = AUSGABEN_TOTAL + bg_auszahlung + kg_auszahlung + neg_est_auszahlung + bge_brutto + admin_kosten - 140;
+  const ausgaben_total = AUSGABEN_TOTAL + bg_auszahlung + kg_auszahlung + neg_est_auszahlung + bge_brutto + admin_kosten - 140 - rv_einsparung;
 
   // ---------- 13. SALDO ----------
   const saldo = einnahmen_total - ausgaben_total;
@@ -2306,7 +2350,8 @@ function berechne(params) {
     rev, einnahmen_total, ausgaben_total, saldo, admin_kosten, nst,
     hh_delta, gini, palma, behavior, klimageld_auszahlung,
     bg_auszahlung, kg_auszahlung, neg_est_auszahlung,
-    armutsrisiko, schuldenquote_delta, metr, dwl, poverty_line
+    armutsrisiko, schuldenquote_delta, metr, dwl, poverty_line,
+    rv_einsparung
   };
 }
 
@@ -2868,7 +2913,10 @@ function getParams() {
     praevention:    +document.getElementById('praevention').value,
     bbg:            +document.getElementById('bbg').value,
     zucman:         +document.getElementById('zucman').value,
-    bge:            +document.getElementById('bge').value
+    bge:                +document.getElementById('bge').value,
+    rente_niveau_gering: +document.getElementById('rente_niveau_gering').value,
+    rente_niveau_hoch:   +document.getElementById('rente_niveau_hoch').value,
+    rente_grenze:        +document.getElementById('rente_grenze').value
   };
 }
 
@@ -3190,6 +3238,14 @@ function render() {
     const bgeSectionTitle = document.getElementById('bge-section-title');
     const bgeLiveCost = document.getElementById('bge-live-cost');
     if (!bgePanel) return;
+    // Slider-Labels für Rentenregler
+    const rnGering = document.getElementById('rente_niveau_gering');
+    const rnHoch   = document.getElementById('rente_niveau_hoch');
+    const rnGrenze = document.getElementById('rente_grenze');
+    if (rnGering) document.getElementById('v_rente_niveau_gering').textContent = rnGering.value + ' %';
+    if (rnHoch)   document.getElementById('v_rente_niveau_hoch').textContent   = rnHoch.value + ' %';
+    if (rnGrenze) document.getElementById('v_rente_grenze').textContent = (rnGrenze.value / 1000).toFixed(0) + '.000 €/J.';
+
     if (bge_p > 0) {
       bgePanel.style.display = 'block';
       if (bgeLiveCost) bgeLiveCost.style.display = 'block';
@@ -3198,13 +3254,19 @@ function render() {
 
       const bge_brutto = bge_p * 12 * 70 / 1000;
       const bg_saved = bge_p >= p.bg ? 5.5 * p.bg * 12 / 1000 : 0;
-      const bge_netto = bge_brutto - bg_saved;
-      const total_rev = 1450; // Mrd. Gesamtsteuereinnahmen Referenz
+      const rv_saved = r.rv_einsparung || 0;
+      const bge_netto = bge_brutto - bg_saved - rv_saved;
+      const total_rev = 1450;
       const fin_pct = Math.min(100, (bge_netto / total_rev) * 100);
 
       document.getElementById('bge-cost-gross').textContent = bge_brutto.toFixed(0) + ' Mrd. €/Jahr';
       document.getElementById('bge-cost-save').textContent = bg_saved > 0 ? '−' + bg_saved.toFixed(0) + ' Mrd.' : '—';
+      document.getElementById('bge-cost-rv').textContent = rv_saved > 0 ? '−' + rv_saved.toFixed(0) + ' Mrd.' : '—';
       document.getElementById('bge-cost-net').textContent = bge_netto.toFixed(0) + ' Mrd. €/Jahr';
+
+      // Renten-Box ein-/ausblenden
+      const renteBox = document.getElementById('bge-rente-box');
+      if (renteBox) renteBox.style.display = 'block';
 
       const BGE_EFF_r = [0.15,0.12,0.09,0.06,0.04,0.025,0.015,0.01,0.005,0,0,0];
       const bge_sc = Math.min(1.67, bge_p / 1200);
@@ -3214,18 +3276,21 @@ function render() {
       document.getElementById('bge-kpi-row').innerHTML = [
         { label:'Bruttokosten', val: bge_brutto.toFixed(0)+' Mrd. €', note:'70 Mio. × '+bge_p+' € × 12', cls:'bad' },
         { label:'Bürgergeld-Ersatz', val: bg_saved > 0 ? '−'+bg_saved.toFixed(0)+' Mrd.' : '—', note: bg_saved > 0 ? 'vollständig ersetzt' : 'BGE < Bürgergeld-Niveau', cls: bg_saved > 0 ? 'good' : 'neutral' },
+        { label:'RV-Einsparung', val: rv_saved > 0 ? '−'+rv_saved.toFixed(0)+' Mrd.' : '—', note: rv_saved > 0 ? 'Aufstockungsrente statt Vollrente' : 'BGE zu niedrig für Aufstockung', cls: rv_saved > 0 ? 'good' : 'neutral' },
         { label:'Nettokosten', val: bge_netto.toFixed(0)+' Mrd. €', note:'zu finanzieren', cls: kpiNetClass },
         { label:'Arbeitsangebot Ø', val: '−'+avg_eff.toFixed(1)+' %', note:'RWI/ZEW Kompromiss', cls:'neutral' },
       ].map(k => `<div class="bge-kpi"><div class="bge-kpi-label">${k.label}</div><div class="bge-kpi-val ${k.cls}">${k.val}</div><div class="bge-kpi-note">${k.note}</div></div>`).join('');
 
       const finFill = document.getElementById('bge-fin-fill');
-      if (finFill) finFill.style.width = fin_pct.toFixed(0) + '%';
+      if (finFill) finFill.style.width = Math.max(0, fin_pct).toFixed(0) + '%';
       const finPct = document.getElementById('bge-fin-pct');
-      if (finPct) finPct.textContent = bge_netto.toFixed(0) + ' Mrd. € (' + fin_pct.toFixed(0) + ' % der Einnahmen)';
+      if (finPct) finPct.textContent = bge_netto.toFixed(0) + ' Mrd. € (' + Math.max(0, fin_pct).toFixed(0) + ' % der Einnahmen)';
     } else {
       bgePanel.style.display = 'none';
       if (bgeLiveCost) bgeLiveCost.style.display = 'none';
       if (bgeSectionTitle) bgeSectionTitle.classList.remove('bge-on');
+      const renteBox = document.getElementById('bge-rente-box');
+      if (renteBox) renteBox.style.display = 'none';
     }
   })();
 
@@ -4941,7 +5006,10 @@ document.getElementById('to-finanztools-btn').addEventListener('click', function
     rendite_fonds: "Langfristig erwartete Rendite eines breit diversifizierten Aktienportfolios. Der MSCI World erzielte historisch ~7–8 % p.a. – für die Zukunft ist das nicht garantiert.",
     startjahr:  "Ab diesem Jahr werden Fondsmittel angespart. Früherer Start nutzt den Zinseszinseffekt stärker – selbst wenige Jahre Unterschied machen Milliarden aus.",
     anzahl_kv:  "Weniger Kassen bedeuten geringere Verwaltungskosten, aber weniger Wettbewerb. Aktuelle Forschung legt eine optimale Zahl von ca. 20–40 Kassen nahe.",
-    praevention: "Investitionen in Gesundheitsprävention senken langfristig Behandlungskosten. WHO-Analysen zeigen: 1 € Prävention spart langfristig 3–5 € an Folgekosten."
+    praevention: "Investitionen in Gesundheitsprävention senken langfristig Behandlungskosten. WHO-Analysen zeigen: 1 € Prävention spart langfristig 3–5 € an Folgekosten.",
+    rente_niveau_gering: "Ziel-Rentenniveau für Menschen mit niedrigem früherem Einkommen (in % des früheren Nettoeinkommens). BGE liefert den Sockel – die Rente stockt nur noch auf dieses Niveau auf.",
+    rente_niveau_hoch:   "Ziel-Rentenniveau für Gutverdiener (% des früheren Nettoeinkommens). Höhere Einkommen erreichen durch BGE+Rente zusammen einen kleineren prozentualen Ersatz – ähnlich dem Schweizer Modell.",
+    rente_grenze:        "Einkommensgrenze zwischen 'Geringverdienern' und 'Gutverdienern'. Beeinflusst wie viele Rentner in welche Gruppe fallen und damit die Höhe der RV-Einsparung."
   };
 
   const tooltip = document.getElementById('slider-tooltip');
