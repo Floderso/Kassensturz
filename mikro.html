@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Interaktive Mikroökonomie-Modelle: Angebot & Nachfrage, Preiselastizität, Steuerinzidenz, Mindestlohn, Monopol.">
+<title>Mikrolabor · Kassensturz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --ink: #1a1814;
+    --paper: #fbf9f4;
+    --rule: #2a2720;
+    --accent: #c8401f;
+    --accent2: #1e5f3a;
+    --accent3: #2a4d7a;
+    --muted: #6b6359;
+    --good: #1e5f3a;
+    --bad: #c8401f;
+    --warn: #b8801f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  body {
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(42,77,122,0.05) 0%, transparent 40%),
+      radial-gradient(circle at 80% 75%, rgba(30,95,58,0.05) 0%, transparent 40%);
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+  /* NAV */
+  .site-nav { background: var(--ink); padding: 0 16px; }
+  .site-nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; overflow-x: auto;
+  }
+  .site-nav a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em;
+    color: rgba(251,249,244,0.55); text-decoration: none;
+    padding: 11px 16px; border-bottom: 2px solid transparent;
+    white-space: nowrap; transition: color 0.15s;
+  }
+  .site-nav a:hover { color: #fbf9f4; }
+  .site-nav a.active { color: #fbf9f4; border-bottom-color: var(--accent); }
+  .site-nav-sep { color: rgba(251,249,244,0.2); padding: 0 4px; font-size: 12px; }
+
+  /* HEADER */
+  header { border-bottom: 2px solid var(--rule); padding: 24px 0; margin-bottom: 32px; }
+  .masthead {
+    display: flex; justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted);
+    border-bottom: 1px solid var(--rule); padding-bottom: 8px; margin-bottom: 16px;
+  }
+  h1 { font-size: clamp(32px,5vw,60px); font-weight: 800; line-height: 0.95; letter-spacing: -0.02em; margin-bottom: 10px; }
+  h1 em { font-style: italic; color: var(--accent3); }
+  .subtitle { font-size: 15px; color: var(--muted); font-style: italic; max-width: 640px; }
+
+  /* MODEL TABS */
+  .model-tabs {
+    display: flex; border-bottom: 2px solid var(--rule);
+    margin-bottom: 28px; overflow-x: auto;
+  }
+  .model-tab {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 10px 14px; background: none; border: none;
+    border-bottom: 3px solid transparent; cursor: pointer;
+    color: var(--muted); white-space: nowrap; transition: color 0.15s;
+    margin-bottom: -2px;
+  }
+  .model-tab:hover { color: var(--ink); }
+  .model-tab.active { color: var(--accent3); border-bottom-color: var(--accent3); }
+
+  /* MODEL PANEL */
+  .model-panel { display: none; }
+  .model-panel.active { display: block; }
+  .model-layout {
+    display: grid; grid-template-columns: 300px 1fr;
+    gap: 28px; align-items: start; margin-bottom: 20px;
+  }
+  @media (max-width: 860px) { .model-layout { grid-template-columns: 1fr; } }
+
+  /* CONTROLS BOX */
+  .ctrl-box { background: var(--paper); border: 1px solid var(--rule); padding: 18px; }
+  .ctrl-title {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
+    margin-bottom: 14px; padding-bottom: 7px; border-bottom: 1px solid var(--rule);
+    color: var(--accent3);
+  }
+  .ctrl-row { margin-bottom: 14px; }
+  .ctrl-label {
+    display: flex; justify-content: space-between;
+    font-size: 12px; margin-bottom: 4px;
+  }
+  .ctrl-val {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--accent3); font-weight: 600;
+  }
+  .ctrl-slider {
+    width: 100%; height: 4px; background: var(--rule);
+    outline: none; -webkit-appearance: none; border-radius: 0; cursor: pointer;
+  }
+  .ctrl-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px;
+    background: var(--accent3); cursor: pointer;
+    border: 2px solid var(--paper); border-radius: 0;
+  }
+  .ctrl-slider::-moz-range-thumb {
+    width: 16px; height: 16px; background: var(--accent3);
+    cursor: pointer; border: 2px solid var(--paper); border-radius: 0;
+  }
+
+  /* RESULT DISPLAY */
+  .result-box {
+    background: rgba(42,77,122,0.06); border-left: 3px solid var(--accent3);
+    padding: 10px 13px; margin-top: 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.9;
+  }
+  .result-box strong { color: var(--accent3); }
+  .col-good { color: var(--good); font-weight: 600; }
+  .col-bad  { color: var(--bad);  font-weight: 600; }
+  .col-warn { color: var(--warn); font-weight: 600; }
+
+  /* GRAPH BOX */
+  .graph-box { background: var(--paper); border: 1px solid var(--rule); padding: 14px; }
+  .graph-title {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--muted); margin-bottom: 10px;
+  }
+  svg.mikro-graph { width: 100%; height: auto; display: block; }
+
+  /* INSIGHT */
+  .insight-box {
+    border: 1px solid var(--rule); border-top: 3px solid var(--accent3);
+    background: var(--paper); padding: 16px 20px;
+  }
+  .insight-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--accent3); margin-bottom: 8px; font-weight: 600;
+  }
+  .insight-text { font-size: 13px; line-height: 1.7; }
+  .insight-quelle {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--muted); margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="/">Haushaltsspiel</a>
+    <span class="site-nav-sep">·</span>
+    <a href="/finanz.html">Finanztools</a>
+    <span class="site-nav-sep">·</span>
+    <a href="/mikro.html" class="active">Mikrolabor</a>
+    <span class="site-nav-sep">·</span>
+    <a href="/impressum.html">Impressum</a>
+  </div>
+</nav>
+
+<div class="wrap">
+<header>
+  <div class="masthead">
+    <span>Mikrolabor · Interaktive Modelle</span>
+    <span>Empirische Schätzwerte · Stand 2024</span>
+  </div>
+  <h1>Das <em>Mikro</em>labor.</h1>
+  <p class="subtitle">Baue Angebots- und Nachfragekurven, verändere Elastizitäten, Steuern und Marktstrukturen — und sieh live, was die Wirtschaftswissenschaft dazu sagt.</p>
+</header>
+
+<div class="model-tabs">
+  <button class="model-tab active" data-panel="andnach">① Angebot &amp; Nachfrage</button>
+  <button class="model-tab" data-panel="elastizitaet">② Preiselastizität</button>
+  <button class="model-tab" data-panel="steuer">③ Steuerinzidenz</button>
+  <button class="model-tab" data-panel="mindestlohn">④ Mindestlohn</button>
+  <button class="model-tab" data-panel="monopol">⑤ Monopol</button>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     1 · ANGEBOT & NACHFRAGE
+     ══════════════════════════════════════════════ -->
+<div class="model-panel active" id="panel-andnach">
+  <div class="model-layout">
+    <div class="ctrl-box">
+      <div class="ctrl-title">Kurvenparameter</div>
+
+      <div class="ctrl-row">
+        <div class="ctrl-label">Max. Zahlungsbereitschaft <span class="ctrl-val" id="v_an_pd0">120 €</span></div>
+        <input class="ctrl-slider" type="range" id="an_pd0" min="60" max="200" step="5" value="120">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label">Nachfrage-Steilheit <span class="ctrl-val" id="v_an_bd">mittel</span></div>
+        <input class="ctrl-slider" type="range" id="an_bd" min="1" max="30" step="1" value="10">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label">Min. Grenzkosten Anbieter <span class="ctrl-val" id="v_an_ps0">20 €</span></div>
+        <input class="ctrl-slider" type="range" id="an_ps0" min="0" max="80" step="5" value="20">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label">Angebots-Steilheit <span class="ctrl-val" id="v_an_bs">mittel</span></div>
+        <input class="ctrl-slider" type="range" id="an_bs" min="1" max="30" step="1" value="10">
+      </div>
+
+      <div class="result-box">
+        <div>Gleichgewichtspreis: <strong id="an_pstar">—</strong></div>
+        <div>Gleichgewichtsmenge: <strong id="an_qstar">—</strong></div>
+        <div>Konsumentenrente: <span class="col-good" id="an_cs">—</span></div>
+        <div>Produzentenrente: <span class="col-good" id="an_ps">—</span></div>
+        <div>Gesamtwohlfahrt: <strong id="an_tw">—</strong></div>
+      </div>
+    </div>
+
+    <div class="graph-box">
+      <div class="graph-title">Marktgleichgewicht · Konsumenten- &amp; Produzentenrente</div>
+      <svg class="mikro-graph" id="svg-andnach" viewBox="0 0 420 320"></svg>
+    </div>
+  </div>
+  <div class="insight-box">
+    <div class="insight-label">Ökonomische Einordnung</div>
+    <div class="insight-text" id="an_insight">Das Marktgleichgewicht ist der Preis, bei dem Angebot und Nachfrage übereinstimmen. Die grüne Fläche zeigt die Konsumentenrente (Differenz zwischen Zahlungsbereitschaft und tatsächlichem Preis), die blaue die Produzentenrente. Im Gleichgewicht ist die Gesamtwohlfahrt maximiert — jede Abweichung erzeugt Verluste.</div>
+    <div class="insight-quelle">Quelle: Marshall (1890) · Mankiw/Taylor Grundzüge der Volkswirtschaftslehre (2018)</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     2 · PREISELASTIZITÄT
+     ══════════════════════════════════════════════ -->
+<div class="model-panel" id="panel-elastizitaet">
+  <div class="model-layout">
+    <div class="ctrl-box">
+      <div class="ctrl-title">Elastizitätsparameter</div>
+
+      <div class="ctrl-row">
+        <div class="ctrl-label">Preiselastizität ε <span class="ctrl-val" id="v_el_e">−1,0</span></div>
+        <input class="ctrl-slider" type="range" id="el_e" min="1" max="50" step="1" value="10">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label">Ausgangspreis P₀ <span class="ctrl-val" id="v_el_p0">50 €</span></div>
+        <input class="ctrl-slider" type="range" id="el_p0" min="10" max="90" step="5" value="50">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label">Preisänderung <span class="ctrl-val" id="v_el_dp">+10 %</span></div>
+        <input class="ctrl-slider" type="range" id="el_dp" min="-30" max="30" step="5" value="10">
+      </div>
+
+      <div class="result-box">
+        <div>Ausgangsmenge Q₀: <strong id="el_q0">—</strong></div>
+        <div>Neue Menge Q₁: <strong id="el_q1">—</strong></div>
+        <div>Umsatz vorher: <strong id="el_r0">—</strong></div>
+        <div>Umsatz nachher: <strong id="el_r1">—</strong></div>
+        <div>Umsatzveränderung: <strong id="el_dr">—</strong></div>
+        <div>Typ: <strong id="el_typ">—</strong></div>
+      </div>
+
+      <div style="margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);line-height:1.6;">
+        Empirische Richtwerte:<br>
+        Benzin: −0,25 · Lebensmittel: −0,27<br>
+        Restaurants: −2,3 · Zigaretten: −0,4<br>
+        Luxusgüter: −2,5 bis −4,0
+      </div>
+    </div>
+
+    <div class="graph-box">
+      <div class="graph-title">Isoelastische Nachfragekurve · Umsatzrechtecke</div>
+      <svg class="mikro-graph" id="svg-elastizitaet" viewBox="0 0 420 320"></svg>
+    </div>
+  </div>
+  <div class="insight-box">
+    <div class="insight-label">Was bedeutet Elastizität?</div>
+    <div class="insight-text" id="el_insight">Bei |ε| > 1 (elastisch) reagiert die Nachfrage stark auf Preisänderungen — Umsatz sinkt bei Preiserhöhung. Bei |ε| < 1 (unelastisch) ändert sich die Menge kaum — Umsatz steigt. Der Umsatz ist bei ε = −1 maximal. Unternehmen mit Marktmacht setzen Preise im elastischen Bereich (sonst könnten sie durch Preissenkung den Umsatz steigern).</div>
+    <div class="insight-quelle">Quellen: Burke & Nishitateno (2013, Energy Policy) · Andreyeva et al. (2010, Am. J. Public Health) · FAO (2015)</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     3 · STEUERINZIDENZ
+     ══════════════════════════════════════════════ -->
+<div class="model-panel" id="panel-steuer">
+  <div class="model-layout">
+    <div class="ctrl-box">
+      <div class="ctrl-title">Steuerparameter</div>
+
+      <div class="ctrl-row">
+        <div class="ctrl-label">Steuerhöhe pro Einheit t <span class="ctrl-val" id="v_st_t">20 €</span></div>
+        <input class="ctrl-slider" type="range" id="st_t" min="0" max="60" step="2" value="20">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label">Nachfrage-Elastizität εD <span class="ctrl-val" id="v_st_ed">−1,0</span></div>
+        <input class="ctrl-slider" type="range" id="st_ed" min="1" max="40" step="1" value="10">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label">Angebots-Elastizität εS <span class="ctrl-val" id="v_st_es">+1,0</span></div>
+        <input class="ctrl-slider" type="range" id="st_es" min="1" max="40" step="1" value="10">
+      </div>
+
+      <div class="result-box">
+        <div>Konsumentenpreis P_C: <strong id="st_pc">—</strong></div>
+        <div>Produzentenpreis P_P: <strong id="st_pp">—</strong></div>
+        <div>Konsumenten tragen: <span class="col-bad" id="st_cb">—</span></div>
+        <div>Produzenten tragen: <span class="col-warn" id="st_pb">—</span></div>
+        <div>Steueraufkommen: <strong id="st_rev">—</strong></div>
+        <div>Wohlfahrtsverlust DWL: <span class="col-bad" id="st_dwl">—</span></div>
+      </div>
+    </div>
+
+    <div class="graph-box">
+      <div class="graph-title">Steuereffekt · Inzidenz &amp; Wohlfahrtsverlust</div>
+      <svg class="mikro-graph" id="svg-steuer" viewBox="0 0 420 320"></svg>
+    </div>
+  </div>
+  <div class="insight-box">
+    <div class="insight-label">Wer trägt die Steuerlast?</div>
+    <div class="insight-text" id="st_insight">Die Steuerlast verteilt sich nach relativer Elastizität: Wer weniger ausweichen kann, zahlt mehr. Bei unelastischer Nachfrage (z.B. Benzin, Tabak) tragen Konsumenten den größten Teil. Bei unelastischem Angebot (z.B. Boden) landen fast alle Kosten beim Produzenten. Der Wohlfahrtsverlust (DWL) steigt quadratisch mit dem Steuersatz.</div>
+    <div class="insight-quelle">Quellen: Carbonnier (2007, QJE) · Doyle & Samphantharak (2008, J. Public Econ.) · Weyl & Fabinger (2013, JPE)</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     4 · MINDESTLOHN
+     ══════════════════════════════════════════════ -->
+<div class="model-panel" id="panel-mindestlohn">
+  <div class="model-layout">
+    <div class="ctrl-box">
+      <div class="ctrl-title">Arbeitsmarkt-Parameter</div>
+
+      <div class="ctrl-row">
+        <div class="ctrl-label">Gleichgewichtslohn W* <span class="ctrl-val" id="v_ml_weq">12,0 €/h</span></div>
+        <input class="ctrl-slider" type="range" id="ml_weq" min="8" max="20" step="0.5" value="12">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label">Mindestlohn W_min <span class="ctrl-val" id="v_ml_wmin">13,0 €/h</span></div>
+        <input class="ctrl-slider" type="range" id="ml_wmin" min="6" max="25" step="0.5" value="13">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label">Beschäftigungselastizität εL <span class="ctrl-val" id="v_ml_eL">−0,2</span></div>
+        <input class="ctrl-slider" type="range" id="ml_eL" min="1" max="20" step="1" value="2">
+      </div>
+
+      <div class="result-box">
+        <div>Beschäftigung vorher: <strong id="ml_l0">—</strong></div>
+        <div>Beschäftigung nachher: <strong id="ml_l1">—</strong></div>
+        <div>Arbeitsangebot bei W_min: <strong id="ml_ls">—</strong></div>
+        <div>Arbeitslosigkeit: <span id="ml_unemp">—</span></div>
+        <div>Lohnmasse vorher: <strong id="ml_wb0">—</strong></div>
+        <div>Lohnmasse nachher: <strong id="ml_wb1">—</strong></div>
+      </div>
+
+      <div style="margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);line-height:1.6;">
+        Emp. εL-Richtwerte (Dube 2019):<br>
+        Moderate Erhöhung: −0,1 bis −0,3<br>
+        Sehr hoher Mindestlohn: bis −0,8<br>
+        DE Medianlohn ungelernt: ~12 €/h
+      </div>
+    </div>
+
+    <div class="graph-box">
+      <div class="graph-title">Arbeitsmarkt · Mindestlohneffekt</div>
+      <svg class="mikro-graph" id="svg-mindestlohn" viewBox="0 0 420 320"></svg>
+    </div>
+  </div>
+  <div class="insight-box">
+    <div class="insight-label">Was sagt die Forschung zum Mindestlohn?</div>
+    <div class="insight-text" id="ml_insight">Klassische Modelle sagen deutliche Beschäftigungsverluste vorher. Empirisch sind die Effekte aber deutlich kleiner: Dube (2019) findet Elastizitäten nahe 0 bis −0,3 für moderate Erhöhungen in US-Bundesstaaten. Ursachen: Monopsonmacht der Arbeitgeber, Kaufkrafteffekte, geringe Substituierbarkeit von Niedriglohnarbeit. Hohe Mindestlöhne (>70% des Medianlohns) zeigen stärkere negative Effekte.</div>
+    <div class="insight-quelle">Quellen: Dube (2019, Hamilton Project) · Cengiz et al. (2019, QJE) · IAB Kurzbericht 15/2024 · Card & Krueger (1994, AER)</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     5 · MONOPOL vs. WETTBEWERB
+     ══════════════════════════════════════════════ -->
+<div class="model-panel" id="panel-monopol">
+  <div class="model-layout">
+    <div class="ctrl-box">
+      <div class="ctrl-title">Marktstruktur-Parameter</div>
+
+      <div class="ctrl-row">
+        <div class="ctrl-label">Grenzkosten GK (MC) <span class="ctrl-val" id="v_mo_mc">20 €</span></div>
+        <input class="ctrl-slider" type="range" id="mo_mc" min="5" max="70" step="5" value="20">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label">Max. Zahlungsbereitschaft <span class="ctrl-val" id="v_mo_pmax">100 €</span></div>
+        <input class="ctrl-slider" type="range" id="mo_pmax" min="60" max="160" step="5" value="100">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label">Nachfrage-Steilheit <span class="ctrl-val" id="v_mo_slope">mittel</span></div>
+        <input class="ctrl-slider" type="range" id="mo_slope" min="1" max="20" step="1" value="8">
+      </div>
+
+      <div class="result-box">
+        <div>Monopolpreis P_M: <strong id="mo_pm">—</strong></div>
+        <div>Wettbewerbspreis P_W: <strong id="mo_pw">—</strong></div>
+        <div>Monopolmenge Q_M: <strong id="mo_qm">—</strong></div>
+        <div>Wettbewerbsmenge Q_W: <strong id="mo_qw">—</strong></div>
+        <div>Lerner-Index: <strong id="mo_lerner">—</strong></div>
+        <div>Monopolgewinn: <span class="col-warn" id="mo_profit">—</span></div>
+        <div>Wohlfahrtsverlust DWL: <span class="col-bad" id="mo_dwl">—</span></div>
+      </div>
+    </div>
+
+    <div class="graph-box">
+      <div class="graph-title">Monopol vs. vollkommener Wettbewerb</div>
+      <svg class="mikro-graph" id="svg-monopol" viewBox="0 0 420 320"></svg>
+    </div>
+  </div>
+  <div class="insight-box">
+    <div class="insight-label">Monopolmacht in der Realität</div>
+    <div class="insight-text" id="mo_insight">Der Lerner-Index (P−MC)/P misst Marktmacht: 0 = vollkommener Wettbewerb, 1 = maximale Monopolmacht. Der Monopolist produziert weniger und verlangt mehr als im Wettbewerb — das erzeugt Wohlfahrtsverlust. Empirisch: Meta/Google ≈ 0,5–0,6 · Pharmaindustrie ≈ 0,7 · Airlines ≈ 0,3. Der durchschnittliche US-Lerner-Index stieg von 0,21 (1980) auf 0,61 (2016) durch zunehmende Marktkonzentration.</div>
+    <div class="insight-quelle">Quellen: De Loecker, Eeckhout & Unger (2020, QJE) · Autor et al. (2020, AER) · Monopolkommission DE Hauptgutachten 2022</div>
+  </div>
+</div>
+
+</div><!-- /.wrap -->
+
+<script>
+// ╔═══════════════════════════════════════════════════╗
+// ║           MIKROLABOR — Graph Engine               ║
+// ╚═══════════════════════════════════════════════════╝
+
+const SVG_W = 420, SVG_H = 320;
+const PAD = { L: 56, R: 18, T: 20, B: 44 };
+const GW = SVG_W - PAD.L - PAD.R;
+const GH = SVG_H - PAD.T - PAD.B;
+const NS = 'http://www.w3.org/2000/svg';
+const PAPER = '#fbf9f4';
+
+function toX(q, Qmax) { return PAD.L + (q / Qmax) * GW; }
+function toY(p, Pmax) { return PAD.T + GH * (1 - p / Pmax); }
+
+function svgEl(tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, String(v));
+  return e;
+}
+function svgTxt(x, y, text, attrs = {}) {
+  const e = svgEl('text', { x, y, 'font-family': 'JetBrains Mono,monospace', 'font-size': '10', fill: '#1a1814', ...attrs });
+  e.textContent = text;
+  return e;
+}
+function clearSvg(id) {
+  const svg = document.getElementById(id);
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  return svg;
+}
+
+function drawAxes(svg, Qmax, Pmax, xLabel, yLabel) {
+  svg.appendChild(svgEl('rect', { x: PAD.L, y: PAD.T, width: GW, height: GH, fill: 'rgba(251,249,244,0.6)' }));
+  [0.25, 0.5, 0.75].forEach(f => {
+    svg.appendChild(svgEl('line', { x1: PAD.L, x2: PAD.L + GW, y1: PAD.T + GH * f, y2: PAD.T + GH * f, stroke: 'rgba(42,39,32,0.07)', 'stroke-width': '1' }));
+    svg.appendChild(svgEl('line', { x1: PAD.L + GW * f, x2: PAD.L + GW * f, y1: PAD.T, y2: PAD.T + GH, stroke: 'rgba(42,39,32,0.07)', 'stroke-width': '1' }));
+  });
+  svg.appendChild(svgEl('line', { x1: PAD.L, y1: PAD.T + GH, x2: PAD.L + GW + 6, y2: PAD.T + GH, stroke: '#1a1814', 'stroke-width': '1.5' }));
+  svg.appendChild(svgEl('line', { x1: PAD.L, y1: PAD.T, x2: PAD.L, y2: PAD.T + GH + 6, stroke: '#1a1814', 'stroke-width': '1.5' }));
+  svg.appendChild(svgEl('polygon', { points: `${PAD.L + GW + 6},${PAD.T + GH - 4} ${PAD.L + GW + 14},${PAD.T + GH} ${PAD.L + GW + 6},${PAD.T + GH + 4}`, fill: '#1a1814' }));
+  svg.appendChild(svgEl('polygon', { points: `${PAD.L - 4},${PAD.T} ${PAD.L},${PAD.T - 8} ${PAD.L + 4},${PAD.T}`, fill: '#1a1814' }));
+  svg.appendChild(svgTxt(PAD.L + GW + 8, PAD.T + GH + 14, xLabel, { 'font-size': '9', fill: '#6b6359', 'text-anchor': 'start' }));
+  svg.appendChild(svgTxt(PAD.L - 8, PAD.T - 10, yLabel, { 'font-size': '9', fill: '#6b6359', 'text-anchor': 'middle' }));
+  for (let i = 0; i <= 4; i++) {
+    svg.appendChild(svgTxt(toX(Qmax * i / 4, Qmax), PAD.T + GH + 14, Math.round(Qmax * i / 4), { 'font-size': '9', fill: '#6b6359', 'text-anchor': 'middle' }));
+    svg.appendChild(svgTxt(PAD.L - 4, toY(Pmax * i / 4, Pmax) + 4, Math.round(Pmax * i / 4), { 'font-size': '9', fill: '#6b6359', 'text-anchor': 'end' }));
+  }
+}
+
+function poly(pts, Qmax, Pmax) {
+  return pts.filter(([q, p]) => isFinite(q) && isFinite(p))
+    .map(([q, p]) => `${toX(Math.max(0, Math.min(q, Qmax)), Qmax)},${toY(Math.max(0, Math.min(p, Pmax)), Pmax)}`).join(' ');
+}
+
+function dashed(svg, x1, y1, x2, y2, color = 'rgba(42,39,32,0.3)') {
+  svg.appendChild(svgEl('line', { x1, y1, x2, y2, stroke: color, 'stroke-width': '1', 'stroke-dasharray': '4,3' }));
+}
+
+function fmt(v, dec = 0) { return isFinite(v) ? v.toFixed(dec) : '—'; }
+function fmtRel(v) { return isFinite(v) ? fmt(v, 0) + ' (rel.)' : '—'; }
+function fmtSign(v, dec = 1) { return (v > 0 ? '+' : '') + fmt(v, dec); }
+
+// ══════════════════════════════════════════════
+// MODEL 1 · ANGEBOT & NACHFRAGE
+// ══════════════════════════════════════════════
+function drawAndNach() {
+  const Pd0 = +document.getElementById('an_pd0').value;
+  const bd  = +document.getElementById('an_bd').value / 100;
+  const Ps0 = +document.getElementById('an_ps0').value;
+  const bs  = +document.getElementById('an_bs').value / 100;
+
+  document.getElementById('v_an_pd0').textContent = Pd0 + ' €';
+  document.getElementById('v_an_ps0').textContent = Ps0 + ' €';
+  const slopeLabels = { flat: 'flach', mid: 'mittel', steep: 'steil' };
+  const label = d => d < 0.07 ? 'flach' : d < 0.18 ? 'mittel' : 'steil';
+  document.getElementById('v_an_bd').textContent = label(bd);
+  document.getElementById('v_an_bs').textContent = label(bs);
+
+  if (Pd0 <= Ps0) {
+    document.getElementById('an_pstar').textContent = '— (kein Gleichgewicht)';
+    document.getElementById('an_qstar').textContent = '—';
+    document.getElementById('an_cs').textContent = '—';
+    document.getElementById('an_ps').textContent = '—';
+    document.getElementById('an_tw').textContent = '—';
+    clearSvg('svg-andnach');
+    return;
+  }
+
+  const Qstar = (Pd0 - Ps0) / (bd + bs);
+  const Pstar = Pd0 - bd * Qstar;
+  const CS = 0.5 * (Pd0 - Pstar) * Qstar;
+  const PS = 0.5 * (Pstar - Ps0) * Qstar;
+  const TW = CS + PS;
+
+  document.getElementById('an_pstar').textContent = fmt(Pstar, 1) + ' €';
+  document.getElementById('an_qstar').textContent = fmt(Qstar, 0) + ' Einh.';
+  document.getElementById('an_cs').textContent = fmtRel(CS);
+  document.getElementById('an_ps').textContent = fmtRel(PS);
+  document.getElementById('an_tw').textContent = fmtRel(TW);
+
+  const Qmax = Qstar * 2.0;
+  const Pmax = Pd0 * 1.1;
+  const svg = clearSvg('svg-andnach');
+  drawAxes(svg, Qmax, Pmax, 'Menge Q', 'Preis P (€)');
+
+  // Consumer surplus (green fill)
+  const csPts = [];
+  for (let q = 0; q <= Qstar; q += Qstar / 60) csPts.push([q, Pd0 - bd * q]);
+  csPts.push([Qstar, Pstar], [0, Pstar]);
+  svg.appendChild(svgEl('polygon', { points: poly(csPts, Qmax, Pmax), fill: 'rgba(30,95,58,0.18)', stroke: 'none' }));
+
+  // Producer surplus (blue fill)
+  const psPts = [[0, Ps0]];
+  for (let q = 0; q <= Qstar; q += Qstar / 60) psPts.push([q, Ps0 + bs * q]);
+  psPts.push([Qstar, Pstar], [0, Pstar]);
+  svg.appendChild(svgEl('polygon', { points: poly(psPts, Qmax, Pmax), fill: 'rgba(42,77,122,0.16)', stroke: 'none' }));
+
+  // Demand curve
+  const dPts = [];
+  for (let q = 0; q <= Qmax; q += Qmax / 120) { const p = Pd0 - bd * q; if (p >= 0) dPts.push([q, p]); }
+  svg.appendChild(svgEl('polyline', { points: poly(dPts, Qmax, Pmax), fill: 'none', stroke: '#c8401f', 'stroke-width': '2.5' }));
+  const dEnd = dPts[dPts.length - 1];
+  svg.appendChild(svgTxt(toX(dEnd[0], Qmax) - 14, toY(dEnd[1], Pmax) - 5, 'N', { fill: '#c8401f', 'font-weight': '700', 'font-size': '12' }));
+
+  // Supply curve
+  const sPts = [];
+  for (let q = 0; q <= Qmax; q += Qmax / 120) { const p = Ps0 + bs * q; if (p <= Pmax) sPts.push([q, p]); }
+  svg.appendChild(svgEl('polyline', { points: poly(sPts, Qmax, Pmax), fill: 'none', stroke: '#2a4d7a', 'stroke-width': '2.5' }));
+  const sEnd = sPts[sPts.length - 1];
+  svg.appendChild(svgTxt(toX(sEnd[0], Qmax) - 14, toY(sEnd[1], Pmax) + 14, 'A', { fill: '#2a4d7a', 'font-weight': '700', 'font-size': '12' }));
+
+  // Equilibrium
+  dashed(svg, toX(Qstar, Qmax), toY(Pstar, Pmax), toX(Qstar, Qmax), toY(0, Pmax));
+  dashed(svg, toX(0, Qmax), toY(Pstar, Pmax), toX(Qstar, Qmax), toY(Pstar, Pmax));
+  svg.appendChild(svgEl('circle', { cx: toX(Qstar, Qmax), cy: toY(Pstar, Pmax), r: '5', fill: '#1a1814', stroke: PAPER, 'stroke-width': '2' }));
+  svg.appendChild(svgTxt(toX(Qstar, Qmax) + 7, toY(Pstar, Pmax) - 6, 'P*', { fill: '#1a1814', 'font-weight': '600', 'font-size': '11' }));
+
+  // Legend
+  svg.appendChild(svgEl('rect', { x: PAD.L + 5, y: PAD.T + 5, width: 10, height: 8, fill: 'rgba(30,95,58,0.3)' }));
+  svg.appendChild(svgTxt(PAD.L + 19, PAD.T + 13, 'Konsumentenrente', { fill: '#1e5f3a', 'font-size': '9' }));
+  svg.appendChild(svgEl('rect', { x: PAD.L + 5, y: PAD.T + 18, width: 10, height: 8, fill: 'rgba(42,77,122,0.25)' }));
+  svg.appendChild(svgTxt(PAD.L + 19, PAD.T + 26, 'Produzentenrente', { fill: '#2a4d7a', 'font-size': '9' }));
+}
+
+// ══════════════════════════════════════════════
+// MODEL 2 · PREISELASTIZITÄT
+// ══════════════════════════════════════════════
+function drawElast() {
+  const e_raw = +document.getElementById('el_e').value;
+  const P0    = +document.getElementById('el_p0').value;
+  const dp    = +document.getElementById('el_dp').value / 100;
+
+  const eps = -(e_raw / 10);
+  const P1  = P0 * (1 + dp);
+  const Q0  = 50;
+  const A   = Q0 / Math.pow(P0, eps);
+  const Q1  = A * Math.pow(Math.max(P1, 0.1), eps);
+  const R0  = P0 * Q0;
+  const R1  = P1 * Q1;
+  const dR  = R1 - R0;
+
+  document.getElementById('v_el_e').textContent = fmt(eps, 1);
+  document.getElementById('v_el_p0').textContent = P0 + ' €';
+  document.getElementById('v_el_dp').textContent = (dp >= 0 ? '+' : '') + Math.round(dp * 100) + ' %';
+  document.getElementById('el_q0').textContent = fmt(Q0, 1) + ' Einh.';
+  document.getElementById('el_q1').textContent = fmt(Q1, 1) + ' Einh.';
+  document.getElementById('el_r0').textContent = fmt(R0, 0);
+  document.getElementById('el_r1').textContent = fmt(R1, 0);
+
+  const drEl = document.getElementById('el_dr');
+  drEl.textContent = fmtSign(dR, 0) + ' (' + fmt(dR / R0 * 100, 1) + '%)';
+  drEl.className = dR >= 0 ? 'col-good' : 'col-bad';
+
+  const typEl = document.getElementById('el_typ');
+  const elastic = Math.abs(eps) > 1.01;
+  const unit    = Math.abs(eps) < 1.01 && Math.abs(eps) > 0.99;
+  typEl.textContent = elastic ? 'elastisch |ε|>1' : unit ? 'einheitselastisch' : 'unelastisch |ε|<1';
+  typEl.className = elastic ? 'col-good' : 'col-warn';
+
+  const Pmax = 100, Qmax = 120;
+  const svg = clearSvg('svg-elastizitaet');
+  drawAxes(svg, Qmax, Pmax, 'Menge Q', 'Preis P (€)');
+
+  // Revenue rectangles
+  const Q0c = Math.min(Q0, Qmax), P0c = Math.min(P0, Pmax);
+  svg.appendChild(svgEl('rect', {
+    x: toX(0, Qmax), y: toY(P0c, Pmax),
+    width: toX(Q0c, Qmax) - toX(0, Qmax),
+    height: toY(0, Pmax) - toY(P0c, Pmax),
+    fill: 'rgba(42,77,122,0.12)', stroke: '#2a4d7a', 'stroke-width': '1', 'stroke-dasharray': '3,2'
+  }));
+  const Q1c = Math.min(Math.max(Q1, 0), Qmax), P1c = Math.min(Math.max(P1, 0), Pmax);
+  if (Q1c > 0 && P1c > 0) {
+    svg.appendChild(svgEl('rect', {
+      x: toX(0, Qmax), y: toY(P1c, Pmax),
+      width: toX(Q1c, Qmax) - toX(0, Qmax),
+      height: toY(0, Pmax) - toY(P1c, Pmax),
+      fill: dR >= 0 ? 'rgba(30,95,58,0.15)' : 'rgba(200,64,31,0.12)',
+      stroke: dR >= 0 ? '#1e5f3a' : '#c8401f', 'stroke-width': '1.5'
+    }));
+  }
+
+  // Demand curve (isoelastic)
+  const dPts = [];
+  for (let p = 2; p <= Pmax; p++) {
+    const q = A * Math.pow(p, eps);
+    if (q >= 0 && q <= Qmax) dPts.push([q, p]);
+  }
+  svg.appendChild(svgEl('polyline', { points: poly(dPts, Qmax, Pmax), fill: 'none', stroke: '#c8401f', 'stroke-width': '2.5' }));
+  svg.appendChild(svgTxt(toX(Qmax * 0.8, Qmax), toY(Pmax * 0.05, Pmax), 'N', { fill: '#c8401f', 'font-weight': '700', 'font-size': '12' }));
+
+  // P0, P1 markers
+  dashed(svg, toX(0, Qmax), toY(P0, Pmax), toX(Q0c, Qmax), toY(P0, Pmax), '#2a4d7a');
+  dashed(svg, toX(Q0c, Qmax), toY(P0, Pmax), toX(Q0c, Qmax), toY(0, Pmax), '#2a4d7a');
+  svg.appendChild(svgEl('circle', { cx: toX(Q0c, Qmax), cy: toY(P0c, Pmax), r: '4', fill: '#2a4d7a' }));
+  svg.appendChild(svgTxt(toX(Q0c, Qmax) + 5, toY(P0c, Pmax) - 5, 'P₀', { fill: '#2a4d7a', 'font-size': '9' }));
+
+  if (P1c > 0 && P1c <= Pmax && Q1c > 0) {
+    const c = dR >= 0 ? '#1e5f3a' : '#c8401f';
+    dashed(svg, toX(0, Qmax), toY(P1c, Pmax), toX(Q1c, Qmax), toY(P1c, Pmax), c);
+    dashed(svg, toX(Q1c, Qmax), toY(P1c, Pmax), toX(Q1c, Qmax), toY(0, Pmax), c);
+    svg.appendChild(svgEl('circle', { cx: toX(Q1c, Qmax), cy: toY(P1c, Pmax), r: '4', fill: c }));
+    svg.appendChild(svgTxt(toX(Q1c, Qmax) + 5, toY(P1c, Pmax) - 5, 'P₁', { fill: c, 'font-size': '9' }));
+  }
+
+  document.getElementById('el_insight').textContent =
+    `Deine Kurve ist ${Math.abs(eps) > 1 ? 'elastisch' : 'unelastisch'} (ε = ${fmt(eps, 1)}). ` +
+    `Bei ${Math.abs(dp * 100).toFixed(0)}% Preisänderung ändert sich die Menge um ${fmt(Math.abs((Q1 - Q0) / Q0 * 100), 1)}% → ` +
+    `Umsatz ${dR >= 0 ? 'steigt' : 'sinkt'} um ${fmt(Math.abs(dR / R0 * 100), 1)}%. ` +
+    `Benzin ε ≈ −0,25 · Lebensmittel ε ≈ −0,27 · Restaurants ε ≈ −2,3.`;
+}
+
+// ══════════════════════════════════════════════
+// MODEL 3 · STEUERINZIDENZ
+// ══════════════════════════════════════════════
+function drawSteuer() {
+  const t    = +document.getElementById('st_t').value;
+  const ed   = +document.getElementById('st_ed').value / 10;
+  const es   = +document.getElementById('st_es').value / 10;
+
+  document.getElementById('v_st_t').textContent = t + ' €';
+  document.getElementById('v_st_ed').textContent = '−' + fmt(ed, 1);
+  document.getElementById('v_st_es').textContent = '+' + fmt(es, 1);
+
+  // Linear model: Demand P = 100 − sd·Q, Supply P = 10 + ss·Q
+  // Slopes from elasticities at equilibrium (P0=55, Q0=45 approx)
+  const Pd0 = 100, Ps0 = 10;
+  const sd = 1.0;
+  const ss = sd * ed / es;  // supply slope so that elasticity ratio matches
+
+  const Q0 = (Pd0 - Ps0) / (sd + ss);
+  const P0 = Pd0 - sd * Q0;
+
+  // With tax t on supply: new supply P = Ps0 + ss·Q + t
+  const Qt = (Pd0 - Ps0 - t) / (sd + ss);
+  const Pc = Pd0 - sd * Qt;
+  const Pp = Pc - t;
+
+  const consumerShare = Qt > 0 ? (Pc - P0) / t : 0.5;
+  const producerShare = 1 - consumerShare;
+  const taxRev = t * Math.max(Qt, 0);
+  const dwl = 0.5 * t * Math.max(Q0 - Qt, 0);
+
+  document.getElementById('st_pc').textContent = fmt(Pc, 1) + ' €';
+  document.getElementById('st_pp').textContent = fmt(Pp, 1) + ' €';
+  document.getElementById('st_cb').textContent = fmt(consumerShare * 100, 0) + '% der Steuer';
+  document.getElementById('st_pb').textContent = fmt(producerShare * 100, 0) + '% der Steuer';
+  document.getElementById('st_rev').textContent = fmtRel(taxRev);
+  document.getElementById('st_dwl').textContent = fmtRel(dwl);
+
+  const Qmax = Q0 * 2.2;
+  const Pmax = Pd0 * 1.1;
+  const svg = clearSvg('svg-steuer');
+  drawAxes(svg, Qmax, Pmax, 'Menge Q', 'Preis P (€)');
+
+  if (Qt > 0 && Pc > Pp) {
+    // Tax revenue rectangle
+    svg.appendChild(svgEl('polygon', {
+      points: poly([[0, Pc], [Qt, Pc], [Qt, Pp], [0, Pp]], Qmax, Pmax),
+      fill: 'rgba(184,128,31,0.22)', stroke: 'none'
+    }));
+    // DWL triangle
+    svg.appendChild(svgEl('polygon', {
+      points: poly([[Qt, Pc], [Q0, P0], [Qt, Pp]], Qmax, Pmax),
+      fill: 'rgba(200,64,31,0.28)', stroke: 'none'
+    }));
+  }
+
+  // Supply (no tax, dashed)
+  const sNoPts = [];
+  for (let q = 0; q <= Qmax; q += Qmax / 120) { const p = Ps0 + ss * q; if (p <= Pmax) sNoPts.push([q, p]); }
+  svg.appendChild(svgEl('polyline', { points: poly(sNoPts, Qmax, Pmax), fill: 'none', stroke: '#2a4d7a', 'stroke-width': '1.5', 'stroke-dasharray': '5,3', opacity: '0.5' }));
+
+  // Supply (with tax)
+  const sTaxPts = [];
+  for (let q = 0; q <= Qmax; q += Qmax / 120) { const p = Ps0 + ss * q + t; if (p <= Pmax) sTaxPts.push([q, p]); }
+  svg.appendChild(svgEl('polyline', { points: poly(sTaxPts, Qmax, Pmax), fill: 'none', stroke: '#2a4d7a', 'stroke-width': '2.5' }));
+  if (sTaxPts.length > 0) {
+    const st = sTaxPts[sTaxPts.length - 1];
+    svg.appendChild(svgTxt(toX(st[0], Qmax) - 16, toY(st[1], Pmax) + 13, 'A+t', { fill: '#2a4d7a', 'font-weight': '600' }));
+  }
+
+  // Demand
+  const dPts = [];
+  for (let q = 0; q <= Qmax; q += Qmax / 120) { const p = Pd0 - sd * q; if (p >= 0) dPts.push([q, p]); }
+  svg.appendChild(svgEl('polyline', { points: poly(dPts, Qmax, Pmax), fill: 'none', stroke: '#c8401f', 'stroke-width': '2.5' }));
+  const dEnd = dPts[dPts.length - 1];
+  svg.appendChild(svgTxt(toX(dEnd[0], Qmax) - 14, toY(dEnd[1], Pmax) - 5, 'N', { fill: '#c8401f', 'font-weight': '700', 'font-size': '12' }));
+
+  // Pre-tax equilibrium
+  svg.appendChild(svgEl('circle', { cx: toX(Q0, Qmax), cy: toY(P0, Pmax), r: '4', fill: 'rgba(42,39,32,0.45)', stroke: PAPER, 'stroke-width': '1.5' }));
+
+  if (Qt > 0 && Qt < Qmax) {
+    dashed(svg, toX(0, Qmax), toY(Pc, Pmax), toX(Qt, Qmax), toY(Pc, Pmax), '#c8401f');
+    dashed(svg, toX(0, Qmax), toY(Pp, Pmax), toX(Qt, Qmax), toY(Pp, Pmax), '#2a4d7a');
+    dashed(svg, toX(Qt, Qmax), toY(0, Pmax), toX(Qt, Qmax), toY(Pc, Pmax));
+    svg.appendChild(svgEl('circle', { cx: toX(Qt, Qmax), cy: toY(Pc, Pmax), r: '4', fill: '#c8401f', stroke: PAPER, 'stroke-width': '1.5' }));
+    svg.appendChild(svgEl('circle', { cx: toX(Qt, Qmax), cy: toY(Pp, Pmax), r: '4', fill: '#2a4d7a', stroke: PAPER, 'stroke-width': '1.5' }));
+    svg.appendChild(svgTxt(PAD.L + 4, toY(Pc, Pmax) - 3, 'Pc', { fill: '#c8401f', 'font-size': '9' }));
+    svg.appendChild(svgTxt(PAD.L + 4, toY(Pp, Pmax) + 11, 'Pp', { fill: '#2a4d7a', 'font-size': '9' }));
+    // Tax wedge label
+    const midY = (toY(Pc, Pmax) + toY(Pp, Pmax)) / 2;
+    svg.appendChild(svgTxt(PAD.L - 10, midY + 4, 't', { fill: '#b8801f', 'font-weight': '600', 'font-size': '11', 'text-anchor': 'middle' }));
+  }
+
+  // Legend
+  svg.appendChild(svgEl('rect', { x: PAD.L + GW - 96, y: PAD.T + 5, width: 10, height: 8, fill: 'rgba(184,128,31,0.35)' }));
+  svg.appendChild(svgTxt(PAD.L + GW - 82, PAD.T + 13, 'Steueraufkommen', { fill: '#b8801f', 'font-size': '9' }));
+  svg.appendChild(svgEl('rect', { x: PAD.L + GW - 96, y: PAD.T + 18, width: 10, height: 8, fill: 'rgba(200,64,31,0.35)' }));
+  svg.appendChild(svgTxt(PAD.L + GW - 82, PAD.T + 26, 'Wohlfahrtsverlust', { fill: '#c8401f', 'font-size': '9' }));
+
+  document.getElementById('st_insight').textContent =
+    `εD = ${fmt(-ed, 1)}, εS = +${fmt(es, 1)}: Konsumenten tragen ${fmt(consumerShare * 100, 0)}% der Steuer. ` +
+    (consumerShare > 0.6
+      ? 'Inelastische Nachfrage → Hauptlast beim Käufer (typisch für Benzin, Tabak, Energie).'
+      : consumerShare < 0.4
+        ? 'Elastische Nachfrage → Hauptlast beim Anbieter.'
+        : 'Ausgeglichene Inzidenz — beide Seiten tragen ähnlich viel.') +
+    ` DWL steigt quadratisch mit t.`;
+}
+
+// ══════════════════════════════════════════════
+// MODEL 4 · MINDESTLOHN
+// ══════════════════════════════════════════════
+function drawMindestlohn() {
+  const Weq  = +document.getElementById('ml_weq').value;
+  const Wmin = +document.getElementById('ml_wmin').value;
+  const eL   = +document.getElementById('ml_eL').value / 10;
+
+  document.getElementById('v_ml_weq').textContent = fmt(Weq, 1) + ' €/h';
+  document.getElementById('v_ml_wmin').textContent = fmt(Wmin, 1) + ' €/h';
+  document.getElementById('v_ml_eL').textContent = '−' + fmt(eL, 1);
+
+  const Leq = 100;
+  // Labour demand: eL = (dL/dW)*(W/L) → slope_d = eL*L/W
+  const sd = eL * Leq / Weq;        // labour demand slope (W on y, L on x) → dW/dL = -1/sd → slope in L(W)
+  const ss = 0.5 * Leq / Weq;      // labour supply slope (supply elasticity 0.5)
+  const L0d = Leq + sd * Weq;       // demand intercept
+  const L0s = Leq - ss * Weq;       // supply intercept
+
+  const Ld_min = Math.max(0, L0d - sd * Wmin);
+  const Ls_min = Math.max(0, L0s + ss * Wmin);
+  const unemp = Math.max(0, Ls_min - Ld_min);
+
+  document.getElementById('ml_l0').textContent = fmt(Leq, 0) + ' (Index)';
+  document.getElementById('ml_l1').textContent = fmt(Ld_min, 0) + ' (Index)';
+  document.getElementById('ml_ls').textContent = fmt(Ls_min, 0) + ' (Index)';
+
+  const unEl = document.getElementById('ml_unemp');
+  if (Wmin <= Weq) {
+    unEl.textContent = 'kein Effekt (W_min < W*)';
+    unEl.className = 'col-good';
+  } else {
+    unEl.textContent = fmt(unemp, 0) + ' (Index)';
+    unEl.className = unemp > 10 ? 'col-bad' : 'col-warn';
+  }
+
+  document.getElementById('ml_wb0').textContent = fmtRel(Weq * Leq);
+  document.getElementById('ml_wb1').textContent = fmtRel(Wmin * Ld_min);
+
+  const Lmax = 170, Wmax = Math.max(Wmin, Weq) * 1.6;
+  const svg = clearSvg('svg-mindestlohn');
+  drawAxes(svg, Lmax, Wmax, 'Arbeit L', 'Lohn W (€/h)');
+
+  // Minimum wage line
+  if (Wmin >= 0 && Wmin <= Wmax) {
+    const mColor = Wmin > Weq ? '#c8401f' : '#1e5f3a';
+    svg.appendChild(svgEl('line', {
+      x1: toX(0, Lmax), y1: toY(Wmin, Wmax),
+      x2: toX(Lmax, Lmax), y2: toY(Wmin, Wmax),
+      stroke: mColor, 'stroke-width': '2', 'stroke-dasharray': '6,3'
+    }));
+    svg.appendChild(svgTxt(PAD.L + GW - 42, toY(Wmin, Wmax) - 5, 'W_min', { fill: mColor, 'font-weight': '600' }));
+  }
+
+  // Unemployment gap
+  if (Wmin > Weq && Ld_min > 0 && Ls_min > Ld_min) {
+    svg.appendChild(svgEl('line', {
+      x1: toX(Ld_min, Lmax), y1: toY(Wmin, Wmax),
+      x2: toX(Math.min(Ls_min, Lmax), Lmax), y2: toY(Wmin, Wmax),
+      stroke: '#c8401f', 'stroke-width': '5', opacity: '0.35'
+    }));
+    svg.appendChild(svgTxt((toX(Ld_min, Lmax) + toX(Math.min(Ls_min, Lmax), Lmax)) / 2, toY(Wmin, Wmax) - 8,
+      'Arbeitslosigkeit', { fill: '#c8401f', 'font-size': '9', 'text-anchor': 'middle' }));
+  }
+
+  // Labour demand (W = (L0d - L) / sd)
+  const dPts = [];
+  for (let l = 0; l <= Lmax; l += Lmax / 120) {
+    const w = (L0d - l) / sd;
+    if (w >= 0 && w <= Wmax) dPts.push([l, w]);
+  }
+  svg.appendChild(svgEl('polyline', { points: poly(dPts, Lmax, Wmax), fill: 'none', stroke: '#c8401f', 'stroke-width': '2.5' }));
+  if (dPts.length > 0) {
+    const de = dPts[dPts.length - 1];
+    svg.appendChild(svgTxt(toX(de[0], Lmax) - 20, toY(de[1], Wmax) + 12, 'AN', { fill: '#c8401f', 'font-weight': '700' }));
+  }
+
+  // Labour supply (W = (L - L0s) / ss)
+  const sPts = [];
+  for (let l = 0; l <= Lmax; l += Lmax / 120) {
+    const w = (l - L0s) / ss;
+    if (w >= 0 && w <= Wmax) sPts.push([l, w]);
+  }
+  svg.appendChild(svgEl('polyline', { points: poly(sPts, Lmax, Wmax), fill: 'none', stroke: '#2a4d7a', 'stroke-width': '2.5' }));
+  if (sPts.length > 0) {
+    const se = sPts[sPts.length - 1];
+    svg.appendChild(svgTxt(toX(se[0], Lmax) - 20, toY(se[1], Wmax) - 6, 'AA', { fill: '#2a4d7a', 'font-weight': '700' }));
+  }
+
+  // Equilibrium
+  dashed(svg, toX(Leq, Lmax), toY(Weq, Wmax), toX(Leq, Lmax), toY(0, Wmax));
+  dashed(svg, toX(0, Lmax), toY(Weq, Wmax), toX(Leq, Lmax), toY(Weq, Wmax));
+  svg.appendChild(svgEl('circle', { cx: toX(Leq, Lmax), cy: toY(Weq, Wmax), r: '5', fill: '#1a1814', stroke: PAPER, 'stroke-width': '2' }));
+  svg.appendChild(svgTxt(toX(Leq, Lmax) + 6, toY(Weq, Wmax) - 6, 'W*', { fill: '#1a1814', 'font-weight': '600', 'font-size': '11' }));
+
+  if (Wmin > 0 && Wmin <= Wmax) {
+    if (Ld_min > 0) svg.appendChild(svgEl('circle', { cx: toX(Ld_min, Lmax), cy: toY(Wmin, Wmax), r: '4', fill: '#c8401f', stroke: PAPER, 'stroke-width': '1.5' }));
+    if (Ls_min > 0 && Ls_min <= Lmax) svg.appendChild(svgEl('circle', { cx: toX(Ls_min, Lmax), cy: toY(Wmin, Wmax), r: '4', fill: '#2a4d7a', stroke: PAPER, 'stroke-width': '1.5' }));
+  }
+
+  document.getElementById('ml_insight').textContent =
+    Wmin <= Weq
+      ? `Mindestlohn (${fmt(Wmin, 1)} €) liegt unter dem Marktlohn (${fmt(Weq, 1)} €) → kein Beschäftigungseffekt. Er wäre nicht bindend.`
+      : `Mindestlohn +${fmt((Wmin / Weq - 1) * 100, 0)}% über W* → Beschäftigung sinkt um ${fmt((Leq - Ld_min) / Leq * 100, 1)}% (εL = −${fmt(eL, 1)}). ` +
+        (eL < 0.3 ? 'Kleine Elastizität: entspricht aktueller Forschungslage (Dube 2019).' : 'Hohe Elastizität: klassisches Modell, empirisch oft überschätzt.');
+}
+
+// ══════════════════════════════════════════════
+// MODEL 5 · MONOPOL vs. WETTBEWERB
+// ══════════════════════════════════════════════
+function drawMonopol() {
+  const MC    = +document.getElementById('mo_mc').value;
+  const Pd0   = +document.getElementById('mo_pmax').value;
+  const sRaw  = +document.getElementById('mo_slope').value;
+
+  document.getElementById('v_mo_mc').textContent = MC + ' €';
+  document.getElementById('v_mo_pmax').textContent = Pd0 + ' €';
+  document.getElementById('v_mo_slope').textContent = sRaw < 6 ? 'flach' : sRaw < 14 ? 'mittel' : 'steil';
+
+  const sd = sRaw / 100;  // demand slope
+
+  if (Pd0 <= MC) {
+    ['mo_pm','mo_pw','mo_qm','mo_qw','mo_lerner','mo_profit','mo_dwl'].forEach(id => document.getElementById(id).textContent = '—');
+    clearSvg('svg-monopol');
+    return;
+  }
+
+  // Linear demand: P = Pd0 − sd·Q
+  // MR: P_MR = Pd0 − 2·sd·Q
+  // Monopoly: MR = MC → Q_M = (Pd0 − MC) / (2·sd)
+  const Qm = (Pd0 - MC) / (2 * sd);
+  const Pm = Pd0 - sd * Qm;
+  const Qw = (Pd0 - MC) / sd;   // Competitive: P = MC
+  const Pw = MC;
+
+  const profit = (Pm - MC) * Qm;
+  const dwl = 0.5 * (Pm - MC) * (Qw - Qm);
+  const lerner = (Pm - MC) / Pm;
+
+  document.getElementById('mo_pm').textContent = fmt(Pm, 1) + ' €';
+  document.getElementById('mo_pw').textContent = fmt(Pw, 1) + ' € (= GK)';
+  document.getElementById('mo_qm').textContent = fmt(Qm, 0) + ' Einh.';
+  document.getElementById('mo_qw').textContent = fmt(Qw, 0) + ' Einh.';
+  document.getElementById('mo_lerner').textContent = fmt(lerner, 2) + '  (0=Wettbewerb, 1=Monopol)';
+  document.getElementById('mo_profit').textContent = fmtRel(profit);
+  document.getElementById('mo_dwl').textContent = fmtRel(dwl);
+
+  const Qmax = Qw * 1.3;
+  const Pmax = Pd0 * 1.1;
+  const svg = clearSvg('svg-monopol');
+  drawAxes(svg, Qmax, Pmax, 'Menge Q', 'Preis P (€)');
+
+  // Monopoly profit rectangle
+  if (Qm > 0 && Pm > MC) {
+    svg.appendChild(svgEl('polygon', {
+      points: poly([[0, Pm], [Qm, Pm], [Qm, MC], [0, MC]], Qmax, Pmax),
+      fill: 'rgba(42,77,122,0.18)', stroke: 'none'
+    }));
+  }
+
+  // DWL triangle
+  if (Qm > 0 && Qw > 0) {
+    svg.appendChild(svgEl('polygon', {
+      points: poly([[Qm, Pm], [Qw, Pw], [Qm, Pw]], Qmax, Pmax),
+      fill: 'rgba(200,64,31,0.28)', stroke: 'none'
+    }));
+  }
+
+  // Demand curve
+  const dPts = [];
+  for (let q = 0; q <= Qmax; q += Qmax / 120) { const p = Pd0 - sd * q; if (p >= 0) dPts.push([q, p]); }
+  svg.appendChild(svgEl('polyline', { points: poly(dPts, Qmax, Pmax), fill: 'none', stroke: '#c8401f', 'stroke-width': '2.5' }));
+  const dEnd = dPts[dPts.length - 1];
+  svg.appendChild(svgTxt(toX(dEnd[0], Qmax) - 16, toY(dEnd[1], Pmax) + 4, 'N=DGE', { fill: '#c8401f', 'font-weight': '600', 'font-size': '9' }));
+
+  // MR curve
+  const mrPts = [];
+  for (let q = 0; q <= Qw * 1.05; q += Qmax / 120) {
+    const p = Pd0 - 2 * sd * q;
+    mrPts.push([q, Math.max(p, -5)]);
+  }
+  svg.appendChild(svgEl('polyline', { points: poly(mrPts, Qmax, Pmax), fill: 'none', stroke: '#b8801f', 'stroke-width': '2', 'stroke-dasharray': '6,3' }));
+  svg.appendChild(svgTxt(toX(Qw * 0.45, Qmax) + 4, toY(2, Pmax) - 6, 'GE (MR)', { fill: '#b8801f', 'font-size': '9', 'font-weight': '600' }));
+
+  // MC line
+  svg.appendChild(svgEl('line', { x1: toX(0, Qmax), y1: toY(MC, Pmax), x2: toX(Qmax, Qmax), y2: toY(MC, Pmax), stroke: '#1e5f3a', 'stroke-width': '2' }));
+  svg.appendChild(svgTxt(PAD.L + GW - 18, toY(MC, Pmax) - 5, 'GK', { fill: '#1e5f3a', 'font-weight': '600' }));
+
+  // Monopoly point
+  dashed(svg, toX(Qm, Qmax), toY(Pm, Pmax), toX(Qm, Qmax), toY(0, Pmax));
+  dashed(svg, toX(0, Qmax), toY(Pm, Pmax), toX(Qm, Qmax), toY(Pm, Pmax));
+  svg.appendChild(svgEl('circle', { cx: toX(Qm, Qmax), cy: toY(Pm, Pmax), r: '5', fill: '#2a4d7a', stroke: PAPER, 'stroke-width': '2' }));
+  svg.appendChild(svgTxt(toX(Qm, Qmax) + 6, toY(Pm, Pmax) - 6, 'M', { fill: '#2a4d7a', 'font-weight': '700', 'font-size': '12' }));
+
+  // Competitive point
+  svg.appendChild(svgEl('circle', { cx: toX(Qw, Qmax), cy: toY(Pw, Pmax), r: '4', fill: '#1e5f3a', stroke: PAPER, 'stroke-width': '2' }));
+  svg.appendChild(svgTxt(toX(Qw, Qmax) + 5, toY(Pw, Pmax) - 6, 'W*', { fill: '#1e5f3a', 'font-weight': '700', 'font-size': '11' }));
+
+  svg.appendChild(svgTxt(PAD.L + 3, toY(Pm, Pmax) - 3, 'P_M', { fill: '#2a4d7a', 'font-size': '9' }));
+  svg.appendChild(svgTxt(PAD.L + 3, toY(MC, Pmax) - 3, 'GK', { fill: '#1e5f3a', 'font-size': '9' }));
+
+  // Legend
+  svg.appendChild(svgEl('rect', { x: PAD.L + GW - 90, y: PAD.T + 5, width: 10, height: 8, fill: 'rgba(42,77,122,0.28)' }));
+  svg.appendChild(svgTxt(PAD.L + GW - 76, PAD.T + 13, 'Monopolgewinn', { fill: '#2a4d7a', 'font-size': '9' }));
+  svg.appendChild(svgEl('rect', { x: PAD.L + GW - 90, y: PAD.T + 18, width: 10, height: 8, fill: 'rgba(200,64,31,0.35)' }));
+  svg.appendChild(svgTxt(PAD.L + GW - 76, PAD.T + 26, 'Wohlfahrtsverlust', { fill: '#c8401f', 'font-size': '9' }));
+
+  document.getElementById('mo_insight').textContent =
+    `Lerner-Index = ${fmt(lerner, 2)}: Monopolpreis liegt ${fmt(lerner * 100, 0)}% über den Grenzkosten. ` +
+    `Monopol produziert ${fmt((Qw - Qm) / Qw * 100, 0)}% weniger als im Wettbewerb. ` +
+    `Empirisch: Meta/Google ≈ 0,5–0,6 · US-Wirtschaft Ø: 0,21 (1980) → 0,61 (2016).`;
+}
+
+// ══════════════════════════════════════════════
+// TAB NAVIGATION
+// ══════════════════════════════════════════════
+const MODELS = {
+  andnach: drawAndNach,
+  elastizitaet: drawElast,
+  steuer: drawSteuer,
+  mindestlohn: drawMindestlohn,
+  monopol: drawMonopol
+};
+
+document.querySelectorAll('.model-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.model-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.model-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const id = btn.dataset.panel;
+    document.getElementById('panel-' + id).classList.add('active');
+    MODELS[id]?.();
+  });
+});
+
+// Slider listeners
+[
+  [['an_pd0','an_bd','an_ps0','an_bs'], drawAndNach],
+  [['el_e','el_p0','el_dp'], drawElast],
+  [['st_t','st_ed','st_es'], drawSteuer],
+  [['ml_weq','ml_wmin','ml_eL'], drawMindestlohn],
+  [['mo_mc','mo_pmax','mo_slope'], drawMonopol]
+].forEach(([ids, fn]) => ids.forEach(id => document.getElementById(id)?.addEventListener('input', fn)));
+
+// Initial draw
+drawAndNach();
+</script>
+</body>
+</html>
