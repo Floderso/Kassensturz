@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quellenverzeichnis · Kassensturz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --ink: #1a1814;
+    --paper: #fbf9f4;
+    --rule: #2a2720;
+    --accent: #c8401f;
+    --accent2: #1e5f3a;
+    --accent3: #2a4d7a;
+    --muted: #6b6359;
+    --warn: #b8801f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  body { padding: 0 16px 80px; }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+
+  /* NAV */
+  .site-nav-bar { background: var(--ink); margin: 0 -16px 48px; padding: 0 16px; }
+  .site-nav-bar-inner {
+    max-width: 1080px; margin: 0 auto;
+    display: flex; align-items: center; overflow-x: auto;
+  }
+  .site-nav-bar a {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: rgba(251,249,244,0.55); text-decoration: none;
+    padding: 11px 16px; border-bottom: 2px solid transparent;
+    white-space: nowrap; transition: color 0.15s; display: inline-block;
+  }
+  .site-nav-bar a:hover { color: #fbf9f4; }
+  .site-nav-bar a.active { color: #fbf9f4; border-bottom-color: var(--accent); }
+  .site-nav-bar-sep { color: rgba(251,249,244,0.2); padding: 0 2px; font-size: 12px; }
+
+  /* HEADER */
+  h1 {
+    font-size: clamp(32px, 5vw, 56px); font-weight: 800;
+    letter-spacing: -0.02em; line-height: 1.0;
+    margin-bottom: 6px; border-bottom: 2px solid var(--rule);
+    padding-bottom: 16px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--muted); margin-bottom: 24px; margin-top: 8px;
+  }
+  .intro { font-size: 14px; color: var(--muted); max-width: 680px;
+    margin-bottom: 32px; font-style: italic; }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex; flex-wrap: wrap; gap: 12px;
+    margin-bottom: 28px;
+    padding: 14px 18px;
+    background: var(--paper);
+    border: 1px solid rgba(42,39,32,0.15);
+    border-left: 3px solid var(--accent);
+  }
+  .stat-item { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+  .stat-num { font-size: 20px; font-family: 'Fraunces', Georgia, serif;
+    font-weight: 800; margin-right: 4px; }
+  .stat-num.a { color: var(--accent); }
+  .stat-num.b { color: var(--accent3); }
+  .stat-num.c { color: var(--accent2); }
+  .stat-num.d { color: var(--muted); }
+  .stat-sep { color: rgba(42,39,32,0.2); margin: 0 6px; }
+
+  /* TOOLBAR */
+  .toolbar {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-bottom: 24px; align-items: center;
+  }
+  .search-wrap {
+    flex: 1; min-width: 220px;
+    position: relative;
+  }
+  .search-wrap input {
+    width: 100%;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    padding: 9px 12px 9px 32px;
+    border: 1px solid var(--rule);
+    background: var(--paper); color: var(--ink);
+    outline: none;
+  }
+  .search-wrap input::placeholder { color: var(--muted); }
+  .search-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    font-size: 13px; color: var(--muted); pointer-events: none;
+  }
+  .filter-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 5px 10px; border: 1px solid var(--rule);
+    background: transparent; color: var(--muted);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .chip:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .chip.active-all   { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .chip.active-a     { background: var(--accent);  color: var(--paper); border-color: var(--accent); }
+  .chip.active-b     { background: var(--accent3); color: var(--paper); border-color: var(--accent3); }
+  .chip.active-c     { background: var(--accent2); color: var(--paper); border-color: var(--accent2); }
+  .chip.active-d     { background: var(--muted);   color: var(--paper); border-color: var(--muted); }
+
+  /* SECTION HEADERS */
+  .section-head {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.16em; font-weight: 600;
+    color: var(--muted); margin: 36px 0 14px;
+    padding-bottom: 6px; border-bottom: 1px solid var(--rule);
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .section-count {
+    font-size: 10px; color: var(--muted); font-weight: 400;
+  }
+
+  /* SOURCE CARDS */
+  .src-grid { display: flex; flex-direction: column; gap: 0; }
+  .src-card {
+    background: var(--paper);
+    border: 1px solid rgba(42,39,32,0.12);
+    border-left: 3px solid transparent;
+    padding: 14px 16px;
+    margin-bottom: 6px;
+    transition: border-color 0.15s;
+  }
+  .src-card:hover { border-left-color: var(--accent); }
+  .src-card[data-typ="akademisch"] { --badge-bg: var(--accent); --badge-col: #fbf9f4; }
+  .src-card[data-typ="bericht"]    { --badge-bg: var(--accent3); --badge-col: #fbf9f4; }
+  .src-card[data-typ="statistik"]  { --badge-bg: var(--accent2); --badge-col: #fbf9f4; }
+  .src-card[data-typ="recht"]      { --badge-bg: var(--muted);   --badge-col: #fbf9f4; }
+
+  .src-top {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 5px;
+    flex-wrap: wrap;
+  }
+  .src-id {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    color: var(--muted); letter-spacing: 0.08em;
+  }
+  .src-badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    background: var(--badge-bg); color: var(--badge-col);
+    padding: 2px 6px;
+  }
+  .src-year {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--muted); margin-left: auto;
+  }
+  .src-author {
+    font-size: 13px; font-weight: 600; margin-bottom: 2px; color: var(--ink);
+  }
+  .src-title {
+    font-size: 13px; font-style: italic; color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .src-journal {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--muted); margin-bottom: 6px;
+  }
+  .src-doi {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    color: var(--accent); text-decoration: none;
+  }
+  .src-doi:hover { text-decoration: underline; }
+  .src-used {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--ink); background: rgba(42,39,32,0.05);
+    border-left: 2px solid var(--badge-bg);
+    padding: 5px 8px; margin-top: 6px;
+    line-height: 1.5;
+  }
+  .src-used::before { content: '▸ '; color: var(--muted); }
+
+  .hidden { display: none !important; }
+
+  /* NO RESULTS */
+  .no-results {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--muted); padding: 32px 0; text-align: center;
+    display: none;
+  }
+
+  /* FOOTER */
+  .foot-note {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: rgba(107,99,89,0.6); margin-top: 40px;
+    border-top: 1px solid rgba(42,39,32,0.1); padding-top: 16px;
+  }
+
+  @media (max-width: 600px) {
+    .stats-bar { gap: 8px; }
+    .src-year { margin-left: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<nav class="site-nav-bar">
+  <div class="site-nav-bar-inner">
+    <a href="/">Haushaltsspiel</a>
+    <span class="site-nav-bar-sep">·</span>
+    <a href="/finanz.html">Finanztools</a>
+    <span class="site-nav-bar-sep">·</span>
+    <a href="/mikro.html">Mikrolabor</a>
+    <span class="site-nav-bar-sep">·</span>
+    <a href="/quellen.html" class="active">Quellen</a>
+    <span class="site-nav-bar-sep">·</span>
+    <a href="/impressum.html">Impressum</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <h1>Quellen&shy;<em>verzeichnis</em></h1>
+  <div class="eyebrow">Literatur, Datenbasis und Rechtsquellen des Kassensturz-Modells</div>
+  <p class="intro">
+    Alle akademischen Studien, Berichte, Statistiken und Rechtsquellen, auf die das Modell zurückgreift —
+    nach Kategorie geordnet, mit Verwendungsnachweis. Filterbar und durchsuchbar.
+  </p>
+
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat-item"><span class="stat-num a" id="cnt-a">—</span> Akademische Studien</div>
+    <span class="stat-sep">|</span>
+    <div class="stat-item"><span class="stat-num b" id="cnt-b">—</span> Berichte &amp; Gutachten</div>
+    <span class="stat-sep">|</span>
+    <div class="stat-item"><span class="stat-num c" id="cnt-c">—</span> Statistiken &amp; Daten</div>
+    <span class="stat-sep">|</span>
+    <div class="stat-item"><span class="stat-num d" id="cnt-d">—</span> Rechtliche Quellen</div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search" placeholder="Autor, Titel, Journal, Verwendung …" autocomplete="off">
+    </div>
+    <div class="filter-chips">
+      <button class="chip active-all" data-filter="alle">Alle</button>
+      <button class="chip" data-filter="akademisch">Studien</button>
+      <button class="chip" data-filter="bericht">Berichte</button>
+      <button class="chip" data-filter="statistik">Statistiken</button>
+      <button class="chip" data-filter="recht">Recht</button>
+    </div>
+  </div>
+
+  <div id="src-container"></div>
+  <div class="no-results" id="no-results">Keine Quellen gefunden. Suchbegriff anpassen.</div>
+
+  <p class="foot-note">
+    Stand: April 2026 · Quellenverzeichnis wird mit dem Modell gepflegt ·
+    Hinweis auf fehlende oder fehlerhafte Angaben: <a href="mailto:info@kassensturz.org" style="color:var(--accent);">info@kassensturz.org</a>
+  </p>
+</div>
+
+<script>
+const QUELLEN = [
+
+  /* ─────────────────────────────────────────────────────────────
+     AKADEMISCHE STUDIEN
+     ───────────────────────────────────────────────────────────── */
+
+  { id:'A01', typ:'akademisch',
+    autor:'Andreyeva, T., Long, M.W. & Brownell, K.D.',
+    jahr:'2010',
+    titel:'The Impact of Food Prices on Consumption: A Systematic Review of Research on Price Elasticity of Demand for Food',
+    quelle:'American Journal of Public Health, 100(2), 216–222',
+    doi:'10.2105/AJPH.2008.151415',
+    verwendet:'Mikrolabor · Preiselastizitäten Lebensmittel (Modell Angebots-/Nachfragekurven)' },
+
+  { id:'A02', typ:'akademisch',
+    autor:'Autor, D., Dorn, D., Katz, L.F., Patterson, C. & Van Reenen, J.',
+    jahr:'2020',
+    titel:'The Fall of the Labor Share and the Rise of Superstar Firms',
+    quelle:'Quarterly Journal of Economics, 135(2), 645–709',
+    doi:'10.1093/qje/qjaa004',
+    verwendet:'Mikrolabor · Monopolmodell: Marktmacht und Lohnquote' },
+
+  { id:'A03', typ:'akademisch',
+    autor:'Bach, S. & Buggeln, M.',
+    jahr:'2024',
+    titel:'DINA-DE: Distributional National Accounts für Deutschland',
+    quelle:'DIW Berlin, Projektbericht',
+    doi:'',
+    verwendet:'DEZILE · Kapitalanteil D10c (≈ 45 %), Einkommensstruktur Top 1 %' },
+
+  { id:'A04', typ:'akademisch',
+    autor:'Bach, S., Sinclair, T., Bührle, A. & Wichers, A.',
+    jahr:'2025',
+    titel:'Reformoptionen für die Erbschaft- und Schenkungsteuer in Deutschland',
+    quelle:'DIW Berlin, Politikberatung kompakt',
+    doi:'',
+    verwendet:'Erbschaftsteuer-Tooltip · Szenarien 10–30 % Flat Tax; +10–40 Mrd. Aufkommen; Bewertung Betriebsvermögens-Privilegien' },
+
+  { id:'A05', typ:'akademisch',
+    autor:'Bach, S. & Sinclair, T.',
+    jahr:'2026',
+    titel:'Synthetische Einkommensteuer: Aufkommen und Verteilungswirkungen einer Reform der Kapitalbesteuerung',
+    quelle:'DIW Wochenbericht 4/2026',
+    doi:'',
+    verwendet:'Tooltip Synthetische ESt · Bach/Wichers 2026: Abschaffung Abgeltungsteuer → +15 Mrd. Aufkommen' },
+
+  { id:'A06', typ:'akademisch',
+    autor:'Bach, S., Wichers, A. & Mudrack, M.',
+    jahr:'2026',
+    titel:'Vermögensteuer in Deutschland: Aufkommens- und Verteilungswirkungen verschiedener Modelle',
+    quelle:'DIW Berlin, Diskussionspapier',
+    doi:'',
+    verwendet:'Tooltip Vermögensteuer · Linke-Modell ≈ 100 Mrd.; Freibetrag 10–20 Mio. → 110–125 Mrd.; ~1,9 % Bevölkerung betroffen' },
+
+  { id:'A07', typ:'akademisch',
+    autor:'Blömer, M., Fuest, C. & Peichl, A.',
+    jahr:'2021',
+    titel:'BGE für Deutschland: Fiskalische und arbeitsmarktliche Auswirkungen',
+    quelle:'ifo Institut, Mikrosimulationsstudie',
+    doi:'',
+    verwendet:'BGE-Panel · BGE_LABOR_EFF-Array; Bruttokosten; Arbeitsangebotseffekte; Finanzierungsmodell' },
+
+  { id:'A08', typ:'akademisch',
+    autor:'Blömer, M., Fuest, C. & Peichl, A.',
+    jahr:'2025',
+    titel:'Steuerreform für Deutschland: Mittelstandsbauch, METR und Bürgergeld',
+    quelle:'ifo Schnelldienst 01/2025',
+    doi:'',
+    verwendet:'Tooltips ESt-Eingangssatz, Spitzensteuersatz, KSt, Bürgergeld · METR D1 > 80 % als stärkstes Arbeitsmarkthemmnis' },
+
+  { id:'A09', typ:'akademisch',
+    autor:'Brülhart, M., Gruber, J., Krapf, M. & Schmidheiny, K.',
+    jahr:'2019',
+    titel:'Behavioral Responses to Wealth Taxes: Evidence from Switzerland',
+    quelle:'American Economic Journal: Economic Policy, 11(4), 1–37',
+    doi:'10.1257/pol.20180598',
+    verwendet:'ELAST.d10c_wegzug = 0,10 · steuerbedingte Emigration bei Grenzsteuersatz > 60 %' },
+
+  { id:'A10', typ:'akademisch',
+    autor:'Burke, M. & Nishitateno, S.',
+    jahr:'2013',
+    titel:'Gasoline prices, gasoline consumption, and new-vehicle fuel economy: Evidence for a large sample of countries',
+    quelle:'Energy Policy, 56, 256–264',
+    doi:'10.1016/j.enpol.2012.12.065',
+    verwendet:'Mikrolabor · Preiselastizitäten Energie/Kraftstoff' },
+
+  { id:'A11', typ:'akademisch',
+    autor:'Card, D. & Krueger, A.B.',
+    jahr:'1994',
+    titel:'Minimum Wages and Employment: A Case Study of the Fast-Food Industry in New Jersey and Pennsylvania',
+    quelle:'American Economic Review, 84(4), 772–793',
+    doi:'',
+    verwendet:'Mikrolabor · Mindestlohn-Modell: empirische Grundlage für differenziertere Beschäftigungseffekte' },
+
+  { id:'A12', typ:'akademisch',
+    autor:'Carbonnier, C.',
+    jahr:'2007',
+    titel:'Who Pays Sales Taxes? Evidence from French VAT Reforms, 1987–1999',
+    quelle:'Quarterly Journal of Economics, 122(4), 1787–1821',
+    doi:'10.1162/qjec.2007.122.4.1787',
+    verwendet:'Mikrolabor · Steuerüberwälzungsmodell: empirische Inzidenz der Mehrwertsteuer' },
+
+  { id:'A13', typ:'akademisch',
+    autor:'Cengiz, D., Dube, A., Lindner, A. & Zipperer, B.',
+    jahr:'2019',
+    titel:'The Effect of Minimum Wages on Low-Wage Jobs',
+    quelle:'Quarterly Journal of Economics, 134(3), 1405–1454',
+    doi:'10.1093/qje/qjz014',
+    verwendet:'Mikrolabor · Mindestlohn-Modell: Bunching-Methode, kaum Beschäftigungsverluste unterhalb von Monopsonie' },
+
+  { id:'A14', typ:'akademisch',
+    autor:'De Loecker, J., Eeckhout, J. & Unger, G.',
+    jahr:'2020',
+    titel:'The Rise of Market Power and the Macroeconomic Implications',
+    quelle:'Quarterly Journal of Economics, 135(2), 561–644',
+    doi:'10.1093/qje/qjz041',
+    verwendet:'Mikrolabor · Monopolmodell: Marktmacht-Zunahme und Wohlfahrtsverluste' },
+
+  { id:'A15', typ:'akademisch',
+    autor:'Doerrenberg, P. & Peichl, A.',
+    jahr:'2014',
+    titel:'The impact of redistributive policies on inequality in OECD countries',
+    quelle:'Applied Economics, 46(17), 2066–2086 / ZEW Discussion Paper',
+    doi:'10.1080/00036846.2014.892202',
+    verwendet:'Laffer-Kurve · ZEW-Schätzung: Aufkommensmaximum bei ~65–70 % Spitzensteuersatz für Deutschland' },
+
+  { id:'A16', typ:'akademisch',
+    autor:'Doyle, J. & Samphantharak, K.',
+    jahr:'2008',
+    titel:'$2.00 Gas! Studying the Effects of a Gas Tax Moratorium',
+    quelle:'Journal of Public Economics, 92(3–4), 869–884',
+    doi:'10.1016/j.jpubeco.2007.05.011',
+    verwendet:'Mikrolabor · Steuerüberwälzungsmodell: Pass-Through-Rate bei Verbrauchsteuern' },
+
+  { id:'A17', typ:'akademisch',
+    autor:'Dube, A.',
+    jahr:'2019',
+    titel:'Impacts of Minimum Wages: Review of the International Evidence',
+    quelle:'Hamilton Project Policy Proposal 2019-09, Brookings Institution',
+    doi:'',
+    verwendet:'Mikrolabor · Mindestlohn-Modell: Übersicht Beschäftigungseffekte international' },
+
+  { id:'A18', typ:'akademisch',
+    autor:'Friedman, M.',
+    jahr:'1962',
+    titel:'Capitalism and Freedom',
+    quelle:'University of Chicago Press',
+    doi:'',
+    verwendet:'Tooltip Negative ESt / Kindergeld · historische Grundlage des Grundeinkommens-Konzepts' },
+
+  { id:'A19', typ:'akademisch',
+    autor:'George, H.',
+    jahr:'1879',
+    titel:'Progress and Poverty',
+    quelle:'D. Appleton & Company, New York',
+    doi:'',
+    verwendet:'Tooltip Bodenwertsteuer · historisch-theoretische Grundlage der reinen Bodenwertsteuer' },
+
+  { id:'A20', typ:'akademisch',
+    autor:'Gechert, S. & Heimberger, P.',
+    jahr:'2022',
+    titel:'Do corporate tax cuts boost economic growth? A meta-regression analysis',
+    quelle:'European Economic Review, 147, 104157',
+    doi:'10.1016/j.euroecorev.2022.104157',
+    verwendet:'Tooltip KSt · Meta-Analyse: Wachstumseffekte von KSt-Senkungen kleiner als in Einzelstudien; Tooltip Gewerbesteuer' },
+
+  { id:'A21', typ:'akademisch',
+    autor:'Gruber, J. & Saez, E.',
+    jahr:'2002',
+    titel:'The elasticity of taxable income: evidence and implications',
+    quelle:'Journal of Public Economics, 84(1), 1–32',
+    doi:'10.1016/S0047-2727(01)00085-8',
+    verwendet:'ELAST.labor_supply = 0,20 · zentrales Schätzpapier für Arbeitselastizität (intensive margin)' },
+
+  { id:'A22', typ:'akademisch',
+    autor:'Jakobsen, K., Kleven, H. & Kolsrud, J.',
+    jahr:'2024',
+    titel:'Wealth Taxation and Wealth Accumulation: Theory and Evidence from Denmark',
+    quelle:'NBER Working Paper (überarbeitete Fassung)',
+    doi:'',
+    verwendet:'ELAST.d10c_avoidance (Vermeidung bei Vermögensteuer, ~15 % Avoidance bei 2 % Satz) · Zucman-Mindeststeuer Tooltip' },
+
+  { id:'A23', typ:'akademisch',
+    autor:'Kleven, H. & Schultz, E.A.',
+    jahr:'2014',
+    titel:'Estimating Taxable Income Responses Using Danish Tax Reforms',
+    quelle:'American Economic Journal: Economic Policy, 6(4), 271–301',
+    doi:'10.1257/pol.6.4.271',
+    verwendet:'ELAST.capital_supply = 0,50 · ELAST.d10c_avoidance · Tooltip synthetische ESt und Kapitalbesteuerung' },
+
+  { id:'A24', typ:'akademisch',
+    autor:'Kleven, H. & Landais, C.',
+    jahr:'2024',
+    titel:'Tax Migration and the Limits of Tax Policy',
+    quelle:'Journal of Economic Perspectives (erschienen 2024)',
+    doi:'',
+    verwendet:'Tooltip Vermögensteuer · Migrationseffekte kleiner als häufig behauptet' },
+
+  { id:'A25', typ:'akademisch',
+    autor:'Lewbel, A. & Pendakur, K.',
+    jahr:'2009',
+    titel:'Tricks with Hicks: The EASI Demand System',
+    quelle:'American Economic Review, 99(3), 827–863',
+    doi:'10.1257/aer.99.3.827',
+    verwendet:'F3-Korrektur (Audit) · methodische Grundlage: verschiedene Warenkategorien haben unterschiedliche Preiselastizitäten → MwSt-Verhaltensreaktion muss je Satz getrennt modelliert werden' },
+
+  { id:'A26', typ:'akademisch',
+    autor:'Mankiw, N.G. & Taylor, M.',
+    jahr:'2018',
+    titel:'Grundzüge der Volkswirtschaftslehre (7. Aufl.)',
+    quelle:'Schäffer-Poeschel Verlag, Stuttgart',
+    doi:'',
+    verwendet:'Mikrolabor · Angebot-/Nachfragemodell, Elastizitäten, Mindestlohn, Steuerüberwälzung' },
+
+  { id:'A27', typ:'akademisch',
+    autor:'Marshall, A.',
+    jahr:'1890',
+    titel:'Principles of Economics',
+    quelle:'Macmillan and Co., London',
+    doi:'',
+    verwendet:'Mikrolabor · Angebot-/Nachfragemodell (Marshallianische Kurven), Konsumenten-/Produzentenrente' },
+
+  { id:'A28', typ:'akademisch',
+    autor:'Piketty, T., Saez, E. & Stantcheva, S.',
+    jahr:'2014',
+    titel:'Optimal Taxation of Top Labor Incomes: A Tale of Three Elasticities',
+    quelle:'American Economic Journal: Economic Policy, 6(1), 230–271',
+    doi:'10.1257/pol.6.1.230',
+    verwendet:'ELAST.d10c_labor = 0,40 · Laffer-Kurve Anmerkung · D10c-Avoidance-Modellierung; extensive margin Top 1 %' },
+
+  { id:'A29', typ:'akademisch',
+    autor:'Saez, E.',
+    jahr:'2001',
+    titel:'Using Elasticities to Derive Optimal Income Tax Rates',
+    quelle:'Review of Economic Studies, 68(2), 205–229',
+    doi:'10.1111/1467-937X.00166',
+    verwendet:'Laffer-Kurve · optimale Steuersätze; Grundlage für Aufkommensmaxima-Schätzungen' },
+
+  { id:'A30', typ:'akademisch',
+    autor:'Saez, E., Slemrod, J. & Giertz, S.H.',
+    jahr:'2012',
+    titel:'The Elasticity of Taxable Income with Respect to Marginal Tax Rates: A Critical Review',
+    quelle:'Journal of Economic Literature, 50(1), 3–50',
+    doi:'10.1257/jel.50.1.3',
+    verwendet:'ELAST.labor_supply = 0,20 · Konsens-Schätzung intensive margin; Fußnote Elastizitäten (Saez/Chetty-Konsens)' },
+
+  { id:'A31', typ:'akademisch',
+    autor:'Weyl, E.G. & Fabinger, M.',
+    jahr:'2013',
+    titel:'Pass-Through as an Economic Tool: Principles of Incidence under Imperfect Competition',
+    quelle:'Journal of Political Economy, 121(3), 528–583',
+    doi:'10.1086/670401',
+    verwendet:'Mikrolabor · Steuerüberwälzungsmodell: Pass-Through-Formel und Inzidenz unter unvollständigem Wettbewerb' },
+
+  { id:'A32', typ:'akademisch',
+    autor:'Zucman, G.',
+    jahr:'2024',
+    titel:'A Blueprint for a Coordinated Minimum Effective Taxation Standard for Ultra-High-Net-Worth Individuals',
+    quelle:'EU Tax Observatory / G20 Presidency Report, Brasília',
+    doi:'',
+    verwendet:'Zucman-Mindeststeuer-Regler · globales Aufkommen 200–250 Mrd. $; Modellbasis 2 % auf Nettovermögen; Sidebar-Tooltip' },
+
+
+  /* ─────────────────────────────────────────────────────────────
+     BERICHTE, GUTACHTEN & INSTITUTIONELLE PUBLIKATIONEN
+     ───────────────────────────────────────────────────────────── */
+
+  { id:'B01', typ:'bericht',
+    autor:'Blömer, M., Fuest, C. & Peichl, A. (ifo Institut)',
+    jahr:'2025',
+    titel:'Reformoptionen für das deutsche Steuer-Transfer-System',
+    quelle:'ifo Schnelldienst 01/2025',
+    doi:'',
+    verwendet:'Szenarien-Benchmark "ifo/Fuest" · Angebotsorientiertes Profil; Eingangssteuersatz, KSt-Senkung, METR-Bürgergeld' },
+
+  { id:'B02', typ:'bericht',
+    autor:'Bundesministerium der Finanzen (BMF)',
+    jahr:'2025',
+    titel:'Bundeshaushalt 2025 — Haushaltsplan und Finanzplan',
+    quelle:'BMF, Berlin',
+    doi:'',
+    verwendet:'AUSGABEN_TOTAL-Basis · Strukturaufteilung Sozial, Bildung, Verteidigung, Infrastruktur, Verwaltung, Zinsen' },
+
+  { id:'B03', typ:'bericht',
+    autor:'Bundesministerium der Finanzen (BMF)',
+    jahr:'2025',
+    titel:'Steuerschätzung Herbst 2025',
+    quelle:'Arbeitskreis Steuerschätzungen, BMF',
+    doi:'',
+    verwendet:'BASIS_AUFKOMMEN · Lohnsteuer 255, MwSt 303, KSt 45, GewSt 75, CO₂ 18 Mrd. (Referenzjahr 2025)' },
+
+  { id:'B04', typ:'bericht',
+    autor:'Bundesministerium der Finanzen (BMF)',
+    jahr:'2026',
+    titel:'BMF-Monatsbericht Januar 2026',
+    quelle:'BMF, Berlin',
+    doi:'',
+    verwendet:'Aktualisierte Haushaltsdaten; Fußnote Datenbasis im Haushaltsspiel' },
+
+  { id:'B05', typ:'bericht',
+    autor:'Bundesrechnungshof (BRH)',
+    jahr:'2016',
+    titel:'Bericht über die Prüfung der Erbschaft- und Schenkungsteuer',
+    quelle:'Bundesrechnungshof, Bonn',
+    doi:'',
+    verwendet:'Tooltip §§ 13a/13b ErbStG · "Haupteinfallstor zur Steuervermeidung"; ADMIN_QUOTE.erbschaft = 8 %' },
+
+  { id:'B06', typ:'bericht',
+    autor:'Bundesrechnungshof (BRH)',
+    jahr:'diverse',
+    titel:'Jahresberichte zur Haushalts- und Wirtschaftsführung des Bundes',
+    quelle:'Bundesrechnungshof, Bonn',
+    doi:'',
+    verwendet:'ADMIN_QUOTE · Verwaltungskosten je Steuerart: ESt 2,5 %, MwSt 1 %, KSt 4 %, GewSt 5 %, Erbschaft 8 %' },
+
+  { id:'B07', typ:'bericht',
+    autor:'Deutsche Rentenversicherung Bund',
+    jahr:'2024',
+    titel:'Rentenbericht 2024',
+    quelle:'DRV, Berlin',
+    doi:'',
+    verwendet:'RV_AUSGABEN_SQ = 430 Mrd. (inkl. Bundeszuschuss) · BGE-Rentenreform Ausgangsbasis' },
+
+  { id:'B08', typ:'bericht',
+    autor:'DIW Berlin (Pilotprojekt Grundeinkommen)',
+    jahr:'2021–2024',
+    titel:'Pilotprojekt Grundeinkommen: Ergebnisse der Längsschnittstudie',
+    quelle:'DIW Berlin / Fachzeitschriften (n=107 Pilotstudie)',
+    doi:'',
+    verwendet:'BGE-Arbeitsangebotseffekte · −2 % Arbeitsangebot kurzfristig (quantitativ konservativ); BGE_LABOR_EFF' },
+
+  { id:'B09', typ:'bericht',
+    autor:'EU Tax Observatory',
+    jahr:'2024',
+    titel:'Global Tax Evasion Report 2024',
+    quelle:'EU Tax Observatory, Paris School of Economics',
+    doi:'',
+    verwendet:'Zucman-Mindeststeuer Tooltip · internationaler Kontext; Deutschland als Hauptblockierer 2024' },
+
+  { id:'B10', typ:'bericht',
+    autor:'Edenhofer, O. et al. (Potsdam-Institut für Klimafolgenforschung, PIK)',
+    jahr:'2024',
+    titel:'CO₂-Bepreisung: Instrument, Niveau und soziale Ausgestaltung',
+    quelle:'PIK / Veröffentlichungen im Sammelband Klimapolitik 2024',
+    doi:'',
+    verwendet:'Tooltip CO₂-Preis (BEHG) · Ökonomen-Konsens zu CO₂-Preis + Klimageld als effizientes und gerechtes Instrument' },
+
+  { id:'B11', typ:'bericht',
+    autor:'GKV-Spitzenverband',
+    jahr:'2025',
+    titel:'GKV-SV Jahresbericht 2025',
+    quelle:'GKV-SV, Berlin',
+    doi:'',
+    verwendet:'GKV-Strukturreformen Panel · Verwaltungskosten ~12 Mrd.; Kassenfusion; Finanzierungslücke 50 Mrd. bis 2030; SV-Beitragssätze' },
+
+  { id:'B12', typ:'bericht',
+    autor:'GKV-Spitzenverband',
+    jahr:'2024',
+    titel:'GKV-Präventionsbericht 2024',
+    quelle:'GKV-SV, Berlin',
+    doi:'',
+    verwendet:'Prävention GKV · aktuell ~700 Mio. €/Jahr Präventionsinvestitionen; Slider Präventionsausgaben' },
+
+  { id:'B13', typ:'bericht',
+    autor:'IAB – Institut für Arbeitsmarkt- und Berufsforschung',
+    jahr:'2024',
+    titel:'IAB-Kurzbericht 15/2024: Mindestlohnerhöhung 2024 — Beschäftigungseffekte',
+    quelle:'IAB, Nürnberg',
+    doi:'',
+    verwendet:'Mikrolabor · Mindestlohn-Modell: empirische Effekte in Deutschland (Kurzbericht 15/2024)' },
+
+  { id:'B14', typ:'bericht',
+    autor:'IGES Institut',
+    jahr:'2021',
+    titel:'Bürgerversicherung in der Krankenversicherung: fiskalische Wirkungen',
+    quelle:'IGES Institut, Berlin',
+    doi:'',
+    verwendet:'PKV-Abschaffungs-Kalkulation · Mehrausgaben vs. Mehreinnahmen bei Überführung 11 Mio. PKV-Versicherter' },
+
+  { id:'B15', typ:'bericht',
+    autor:'Institut der deutschen Wirtschaft (IW Köln)',
+    jahr:'2024',
+    titel:'Bodenwertsteuer: Wirkungen und Umsetzbarkeit',
+    quelle:'IW Köln, Kurzstudie',
+    doi:'',
+    verwendet:'Tooltip Bodenwertsteuer · IW empfiehlt reine Bodenwertsteuer nach GrSt-Reform 2025' },
+
+  { id:'B16', typ:'bericht',
+    autor:'Institut der deutschen Wirtschaft (IW Köln)',
+    jahr:'2025',
+    titel:'IW Verteilungsbericht 2025',
+    quelle:'IW Köln',
+    doi:'',
+    verwendet:'Datenbasis Dezile · Vermögensverteilung, Einkommensanteile; Fußnote Datenquellen' },
+
+  { id:'B17', typ:'bericht',
+    autor:'Kirchhof, P.',
+    jahr:'2011',
+    titel:'Bundessteuergesetzbuch — Ein Reformentwurf zur Erneuerung des Steuerrechts',
+    quelle:'C.F. Müller Verlag, Heidelberg',
+    doi:'',
+    verwendet:'Tooltip Kleine Verbrauchsteuern · Kirchhof-Modell: Abschaffung aller Kleinverbrauchsteuern; Szenario "Kirchhof"-Benchmark' },
+
+  { id:'B18', typ:'bericht',
+    autor:'Koalitionsarbeitsgruppe CDU/CSU & SPD',
+    jahr:'2025',
+    titel:'Koalitionsvertrag 2025–2029',
+    quelle:'Bundesregierung, Berlin',
+    doi:'',
+    verwendet:'Tooltip GewSt · "prüfen"; Tooltip MwSt; Steueränderungsgesetz Oktober 2025 (Grundfreibetrag)' },
+
+  { id:'B19', typ:'bericht',
+    autor:'Monopolkommission',
+    jahr:'2022',
+    titel:'Hauptgutachten XXIV: Wettbewerb 2022',
+    quelle:'Monopolkommission, Bonn',
+    doi:'',
+    verwendet:'Mikrolabor · Monopolmodell: Wettbewerbssituation DE Unternehmenssektor' },
+
+  { id:'B20', typ:'bericht',
+    autor:'Normenkontrollrat (NKR)',
+    jahr:'diverse',
+    titel:'Berichte zur Bürokratiebelastung und Verwaltungseffizienz',
+    quelle:'Nationaler Normenkontrollrat, Berlin',
+    doi:'',
+    verwendet:'ADMIN_QUOTE · Verwaltungskosten-Schätzung je Steuerart; Rechenweg-Panel' },
+
+  { id:'B21', typ:'bericht',
+    autor:'OECD',
+    jahr:'2024',
+    titel:'Tax Administration 2024: Comparative Information on OECD and Other Advanced and Emerging Economies',
+    quelle:'OECD Publishing, Paris',
+    doi:'10.1787/6a9c8c3b-en',
+    verwendet:'ADMIN_QUOTE · Steuer-Verwaltungskosten internationaler Vergleich; DE ~2 % des Aufkommens; Tooltip Verwaltung' },
+
+  { id:'B22', typ:'bericht',
+    autor:'OECD',
+    jahr:'2025',
+    titel:'Taxing Wages 2025',
+    quelle:'OECD Publishing, Paris',
+    doi:'10.1787/tax_wages-2025-en',
+    verwendet:'Tooltip Negative ESt / METR · OECD Taxing Wages; internationale Vergleiche Grenzbelastung' },
+
+  { id:'B23', typ:'bericht',
+    autor:'OECD',
+    jahr:'2024',
+    titel:'Pensions at a Glance 2024: OECD and G20 Indicators',
+    quelle:'OECD Publishing, Paris',
+    doi:'10.1787/aeee10b8-en',
+    verwendet:'Tooltip Generationenkapital · internationale Rentenkapitalfonds-Vergleiche; RV-Reform-Optionen' },
+
+  { id:'B24', typ:'bericht',
+    autor:'PKV-Verband',
+    jahr:'2025',
+    titel:'Zahlenbericht der privaten Krankenversicherung 2025',
+    quelle:'PKV-Verband, Köln',
+    doi:'',
+    verwendet:'PKV-Abschaffungs-Kalkulation · 11 Mio. PKV-Versicherte; Beitragshöhe ~450 €/Monat; GKV-Panel' },
+
+  { id:'B25', typ:'bericht',
+    autor:'RWI – Leibniz-Institut für Wirtschaftsforschung',
+    jahr:'2024',
+    titel:'Bedingungsloses Grundeinkommen: Makroökonomische Wirkungsanalyse',
+    quelle:'RWI Projektbericht 2024',
+    doi:'',
+    verwendet:'BGE_LABOR_EFF · bis −30 % Arbeitsangebot bei BGE 1.500 €; Verwaltungskosten 0,8 %; Bürgergeld-Ersatz' },
+
+  { id:'B26', typ:'bericht',
+    autor:'Rürup-Kommission (Kommission für die Nachhaltigkeit in der Finanzierung der Sozialen Sicherungssysteme)',
+    jahr:'2003',
+    titel:'Nachhaltigkeit in der Finanzierung der Sozialen Sicherungssysteme: Bericht der Kommission',
+    quelle:'BMAS, Berlin',
+    doi:'',
+    verwendet:'Tooltip Generationenkapital · Grundlage für Rentenreform-Diskussion; demografische Projektion' },
+
+  { id:'B27', typ:'bericht',
+    autor:'Sachverständigenrat zur Begutachtung der gesamtwirtschaftlichen Entwicklung (SVR)',
+    jahr:'diverse',
+    titel:'Jahresgutachten (insb. 2004, 2020/21, 2024)',
+    quelle:'SVR Wirtschaft, Wiesbaden',
+    doi:'',
+    verwendet:'SVR-Demografieprojektion: +0,3 PP/Jahr RV-Beitragssatz bis 2045; Tooltip GewSt; Saldo-Projektion' },
+
+  { id:'B28', typ:'bericht',
+    autor:'WHO – World Health Organization',
+    jahr:'2017',
+    titel:'Return on Investment of Public Health Interventions: A Systematic Review',
+    quelle:'WHO Regional Office for Europe, Copenhagen',
+    doi:'',
+    verwendet:'GKV-Panel Prävention · ROI 3–5 € je 1 € über 20 Jahre; im Modell vereinfacht 1,5× Nettonutzen (konservativ)' },
+
+  { id:'B29', typ:'bericht',
+    autor:'ZEW – Leibniz-Zentrum für Europäische Wirtschaftsforschung / Heim, B. et al.',
+    jahr:'diverse',
+    titel:'BGE und Arbeitsmarkt: Microsimulations und Survey-Analysen',
+    quelle:'ZEW Discussion Papers',
+    doi:'',
+    verwendet:'BGE_LABOR_EFF · extensiver Margin D1–D4; BGE-Quellen im BGE-Panel' },
+
+  { id:'B30', typ:'bericht',
+    autor:'Bundesministerium für Gesundheit (BMG)',
+    jahr:'2025',
+    titel:'Kassenstatistik GKV 2025',
+    quelle:'BMG, Berlin',
+    doi:'',
+    verwendet:'GKV-Panel · Beitragssätze; Leistungsausgaben; Tooltip Krankenversicherung' },
+
+  { id:'B31', typ:'bericht',
+    autor:'Bundesministerium für Umwelt / DEHSt / Umweltbundesamt (UBA)',
+    jahr:'2025',
+    titel:'Treibhausgasemissionen 2024: Vorläufige Emissionsbilanz',
+    quelle:'UBA, Dessau-Roßlau',
+    doi:'',
+    verwendet:'Rechenweg CO₂ · Emissionsbasis ~500 Mio. t im Bepreisungsbereich (Wärme + Verkehr BEHG + Industrie EU-ETS)' },
+
+  { id:'B32', typ:'bericht',
+    autor:'Rentenpaket II (Bundesregierung)',
+    jahr:'2024',
+    titel:'Rentenpaket II 2024 — Generationenkapital und Rentenniveaustabilisierung',
+    quelle:'Bundesgesetzblatt 2024',
+    doi:'',
+    verwendet:'Renten-Slider Generationenkapital · 12 Mrd. €/Jahr in Staatsfonds ab 2024; historische Simulation' },
+
+
+  /* ─────────────────────────────────────────────────────────────
+     AMTLICHE STATISTIKEN & DATENSÄTZE
+     ───────────────────────────────────────────────────────────── */
+
+  { id:'C01', typ:'statistik',
+    autor:'BA – Bundesagentur für Arbeit',
+    jahr:'2025',
+    titel:'Statistik der Bundesagentur für Arbeit: Grundsicherung (SGB II)',
+    quelle:'BA Statistik, Nürnberg',
+    doi:'',
+    verwendet:'Tooltip Bürgergeld · ~5,5 Mio. Bedarfsgemeinschaften; Bürgergeld 563 €/M (2025)' },
+
+  { id:'C02', typ:'statistik',
+    autor:'Destatis – Statistisches Bundesamt',
+    jahr:'2024',
+    titel:'Mikrozensus 2024: Bevölkerung und Haushaltsgröße',
+    quelle:'Statistisches Bundesamt, Wiesbaden',
+    doi:'',
+    verwendet:'DEZILE · ~70 Mio. Erwachsene (BGE-Bruttokosten-Basis); Haushaltsanzahl; Kinderzahl je Dezil (kg_quote)' },
+
+  { id:'C03', typ:'statistik',
+    autor:'Destatis – Statistisches Bundesamt',
+    jahr:'2025',
+    titel:'Volkswirtschaftliche Gesamtrechnungen (VGR) 2025',
+    quelle:'Statistisches Bundesamt, Wiesbaden',
+    doi:'',
+    verwendet:'BIP 4.200 Mrd. (Schuldenquote-Projektion); Konsumquoten; Lohnsumme 1.750 Mrd.' },
+
+  { id:'C04', typ:'statistik',
+    autor:'DIW Berlin',
+    jahr:'2024',
+    titel:'DIW Vermögensbericht 2024',
+    quelle:'DIW Berlin',
+    doi:'',
+    verwendet:'DEZILE · Vermögenswerte je Dezil (vermoegen-Feld); D10c: 7 Mio. € Medianvermögen' },
+
+  { id:'C05', typ:'statistik',
+    autor:'Eurostat / EU-SILC',
+    jahr:'2024',
+    titel:'European Union Statistics on Income and Living Conditions (EU-SILC) 2024',
+    quelle:'Eurostat, Luxembourg',
+    doi:'',
+    verwendet:'DEZILE-Konsumquoten; Armutsgrenze 60 % des Median (K4-Korrektur); Gini-Vergleich (DE ~0,295)' },
+
+  { id:'C06', typ:'statistik',
+    autor:'SOEP-Konsortium (DIW Berlin)',
+    jahr:'2023',
+    titel:'Sozio-Oekonomisches Panel (SOEP) v40, Erhebungswelle 2022',
+    quelle:'DIW Berlin, DOI: 10.5684/soep.core.v40eu',
+    doi:'10.5684/soep.core.v40eu',
+    verwendet:'DEZILE · Einkommensdezile D1–D9 (Bruttoeinkommen, Haushaltsgrößen, Kapitalanteile); Hauptdatenbasis' },
+
+
+  /* ─────────────────────────────────────────────────────────────
+     RECHTLICHE QUELLEN
+     ───────────────────────────────────────────────────────────── */
+
+  { id:'G01', typ:'recht',
+    autor:'',
+    jahr:'2025',
+    titel:'§ 32a EStG — Einkommensteuertarif (Grundtabelle 2025)',
+    quelle:'Einkommensteuergesetz i.d.F. des Steueränderungsgesetzes Oktober 2025 · Grundfreibetrag 12.084 €, ab 2026: 12.348 €',
+    doi:'',
+    verwendet:'estTarif() · grenzsteuersatz() · 5-Zonen-Formeltarif; alle ESt-Berechnungen' },
+
+  { id:'G02', typ:'recht',
+    autor:'',
+    jahr:'2025',
+    titel:'§§ 32d, 43 EStG — Abgeltungsteuer auf Kapitalerträge',
+    quelle:'Einkommensteuergesetz · 25 % + 5,5 % Soli; separate Besteuerung Kapitalerträge',
+    doi:'',
+    verwendet:'est_kap-Berechnung · Dual-Modus (Standard); Tooltip synthetische vs. duale Besteuerung' },
+
+  { id:'G03', typ:'recht',
+    autor:'',
+    jahr:'2025',
+    titel:'§ 23 KStG — Körperschaftsteuersatz',
+    quelle:'Körperschaftsteuergesetz · 15 % + 5,5 % Solidaritätszuschlag',
+    doi:'',
+    verwendet:'kst_auf-Berechnung · Grundlage KSt-Slider' },
+
+  { id:'G04', typ:'recht',
+    autor:'',
+    jahr:'2025',
+    titel:'GewStG — Gewerbesteuergesetz (Ø Hebesatz 432 %)',
+    quelle:'Gewerbesteuergesetz · Steuermessbetrag 3,5 % × Hebesatz ≈ 14 % effektiv',
+    doi:'',
+    verwendet:'gewst_auf-Berechnung · Tooltip Gewerbesteuer; GewSt-Abschaffungs-Toggle' },
+
+  { id:'G05', typ:'recht',
+    autor:'',
+    jahr:'2025',
+    titel:'§ 12 UStG — Umsatzsteuersätze (Regelsatz 19 %, ermäßigt 7 %)',
+    quelle:'Umsatzsteuergesetz 2025',
+    doi:'',
+    verwendet:'mwst_auf-Berechnung · beide Slider (mwst, mwst_erm)' },
+
+  { id:'G06', typ:'recht',
+    autor:'',
+    jahr:'2025',
+    titel:'§ 10 BEHG — Brennstoffemissionshandelsgesetz (CO₂-Preis Wärme/Verkehr)',
+    quelle:'BEHG · 2025: 55 €/t CO₂ · Fusion mit EU-ETS2 ab 2027 vorgesehen',
+    doi:'',
+    verwendet:'co2_auf-Berechnung · Tooltip CO₂-Preis BEHG; Emissions-Basis' },
+
+  { id:'G07', typ:'recht',
+    autor:'',
+    jahr:'2025',
+    titel:'§§ 10, 19 ErbStG — Erbschaft- und Schenkungsteuer (Tarif, Freibeträge)',
+    quelle:'Erbschaftsteuer- und Schenkungsteuergesetz 2025',
+    doi:'',
+    verwendet:'erb_auf-Berechnung · Erbschaftsteuer-Slider; progressiver Tarif Steuerklassen' },
+
+  { id:'G08', typ:'recht',
+    autor:'',
+    jahr:'2025',
+    titel:'§§ 13a, 13b ErbStG — Betriebsvermögensprivilegien (bis 100 % Steuerbefreiung)',
+    quelle:'ErbStG · BVerfG-Entscheidung 2014 zu Verfassungskonformität',
+    doi:'',
+    verwendet:'erb_satz_eff · Betriebsvermögen-Toggle (params.betriebs); effektiver Satz 30 % bei Ausnahmen vs. 90 %' },
+
+  { id:'G09', typ:'recht',
+    autor:'',
+    jahr:'1995',
+    titel:'BVerfGE 93, 121 — Beschluss zur Vermögensteuer',
+    quelle:'Bundesverfassungsgericht, 22.06.1995 · 2 BvL 37/91',
+    doi:'',
+    verwendet:'Tooltip Vermögensteuer · Vermögensteuer seit 1997 ausgesetzt; Verfassungskonformitäts-Problematik' },
+
+  { id:'G10', typ:'recht',
+    autor:'',
+    jahr:'2014',
+    titel:'BVerfG — Urteil zur Erbschaftsteuer (1 BvL 21/12)',
+    quelle:'Bundesverfassungsgericht, 17.12.2014',
+    doi:'',
+    verwendet:'Tooltip §§ 13a/13b ErbStG · Verfassungswidrigkeit der Betriebsvermögensprivilegien; BFH-Verweis' },
+
+  { id:'G11', typ:'recht',
+    autor:'',
+    jahr:'2025',
+    titel:'§ 20 SGB II — Bürgergeld-Regelsatz (2025: 563 € Alleinstehende)',
+    quelle:'SGB II i.d.F. des Bürgergesetzes 2022/2023 · Fortschreibung 2025',
+    doi:'',
+    verwendet:'bg_auszahlung · Bürgergeld-Slider; bg_quote-Array; METR D1 Transfer-Entzug' },
+
+  { id:'G12', typ:'recht',
+    autor:'',
+    jahr:'2025',
+    titel:'§ 11b SGB II — Freibetragsregelung (Erwerbstätigenfreibetrag)',
+    quelle:'SGB II · Anrechnungsquote 80 % auf Zusatzeinkommen D1',
+    doi:'',
+    verwendet:'METR-Berechnung · bg_entzug_arr[0] = 0,80; Tooltip METR "Bürgergeld-Anrechnung erhöht METR deutlich"' },
+
+  { id:'G13', typ:'recht',
+    autor:'',
+    jahr:'2025',
+    titel:'§ 241 SGB V — Allgemeiner Beitragssatz GKV (14,6 % + Zusatzbeitrag ≈ 1,7 %)',
+    quelle:'SGB V · KV-BBG 2025: 62.100 €/Jahr',
+    doi:'',
+    verwendet:'kv_auf-Berechnung · KV-Slider; K3-Korrektur KV-BBG 62.100 €; Tooltip GKV' },
+
+  { id:'G14', typ:'recht',
+    autor:'',
+    jahr:'2025',
+    titel:'§ 6 SGB IV — Beitragsbemessungsgrenze (BBG 2025: RV/AL 90.600 €, KV/PV 62.100 €)',
+    quelle:'SGB IV · Rechengrößen der Sozialversicherung 2025 (BGBl. I 2024)',
+    doi:'',
+    verwendet:'BBG-Slider · bbg_lohnsumme_factor; K3-Korrektur: getrennte BBGs für KV (62.100 €) und RV (90.000 €); Tooltip BBG' },
+
+  { id:'G15', typ:'recht',
+    autor:'',
+    jahr:'2025',
+    titel:'§ 213 SGB VI — Finanzierung der Rentenversicherung (Beitragssatz + Bundeszuschuss)',
+    quelle:'SGB VI · RV-Beitragssatz 2025: 18,6 %',
+    doi:'',
+    verwendet:'F1-Korrektur (Audit) · SV-Ausgaben koppeln an Beitragssätze gemäß Umlagesystem-Logik; rv_auf' },
+
+  { id:'G16', typ:'recht',
+    autor:'',
+    jahr:'1949',
+    titel:'Art. 28 Abs. 2 GG — Kommunale Selbstverwaltungsgarantie',
+    quelle:'Grundgesetz für die Bundesrepublik Deutschland',
+    doi:'',
+    verwendet:'Tooltip Gewerbesteuer-Abschaffung · Kommunalverbände: Eigenfinanzierungsanspruch aus Art. 28 GG' },
+
+  { id:'G17', typ:'recht',
+    autor:'',
+    jahr:'2025',
+    titel:'Steueränderungsgesetz Oktober 2025 — Anpassung Grundfreibetrag und Tarif',
+    quelle:'Bundesgesetzblatt 2025',
+    doi:'',
+    verwendet:'Tooltip Grundfreibetrag · 2026: 12.348 €; Ausgangswert Freibetrag-Slider 12.084 € (2025)' },
+
+];
+
+/* ────────────────────── RENDER ────────────────────── */
+
+const TYP_LABEL = { akademisch:'Studie', bericht:'Bericht', statistik:'Statistik', recht:'Recht' };
+const TYP_CHIP  = { akademisch:'active-a', bericht:'active-b', statistik:'active-c', recht:'active-d' };
+
+let currentFilter = 'alle';
+let currentSearch = '';
+
+function renderAll() {
+  const container = document.getElementById('src-container');
+  const noRes     = document.getElementById('no-results');
+  const q = currentSearch.toLowerCase();
+
+  // Group by typ in display order
+  const ORDER = ['akademisch','bericht','statistik','recht'];
+  const HEADS = {
+    akademisch: 'I · Akademische Studien',
+    bericht:    'II · Berichte, Gutachten &amp; Institutionelle Publikationen',
+    statistik:  'III · Amtliche Statistiken &amp; Datensätze',
+    recht:      'IV · Rechtliche Quellen (Gesetze &amp; Urteile)'
+  };
+
+  let html = '';
+  let totalVisible = 0;
+
+  for (const typ of ORDER) {
+    if (currentFilter !== 'alle' && currentFilter !== typ) continue;
+    const items = QUELLEN.filter(src => {
+      if (src.typ !== typ) return false;
+      if (!q) return true;
+      return [src.autor, src.titel, src.quelle, src.verwendet, src.id].join(' ').toLowerCase().includes(q);
+    });
+    if (items.length === 0) continue;
+    totalVisible += items.length;
+
+    html += `<div class="section-head">${HEADS[typ]}<span class="section-count">${items.length} Quellen</span></div>`;
+    html += '<div class="src-grid">';
+    for (const s of items) {
+      const doi = s.doi
+        ? `<a class="src-doi" href="https://doi.org/${s.doi}" target="_blank" rel="noopener">doi:${s.doi}</a>`
+        : '';
+      html += `
+      <div class="src-card" data-typ="${s.typ}">
+        <div class="src-top">
+          <span class="src-id">${s.id}</span>
+          <span class="src-badge">${TYP_LABEL[s.typ]}</span>
+          <span class="src-year">${s.jahr}</span>
+        </div>
+        ${s.autor ? `<div class="src-author">${s.autor}</div>` : ''}
+        <div class="src-title">„${s.titel}"</div>
+        <div class="src-journal">${s.quelle}${doi ? ' · '+doi : ''}</div>
+        <div class="src-used">${s.verwendet}</div>
+      </div>`;
+    }
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+  noRes.style.display = totalVisible === 0 ? 'block' : 'none';
+}
+
+function updateCounters() {
+  document.getElementById('cnt-a').textContent = QUELLEN.filter(s=>s.typ==='akademisch').length;
+  document.getElementById('cnt-b').textContent = QUELLEN.filter(s=>s.typ==='bericht').length;
+  document.getElementById('cnt-c').textContent = QUELLEN.filter(s=>s.typ==='statistik').length;
+  document.getElementById('cnt-d').textContent = QUELLEN.filter(s=>s.typ==='recht').length;
+}
+
+// Filter chips
+document.querySelectorAll('.chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(b => b.className = 'chip');
+    currentFilter = btn.dataset.filter;
+    if (currentFilter === 'alle') btn.className = 'chip active-all';
+    else btn.className = 'chip ' + TYP_CHIP[currentFilter];
+    renderAll();
+  });
+});
+
+// Search
+document.getElementById('search').addEventListener('input', e => {
+  currentSearch = e.target.value;
+  renderAll();
+});
+
+updateCounters();
+renderAll();
+</script>
+</body>
+</html>
