@@ -1737,6 +1737,12 @@
         <div class="kpi-delta" id="kpi_dwl_d">Mrd. € / Jahr</div>
         <div class="kpi-bench" id="kpi_dwl_bench"></div>
       </div>
+      <div class="kpi">
+        <div class="kpi-label">Schuldenbremse (Art. 109 GG)</div>
+        <div class="kpi-value" id="kpi_sbremse" style="font-size:22px">—</div>
+        <div class="kpi-delta" id="kpi_sbremse_d">struct. Saldo / BIP</div>
+        <div class="kpi-bench">Grenze: −0,35 % BIP (Bund)</div>
+      </div>
     </div>
 
     <!-- GESAMTNOTE / SCORE PANEL -->
@@ -1820,6 +1826,14 @@
       </div>
     </div>
 
+    <!-- WIRTSCHAFTLICHE WIRKUNGSANALYSE -->
+    <div class="panel">
+      <h2>Wirtschaftliche Wirkungsanalyse</h2>
+      <div class="panel-sub">Fiskalmultiplikator · Automatische Stabilisatoren · Dynamisches Scoring — Quellen: ECB WP 1267, Bundesbank DP 28/2018, Dolls et al. (ECB Bulletin 2020), Elmendorf/Hubbard/Williams (Brookings 2024)</div>
+      <div class="bars" id="wirk_bars"></div>
+      <p style="font-size:11px;color:var(--muted);margin-top:10px;font-style:italic;">Fiskalmultiplikator: ECB/Bundesbank-Schätzung für DE (0,65). Automatische Stabilisatoren: Dolls et al. 2020 — DE dämpft ~48 % eines Einkommensschocks. Dynamisches Scoring: Verhaltensbedingte Aufkommensreaktion nach Gruber/Saez (2002) und Neumeier/SVR (2025).</p>
+    </div>
+
     <!-- EST-TARIFKURVE -->
     <div class="panel">
       <h2>Einkommensteuer-Tarifkurve</h2>
@@ -1886,7 +1900,7 @@
     </details>
 
     <p class="footer-note">
-      Daten: Bundesfinanzministerium (Haushalt 2025, Steuerschätzung), Destatis, SOEP v40 (DIW), EU-SILC 2024, IW Verteilungsbericht 2025, BMF-Monatsbericht Januar 2026, BRH-Berichte zu Verwaltungskosten. Elastizitäten: Saez/Chetty/Gruber (Labor), Kleven/Schultz (Kapital), EWI/DIW (CO₂). Das Modell arbeitet mit 10 Haushaltsdezilen + Unternehmenssektor und berücksichtigt statische Aufkommensänderung, Verhaltensreaktion und Verwaltungskosten. Grenzen: keine makroökonomischen Feedbacks, keine regionale Differenzierung, vereinfachte Unternehmensseite.
+      Daten: Bundesfinanzministerium (Haushalt 2025, Steuerschätzung), Destatis, SOEP v40 (DIW), EU-SILC 2024, IW Verteilungsbericht 2025, BMF-Monatsbericht Januar 2026, BRH-Berichte zu Verwaltungskosten, IMF Article IV 2025. Elastizitäten: Saez/Chetty/Gruber (Labor), Kleven/Schultz (Kapital), EWI/DIW (CO₂), Neumeier/SVR 2025 (Investitionen). MwSt-Compliance-Abschlag: EU-Kommission / CASE VAT Gap 2024. Fiskalmultiplikator: ECB WP 1267 (Kirchner et al. 2010) · Bundesbank DP 28/2018. Automatische Stabilisatoren: Dolls/Fuest/Peichl (ECB Bulletin 2020). Das Modell arbeitet mit 10 Haushaltsdezilen + Unternehmenssektor und berücksichtigt statische Aufkommensänderung, Verhaltensreaktion, Verwaltungskosten und Fiskalmultiplikatoreffekte. Grenzen: keine regionale Differenzierung, vereinfachte Unternehmensseite, keine Konjunkturbereinigung im Schuldenbremsen-Indikator.
     </p>
 
   </main>
@@ -2169,6 +2183,8 @@ function berechne(params) {
                            + 0.3 * params.mwst_erm / (100 + params.mwst_erm) * cf_erm);
     mwst_auf += mwst_d * d.anzahl / 1000;
   }
+  // R08: VAT-Gap-Korrekturfaktor (EU-Kommission / CASE VAT Gap 2024: DE ~3,7 % des theoretischen Aufkommens ungehoben)
+  mwst_auf *= 0.963;
 
   // ---------- 5. CO2 ----------
   // Emissionen Deutschland ca. 650 Mio t, davon ~500 Mio t im CO2-Bepreisungsbereich
@@ -2381,12 +2397,29 @@ function berechne(params) {
     return a + 0.5 * ELAST.labor_supply * (gs * gs) / Math.max(0.01, 1 - gs) * lohnsumme_d;
   }, 0);
 
+  // ---------- 19b. SCHULDENBREMSE (Art. 109 GG) ----------
+  // Vereinfacht: struktureller Saldo ≈ Gesamtsaldo / BIP (keine Konjunkturbereinigung im Modell)
+  const saldo_bip_pct = saldo / bip * 100;
+  const schuldenbremse_ok = saldo_bip_pct >= -0.35;
+
+  // ---------- 19c. DYNAMISCHES SCORING ----------
+  // Verhaltensbedingte Aufkommensänderung gegenüber mechanischer (statischer) Wirkung
+  // KSt: investment_factor-Abweichung von 1 = Investitionsreaktion auf KSt-Änderung
+  const dynamisch_kst = gewinn_basis * params.kst / 100 * (investment_factor - 1);
+  // ESt: labor_factor-Abweichung → Arbeitsangebotsreaktion (Saez/Chetty-Konsens ε = 0,20)
+  const dynamisch_est = est_aufkommen * (avg_labor - 1);
+  const dynamisch_delta = dynamisch_kst + dynamisch_est;
+
   return {
     rev, einnahmen_total, ausgaben_total, saldo, admin_kosten, nst,
     hh_delta, gini, palma, behavior, klimageld_auszahlung,
     bg_auszahlung, kg_auszahlung, neg_est_auszahlung,
     armutsrisiko, schuldenquote_delta, metr, dwl, poverty_line,
-    rv_einsparung
+    rv_einsparung,
+    // Research-basierte Erweiterungen (QUELLENRECHERCHE.md)
+    saldo_bip_pct, schuldenbremse_ok,
+    dynamisch_kst, dynamisch_est, dynamisch_delta,
+    investment_factor, avg_labor
   };
 }
 
@@ -3182,6 +3215,58 @@ function render() {
   }).join('');
   document.getElementById('behavior_bars').innerHTML = bhvHtml;
 
+  // WIRTSCHAFTLICHE WIRKUNGSANALYSE (R01, R10, R12)
+  const bip_impuls = -(r.saldo - REF.saldo) * 0.65; // Fiskalmultiplikator 0,65 (ECB/Bundesbank-Konsens DE)
+  const stab_index = r.metr.slice(0, 4).reduce((a, m) => a + m, 0) / 4 * 100; // Ø METR D1–D4 als Stabilisierungsgrad
+  const wirkBars = [
+    {
+      label: 'BIP-Impuls (Multiplikator 0,65)',
+      value: bip_impuls,
+      fmt: v => (v >= 0 ? '+' : '') + v.toFixed(1) + ' Mrd. €',
+      cls: bip_impuls > 5 ? 'pos' : bip_impuls < -5 ? 'neg' : 'neu',
+      pct: Math.min(100, Math.abs(bip_impuls) / 50 * 100),
+      hint: 'Fiskalimpuls × 0,65 (ECB WP 1267 · Bundesbank DP 28/2018)'
+    },
+    {
+      label: 'Auto-Stabilisatoren (Ø METR D1–D4)',
+      value: stab_index,
+      fmt: v => v.toFixed(1) + ' %',
+      cls: stab_index > 50 ? 'pos' : stab_index < 35 ? 'neg' : 'neu',
+      pct: Math.min(100, stab_index),
+      hint: 'Dämpfungsgrad Einkommensschock — DE Benchmark: ~48 % (Dolls et al. 2020)'
+    },
+    {
+      label: 'Dyn. Scoring: KSt-Investitionseffekt',
+      value: r.dynamisch_kst,
+      fmt: v => (v >= 0 ? '+' : '') + v.toFixed(1) + ' Mrd. €',
+      cls: r.dynamisch_kst > 0 ? 'pos' : r.dynamisch_kst < 0 ? 'neg' : 'neu',
+      pct: Math.min(100, Math.abs(r.dynamisch_kst) / 20 * 100),
+      hint: 'Verhaltensbedingte KSt-Aufkommensänderung via Investitionselastizität (Neumeier SVR 2025)'
+    },
+    {
+      label: 'Dyn. Scoring: ESt-Arbeitsangebotseffekt',
+      value: r.dynamisch_est,
+      fmt: v => (v >= 0 ? '+' : '') + v.toFixed(1) + ' Mrd. €',
+      cls: r.dynamisch_est > 0 ? 'pos' : r.dynamisch_est < 0 ? 'neg' : 'neu',
+      pct: Math.min(100, Math.abs(r.dynamisch_est) / 20 * 100),
+      hint: 'Verhaltensbedingte ESt-Aufkommensänderung via Arbeitselastizität ε = 0,20 (Gruber/Saez 2002)'
+    },
+    {
+      label: 'Dyn. Scoring gesamt (KSt + ESt)',
+      value: r.dynamisch_delta,
+      fmt: v => (v >= 0 ? '+' : '') + v.toFixed(1) + ' Mrd. €',
+      cls: r.dynamisch_delta > 0 ? 'pos' : r.dynamisch_delta < 0 ? 'neg' : 'neu',
+      pct: Math.min(100, Math.abs(r.dynamisch_delta) / 30 * 100),
+      hint: 'Gesamter Verhaltenseffekt — positiv = Mehraufkommen durch Verhaltensreaktion'
+    }
+  ];
+  document.getElementById('wirk_bars').innerHTML = wirkBars.map(b => `
+    <div class="bar-row" title="${b.hint}">
+      <div class="bar-label">${b.label}</div>
+      <div class="bar-track"><div class="bar-fill ${b.cls}" style="width:${b.pct}%"></div></div>
+      <div class="bar-value">${b.fmt(b.value)}</div>
+    </div>`).join('');
+
   // NEUE KPIs
   const armutEl = document.getElementById('kpi_armut');
   const armutDEl = document.getElementById('kpi_armut_d');
@@ -3202,6 +3287,14 @@ function render() {
   const dDwl = r.dwl - REF.dwl;
   dwlDEl.textContent = (dDwl >= 0 ? '+' : '') + dDwl.toFixed(0) + ' Mrd. vs. Basis';
   dwlDEl.className = 'kpi-delta ' + (dDwl > 5 ? 'bad' : dDwl < -5 ? 'good' : 'neutral');
+
+  // SCHULDENBREMSE-KPI (Art. 109 GG) — R05
+  const sbEl  = document.getElementById('kpi_sbremse');
+  const sbDEl = document.getElementById('kpi_sbremse_d');
+  sbEl.textContent = r.schuldenbremse_ok ? '✓ eingehalten' : '✗ verletzt';
+  sbEl.style.color = r.schuldenbremse_ok ? 'var(--good)' : 'var(--bad)';
+  sbDEl.textContent = (r.saldo_bip_pct >= 0 ? '+' : '') + r.saldo_bip_pct.toFixed(2).replace('.', ',') + ' % BIP';
+  sbDEl.className = 'kpi-delta ' + (r.schuldenbremse_ok ? 'good' : 'bad');
 
   // KPI BENCHMARKS
   document.getElementById('kpi_saldo_bench').textContent = KPI_BENCH.saldo;
@@ -3259,7 +3352,7 @@ function render() {
   renderScore(r);
 
   // KPI PULSE — detect changed KPI values and flash them
-  const _kpiPulseIds = ['kpi_saldo','kpi_einn','kpi_gini','kpi_admin','kpi_nst','kpi_arb','kpi_armut','kpi_schuld','kpi_dwl'];
+  const _kpiPulseIds = ['kpi_saldo','kpi_einn','kpi_gini','kpi_admin','kpi_nst','kpi_arb','kpi_armut','kpi_schuld','kpi_dwl','kpi_sbremse'];
   _kpiPulseIds.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -3655,8 +3748,8 @@ const TOOLTIPS = {
   },
   kst: {
     title: "Körperschaftsteuer",
-    text: "Steuer auf Gewinne von Kapitalgesellschaften. KSt (15%) + Soli + GewSt (~14%) = ~30% Gesamtbelastung. ifo/Fuest (2025): Senkung auf 25% würde Investitionen signifikant steigern. Meta-Analyse Gechert/Heimberger (2022, Eur. Econ. Rev.): Effekte kleiner als behauptet.",
-    quelle: "§ 23 KStG · 15% + 5,5% Soli · Blömer/Fuest/Peichl ifo 01/2025 · Gechert/Heimberger 2022"
+    text: "Steuer auf Gewinne von Kapitalgesellschaften. KSt (15%) + Soli + GewSt (~14%) = ~30% Gesamtbelastung. ifo/Fuest (2025): Senkung auf 25% würde Investitionen signifikant steigern. Meta-Analyse Gechert/Heimberger (2022): Effekte kleiner als behauptet. SVR (Neumeier 2025): −0,5% Investitionen je PP KSt-Senkung. Koalitionsvertrag 2025: −5 PP bis 2033 (5×1 PP ab 2028) → Investitionsimpuls ~+25 Mrd. €/Jahr laut SVR.",
+    quelle: "§ 23 KStG · Blömer/Fuest/Peichl ifo 01/2025 · Gechert/Heimberger 2022 · Neumeier SVR Arbeitspapier 03/2025 · Koalitionsvertrag 2025"
   },
   gewst: {
     title: "Gewerbesteuer",
@@ -3680,8 +3773,8 @@ const TOOLTIPS = {
   },
   co2: {
     title: "CO₂-Preis (BEHG)",
-    text: "Nationaler Emissionshandel (BEHG) für Wärme und Verkehr. EU-ETS deckt Industrie/Strom separat. Emissionselastizität: −0,30 (EWI/DIW). Klima-Konsens: höherer CO₂-Preis ist effizientestes Klimainstrument, wenn sozial ausgeglichen (Klimageld).",
-    quelle: "BEHG § 10 · 2025: 55 €/t · EU-ETS ab 2027 fusioniert · Edenhofer/PIK 2024"
+    text: "Nationaler Emissionshandel (BEHG) für Wärme und Verkehr. EU-ETS deckt Industrie/Strom separat. Emissionselastizität: −0,30 (EWI/DIW). Klima-Konsens: höherer CO₂-Preis ist effizientestes Klimainstrument, wenn sozial ausgeglichen (Klimageld). Pro-Kopf-Klimageld: bei 55 €/t ~150 €/Person/Jahr, bei 100 €/t ~190 €/Person/Jahr, bei 150 €/t ~250 €/Person/Jahr. IMK Policy-Brief 161 (Endres 2023): CO₂-Last trifft D1 relativ stärker (~4 % des Einkommens vs. ~1 % bei D10c) — Pro-Kopf-Rückzahlung macht Gesamteffekt für D1–D4 positiv.",
+    quelle: "BEHG § 10 · 2025: 55 €/t · Edenhofer/PIK 2024 · Endres IMK Policy-Brief 161/2023 · FÖS/Greenpeace 2024"
   },
   klimageld: {
     title: "Klimageld (Pro-Kopf-Rückzahlung)",
@@ -3730,8 +3823,8 @@ const TOOLTIPS = {
   },
   bg: {
     title: "Bürgergeld-Regelsatz",
-    text: "563 €/Monat für Alleinstehende (2025). ~5,5 Mio. Bedarfsgemeinschaften. ifo/Peichl (2025): Schlüsselreform ist METR-Senkung (Anrechnung 80% → 65%), nicht Regelsatz selbst. Simulation zeigt: METR D1 liegt bei 80%+ — stärkstes Arbeitsmarkthemmnis.",
-    quelle: "§ 20 SGB II · 2025: 563 € · Blömer/Fuest/Peichl ifo 01/2025 · BA Statistik 2025"
+    text: "563 €/Monat für Alleinstehende (2025). ~5,5 Mio. Bedarfsgemeinschaften. ifo/Peichl (2025): Schlüsselreform ist METR-Senkung (Anrechnung 80% → 60%), nicht Regelsatz selbst. Simulation zeigt: METR D1 liegt bei 80%+ — stärkstes Arbeitsmarkthemmnis. ifo Forschungsbericht 159 (2025): Reformvariante mit 60% Anrechnungsquote senkt D1-METR auf ~64% und könnte das Arbeitsangebot im untersten Dezil spürbar steigern.",
+    quelle: "§ 20 SGB II · 2025: 563 € · Blömer/Fuest/Peichl ifo 01/2025 · ifo Forschungsbericht 159/2025 · ifo/ZEW METR-Simulation 2024"
   },
   kg: {
     title: "Kindergeld",
@@ -4201,9 +4294,9 @@ function berechneSchuldenpfad(saldo_neu, saldo_sq) {
   const bip_g = 0.015; // nominal 1,5 % BIP-Wachstum
   const zins  = 0.025; // Ø-Zins auf Bestandsschulden (Rollover-Effekt ~2,5 %)
   let bip     = 4200;
-  let schuld_neu = 63.0 / 100 * bip;  // Startpunkt: 63 % Schuldenquote 2025
-  let schuld_sq  = 63.0 / 100 * bip;
-  const pfad = [{jahr:2025, neu:63.0, sq:63.0}];
+  let schuld_neu = 64.0 / 100 * bip;  // Startpunkt: 64 % BIP 2025 (IMF Article IV 2025)
+  let schuld_sq  = 64.0 / 100 * bip;
+  const pfad = [{jahr:2025, neu:64.0, sq:64.0}];
 
   for (let y = 1; y <= 20; y++) {
     bip *= (1 + bip_g);
@@ -4582,7 +4675,7 @@ const KPI_BENCH = {
   nst:    'DE aktuell: ~40 Steuerarten',
   arb:    'Elastizitäten: Saez/Chetty/Gruber',
   armut:  'DE 2023: 14,8 % (EU-SILC) · EU-Ø: 16,5 %',
-  schuld: 'DE Schuldenquote 2024: ~63 % BIP',
+  schuld: 'DE Schuldenquote 2025: ~64 % BIP (IMF Art. IV 2025)',
   dwl:    'Schätzung: 5–15 % des Steueraufkommens',
 };
 const CHALLENGE_CTX = {
