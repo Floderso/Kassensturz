@@ -2148,19 +2148,24 @@ function berechne(params) {
   const gewst_auf = params.gewst_aus ? 0 : gewinn * params.gewst / 100;
 
   // ---------- 4. MWST ----------
+  // F3: Verhaltensreaktion Konsum auf BEIDE MwSt-Sätze getrennt (Lewbel/Pendakur 2009).
+  // Vorher reagierte cons_factor nur auf den Regelsatz — Senkung des ermäßigten Satzes hatte keinen Effekt.
+  const cf_reg = Math.max(0.85, Math.min(1.1, 1 + ELAST.consumption * (params.mwst     - 19) / 100));
+  const cf_erm = Math.max(0.85, Math.min(1.1, 1 + ELAST.consumption * (params.mwst_erm -  7) / 100));
   let mwst_auf = 0;
   for (const d of dezile) {
-    // Netto nach ESt und SV
+    // Netto nach ESt und SV (SV-Basis = Arbeitseinkommen, K3-Vorkorrektur hier vereinfacht)
     const est_d = est_pro_dezil.find(x => x.d === d.d).est;
-    const sv_satz = (params.rv + params.kv + params.alpf) / 100 * 0.5; // AN-Anteil ca.
-    const sv_d = Math.min(d.brutto_adj, params.bbg ?? 90000) * sv_satz;
+    const arbeit_mwst = d.brutto_adj * (1 - d.kapital);
+    const bbg_kv_mwst = Math.round((params.bbg ?? 90000) * (62100 / 90000));
+    const sv_d = Math.min(arbeit_mwst, params.bbg ?? 90000) * (params.rv + params.alpf * 0.42) / 100 * 0.5
+               + Math.min(arbeit_mwst, bbg_kv_mwst) * (params.kv + params.alpf * 0.58) / 100 * 0.5;
     const netto = d.brutto_adj - est_d - sv_d;
     const konsum = netto * d.konsum;
-    // 70% Regelsatz, 30% ermäßigt (grob aus VGR)
-    const mwst_d = konsum * (0.7 * params.mwst / (100 + params.mwst) + 0.3 * params.mwst_erm / (100 + params.mwst_erm));
-    // Verhaltensreaktion Konsum (nur marginal)
-    const cons_factor = 1 + ELAST.consumption * ((params.mwst - 19) / 100);
-    mwst_auf += mwst_d * d.anzahl / 1000 * Math.max(0.85, Math.min(1.1, cons_factor));
+    // 70% Regelsatz, 30% ermäßigt (grob aus VGR); je Kategorie eigene Verhaltensreaktion
+    const mwst_d = konsum * (0.7 * params.mwst     / (100 + params.mwst)     * cf_reg
+                           + 0.3 * params.mwst_erm / (100 + params.mwst_erm) * cf_erm);
+    mwst_auf += mwst_d * d.anzahl / 1000;
   }
 
   // ---------- 5. CO2 ----------
@@ -2211,9 +2216,12 @@ function berechne(params) {
   const bge = params.bge || 0;
 
   // BGE + Rentenreform: Einsparung weil BGE als Sockel die Rentenzahlung reduziert
-  // Quelle: Rentenbericht 2024 — RV-Gesamtausgaben inkl. Bundeszuschuss ~430 Mrd. €/J.
-  // Bei BGE wird nur noch auf ein Zielniveau aufgestockt (einkommensabhängig).
-  const RV_GESAMT_AUSGABEN = 430; // Mrd. €/Jahr
+  // Quelle: Rentenbericht 2024 — RV-Gesamtausgaben inkl. Bundeszuschuss SQ ~430 Mrd. €/J.
+  // M3: Ausgabenbasis skaliert mit rv-Regler (Umlagesystem: niedrigere Beiträge = niedrigeres Leistungsniveau).
+  // Damit wird verhindert, dass rv_einsparung gegen eine feste Basis gerechnet wird, die der rv-Slider
+  // schon implizit abgesenkt hat (Doppelkorrektur-Vermeidung).
+  const RV_AUSGABEN_SQ = 430;
+  const rv_ausgaben_basis = RV_AUSGABEN_SQ * (params.rv / 18.6); // skaliert mit Beitragssatz
   let rv_einsparung = 0;
   if (bge > 0) {
     const rl = params.rente_grenze || 35000;              // €/Jahr Einkommensgrenze
@@ -2226,7 +2234,7 @@ function berechne(params) {
     const topup_g = Math.max(0, ziel_g - bge);           // monatl. Aufstockung Geringverdiener
     const topup_h = Math.max(0, ziel_h - bge);           // monatl. Aufstockung Gutverdiener
     const rv_neu = (rentner_g * topup_g + rentner_h * topup_h) * 12 / 1000; // Mrd./Jahr
-    rv_einsparung = Math.max(0, RV_GESAMT_AUSGABEN - rv_neu);
+    rv_einsparung = Math.max(0, rv_ausgaben_basis - rv_neu);
   }
 
   // Bürgergeld: wenn BGE >= BG-Niveau, vollständig durch BGE ersetzt (RWI 2024)
@@ -2278,7 +2286,15 @@ function berechne(params) {
     bge_brutto * 0.008; // BGE: 0,8% Verwaltungskosten — kein Bedürftigkeitstest (RWI 2024)
 
   // ---------- 12. AUSGABEN inkl. Transfers ----------
-  const ausgaben_total = AUSGABEN_TOTAL + bg_auszahlung + kg_auszahlung + neg_est_auszahlung + bge_brutto + admin_kosten - 140 - rv_einsparung;
+  // F1: SV-Ausgabenseite koppeln — Umlagesystem: Beitragssatz ↓ → Leistungen ↓ (§ 213 SGB VI).
+  // Sozial=850 enthält grob: RV ~390, GKV ~290, AL+PV ~90, Bürgergeld etc. ~80 Mrd.
+  // Bürgergeld wird separat über bg_auszahlung geführt; die SV-Anteile skalieren mit den Reglern.
+  const SV_AUSG = { rv: 390, kv: 290, alpf: 90 };
+  const sv_ausgaben_delta =
+    SV_AUSG.rv   * (params.rv   / 18.6 - 1) +
+    SV_AUSG.kv   * (params.kv   / 16.3 - 1) +
+    SV_AUSG.alpf * (params.alpf /  6.2 - 1);
+  const ausgaben_total = AUSGABEN_TOTAL + bg_auszahlung + kg_auszahlung + neg_est_auszahlung + bge_brutto + admin_kosten - 140 - rv_einsparung + sv_ausgaben_delta;
 
   // ---------- 13. SALDO ----------
   const saldo = einnahmen_total - ausgaben_total;
@@ -2310,7 +2326,7 @@ function berechne(params) {
   const avg_labor = dezile.reduce((a,d) => a + d.labor_factor * d.anzahl, 0) / dezile.reduce((a,d) => a + d.anzahl, 0);
   const behavior = {
     labor: avg_labor * 100,
-    konsum: (1 + ELAST.consumption * ((params.mwst - 19) / 100)) * 100,
+    konsum: (0.7 * cf_reg + 0.3 * cf_erm) * 100, // F3: gewichteter Schnitt beider MwSt-Faktoren
     invest: investment_factor * 100,
     co2: co2_factor * 100
   };
@@ -2318,9 +2334,12 @@ function berechne(params) {
   // ---------- 18. ARMUTSRISIKOQUOTE ----------
   // Gewichteter Median (nach Haushaltsanzahl) — korrekt für ungleiche Dezilgrößen (D10a/b/c)
   const median_netto = berechneMedianGewichtet(hh_delta.netto, dezile);
-  // 65% statt 60%: bei 60% liegt D1 (inkl. Bürgergeld/Klimageld ~15.900€) knapp über
-  // der Grenze → armutsrisiko = immer 0. 65% → Grenze ~16.380€ → D1 darunter → ~10% SQ.
-  const poverty_line = median_netto * 0.65;
+  // K4: EU-SILC-Standard 60 % (Eurostat). Das Modell arbeitet mit Dezil-Durchschnittswerten;
+  // einzelne Haushalte innerhalb von D1 können deutlich unter dem Mittelwert liegen.
+  // Ein Armutsrisiko von ~0 % im Status quo spiegelt wider, dass Bürgergeld + Klimageld
+  // den Dezil-1-Mittelwert über die 60%-Schwelle hebt — korrekt, aber kein Abbild
+  // der Innerhalb-Dezil-Streuung (bekannte Modell-Vereinfachung durch Dezil-Durchschnitte).
+  const poverty_line = median_netto * 0.60;
   const total_hh_all = dezile.reduce((a,d)=>a+d.anzahl,0);
   const armutsrisiko = dezile.reduce((a,d,i)=>hh_delta.netto[i]<poverty_line?a+d.anzahl:a,0)/total_hh_all*100;
 
@@ -2335,8 +2354,13 @@ function berechne(params) {
     const brutto = d.brutto_adj;
     const arbeit = brutto * (1 - d.kapital);
     const gs_est = grenzsteuersatz(arbeit, params.freibetrag, params.eingang, params.spitze, params.grenze);
-    // SV: nur bis BBG fällig, AN-Anteil ~50%
-    const sv_grenz = arbeit < (params.bbg ?? 90000) ? (params.rv + params.kv + params.alpf) / 100 * 0.5 : 0;
+    // K3: Separate BBG für KV/PV (62.100 €) und RV/AL (params.bbg).
+    // RV+AL Grenzbelastung fällt weg sobald Arbeitseinkommen ≥ RV-BBG
+    const bbg_rv_m = params.bbg ?? 90000;
+    const bbg_kv_m = Math.round(bbg_rv_m * (62100 / 90000));
+    const sv_grenz_rv = arbeit < bbg_rv_m ? (params.rv + params.alpf * 0.42) / 100 * 0.5 : 0;
+    const sv_grenz_kv = arbeit < bbg_kv_m ? (params.kv + params.alpf * 0.58) / 100 * 0.5 : 0;
+    const sv_grenz = sv_grenz_rv + sv_grenz_kv;
     // Transfer-Entzug: Bürgergeld-Empfänger verlieren 80% des Zusatzeinkommens (§ 11b SGB II)
     // Bei BGE >= Bürgergeld: kein Entzug mehr (BGE ist bedingungslos, kein Anrechnungsprinzip)
     const bg_entzug_arr = [0.80, 0.70, 0.20, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -2344,13 +2368,16 @@ function berechne(params) {
     return Math.min(0.99, gs_est + sv_grenz + bg_entzug);
   });
 
-  // ---------- 21. DEADWEIGHT LOSS (vereinfacht) ----------
-  // DWL ≈ 0.5 × ε × t² / (1−t) × Lohnsumme (Harberger-Dreieck)
-  const avg_gs = dezile.reduce((a,d,i) => {
-    const gs = grenzsteuersatz(d.brutto_adj*(1-d.kapital), params.freibetrag, params.eingang, params.spitze, params.grenze);
-    return a + gs * d.anzahl;
-  }, 0) / dezile.reduce((a,d) => a + d.anzahl, 0);
-  const dwl = 0.5 * ELAST.labor_supply * (avg_gs * avg_gs) / Math.max(0.01, 1 - avg_gs) * 1750; // Mrd. €
+  // ---------- 21. DEADWEIGHT LOSS ----------
+  // M2: DWL pro Dezil summieren statt über Durchschnitts-Grenzsteuersatz — Jensen-Ungleichung:
+  // E[gs²] ≥ E[gs]², daher unterschätzt avg_gs²-Ansatz den DWL systematisch.
+  // Korrekt: ∑ 0.5 × ε × gs_i² / (1−gs_i) × Lohnsumme_i  (Harberger-Dreieck je Dezil)
+  const dwl = dezile.reduce((a, d) => {
+    const arbeit_dwl = d.brutto_adj * (1 - d.kapital);
+    const gs = grenzsteuersatz(arbeit_dwl, params.freibetrag, params.eingang, params.spitze, params.grenze);
+    const lohnsumme_d = arbeit_dwl * d.anzahl / 1000; // Mrd.
+    return a + 0.5 * ELAST.labor_supply * (gs * gs) / Math.max(0.01, 1 - gs) * lohnsumme_d;
+  }, 0);
 
   return {
     rev, einnahmen_total, ausgaben_total, saldo, admin_kosten, nst,
@@ -2370,9 +2397,12 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg) {
     const d = dezile[i];
     const est = est_dez[i].est;
     const brutto = d.brutto_adj;
-    // SV-Beiträge
-    const sv_base = Math.min(brutto, params.bbg ?? 90000);
-    const sv = sv_base * (params.rv + params.kv + params.alpf)/100 * 0.5;
+    // K3: SV nur auf Arbeitseinkommen (nicht Kapital); KV-BBG (62.100 €) < RV/AL-BBG
+    const arbeit_dez = brutto * (1 - d.kapital);
+    const bbg_rv_dez = params.bbg ?? 90000;
+    const bbg_kv_dez = Math.round(bbg_rv_dez * (62100 / 90000));
+    const sv = Math.min(arbeit_dez, bbg_rv_dez) * (params.rv + params.alpf * 0.42) / 100 * 0.5
+             + Math.min(arbeit_dez, bbg_kv_dez) * (params.kv + params.alpf * 0.58) / 100 * 0.5;
     // MwSt auf Konsum
     const vornetto = brutto - est - sv;
     const konsum = vornetto * d.konsum;
@@ -2414,8 +2444,14 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg) {
 function berechneNettoSQ(d) {
   // Status Quo: freibetrag 12084, eingang 14, spitze 45, grenze 277826
   const brutto = d.brutto;
-  const est = estTarif(brutto, 12084, 14, 45, 277826);
-  const sv = Math.min(brutto, 90000) * (18.6 + 16.3 + 6.2)/100 * 0.5;
+  // F2: Kapital und Arbeit getrennt besteuern — konsistent mit berechne()
+  // Vorher wurde estTarif(brutto) genutzt, was Kapitalanteil doppelt progressiv besteuert hätte.
+  const arbeit_sq = brutto * (1 - d.kapital);
+  const kapital_sq = brutto * d.kapital;
+  const est = estTarif(arbeit_sq, 12084, 14, 45, 277826) + kapital_sq * 0.25; // Abgeltungsteuer SQ
+  // SV nur auf Arbeitseinkommen; KV-BBG (62.100 €) < RV/AL-BBG (90.000 €)
+  const sv = Math.min(arbeit_sq, 90000) * (18.6 + 2.6) / 100 * 0.5   // RV + AL
+           + Math.min(arbeit_sq, 62100) * (16.3 + 3.6) / 100 * 0.5;  // KV + PV
   const vornetto = brutto - est - sv;
   const konsum = vornetto * d.konsum;
   const mwst = konsum * (0.7 * 19/119 + 0.3 * 7/107);
