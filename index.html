@@ -1525,6 +1525,12 @@
           <span>0 €</span><span>1.000 €</span><span>2.000 €</span>
         </div>
       </div>
+      <!-- Warnung: BGE > Grundfreibetrag/12 → Staat besteuert eigene Ausgaben -->
+      <div id="bge-freibetrag-warning" style="display:none;margin-top:10px;background:rgba(200,64,31,0.1);border-left:3px solid var(--accent);padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.6;color:var(--ink);">
+        <span style="font-weight:600;color:var(--accent);">⚠ Konsistenz-Problem</span><br>
+        BGE (<span id="bge-warn-val">—</span> €/M) übersteigt den steuerfreien Grundfreibetrag (<span id="bge-warn-fb">—</span> €/M). Der Staat würde seine eigenen Transferzahlungen mit Einkommensteuer belasten — eine fiskalische Kreisrechnung. Lösung: BGE steuerfrei stellen (§ 3 EStG) oder Freibetrag entsprechend anheben.
+      </div>
+
       <div class="bge-live-cost" id="bge-live-cost">
         <div>Bruttokosten: <strong id="bge-cost-gross">—</strong></div>
         <div class="bge-save">Bürgergeld-Ersatz: <strong id="bge-cost-save">—</strong></div>
@@ -3238,6 +3244,19 @@ function render() {
     const bgeSectionTitle = document.getElementById('bge-section-title');
     const bgeLiveCost = document.getElementById('bge-live-cost');
     if (!bgePanel) return;
+    // BGE vs. Grundfreibetrag Warnung
+    const bgeWarnBox = document.getElementById('bge-freibetrag-warning');
+    if (bgeWarnBox) {
+      const fb_monat = (p.freibetrag || 12084) / 12;
+      if (bge_p > fb_monat) {
+        bgeWarnBox.style.display = 'block';
+        document.getElementById('bge-warn-val').textContent = bge_p;
+        document.getElementById('bge-warn-fb').textContent = Math.round(fb_monat);
+      } else {
+        bgeWarnBox.style.display = 'none';
+      }
+    }
+
     // Slider-Labels für Rentenregler
     const rnGering = document.getElementById('rente_niveau_gering');
     const rnHoch   = document.getElementById('rente_niveau_hoch');
