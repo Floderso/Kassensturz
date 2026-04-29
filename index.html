@@ -1617,6 +1617,14 @@
         <span>PKV abschaffen (alle in GKV)</span>
         <input type="checkbox" id="pkv_abschaffen">
       </div>
+      <div class="toggle-row">
+        <span>Kapitalerträge KV-pflichtig</span>
+        <input type="checkbox" id="kv_kapital">
+      </div>
+      <div class="toggle-row">
+        <span>KV-Beitragsbemessungsgrenze abschaffen</span>
+        <input type="checkbox" id="kv_bbg_frei">
+      </div>
       <div class="slider-row">
         <label>Anzahl Krankenkassen <span class="value" id="v_anzahl_kv"></span></label>
         <input type="range" id="anzahl_kv" min="5" max="105" step="5" value="95">
@@ -2173,7 +2181,7 @@ function berechne(params) {
     // Netto nach ESt und SV (SV-Basis = Arbeitseinkommen, K3-Vorkorrektur hier vereinfacht)
     const est_d = est_pro_dezil.find(x => x.d === d.d).est;
     const arbeit_mwst = d.brutto_adj * (1 - d.kapital);
-    const bbg_kv_mwst = Math.round((params.bbg ?? 90000) * (62100 / 90000));
+    const bbg_kv_mwst = params.kv_bbg_frei ? Infinity : Math.round((params.bbg ?? 90000) * (62100 / 90000));
     const sv_d = Math.min(arbeit_mwst, params.bbg ?? 90000) * (params.rv + params.alpf * 0.42) / 100 * 0.5
                + Math.min(arbeit_mwst, bbg_kv_mwst) * (params.kv + params.alpf * 0.58) / 100 * 0.5;
     const netto = d.brutto_adj - est_d - sv_d;
@@ -2215,7 +2223,12 @@ function berechne(params) {
   const lohnsumme_sv = 1750 * bbg_lohnsumme_factor;
   const buerger_boost = params.buergerv ? 1.15 : 1.0; // breitere Basis
   const rv_auf = lohnsumme_sv * params.rv / 100 * buerger_boost;
-  const kv_auf = lohnsumme_sv * params.kv / 100 * buerger_boost;
+  // KV-Reformboni (Bürgerversicherungs-Bausteine — ifo Forschungsbericht 159/2025, DIW):
+  // kv_bbg_frei: Lohnbasis über KV-BBG (62.100 €) wird beitragspflichtig → +~18 Mrd. bei 16,3%
+  // kv_kapital:  Kapital- und Mieteinkünfte GKV-Mitglieder KV-pflichtig → +~8 Mrd. bei 16,3%
+  const kv_bbg_frei_bonus = params.kv_bbg_frei ? 18 * (params.kv / 16.3) : 0;
+  const kv_kapital_bonus  = params.kv_kapital  ?  8 * (params.kv / 16.3) : 0;
+  const kv_auf = lohnsumme_sv * params.kv / 100 * buerger_boost + kv_bbg_frei_bonus + kv_kapital_bonus;
   const al_auf = lohnsumme_sv * params.alpf / 100 * buerger_boost;
 
   // ---------- 7b. ZUCMAN-MINDESTSTEUER ----------
@@ -2377,7 +2390,8 @@ function berechne(params) {
     const bbg_rv_m = params.bbg ?? 90000;
     const bbg_kv_m = Math.round(bbg_rv_m * (62100 / 90000));
     const sv_grenz_rv = arbeit < bbg_rv_m ? (params.rv + params.alpf * 0.42) / 100 * 0.5 : 0;
-    const sv_grenz_kv = arbeit < bbg_kv_m ? (params.kv + params.alpf * 0.58) / 100 * 0.5 : 0;
+    // kv_bbg_frei: kein Deckel → Grenzbelastung gilt bei jedem Einkommensniveau
+    const sv_grenz_kv = (params.kv_bbg_frei || arbeit < bbg_kv_m) ? (params.kv + params.alpf * 0.58) / 100 * 0.5 : 0;
     const sv_grenz = sv_grenz_rv + sv_grenz_kv;
     // Transfer-Entzug: Bürgergeld-Empfänger verlieren 80% des Zusatzeinkommens (§ 11b SGB II)
     // Bei BGE >= Bürgergeld: kein Entzug mehr (BGE ist bedingungslos, kein Anrechnungsprinzip)
@@ -2419,7 +2433,9 @@ function berechne(params) {
     // Research-basierte Erweiterungen (QUELLENRECHERCHE.md)
     saldo_bip_pct, schuldenbremse_ok,
     dynamisch_kst, dynamisch_est, dynamisch_delta,
-    investment_factor, avg_labor
+    investment_factor, avg_labor,
+    // GKV-Reform-Boni (für GKV-Panel-Darstellung)
+    kv_bbg_frei_bonus, kv_kapital_bonus
   };
 }
 
@@ -2435,9 +2451,15 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg) {
     // K3: SV nur auf Arbeitseinkommen (nicht Kapital); KV-BBG (62.100 €) < RV/AL-BBG
     const arbeit_dez = brutto * (1 - d.kapital);
     const bbg_rv_dez = params.bbg ?? 90000;
-    const bbg_kv_dez = Math.round(bbg_rv_dez * (62100 / 90000));
-    const sv = Math.min(arbeit_dez, bbg_rv_dez) * (params.rv + params.alpf * 0.42) / 100 * 0.5
-             + Math.min(arbeit_dez, bbg_kv_dez) * (params.kv + params.alpf * 0.58) / 100 * 0.5;
+    // kv_bbg_frei: kein KV-Beitragsdeckel → gesamtes Arbeitseinkommen KV-pflichtig
+    const bbg_kv_dez = params.kv_bbg_frei ? Infinity : Math.round(bbg_rv_dez * (62100 / 90000));
+    const sv_lohn = Math.min(arbeit_dez, bbg_rv_dez) * (params.rv + params.alpf * 0.42) / 100 * 0.5
+                  + Math.min(arbeit_dez, bbg_kv_dez) * (params.kv + params.alpf * 0.58) / 100 * 0.5;
+    // kv_kapital: Kapitalerträge von GKV-Mitgliedern werden KV-pflichtig (Mieteinnahmen, Zinsen, Dividenden)
+    // GKV-Quote sinkt in den oberen Dezilen (mehr PKV)
+    const GKV_QUOTE = [0.95, 0.95, 0.95, 0.93, 0.90, 0.85, 0.80, 0.75, 0.70, 0.55, 0.30, 0.08];
+    const sv_kapital = params.kv_kapital ? brutto * d.kapital * params.kv / 100 * 0.5 * GKV_QUOTE[i] : 0;
+    const sv = sv_lohn + sv_kapital;
     // MwSt auf Konsum
     const vornetto = brutto - est - sv;
     const konsum = vornetto * d.konsum;
@@ -2571,7 +2593,7 @@ function berechneRente(params, rv_aufkommen_aktuell) {
 }
 
 function renderRenten(p, r) {
-  if (!p.kapitalquote && !p.pkv_abschaffen && p.anzahl_kv >= 95 && !p.praevention) {
+  if (!p.kapitalquote && !p.pkv_abschaffen && p.anzahl_kv >= 95 && !p.praevention && !p.kv_kapital && !p.kv_bbg_frei) {
     document.getElementById('renten-panel').style.display = 'none';
     return;
   }
@@ -2611,7 +2633,11 @@ function renderRenten(p, r) {
     { label: 'Kassenfusion (Verwalt.)', v: rente.kassen_ersparnis, aktiv: p.anzahl_kv < 95,
       note: p.anzahl_kv < 95 ? `${p.anzahl_kv} statt 95 Kassen; Fixkostenabbau 45%` : 'inaktiv' },
     { label: 'Prävention (Nettonutzen)', v: rente.praevention_ersparnis, aktiv: p.praevention > 0,
-      note: p.praevention > 0 ? `${p.praevention} Mrd. Invest × 1,5 ROI (vereinf.)` : 'inaktiv' }
+      note: p.praevention > 0 ? `${p.praevention} Mrd. Invest × 1,5 ROI (vereinf.)` : 'inaktiv' },
+    { label: 'Kapitalerträge KV-pflichtig', v: r.kv_kapital_bonus, aktiv: p.kv_kapital,
+      note: p.kv_kapital ? `+${r.kv_kapital_bonus.toFixed(1)} Mrd. bei ${p.kv}% KV-Satz (ifo FB 159/2025)` : 'inaktiv' },
+    { label: 'KV-BBG abschaffen', v: r.kv_bbg_frei_bonus, aktiv: p.kv_bbg_frei,
+      note: p.kv_bbg_frei ? `+${r.kv_bbg_frei_bonus.toFixed(1)} Mrd. bei ${p.kv}% KV-Satz (DIW Wochenbericht 2025)` : 'inaktiv' }
   ].filter(x => x.aktiv);
 
   if (gkvItems.length === 0) {
@@ -2858,7 +2884,7 @@ const PRESETS = {
     rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
     bg: 563, kg: 255, neg_est: false, kleine_st: true,
     kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
-    pkv_abschaffen: false, anzahl_kv: 95, praevention: 0, bge: 0
+    pkv_abschaffen: false, kv_kapital: false, kv_bbg_frei: false, anzahl_kv: 95, praevention: 0, bge: 0
   },
   synthetisch: {
     freibetrag: 15000, eingang: 14, spitze: 50, grenze: 300000,
@@ -2870,7 +2896,7 @@ const PRESETS = {
     rv: 18.6, kv: 14, alpf: 6.2, buergerv: true, bbg: 115000,
     bg: 650, kg: 300, neg_est: false, kleine_st: false,
     kapitalquote: 5, rendite_fonds: 7, startjahr: 2015,
-    pkv_abschaffen: false, anzahl_kv: 95, praevention: 3, bge: 0
+    pkv_abschaffen: false, kv_kapital: true, kv_bbg_frei: false, anzahl_kv: 95, praevention: 3, bge: 0
   },
   kirchhof: {
     freibetrag: 10000, eingang: 25, spitze: 25, grenze: 60000,
@@ -2882,7 +2908,7 @@ const PRESETS = {
     rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
     bg: 563, kg: 255, neg_est: false, kleine_st: false,
     kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
-    pkv_abschaffen: false, anzahl_kv: 95, praevention: 0, bge: 0
+    pkv_abschaffen: false, kv_kapital: false, kv_bbg_frei: false, anzahl_kv: 95, praevention: 0, bge: 0
   },
   radikal: {
     freibetrag: 18000, eingang: 20, spitze: 60, grenze: 200000,
@@ -2894,7 +2920,7 @@ const PRESETS = {
     rv: 20, kv: 14, alpf: 6.2, buergerv: true, bbg: 150000,
     bg: 800, kg: 350, neg_est: true, kleine_st: false,
     kapitalquote: 10, rendite_fonds: 7, startjahr: 2010,
-    pkv_abschaffen: true, anzahl_kv: 20, praevention: 10, bge: 0
+    pkv_abschaffen: true, kv_kapital: true, kv_bbg_frei: true, anzahl_kv: 20, praevention: 10, bge: 0
   },
   simpel: {
     freibetrag: 15000, eingang: 20, spitze: 50, grenze: 250000,
@@ -2906,7 +2932,7 @@ const PRESETS = {
     rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
     bg: 600, kg: 280, neg_est: false, kleine_st: false,
     kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
-    pkv_abschaffen: false, anzahl_kv: 95, praevention: 0, bge: 0
+    pkv_abschaffen: false, kv_kapital: false, kv_bbg_frei: false, anzahl_kv: 95, praevention: 0, bge: 0
   },
   nordisch: {
     freibetrag: 14000, eingang: 20, spitze: 52, grenze: 120000,
@@ -2918,7 +2944,7 @@ const PRESETS = {
     rv: 22, kv: 12, alpf: 7.0, buergerv: true, bbg: 120000,
     bg: 750, kg: 350, neg_est: false, kleine_st: true,
     kapitalquote: 15, rendite_fonds: 7, startjahr: 2005,
-    pkv_abschaffen: true, anzahl_kv: 30, praevention: 8, bge: 0
+    pkv_abschaffen: true, kv_kapital: true, kv_bbg_frei: true, anzahl_kv: 30, praevention: 8, bge: 0
   },
   koalition27: {
     freibetrag: 13000, eingang: 12, spitze: 44, grenze: 290000,
@@ -2930,7 +2956,7 @@ const PRESETS = {
     rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
     bg: 550, kg: 259, neg_est: false, kleine_st: true,
     kapitalquote: 10, rendite_fonds: 7, startjahr: 2024,
-    pkv_abschaffen: false, anzahl_kv: 95, praevention: 3, bge: 0
+    pkv_abschaffen: false, kv_kapital: false, kv_bbg_frei: false, anzahl_kv: 95, praevention: 3, bge: 0
   },
   bge: {
     // BGE 1.200 €/Monat für alle Erwachsenen (~70 Mio.)
@@ -2947,7 +2973,7 @@ const PRESETS = {
     rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
     bg: 0, kg: 255, neg_est: false, kleine_st: false,
     kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
-    pkv_abschaffen: false, anzahl_kv: 95, praevention: 0, bge: 1200
+    pkv_abschaffen: false, kv_kapital: false, kv_bbg_frei: false, anzahl_kv: 95, praevention: 0, bge: 1200
   }
 };
 
@@ -2986,6 +3012,8 @@ function getParams() {
     rendite_fonds:  +document.getElementById('rendite_fonds').value,
     startjahr:      +document.getElementById('startjahr').value,
     pkv_abschaffen: document.getElementById('pkv_abschaffen').checked,
+    kv_kapital:     document.getElementById('kv_kapital').checked,
+    kv_bbg_frei:    document.getElementById('kv_bbg_frei').checked,
     anzahl_kv:      +document.getElementById('anzahl_kv').value,
     praevention:    +document.getElementById('praevention').value,
     bbg:            +document.getElementById('bbg').value,
@@ -3880,6 +3908,16 @@ const TOOLTIPS = {
     title: "Zucman-Mindeststeuer (Milliardäre)",
     text: "2%-Mindeststeuer auf Nettovermögen ultra-Reicher — Vorschlag von Gabriel Zucman im Auftrag der G20-Präsidentschaft (Brasilien 2024). Weltweites Aufkommen: 200–250 Mrd. $. Deutschland war 2024 Hauptblockierer (zusammen mit USA). Im Modell: Basis ~2.870 Mrd. € (D10c-Vermögen); Avoidance-Abschlag ~15% bei 2% Satz.",
     quelle: "Zucman G20 Report 2024 · EU Tax Observatory 2024 · Jakobsen/Kleven/Kolsrud NBER 2024"
+  },
+  kv_kapital: {
+    title: "Kapitalerträge KV-pflichtig",
+    text: "GKV-Mitglieder zahlen Beitrag auch auf Kapitalerträge (Dividenden, Zinsen, Mieteinnahmen). Derzeit: nur auf Arbeitseinkommen bis BBG (66.150 €). Reform würde Beitragsbasis strukturell verbreitern. ifo Forschungsbericht 159/2025: Mehreinnahmen ~8 Mrd. € / Jahr bei 16,3% Satz. Erfasst ca. 90% der unteren Dezile, nur ~8% im Spitzendezil (PKV-Quote).",
+    quelle: "§ 226 SGB V · ifo Forschungsbericht 159/2025 · GKV-SV Jahresbericht 2025 · DIW Wochenbericht 4/2026"
+  },
+  kv_bbg_frei: {
+    title: "KV-Beitragsbemessungsgrenze abschaffen",
+    text: "Aktuell: KV-Beiträge nur bis 66.150 € (2025). Darüber: kein weiterer Beitrag — wirkt stark regressiv. Abschaffung: alle Arbeitseinkommen KV-pflichtig ohne Deckel. DIW (2025): Mehreinnahmen ~18 Mrd. € / Jahr bei 16,3% Satz. Entlastet mittlere Einkommen nicht direkt, stärkt aber GKV-Finanzierungsbasis dauerhaft.",
+    quelle: "§ 6 Abs. 7 SGB V · KV-BBG 2025: 66.150 € · DIW Wochenbericht 4/2026 · GKV-SV Jahresbericht 2025"
   }
 };
 
