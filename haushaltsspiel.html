@@ -1314,6 +1314,165 @@
   .rw-zone-table th { text-align: left; border-bottom: 1px solid var(--rule); padding: 3px 8px; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
   .rw-zone-table td { padding: 3px 8px; border-bottom: 1px dashed rgba(42,39,32,0.15); }
   .rw-zone-table tr.active-zone td { background: rgba(42,77,122,0.08); color: var(--accent3); font-weight: 600; }
+
+/* ── MODUL-SYSTEM ────────────────────────────────── */
+.mod-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px 14px;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.mod-add-btn:hover {
+  background: rgba(37,99,235,0.05);
+  border-color: var(--accent);
+}
+.mod-add-btn span {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+}
+.mod-add-result {
+  margin: 16px 0;
+  max-width: 100%;
+}
+
+/* OVERLAY */
+.mod-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(28,25,23,0.5);
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+  align-items: flex-end;
+  justify-content: center;
+}
+.mod-overlay.open {
+  display: flex;
+  animation: overlayIn 0.2s ease both;
+}
+@keyframes overlayIn { from { opacity:0; } to { opacity:1; } }
+
+.mod-drawer {
+  background: var(--paper);
+  border-radius: 12px 12px 0 0;
+  width: 100%;
+  max-width: 860px;
+  max-height: 75vh;
+  overflow-y: auto;
+  padding: 24px 24px 32px;
+  animation: drawerUp 0.25s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes drawerUp { from { transform: translateY(40px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+
+.mod-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.mod-drawer-title {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+.mod-drawer-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+.mod-drawer-close {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.mod-drawer-close:hover { background: var(--bg); }
+
+.mod-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.mod-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s, background 0.15s;
+  background: var(--paper);
+  position: relative;
+}
+.mod-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  border-color: rgba(37,99,235,0.3);
+}
+.mod-card.active {
+  border-color: var(--accent);
+  background: rgba(37,99,235,0.04);
+}
+.mod-card.active::after {
+  content: '✓';
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+}
+.mod-card-icon { font-size: 20px; margin-bottom: 8px; }
+.mod-card-name {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 4px;
+  padding-right: 20px;
+}
+.mod-card-desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.mod-card-level {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 7px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.mod-card-level.ein  { background: rgba(5,150,105,0.08); color: var(--good); }
+.mod-card-level.fort { background: rgba(217,119,6,0.08);  color: var(--warn); }
+.mod-card-level.exp  { background: rgba(220,38,38,0.08);  color: var(--bad); }
 </style>
 </head>
 <body>
@@ -1389,6 +1548,7 @@
     </div>
 
     <!-- Einkommensteuer -->
+    <div class="mod-section" data-mod="est" data-mod-type="control">
     <div class="section-title" data-toggle>Einkommensteuer</div>
     <div class="section-body">
       <div class="slider-row">
@@ -1416,8 +1576,10 @@
         <input type="range" id="abgeltung" min="0" max="50" step="1" value="25">
       </div>
     </div>
+    </div>
 
     <!-- Unternehmen -->
+    <div class="mod-section" data-mod="kst" data-mod-type="control">
     <div class="section-title" data-toggle>Unternehmen</div>
     <div class="section-body">
       <div class="slider-row">
@@ -1433,8 +1595,10 @@
         <input type="checkbox" id="gewst_aus">
       </div>
     </div>
+    </div>
 
     <!-- Mehrwertsteuer -->
+    <div class="mod-section" data-mod="mwst" data-mod-type="control">
     <div class="section-title" data-toggle>Mehrwertsteuer</div>
     <div class="section-body">
       <div class="slider-row">
@@ -1446,8 +1610,10 @@
         <input type="range" id="mwst_erm" min="0" max="19" step="1" value="7">
       </div>
     </div>
+    </div>
 
     <!-- CO2 & Klima -->
+    <div class="mod-section" data-mod="co2" data-mod-type="control">
     <div class="section-title" data-toggle>CO₂-Steuer · Klimageld</div>
     <div class="section-body">
       <div class="slider-row">
@@ -1459,8 +1625,10 @@
         <input type="checkbox" id="klimageld" checked>
       </div>
     </div>
+    </div>
 
     <!-- Vermögen & Erbschaft -->
+    <div class="mod-section" data-mod="verm" data-mod-type="control" style="display:none">
     <div class="section-title" data-toggle>Vermögen · Erbschaft</div>
     <div class="section-body">
       <div class="slider-row">
@@ -1484,8 +1652,10 @@
         <input type="range" id="zucman" min="0" max="3" step="0.1" value="0">
       </div>
     </div>
+    </div>
 
     <!-- Sozialversicherung -->
+    <div class="mod-section" data-mod="sv" data-mod-type="control" style="display:none">
     <div class="section-title" data-toggle>Sozialversicherung</div>
     <div class="section-body">
       <div class="slider-row">
@@ -1509,8 +1679,10 @@
         <input type="checkbox" id="buergerv">
       </div>
     </div>
+    </div>
 
     <!-- BGE -->
+    <div class="mod-section" data-mod="bge" data-mod-type="control" style="display:none">
     <div class="section-title bge-section collapsed" id="bge-section-title" data-toggle>BGE · Grundeinkommen</div>
     <div class="section-body">
       <div class="bge-slider-wrap">
@@ -1561,8 +1733,10 @@
         Quellen: DIW Pilot 2024 · RWI 2024<br>ifo Mikrosimulation 2021 (Blömer/Peichl)
       </p>
     </div>
+    </div>
 
     <!-- Transfers -->
+    <div class="mod-section" data-mod="transfers" data-mod-type="control" style="display:none">
     <div class="section-title" data-toggle>Transfers · Sozialstaat</div>
     <div class="section-body">
       <div class="slider-row">
@@ -1578,8 +1752,10 @@
         <input type="checkbox" id="neg_est">
       </div>
     </div>
+    </div>
 
     <!-- Staat / Sonstiges -->
+    <div class="mod-section" data-mod="kleine" data-mod-type="control" style="display:none">
     <div class="section-title" data-toggle>Kleine Verbrauchsteuern</div>
     <div class="section-body">
       <div class="toggle-row">
@@ -1587,8 +1763,10 @@
         <input type="checkbox" id="kleine_st" checked>
       </div>
     </div>
+    </div>
 
     <!-- Rentenreform -->
+    <div class="mod-section" data-mod="renten_ctrl" data-mod-type="control" style="display:none">
     <div class="section-title collapsed" data-toggle>Rentenreform · Generationenkapital</div>
     <div class="section-body">
       <div class="slider-row">
@@ -1604,8 +1782,10 @@
         <input type="range" id="startjahr" min="2000" max="2025" step="1" value="2020">
       </div>
     </div>
+    </div>
 
     <!-- GKV Reform -->
+    <div class="mod-section" data-mod="gkv_ctrl" data-mod-type="control" style="display:none">
     <div class="section-title collapsed" data-toggle>Gesundheitsreform · GKV</div>
     <div class="section-body">
       <div class="toggle-row">
@@ -1628,6 +1808,11 @@
         <label>Prävention-Invest. (Mrd. €) <span class="value" id="v_praevention"></span></label>
         <input type="range" id="praevention" min="0" max="20" step="1" value="0">
       </div>
+    </div>
+    </div>
+
+    <div class="mod-add-btn" onclick="openPicker('control')">
+      <span>+</span> Regler-Modul hinzufügen
     </div>
 
   </aside>
@@ -1791,7 +1976,7 @@
     </div>
 
     <!-- WIRTSCHAFTLICHE WIRKUNGSANALYSE -->
-    <div class="panel">
+    <div class="panel" data-mod="wirk">
       <h2>Wirtschaftliche Wirkungsanalyse</h2>
       <div class="panel-sub">Fiskalmultiplikator · Automatische Stabilisatoren · Dynamisches Scoring — ECB WP 1267 · Bundesbank DP 28/2018 · Dolls et al. 2020 · Elmendorf/Hubbard/Williams 2024</div>
       <div class="bars" id="wirk_bars"></div>
@@ -1799,13 +1984,13 @@
     </div>
 
     <!-- EINNAHMEN NACH STEUERART -->
-    <div class="panel">
+    <div class="panel" data-mod="einnahmen">
       <h2>Einnahmen nach Steuerart</h2>
       <div class="panel-sub">in Mrd. € / Jahr · Gesamtstaat inkl. Sozialversicherung</div>
       <div class="bars" id="revenue_bars"></div>
     </div>
 
-    <div class="two-col">
+    <div class="two-col" data-mod="haushalt">
       <!-- HAUSHALTSWIRKUNG -->
       <div class="panel">
         <h2>Wer gewinnt, wer verliert</h2>
@@ -1821,7 +2006,7 @@
       </div>
     </div>
 
-    <div class="two-col">
+    <div class="two-col" data-mod="belastung" style="display:none">
       <!-- STEUERBELASTUNG JE DEZIL -->
       <div class="panel">
         <h2>Gesamtbelastung pro Dezil</h2>
@@ -1838,21 +2023,21 @@
     </div>
 
     <!-- EST-TARIFKURVE -->
-    <div class="panel">
+    <div class="panel" data-mod="est_kurve" style="display:none">
       <h2>Einkommensteuer-Tarifkurve</h2>
       <div class="panel-sub">Grenz- und Effektivsteuersatz nach aktuellem Tarif · nur ESt (ohne SV)</div>
       <div id="est_kurve"></div>
     </div>
 
     <!-- LAFFER-KURVE -->
-    <div class="panel">
+    <div class="panel" data-mod="laffer" style="display:none">
       <h2>Laffer-Kurve</h2>
       <div class="panel-sub">ESt-Aufkommen vs. Spitzensteuersatz · alle anderen Parameter konstant · inkl. D10c-Verhaltenseffekte</div>
       <div id="laffer_chart"></div>
       <p style="font-size:11px;color:var(--muted);margin-top:10px;font-style:italic;">Modell-Maximum ≠ optimaler Steuersatz — berücksichtigt keine Verteilungseffekte. ZEW-Schätzung für DE: Aufkommensmaximum bei ~65–70%, ifo: ~55%. Quelle: Saez (2001), Piketty/Saez/Stantcheva (2014), Doerrenberg/Peichl (2014).</p>
     </div>
 
-    <div class="two-col">
+    <div class="two-col" data-mod="metr" style="display:none">
       <!-- METR -->
       <div class="panel">
         <h2>Grenzabgabensatz (METR) je Dezil</h2>
@@ -1869,7 +2054,7 @@
       </div>
     </div>
 
-    <!-- RENTEN & GKV PANEL -->
+    <!-- RENTEN & GKV PANEL — display controlled by renderRenten(), no data-mod -->
     <div class="panel" id="renten-panel">
       <h2>Rentenreform · Generationenkapital &amp; GKV</h2>
       <div class="panel-sub">Historische Was-wäre-wenn-Analyse · Beitragssatzprojektion 2025–2045 · GKV-Strukturreformen</div>
@@ -1888,10 +2073,14 @@
     </div>
 
     <!-- SCHULDENQUOTENPFAD -->
-    <div class="panel">
+    <div class="panel" data-mod="schulden" style="display:none">
       <h2>Schuldenquotenpfad 2025–2045</h2>
       <div class="panel-sub">Projektion bei konstantem Primärsaldo · Maastricht-Grenze 60 % · BIP-Wachstum 1,5 % nominal</div>
       <div id="schulden_pfad_chart"></div>
+    </div>
+
+    <div class="mod-add-btn mod-add-result" onclick="openPicker('result')">
+      <span>+</span> Darstellung hinzufügen
     </div>
 
     <details class="panel rw-details" id="rw-details">
@@ -5240,6 +5429,109 @@ document.getElementById('to-finanztools-btn').addEventListener('click', function
     input.addEventListener('touchend',   () => setTimeout(hide, 1200));
   });
 })();
+</script>
+
+<!-- MODUL-PICKER OVERLAY -->
+<div class="mod-overlay" id="mod-overlay" onclick="closePicker(event)">
+  <div class="mod-drawer">
+    <div class="mod-drawer-head">
+      <div>
+        <div class="mod-drawer-title" id="mod-drawer-title">Module hinzufügen</div>
+        <div class="mod-drawer-sub" id="mod-drawer-sub">Wähle was du zur Simulation hinzufügen möchtest</div>
+      </div>
+      <button class="mod-drawer-close" onclick="closePicker()">✕</button>
+    </div>
+    <div class="mod-grid" id="mod-grid"></div>
+  </div>
+</div>
+
+<script>
+// ── MODUL-SYSTEM ─────────────────────────────────────────
+const MOD_DEFS = {
+  // CONTROL MODULES
+  est:       { type:'control', icon:'💰', name:'Einkommensteuer', desc:'Grundfreibetrag, Eingangs- & Spitzensteuersatz, synthetisch/dual', level:'ein' },
+  kst:       { type:'control', icon:'🏭', name:'Unternehmen & Gewerbe', desc:'Körperschaft- und Gewerbesteuer, Abschaffungs-Toggle', level:'ein' },
+  mwst:      { type:'control', icon:'🛒', name:'Mehrwertsteuer', desc:'Regel- und ermäßigter Satz', level:'ein' },
+  co2:       { type:'control', icon:'🌱', name:'CO₂-Steuer & Klimageld', desc:'CO₂-Preis und Rückzahlungsquote', level:'ein' },
+  verm:      { type:'control', icon:'🏠', name:'Vermögen & Erbschaft', desc:'Erbschaft-, Vermögen-, Bodenwertsteuer', level:'fort' },
+  sv:        { type:'control', icon:'🏥', name:'Sozialversicherung', desc:'RV, KV, ALV+Pflege, BBG, Bürgerversicherung', level:'fort' },
+  bge:       { type:'control', icon:'💸', name:'BGE · Grundeinkommen', desc:'Bedingungsloses Grundeinkommen simulieren', level:'fort' },
+  transfers: { type:'control', icon:'👶', name:'Transfers & Sozialstaat', desc:'Bürgergeld, Kindergeld, Negative ESt', level:'fort' },
+  kleine:    { type:'control', icon:'⛽', name:'Kleine Verbrauchsteuern', desc:'Energie, Tabak, Kfz, Versicherung u.a.', level:'exp' },
+  renten_ctrl:{ type:'control', icon:'📈', name:'Rentenreform', desc:'Fondsquote, Rendite, Startjahr', level:'exp' },
+  gkv_ctrl:  { type:'control', icon:'💊', name:'GKV-Strukturreformen', desc:'PKV, Kassenfusion, Prävention, KV-BBG', level:'exp' },
+  // RESULT MODULES
+  wirk:      { type:'result', icon:'⚡', name:'Wirtschaftliche Wirkung', desc:'Fiskalmultiplikator, Stabilisatoren, Dynamisches Scoring', level:'fort' },
+  einnahmen: { type:'result', icon:'💰', name:'Einnahmen nach Steuerart', desc:'Aufkommen aller Steuern in Mrd. €', level:'ein' },
+  haushalt:  { type:'result', icon:'👥', name:'Wer gewinnt, wer verliert', desc:'Netto-Δ pro Haushalt + Verteilungskennzahlen', level:'ein' },
+  belastung: { type:'result', icon:'📊', name:'Belastung & Verhaltenseffekte', desc:'Gesamtabgabenquote je Dezil + Verhaltensreaktionen', level:'fort' },
+  est_kurve: { type:'result', icon:'📉', name:'ESt-Tarifkurve', desc:'Grenz- und Effektivsteuersatz im Verlauf', level:'fort' },
+  laffer:    { type:'result', icon:'🔄', name:'Laffer-Kurve', desc:'Aufkommen vs. Spitzensteuersatz', level:'exp' },
+  metr:      { type:'result', icon:'🔬', name:'METR & Einkommensverteilung', desc:'Grenzabgabensätze je Dezil + Verteilungsvisualisierung', level:'exp' },
+  schulden:  { type:'result', icon:'📅', name:'Schuldenquotenpfad', desc:'Projektion 2025–2045 vs. Maastricht-Grenze', level:'fort' },
+};
+
+// Welche Module sind gerade aktiv (sichtbar)?
+const activeModules = new Set(['est','kst','mwst','co2','wirk','einnahmen','haushalt']);
+
+function applyModules() {
+  document.querySelectorAll('[data-mod]').forEach(el => {
+    const id = el.dataset.mod;
+    if (!id || !MOD_DEFS[id]) return;
+    el.style.display = activeModules.has(id) ? '' : 'none';
+  });
+}
+
+let pickerType = 'control';
+
+function openPicker(type) {
+  pickerType = type;
+  const overlay = document.getElementById('mod-overlay');
+  const title   = document.getElementById('mod-drawer-title');
+  const sub     = document.getElementById('mod-drawer-sub');
+  title.textContent = type === 'control' ? 'Regler-Module hinzufügen' : 'Darstellungen hinzufügen';
+  sub.textContent   = type === 'control' ? 'Welche Parameter möchtest du steuern?' : 'Welche Auswertungen möchtest du sehen?';
+  renderModGrid(type);
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePicker(e) {
+  if (e && e.target !== document.getElementById('mod-overlay')) return;
+  document.getElementById('mod-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderModGrid(type) {
+  const grid = document.getElementById('mod-grid');
+  const entries = Object.entries(MOD_DEFS).filter(([,d]) => d.type === type);
+  grid.innerHTML = entries.map(([id, d]) => `
+    <div class="mod-card ${activeModules.has(id) ? 'active' : ''}" onclick="toggleMod('${id}')">
+      <div class="mod-card-icon">${d.icon}</div>
+      <div class="mod-card-name">${d.name}</div>
+      <div class="mod-card-desc">${d.desc}</div>
+      <span class="mod-card-level ${d.level}">${d.level === 'ein' ? 'Einsteiger' : d.level === 'fort' ? 'Fortgeschritten' : 'Experte'}</span>
+    </div>
+  `).join('');
+}
+
+function toggleMod(id) {
+  if (activeModules.has(id)) {
+    // Immer mindestens 1 Ergebnis-Modul sichtbar lassen
+    const resultActive = [...activeModules].filter(m => MOD_DEFS[m]?.type === 'result');
+    const controlActive = [...activeModules].filter(m => MOD_DEFS[m]?.type === 'control');
+    if (MOD_DEFS[id].type === 'result' && resultActive.length <= 1) return;
+    if (MOD_DEFS[id].type === 'control' && controlActive.length <= 1) return;
+    activeModules.delete(id);
+  } else {
+    activeModules.add(id);
+  }
+  applyModules();
+  renderModGrid(pickerType);
+}
+
+// Initial anwenden
+applyModules();
 </script>
 
 </body>
