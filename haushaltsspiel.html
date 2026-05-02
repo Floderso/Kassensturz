@@ -1153,6 +1153,53 @@
   details.about[open] summary { margin-bottom: 12px; }
   details.about p { margin-bottom: 8px; font-size: 13px; }
 
+  /* ── COLLAPSIBLE PANEL (z.B. Challenges) ── */
+  details.panel-collapsible {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  details.panel-collapsible:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+  details.panel-collapsible > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+  details.panel-collapsible > summary::-webkit-details-marker { display: none; }
+  details.panel-collapsible > summary .summary-left { display: flex; align-items: center; gap: 12px; }
+  details.panel-collapsible > summary h2 {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  details.panel-collapsible > summary .panel-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin: 0;
+  }
+  details.panel-collapsible > summary .summary-chevron {
+    font-size: 13px;
+    color: var(--muted);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  details.panel-collapsible[open] > summary .summary-chevron { transform: rotate(180deg); }
+  details.panel-collapsible > summary:hover .summary-chevron { color: var(--accent); }
+  details.panel-collapsible .panel-body {
+    padding: 0 24px 20px;
+    border-top: 1px solid var(--border);
+  }
+
   .badge {
     display: inline-block;
     font-family: 'JetBrains Mono', monospace;
@@ -1882,11 +1929,20 @@
     <div id="szenario-panel" style="display:none"></div>
 
     <!-- CHALLENGES -->
-    <div class="panel" id="challenges-panel">
-      <h2>Tages- · Wochen- · Monats-Challenge</h2>
-      <div class="panel-sub">Täglich neue Ziele — für alle gleich · Fortschritt wird live berechnet</div>
-      <div class="challenge-grid" id="challenges-grid"></div>
-    </div>
+    <details class="panel-collapsible" id="challenges-panel">
+      <summary>
+        <div class="summary-left">
+          <div>
+            <h2>Tages- · Wochen- · Monats-Challenge</h2>
+            <div class="panel-sub">Täglich neue Ziele — für alle gleich · Fortschritt wird live berechnet</div>
+          </div>
+        </div>
+        <span class="summary-chevron">▼</span>
+      </summary>
+      <div class="panel-body">
+        <div class="challenge-grid" id="challenges-grid" style="margin-top:16px"></div>
+      </div>
+    </details>
 
     <!-- Wissenschafts-Kompass -->
     <div class="panel" id="wissenschafts-panel">
