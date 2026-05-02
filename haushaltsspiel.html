@@ -4918,6 +4918,13 @@ const _hadInitialHash = !!window.location.hash;
 
 computeRef();
 setParams(PRESETS.status_quo);
+// URL-Preset: ?preset=kirchhof etc. (aus Startseiten-Links)
+const _urlPreset = new URLSearchParams(window.location.search).get('preset');
+if (_urlPreset && PRESETS[_urlPreset]) {
+  setParams(PRESETS[_urlPreset]);
+  document.querySelectorAll('#presets button').forEach(b =>
+    b.classList.toggle('active', b.dataset.preset === _urlPreset));
+}
 if (window.location.hash) {
   const fromHash = hashToParams(window.location.hash);
   if (fromHash) setParams(fromHash);
