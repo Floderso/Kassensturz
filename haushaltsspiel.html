@@ -681,6 +681,91 @@
 </div>
 
 
+<!-- CARD STYLE PICKER MODAL -->
+<div class="csp-backdrop" id="csp-modal" style="display:none" onclick="if(event.target===this)closeCardModal()">
+  <div class="csp-picker">
+    <div class="csp-head">
+      <span class="csp-title">Format & Stil wählen</span>
+      <button class="csp-close" onclick="closeCardModal()">✕</button>
+    </div>
+    <div class="csp-formats">
+      <button class="csp-fmt" onclick="pickCardStyle('landscape')">
+        <div class="csp-preview-wrap">
+          <div class="csp-preview csp-landscape" id="csp-prev-landscape"></div>
+        </div>
+        <div class="csp-fmt-name">Querformat</div>
+        <div class="csp-fmt-plat">Twitter · X<br>LinkedIn · Facebook</div>
+      </button>
+      <button class="csp-fmt" onclick="pickCardStyle('square')">
+        <div class="csp-preview-wrap">
+          <div class="csp-preview csp-square" id="csp-prev-square"></div>
+        </div>
+        <div class="csp-fmt-name">Quadrat</div>
+        <div class="csp-fmt-plat">Instagram · Facebook<br>1080 × 1080</div>
+      </button>
+      <button class="csp-fmt" onclick="pickCardStyle('story')">
+        <div class="csp-preview-wrap">
+          <div class="csp-preview csp-story" id="csp-prev-story"></div>
+        </div>
+        <div class="csp-fmt-name">Story</div>
+        <div class="csp-fmt-plat">Instagram Story<br>TikTok · Reels</div>
+      </button>
+    </div>
+    <hr class="csp-divider">
+    <div class="csp-theme-row">
+      <span class="csp-theme-label">Stil:</span>
+      <button class="csp-theme-btn active" id="csp-dark" onclick="setCardTheme('dark')">Dunkel</button>
+      <button class="csp-theme-btn" id="csp-light" onclick="setCardTheme('light')">Hell</button>
+      <span class="csp-hint">Klicke ein Format um sofort zu speichern</span>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING OVERLAY -->
+<div class="onboarding-overlay" id="onboarding-overlay" style="display:none">
+  <div class="onboarding-card">
+    <div class="onboarding-eyebrow">Kassensturz · Haushaltsspiel Deutschland</div>
+    <div class="onboarding-title">Du bist Finanzminister.<br>Das Defizit: 85 Mrd. €.</div>
+    <div class="onboarding-sub">Was ist dein erster Zug? Wähle einen Ausgangspunkt — du kannst danach jeden Regler frei anpassen.</div>
+    <div class="onboarding-choices">
+      <button class="onboarding-choice" onclick="startWith('radikal')">
+        Reiche stärker besteuern — Umverteilung von oben nach unten
+        <span class="onboarding-choice-tag">Umverteilung</span>
+      </button>
+      <button class="onboarding-choice" onclick="startWith('kirchhof')">
+        Radikal vereinfachen — Flat Tax, nur 4 Steuerarten
+        <span class="onboarding-choice-tag">Vereinfachung</span>
+      </button>
+      <button class="onboarding-choice" onclick="startWith('synthetisch')">
+        Synthetisch progressiv — Kapital wie Arbeit besteuern
+        <span class="onboarding-choice-tag">Reform</span>
+      </button>
+      <button class="onboarding-choice" onclick="startWith('nordisch')">
+        Nordisches Modell — hohe MwSt, niedrige Unternehmensteuer
+        <span class="onboarding-choice-tag">Skandinavien</span>
+      </button>
+    </div>
+    <button class="onboarding-skip" onclick="closeOnboarding()">Lieber selbst erkunden →</button>
+  </div>
+</div>
+
+<!-- SLIDER TOOLTIP -->
+<div class="slider-tooltip" id="slider-tooltip"></div>
+
+<!-- MODUL-PICKER OVERLAY -->
+<div class="mod-overlay" id="mod-overlay" onclick="closePicker(event)">
+  <div class="mod-drawer">
+    <div class="mod-drawer-head">
+      <div>
+        <div class="mod-drawer-title" id="mod-drawer-title">Module hinzufügen</div>
+        <div class="mod-drawer-sub" id="mod-drawer-sub">Wähle was du zur Simulation hinzufügen möchtest</div>
+      </div>
+      <button class="mod-drawer-close" onclick="closePicker()">✕</button>
+    </div>
+    <div class="mod-grid" id="mod-grid"></div>
+  </div>
+</div>
+
 <script src="js/data.js"></script>
 <script src="js/haushaltsspiel.js"></script>
 </body>

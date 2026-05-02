@@ -993,6 +993,31 @@ function computeRef() {
 
 // ── 6. RENDER — render() Hauptfunktion ──
 
+let _heavyTimer = null;
+function scheduleHeavyRender(p, r) {
+  clearTimeout(_heavyTimer);
+  _heavyTimer = setTimeout(() => {
+    renderEstKurve(p);
+    renderLaffer(p);
+    const metrHtml = r.metr.map((m, i) => {
+      const pct = Math.min(100, m * 100);
+      const cls = m > 0.70 ? 'neg' : m > 0.50 ? 'neu' : 'pos';
+      return `<div class="bar-row">
+        <div class="bar-label">${DEZILE[i].label}</div>
+        <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
+        <div class="bar-value">${Math.round(m * 100)} %</div>
+      </div>`;
+    }).join('');
+    document.getElementById('metr_bars').innerHTML = metrHtml;
+    renderIncomeDist(r, p);
+    renderRenten(p, r);
+    renderSchuldenpfad(r);
+    renderChallenges(r);
+    renderWissenschaftsPanel(p);
+    renderRechenweg(r, p);
+  }, 150);
+}
+
 function render() {
   const p = getParams();
 
@@ -1265,46 +1290,14 @@ function render() {
   // Cross-page param sync
   localStorage.setItem('haushaltsspiel_params', JSON.stringify(p));
 
-  // ESt-TARIFKURVE
-  renderEstKurve(p);
-
-  // LAFFER-KURVE (debounced — sofort beim ersten Aufruf, danach 200ms nach letzter Änderung)
-  renderLaffer(p);
-
-  // METR-BARS
-  const metrHtml = r.metr.map((m, i) => {
-    const pct = Math.min(100, m * 100);
-    const cls = m > 0.70 ? 'neg' : m > 0.50 ? 'neu' : 'pos';
-    return `<div class="bar-row">
-      <div class="bar-label">${DEZILE[i].label}</div>
-      <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
-      <div class="bar-value">${Math.round(m * 100)} %</div>
-    </div>`;
-  }).join('');
-  document.getElementById('metr_bars').innerHTML = metrHtml;
-
-  // EINKOMMENSVERTEILUNG
-  renderIncomeDist(r, p);
-
-  // RENTEN & GKV
-  renderRenten(p, r);
-
-  // SCHULDENQUOTENPFAD
-  renderSchuldenpfad(r);
-
-  // CHALLENGES
-  renderChallenges(r);
-
-  // WISSENSCHAFTS-KOMPASS
-  renderWissenschaftsPanel(p);
-
   // URL-Hash aktualisieren
   window.history.replaceState(null, '', paramsToHash(p));
 
-  renderRechenweg(r, p);
-
   // SCORE PANEL
   renderScore(r);
+
+  // SCHWERE CHART-RENDERS — debounced, feuern 150ms nach letzter Änderung
+  scheduleHeavyRender(p, r);
 
   // KPI PULSE — detect changed KPI values and flash them
   const _kpiPulseIds = ['kpi_saldo','kpi_einn','kpi_gini','kpi_admin','kpi_nst','kpi_arb','kpi_armut','kpi_schuld','kpi_dwl','kpi_sbremse'];
@@ -2412,8 +2405,16 @@ if (window.location.hash) {
 }
 render();
 syncAllSliders();
-// Laffer-Kurve sofort beim Start berechnen (kein Debounce-Delay)
-_renderLafferNow(getParams());
+// Beim initialen Laden alle schweren Renders sofort ausführen (kein Delay)
+const _initP = getParams(), _initR = berechne(_initP);
+renderEstKurve(_initP);
+_renderLafferNow(_initP);
+renderIncomeDist(_initR, _initP);
+renderRenten(_initP, _initR);
+renderSchuldenpfad(_initR);
+renderChallenges(_initR);
+renderWissenschaftsPanel(_initP);
+renderRechenweg(_initR, _initP);
 injectTooltips();
 updateScenarioModeUI();
 
