@@ -1070,18 +1070,7 @@
   }
 
   /* ── KPI SECONDARY TOGGLE ── */
-  .kpi-more-toggle { display: none; }
   @keyframes kpiFadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
-  .kpi-more-toggle {
-    grid-column: 1 / -1;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    padding: 8px 16px; cursor: pointer;
-    font-family: 'DM Mono', monospace; font-size: 10px;
-    text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);
-    background: var(--paper); border: 1px solid var(--border); border-radius: var(--r);
-    transition: background 0.15s; user-select: none;
-  }
-  .kpi-more-toggle:hover { background: rgba(194,65,12,0.04); }
 
   /* ── CHALLENGE CONTEXT ── */
   .challenge-context {
@@ -2182,11 +2171,6 @@
         <div class="kpi-delta neutral">Mrd. € / Jahr</div>
         <div class="kpi-bench" id="kpi_einn_bench"></div>
       </div>
-      <!-- Toggle-Button -->
-      <button class="kpi-more-toggle" id="kpi-more-toggle" onclick="toggleKPIMore()">
-        6 weitere Metriken <span id="kpi-more-chevron">▼</span>
-      </button>
-      <!-- 6 sekundäre KPIs — zunächst ausgeblendet -->
       <div class="kpi">
         <div class="kpi-label">Verwaltungskosten</div>
         <div class="kpi-value" id="kpi_admin">—</div>
