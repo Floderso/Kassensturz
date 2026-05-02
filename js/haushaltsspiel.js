@@ -1834,13 +1834,28 @@ document.querySelectorAll('#presets button').forEach(btn => {
   });
 });
 
+// Render-Drosselung: maximal 1× pro Animationsframe, egal wie schnell der Slider bewegt wird
+let _renderPending = false;
+let _historyTimer = null;
+
+function scheduleRender() {
+  if (_renderPending) return;
+  _renderPending = true;
+  requestAnimationFrame(() => {
+    _renderPending = false;
+    render();
+  });
+}
+
 // Listen on all inputs
 document.querySelectorAll('input[type="range"], input[type="checkbox"]').forEach(inp => {
   inp.addEventListener('input', () => {
     if (inp.classList.contains('styled-slider')) syncSlider(inp);
-    pushHistory();
+    // History nur beim Loslassen, nicht bei jedem Tick
+    clearTimeout(_historyTimer);
+    _historyTimer = setTimeout(pushHistory, 400);
     document.querySelectorAll('#presets button').forEach(b => b.classList.remove('active'));
-    render();
+    scheduleRender();
   });
 });
 
