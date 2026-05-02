@@ -44,36 +44,28 @@
   }
   .wrap { max-width: 1400px; margin: 0 auto; }
   header {
-    border-bottom: 2px solid var(--rule);
-    padding-bottom: 24px;
-    margin-bottom: 32px;
-  }
-  .masthead {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 0 16px;
+    margin-bottom: 24px;
     display: flex;
-    justify-content: space-between;
     align-items: baseline;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(22px, 3vw, 32px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .subtitle {
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.1em;
     color: var(--muted);
-    border-bottom: 1px solid var(--rule);
-    padding-bottom: 8px;
-    margin-bottom: 16px;
-  }
-  h1 {
-    font-size: clamp(36px, 6vw, 72px);
-    font-weight: 800;
-    line-height: 0.95;
-    letter-spacing: -0.02em;
-    margin-bottom: 8px;
-  }
-  h1 em { font-style: italic; color: var(--accent); }
-  .subtitle {
-    font-size: 16px;
-    color: var(--muted);
-    max-width: 700px;
-    font-style: italic;
   }
 
   .layout {
@@ -1572,19 +1564,15 @@
 </nav>
 
 <header>
-  <div class="masthead">
-    <span>Ausgabe Nº 01 — Prototyp</span>
-    <span>Mikrosimulation · Datenstand 2025</span>
-  </div>
-  <h1>Das <em>große</em><br>Haushaltsspiel<br>Deutschlands.</h1>
-  <p class="subtitle">Eine datenbasierte Simulation. Verschiebe die Regler, beobachte was mit Staatshaushalt, Ungleichheit und Haushalten passiert. Echte Zahlen aus Bundeshaushalt 2025, Einkommensdezilen des SOEP und aus der Sozialversicherung.</p>
+  <h1>Das <em>große</em> Haushaltsspiel</h1>
+  <p class="subtitle">Datenbasierte Simulation des deutschen Steuersystems · Bundeshaushalt 2025 · SOEP</p>
 </header>
 
 <div class="layout">
 
   <!-- MOBILE TOGGLE (nur auf kleinen Screens sichtbar) -->
   <button class="mobile-toggle" id="mobile-toggle-btn">
-    <span id="mobile-toggle-label">⚙ Regler ausblenden</span>
+    <span id="mobile-toggle-label">Regler ausblenden</span>
     <span style="font-size:16px" id="mobile-toggle-icon">−</span>
   </button>
 
@@ -5038,7 +5026,7 @@ document.getElementById('mobile-toggle-btn').addEventListener('click', () => {
   const label = document.getElementById('mobile-toggle-label');
   const icon = document.getElementById('mobile-toggle-icon');
   const hidden = sidebar.classList.toggle('mobile-hidden');
-  label.textContent = hidden ? '⚙ Regler anzeigen' : '⚙ Regler ausblenden';
+  label.textContent = hidden ? 'Regler anzeigen' : 'Regler ausblenden';
   icon.textContent = hidden ? '+' : '−';
 });
 
@@ -5546,26 +5534,26 @@ document.getElementById('to-finanztools-btn').addEventListener('click', function
 // ── MODUL-SYSTEM ─────────────────────────────────────────
 const MOD_DEFS = {
   // CONTROL MODULES
-  est:       { type:'control', icon:'💰', name:'Einkommensteuer', desc:'Grundfreibetrag, Eingangs- & Spitzensteuersatz, synthetisch/dual', level:'ein' },
-  kst:       { type:'control', icon:'🏭', name:'Unternehmen & Gewerbe', desc:'Körperschaft- und Gewerbesteuer, Abschaffungs-Toggle', level:'ein' },
-  mwst:      { type:'control', icon:'🛒', name:'Mehrwertsteuer', desc:'Regel- und ermäßigter Satz', level:'ein' },
-  co2:       { type:'control', icon:'🌱', name:'CO₂-Steuer & Klimageld', desc:'CO₂-Preis und Rückzahlungsquote', level:'ein' },
-  verm:      { type:'control', icon:'🏠', name:'Vermögen & Erbschaft', desc:'Erbschaft-, Vermögen-, Bodenwertsteuer', level:'fort' },
-  sv:        { type:'control', icon:'🏥', name:'Sozialversicherung', desc:'RV, KV, ALV+Pflege, BBG, Bürgerversicherung', level:'fort' },
-  bge:       { type:'control', icon:'💸', name:'BGE · Grundeinkommen', desc:'Bedingungsloses Grundeinkommen simulieren', level:'fort' },
-  transfers: { type:'control', icon:'👶', name:'Transfers & Sozialstaat', desc:'Bürgergeld, Kindergeld, Negative ESt', level:'fort' },
-  kleine:    { type:'control', icon:'⛽', name:'Kleine Verbrauchsteuern', desc:'Energie, Tabak, Kfz, Versicherung u.a.', level:'exp' },
-  renten_ctrl:{ type:'control', icon:'📈', name:'Rentenreform', desc:'Fondsquote, Rendite, Startjahr', level:'exp' },
-  gkv_ctrl:  { type:'control', icon:'💊', name:'GKV-Strukturreformen', desc:'PKV, Kassenfusion, Prävention, KV-BBG', level:'exp' },
+  est:        { type:'control', name:'Einkommensteuer',       desc:'Grundfreibetrag, Eingangs- & Spitzensteuersatz, synthetisch/dual', level:'ein' },
+  kst:        { type:'control', name:'Unternehmen & Gewerbe', desc:'Körperschaft- und Gewerbesteuer, Abschaffungs-Toggle', level:'ein' },
+  mwst:       { type:'control', name:'Mehrwertsteuer',        desc:'Regel- und ermäßigter Satz', level:'ein' },
+  co2:        { type:'control', name:'CO₂-Steuer & Klimageld',desc:'CO₂-Preis und Rückzahlungsquote', level:'ein' },
+  verm:       { type:'control', name:'Vermögen & Erbschaft',  desc:'Erbschaft-, Vermögen-, Bodenwertsteuer', level:'fort' },
+  sv:         { type:'control', name:'Sozialversicherung',    desc:'RV, KV, ALV+Pflege, BBG, Bürgerversicherung', level:'fort' },
+  bge:        { type:'control', name:'BGE · Grundeinkommen',  desc:'Bedingungsloses Grundeinkommen simulieren', level:'fort' },
+  transfers:  { type:'control', name:'Transfers & Sozialstaat',desc:'Bürgergeld, Kindergeld, Negative ESt', level:'fort' },
+  kleine:     { type:'control', name:'Verbrauchsteuern',      desc:'Energie, Tabak, Kfz, Versicherung u.a.', level:'exp' },
+  renten_ctrl:{ type:'control', name:'Rentenreform',          desc:'Fondsquote, Rendite, Startjahr', level:'exp' },
+  gkv_ctrl:   { type:'control', name:'GKV-Strukturreformen',  desc:'PKV, Kassenfusion, Prävention, KV-BBG', level:'exp' },
   // RESULT MODULES
-  wirk:      { type:'result', icon:'⚡', name:'Wirtschaftliche Wirkung', desc:'Fiskalmultiplikator, Stabilisatoren, Dynamisches Scoring', level:'fort' },
-  einnahmen: { type:'result', icon:'💰', name:'Einnahmen nach Steuerart', desc:'Aufkommen aller Steuern in Mrd. €', level:'ein' },
-  haushalt:  { type:'result', icon:'👥', name:'Wer gewinnt, wer verliert', desc:'Netto-Δ pro Haushalt + Verteilungskennzahlen', level:'ein' },
-  belastung: { type:'result', icon:'📊', name:'Belastung & Verhaltenseffekte', desc:'Gesamtabgabenquote je Dezil + Verhaltensreaktionen', level:'fort' },
-  est_kurve: { type:'result', icon:'📉', name:'ESt-Tarifkurve', desc:'Grenz- und Effektivsteuersatz im Verlauf', level:'fort' },
-  laffer:    { type:'result', icon:'🔄', name:'Laffer-Kurve', desc:'Aufkommen vs. Spitzensteuersatz', level:'exp' },
-  metr:      { type:'result', icon:'🔬', name:'METR & Einkommensverteilung', desc:'Grenzabgabensätze je Dezil + Verteilungsvisualisierung', level:'exp' },
-  schulden:  { type:'result', icon:'📅', name:'Schuldenquotenpfad', desc:'Projektion 2025–2045 vs. Maastricht-Grenze', level:'fort' },
+  wirk:      { type:'result', name:'Wirtschaftliche Wirkung',    desc:'Fiskalmultiplikator, Stabilisatoren, Dynamisches Scoring', level:'fort' },
+  einnahmen: { type:'result', name:'Einnahmen nach Steuerart',   desc:'Aufkommen aller Steuern in Mrd. €', level:'ein' },
+  haushalt:  { type:'result', name:'Wer gewinnt, wer verliert',  desc:'Netto-Δ pro Haushalt + Verteilungskennzahlen', level:'ein' },
+  belastung: { type:'result', name:'Belastung & Verhaltenseffekte', desc:'Gesamtabgabenquote je Dezil + Verhaltensreaktionen', level:'fort' },
+  est_kurve: { type:'result', name:'ESt-Tarifkurve',             desc:'Grenz- und Effektivsteuersatz im Verlauf', level:'fort' },
+  laffer:    { type:'result', name:'Laffer-Kurve',               desc:'Aufkommen vs. Spitzensteuersatz', level:'exp' },
+  metr:      { type:'result', name:'METR & Einkommensverteilung',desc:'Grenzabgabensätze je Dezil + Verteilungsvisualisierung', level:'exp' },
+  schulden:  { type:'result', name:'Schuldenquotenpfad',         desc:'Projektion 2025–2045 vs. Maastricht-Grenze', level:'fort' },
 };
 
 // Welche Module sind gerade aktiv (sichtbar)?
@@ -5611,7 +5599,6 @@ function renderModGrid(type) {
   const entries = Object.entries(MOD_DEFS).filter(([,d]) => d.type === type);
   grid.innerHTML = entries.map(([id, d]) => `
     <div class="mod-card ${activeModules.has(id) ? 'active' : ''}" onclick="toggleMod('${id}')">
-      <div class="mod-card-icon">${d.icon}</div>
       <div class="mod-card-name">${d.name}</div>
       <div class="mod-card-desc">${d.desc}</div>
       <span class="mod-card-level ${d.level}">${d.level === 'ein' ? 'Einsteiger' : d.level === 'fort' ? 'Fortgeschritten' : 'Experte'}</span>
