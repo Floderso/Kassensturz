@@ -10,35 +10,37 @@
 <title>Das große Haushaltsspiel Deutschlands</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:      #F5F2EB;
-    --paper:   #FEFCF8;
-    --ink:     #1C1917;
-    --border:  #E5E1D8;
-    --rule:    #E5E1D8;
-    --muted:   #78716C;
-    --accent:  #2563EB;
-    --accent2: #1e5f3a;
-    --accent3: #2a4d7a;
-    --good:    #059669;
-    --bad:     #DC2626;
-    --warn:    #D97706;
-    --r:       8px;
+    --bg:      #F6F3EC;
+    --paper:   #FDFBF7;
+    --ink:     #1A1814;
+    --border:  #E4DFD4;
+    --rule:    #E4DFD4;
+    --muted:   #7A746E;
+    --accent:  #C2410C;
+    --good:    #166534;
+    --bad:     #991B1B;
+    --warn:    #92400E;
+    --goodbg:  #DCFCE7;
+    --badbg:   #FEE2E2;
+    --warnbg:  #FEF3C7;
+    --neutbg:  #F0EDE7;
+    --r:       10px;
+    --ff-body:    'DM Sans', sans-serif;
+    --ff-display: 'Fraunces', serif;
+    --ff-mono:    'DM Mono', monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     background: var(--bg);
     color: var(--ink);
-    font-family: 'Inter', sans-serif;
-    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
     line-height: 1.5;
   }
   body {
-    background-image:
-      radial-gradient(circle at 15% 30%, rgba(37,99,235,0.025) 0%, transparent 40%),
-      radial-gradient(circle at 85% 70%, rgba(5,150,105,0.025) 0%, transparent 40%);
     min-height: 100vh;
     padding: 0 16px 80px;
   }
@@ -61,7 +63,7 @@
   }
   h1 em { font-style: normal; color: var(--accent); }
   .subtitle {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -78,6 +80,7 @@
   .controls {
     background: var(--paper);
     border: 1px solid var(--rule);
+    border-radius: var(--r);
     padding: 20px;
     height: fit-content;
     position: sticky;
@@ -100,8 +103,8 @@
     }
     /* Größere Touch-Targets für Finger */
     input[type="range"] { height: 6px; }
-    input[type="range"]::-webkit-slider-thumb { width: 22px; height: 22px; }
-    input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; }
+    input[type="range"]::-webkit-slider-thumb { width: 24px; height: 24px; }
+    input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; }
     .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
     .two-col { grid-template-columns: 1fr !important; }
     .kpi-value { font-size: 20px !important; }
@@ -129,7 +132,7 @@
       justify-content: space-between;
       grid-column: 1 / -1;
       padding: 10px 14px;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'DM Mono', monospace;
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.12em;
@@ -154,13 +157,45 @@
   .controls::-webkit-scrollbar-track { background: transparent; }
   .controls::-webkit-scrollbar-thumb { background: var(--rule); }
 
+  .sidebar-collapsible {
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .sidebar-collapsible-summary {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 9px 14px;
+    background: var(--bg);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+  .sidebar-collapsible-summary::-webkit-details-marker { display: none; }
+  .sidebar-collapsible-summary::after {
+    content: '▼';
+    font-size: 8px;
+    transition: transform 0.2s;
+  }
+  details.sidebar-collapsible[open] > .sidebar-collapsible-summary::after { content: '▲'; }
+  .sidebar-collapsible > .preset-group,
+  .sidebar-collapsible > .tour-buttons {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+  }
+
   .preset-group {
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px dashed var(--rule);
+    margin-bottom: 0;
   }
   .preset-label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -173,7 +208,7 @@
     gap: 6px;
   }
   .preset-buttons button {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     background: transparent;
@@ -195,7 +230,7 @@
   }
 
   .section-title {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.15em;
@@ -216,8 +251,8 @@
   .section-title.collapsed::after { content: '+'; }
   .section-body { padding-bottom: 8px; }
   .section-title.collapsed + .section-body { display: none; }
-  .section-title.bge-section { color: var(--accent); border-bottom-color: var(--accent); }
-  .section-title.bge-section.bge-on { background: rgba(37,99,235,0.06); padding: 4px 6px; margin-left: -6px; margin-right: -6px; }
+  .ctrl-section-head.bge-section { color: var(--accent); border-bottom-color: var(--accent); }
+  .ctrl-section-head.bge-section.bge-on { background: rgba(194,65,12,0.06); padding: 4px 6px; margin-left: -6px; margin-right: -6px; }
 
   /* ── BGE SIDEBAR ── */
   .bge-slider-wrap { padding: 4px 0 2px; }
@@ -225,10 +260,10 @@
   .bge-live-cost {
     display: none;
     margin-top: 10px;
-    background: rgba(37,99,235,0.07);
+    background: rgba(194,65,12,0.07);
     border-left: 2px solid var(--accent);
     padding: 8px 12px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     line-height: 1.7;
     color: var(--ink);
@@ -240,6 +275,7 @@
   .bge-impact-panel {
     border: 1px solid var(--rule);
     border-top: 3px solid var(--accent);
+    border-radius: var(--r);
     background: var(--paper);
     padding: 20px 22px 18px;
   }
@@ -250,17 +286,17 @@
     margin-top: 16px;
   }
   @media (max-width: 1024px) { .bge-kpi-row { grid-template-columns: repeat(2, 1fr); } }
-  .bge-kpi { border: 1px solid rgba(42,39,32,0.12); padding: 12px 14px; }
+  .bge-kpi { border: 1px solid rgba(42,39,32,0.12); border-radius: 6px; padding: 12px 14px; }
   .bge-kpi-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--muted);
     margin-bottom: 6px;
   }
   .bge-kpi-val {
-    font-family: 'Fraunces', Georgia, serif;
+    font-family: 'Fraunces', serif;
     font-size: 22px;
     font-weight: 800;
     line-height: 1;
@@ -270,15 +306,15 @@
   .bge-kpi-val.good { color: var(--good); }
   .bge-kpi-val.neutral { color: var(--ink); }
   .bge-kpi-note {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
     color: var(--muted);
     line-height: 1.4;
   }
   .bge-source-note {
     margin-top: 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
     color: rgba(107,99,89,0.6);
     border-top: 1px solid rgba(42,39,32,0.08);
     padding-top: 10px;
@@ -291,8 +327,8 @@
     flex-wrap: wrap;
   }
   .bge-financing-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--muted);
@@ -306,7 +342,7 @@
   }
   .bge-financing-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; }
   .bge-financing-pct {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     font-weight: 600;
     color: var(--bad);
@@ -320,8 +356,9 @@
     gap: 10px;
     padding: 9px 12px;
     margin-bottom: 16px;
+    border-radius: 6px;
     border-left: 3px solid transparent;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
@@ -329,7 +366,7 @@
   }
   .scenario-mode-bar.mode-a {
     display: flex;
-    background: rgba(37,99,235,0.09);
+    background: rgba(194,65,12,0.09);
     border-left-color: var(--accent);
     color: var(--accent);
   }
@@ -365,12 +402,13 @@
 
   /* ── SCENARIO ACTION BUTTONS ── */
   .scenario-btn {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 6px 13px;
     border: 1px solid;
+    border-radius: 4px;
     cursor: pointer;
     transition: all 0.15s;
     white-space: nowrap;
@@ -395,19 +433,19 @@
   }
 
   .slider-row {
-    margin-bottom: 14px;
+    margin-bottom: 12px;
   }
   .slider-row label {
     display: flex;
     justify-content: space-between;
-    font-size: 13px;
-    margin-bottom: 4px;
+    font-size: 12px;
+    margin-bottom: 2px;
   }
   .slider-row .value {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 12px;
     color: var(--accent);
-    font-weight: 600;
+    font-weight: 500;
   }
   input[type="range"] {
     width: 100%;
@@ -419,33 +457,146 @@
   }
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     background: var(--accent);
     cursor: pointer;
     border: 2px solid var(--paper);
     border-radius: 50%;
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    box-shadow: 0 0 0 3px rgba(194,65,12,0.15);
     transition: box-shadow 0.2s, transform 0.15s;
   }
   input[type="range"]::-webkit-slider-thumb:hover {
-    box-shadow: 0 0 0 6px rgba(37,99,235,0.2);
+    box-shadow: 0 0 0 6px rgba(194,65,12,0.2);
     transform: scale(1.1);
   }
   input[type="range"]::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     background: var(--accent);
     cursor: pointer;
     border: 2px solid var(--paper);
     border-radius: 50%;
   }
+  /* ── VISUAL SLIDER SYSTEM ── */
+  .slider-track {
+    position: relative;
+    height: 4px;
+    background: var(--border);
+    border-radius: 99px;
+    margin: 8px 0 2px;
+  }
+  .slider-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--accent);
+    border-radius: 99px;
+    pointer-events: none;
+    transition: width 0.05s;
+  }
+  .slider-thumb {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 14px; height: 14px;
+    background: var(--paper);
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .slider-track:has(.styled-slider:hover) .slider-thumb,
+  .slider-track:has(.styled-slider:focus) .slider-thumb {
+    transform: translate(-50%, -50%) scale(1.25);
+    box-shadow: 0 0 0 5px rgba(194,65,12,0.15);
+  }
+  input[type="range"].styled-slider {
+    position: absolute;
+    inset: -10px 0;
+    height: auto;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+  }
+
+  /* ── CTRL-BOX: Slider-Gruppe mit bg-Hintergrund + Themenfarbe ── */
+  .ctrl-box {
+    background: var(--bg);
+    border-radius: var(--r);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    border-left: 3px solid var(--box-accent, var(--border));
+  }
+  .ctrl-box .ctrl-section-head {
+    color: var(--box-accent, var(--muted));
+    border-bottom-color: color-mix(in srgb, var(--box-accent, var(--border)) 30%, var(--border));
+  }
+  .ctrl-box .ctrl-section-head:hover { color: var(--box-accent, var(--ink)); filter: brightness(0.85); }
+
+  /* ── CTRL-SECTION (ersetzt section-title/section-body) ── */
+  .ctrl-section {
+    margin-bottom: 4px;
+  }
+  .ctrl-section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    font-weight: 500;
+    color: var(--muted);
+    padding: 9px 0 7px;
+    border-bottom: 1px solid var(--rule);
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+  }
+  .ctrl-section-head:hover { color: var(--ink); }
+  .ctrl-chevron { font-size: 9px; transition: transform 0.2s; }
+  .ctrl-section-head.collapsed .ctrl-chevron { transform: rotate(-90deg); }
+  .ctrl-section-body { padding-bottom: 4px; }
+  .ctrl-section-head.collapsed + .ctrl-section-body { display: none; }
+
+  /* ── SIDEBAR HEAD ── */
+  .sidebar-head {
+    padding: 4px 0 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+  .sidebar-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .sidebar-title {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .sidebar-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
   /* ── SLIDER TOOLTIP ── */
   .slider-tooltip {
     position: fixed;
     background: var(--ink);
     color: var(--paper);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
     line-height: 1.55;
     padding: 9px 13px;
@@ -471,17 +622,20 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
-    font-size: 13px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    gap: 8px;
   }
   .toggle-row input[type="checkbox"] {
     appearance: none;
     width: 36px;
     height: 18px;
     background: var(--rule);
+    border-radius: 99px;
     position: relative;
     cursor: pointer;
     transition: background 0.2s;
+    flex-shrink: 0;
   }
   .toggle-row input[type="checkbox"]:checked { background: var(--accent); }
   .toggle-row input[type="checkbox"]::before {
@@ -490,9 +644,11 @@
     width: 14px;
     height: 14px;
     background: var(--paper);
+    border-radius: 50%;
     top: 2px;
     left: 2px;
     transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
   }
   .toggle-row input[type="checkbox"]:checked::before { transform: translateX(18px); }
 
@@ -512,27 +668,35 @@
   .kpi {
     background: var(--paper);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--r);
     padding: 16px 18px;
-    transition: box-shadow 0.2s, transform 0.2s;
+    transition: background 0.3s, box-shadow 0.2s;
   }
-  .kpi:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.08); transform: translateY(-1px); }
+  .kpi:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+  .kpi.tone-bad  { background: var(--badbg);  border-color: rgba(153,27,27,0.15); }
+  .kpi.tone-good { background: var(--goodbg); border-color: rgba(22,101,52,0.15); }
+  .kpi.tone-warn { background: var(--warnbg); border-color: rgba(146,64,14,0.15); }
+  .kpi.tone-neu  { background: var(--neutbg); border-color: var(--border); }
+  .kpi.tone-bad  .kpi-value { color: var(--bad) !important; }
+  .kpi.tone-good .kpi-value { color: var(--good) !important; }
+  .kpi.tone-warn .kpi-value { color: var(--warn) !important; }
   .kpi-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--muted);
     margin-bottom: 6px;
   }
   .kpi-value {
+    font-family: 'Fraunces', serif;
     font-size: 28px;
     font-weight: 800;
     letter-spacing: -0.02em;
     line-height: 1;
   }
   .kpi-delta {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
     margin-top: 4px;
   }
@@ -543,19 +707,20 @@
   .panel {
     background: var(--paper);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--r);
     padding: 20px 24px;
     transition: box-shadow 0.2s;
   }
   .panel:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
   .panel h2 {
+    font-family: 'Fraunces', serif;
     font-size: 20px;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 4px;
     letter-spacing: -0.01em;
   }
   .panel .panel-sub {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -570,21 +735,28 @@
   }
   .bar-row {
     display: grid;
-    grid-template-columns: 80px 1fr 90px;
+    grid-template-columns: 120px 1fr 90px;
     align-items: center;
     gap: 10px;
     font-size: 12px;
   }
-  .bar-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+  .bar-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .bar-track {
-    height: 20px;
-    background: var(--bg);
-    position: relative;
-    border: 1px solid var(--rule);
+    height: 8px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
   }
   .bar-fill {
     height: 100%;
     background: var(--ink);
+    border-radius: 99px;
     transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
     min-width: 0;
     animation: growBar 0.5s cubic-bezier(0.16,1,0.3,1) both;
@@ -595,7 +767,7 @@
   .bar-fill.neg { background: var(--bad); }
   .bar-fill.neu { background: var(--ink); }
   .bar-value {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
     text-align: right;
   }
@@ -611,32 +783,35 @@
     font-size: 11px;
     margin-bottom: 4px;
   }
-  .div-label { font-family: 'JetBrains Mono', monospace; }
+  .div-label { font-family: 'DM Mono', monospace; }
   .div-track-left, .div-track-right {
-    height: 18px;
-    background: var(--bg);
-    border: 1px solid var(--rule);
+    height: 8px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
     position: relative;
   }
   .div-track-left { display: flex; justify-content: flex-end; }
   .div-fill-left {
     height: 100%;
     background: var(--bad);
+    border-radius: 99px;
     transition: width 0.4s;
   }
   .div-fill-right {
     height: 100%;
     background: var(--good);
+    border-radius: 99px;
     transition: width 0.4s;
   }
   .div-value {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
     text-align: right;
     font-weight: 600;
   }
   .div-center {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-align: center;
     color: var(--muted);
@@ -652,12 +827,13 @@
   .warning-box {
     background: var(--ink);
     color: var(--paper);
+    border-radius: var(--r);
     padding: 16px 20px;
     font-size: 13px;
-    border-left: 6px solid var(--accent);
+    border-left: 3px solid var(--accent);
   }
   .warning-box strong {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.15em;
@@ -690,7 +866,8 @@
   .onboarding-card {
     background: var(--paper);
     border: 1px solid var(--rule);
-    border-left: 5px solid var(--accent);
+    border-radius: var(--r);
+    border-left: 3px solid var(--accent);
     max-width: 600px;
     width: 100%;
     padding: 36px 40px;
@@ -698,7 +875,7 @@
   }
   @keyframes obSlideUp { from { transform:translateY(16px); opacity:0; } to { transform:none; opacity:1; } }
   .onboarding-eyebrow {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.15em;
@@ -727,7 +904,7 @@
     cursor: pointer;
     text-align: left;
     font-family: 'Fraunces', serif;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--ink);
     display: flex;
     justify-content: space-between;
@@ -737,7 +914,7 @@
   }
   .onboarding-choice:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .onboarding-choice-tag {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -746,7 +923,7 @@
     flex-shrink: 0;
   }
   .onboarding-skip {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -774,7 +951,8 @@
   }
   .csp-picker {
     background: var(--paper);
-    border: 2px solid var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
     padding: 26px 26px 22px;
     max-width: 500px;
     width: 94%;
@@ -786,7 +964,7 @@
     margin-bottom: 20px;
   }
   .csp-title {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.15em;
@@ -794,7 +972,7 @@
   }
   .csp-close {
     background: none; border: none; cursor: pointer;
-    font-size: 15px; color: var(--muted); padding: 0; line-height: 1;
+    font-size: 16px; color: var(--muted); padding: 0; line-height: 1;
   }
   .csp-close:hover { color: var(--ink); }
   .csp-formats {
@@ -829,7 +1007,7 @@
   .csp-square    { width: 58px; height: 58px; }
   .csp-story     { width: 36px; height: 64px; }
   .csp-fmt-name {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -838,8 +1016,8 @@
     line-height: 1.4;
   }
   .csp-fmt-plat {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
     color: var(--muted);
     text-align: center;
     line-height: 1.4;
@@ -856,7 +1034,7 @@
     flex-wrap: wrap;
   }
   .csp-theme-label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -864,13 +1042,14 @@
     margin-right: 4px;
   }
   .csp-theme-btn {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 5px 14px;
     background: transparent;
     border: 1px solid rgba(42,39,32,0.22);
+    border-radius: 4px;
     color: var(--muted);
     cursor: pointer;
     transition: all 0.12s;
@@ -882,18 +1061,33 @@
 
   /* ── KPI BENCHMARK LINE ── */
   .kpi-bench {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
     color: rgba(107,99,89,0.65);
     margin-top: 5px;
     line-height: 1.4;
     letter-spacing: 0.02em;
   }
 
+  /* ── KPI SECONDARY TOGGLE ── */
+  .kpi-secondary { display: none; }
+  .kpi-secondary.kpi-shown { display: block; animation: kpiFadeIn 0.2s ease both; }
+  @keyframes kpiFadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+  .kpi-more-toggle {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 8px 16px; cursor: pointer;
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);
+    background: var(--paper); border: 1px solid var(--border); border-radius: var(--r);
+    transition: background 0.15s; user-select: none;
+  }
+  .kpi-more-toggle:hover { background: rgba(194,65,12,0.04); }
+
   /* ── CHALLENGE CONTEXT ── */
   .challenge-context {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
     color: var(--muted);
     margin-top: 3px;
     opacity: 0.75;
@@ -913,26 +1107,26 @@
   }
   .score-left { flex-shrink: 0; text-align: center; min-width: 80px; }
   .score-grade {
-    font-family: 'Fraunces', Georgia, serif;
+    font-family: 'Fraunces', serif;
     font-size: 64px;
     font-weight: 800;
     line-height: 1;
     color: var(--ink);
   }
-  .score-grade.grade-a { color: #2a7a4a; }
-  .score-grade.grade-b { color: #5a7a20; }
-  .score-grade.grade-c { color: #8a6010; }
-  .score-grade.grade-d { color: #9a4812; }
-  .score-grade.grade-e, .score-grade.grade-f { color: #a83020; }
+  .score-grade.grade-a { color: var(--good); }
+  .score-grade.grade-b { color: #4a8a20; }
+  .score-grade.grade-c { color: var(--warn); }
+  .score-grade.grade-d { color: #c8440a; }
+  .score-grade.grade-e, .score-grade.grade-f { color: var(--bad); }
   .score-number {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
     color: var(--muted);
     margin-top: 3px;
   }
   .score-label-tag {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: rgba(107,99,89,0.65);
@@ -941,8 +1135,8 @@
   .score-dims { display: flex; gap: 18px; flex-wrap: wrap; flex: 1; }
   .score-dim { flex: 1; min-width: 100px; }
   .score-dim-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--muted);
@@ -955,7 +1149,7 @@
   }
   .score-dim-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; }
   .score-dim-val {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
     color: var(--ink);
     font-weight: 600;
@@ -974,7 +1168,7 @@
 
   /* ── ACTION TOOLBAR BUTTONS ── */
   .toolbar-btn {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -983,12 +1177,12 @@
     color: var(--muted);
     padding: 6px 14px;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 4px;
     transition: background 0.15s, color 0.15s, border-color 0.15s;
   }
   .toolbar-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .toolbar-btn-primary {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -997,7 +1191,7 @@
     color: var(--paper);
     padding: 6px 14px;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 4px;
     transition: background 0.15s, border-color 0.15s;
   }
   .toolbar-btn-primary:hover { background: var(--ink); border-color: var(--ink); }
@@ -1016,8 +1210,8 @@
   .reform-tour-bar.active { display: flex; }
   .reform-tour-info { flex: 1; min-width: 200px; }
   .reform-tour-eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: rgba(251,249,244,0.65);
@@ -1026,7 +1220,7 @@
   .reform-tour-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
   .reform-tour-desc { font-size: 12px; font-style: italic; color: rgba(251,249,244,0.78); }
   .reform-tour-step {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     color: rgba(251,249,244,0.55);
     white-space: nowrap;
@@ -1034,7 +1228,7 @@
   }
   .reform-tour-nav { display: flex; gap: 6px; flex-shrink: 0; }
   .reform-tour-btn {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -1042,6 +1236,7 @@
     background: rgba(255,255,255,0.15);
     color: var(--paper);
     border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 4px;
     cursor: pointer;
     transition: background 0.15s;
     white-space: nowrap;
@@ -1049,7 +1244,7 @@
   .reform-tour-btn:hover:not(:disabled) { background: rgba(255,255,255,0.3); }
   .reform-tour-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .reform-tour-close {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 12px;
     background: none;
     border: none;
@@ -1063,8 +1258,8 @@
   /* ── TOUR BUTTONS IN SIDEBAR ── */
   .tour-group { margin-top: 12px; }
   .tour-group-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.13em;
     color: var(--muted);
@@ -1072,13 +1267,14 @@
   }
   .tour-buttons { display: flex; flex-direction: column; gap: 4px; }
   .tour-btn {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 7px 10px;
     background: transparent;
     border: 1px solid rgba(42,39,32,0.25);
+    border-radius: 4px;
     color: var(--muted);
     cursor: pointer;
     text-align: left;
@@ -1090,6 +1286,7 @@
   .ft-link-panel {
     background: var(--ink);
     color: var(--paper);
+    border-radius: var(--r);
     padding: 16px 22px;
     display: flex;
     justify-content: space-between;
@@ -1098,7 +1295,7 @@
     flex-wrap: wrap;
   }
   .ft-link-eyebrow {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.13em;
@@ -1107,7 +1304,7 @@
   }
   .ft-link-text { font-size: 14px; font-style: italic; }
   .ft-link-btn {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -1115,28 +1312,30 @@
     background: var(--accent);
     color: var(--paper);
     border: none;
+    border-radius: 4px;
     cursor: pointer;
     white-space: nowrap;
     transition: background 0.15s;
   }
-  .ft-link-btn:hover { background: #1d4ed8; }
+  .ft-link-btn:hover { background: var(--ink); }
 
   /* ── SITE NAV ── */
-  .site-nav-bar { background: var(--ink); padding: 0 24px; height: 40px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; margin: 0 -16px 28px; }
+  .site-nav-bar { background: var(--ink); padding: 0 24px; height: 48px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; margin: 0 -16px 28px; }
   .site-nav-bar-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; width: 100%; }
   .nav-logo { font-family: 'Fraunces', serif; font-weight: 800; font-size: 17px; color: #fff; letter-spacing: -0.02em; margin-right: 28px; text-decoration: none; }
-  .nav-link { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); padding: 0 12px; height: 40px; display: flex; align-items: center; text-decoration: none; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
+  .nav-link { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); padding: 0 12px; height: 48px; display: flex; align-items: center; text-decoration: none; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
   .nav-link:hover { color: rgba(255,255,255,0.85); }
   .nav-link.active { color: #fff; border-bottom-color: var(--accent); }
 
   details.about {
     background: var(--paper);
     border: 1px solid var(--rule);
+    border-radius: var(--r);
     padding: 16px 20px;
   }
   details.about summary {
     cursor: pointer;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -1149,7 +1348,7 @@
   details.panel-collapsible {
     background: var(--paper);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--r);
     overflow: hidden;
     transition: box-shadow 0.2s;
   }
@@ -1172,7 +1371,7 @@
     margin: 0;
   }
   details.panel-collapsible > summary .panel-sub {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -1194,8 +1393,8 @@
 
   .badge {
     display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 2px 6px;
@@ -1215,13 +1414,15 @@
   @media (max-width: 1024px) { .challenge-grid { grid-template-columns: 1fr; } }
   .challenge-card {
     border: 1px solid var(--rule);
+    border-radius: var(--r);
     padding: 14px 16px;
     background: var(--paper);
     position: relative;
+    overflow: hidden;
   }
   .challenge-card.done { opacity: 0.75; }
   .challenge-period {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -1229,7 +1430,7 @@
     margin-bottom: 5px;
   }
   .challenge-title {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     margin-bottom: 2px;
     line-height: 1.2;
@@ -1245,7 +1446,7 @@
   .challenge-bar-label {
     display: flex;
     justify-content: space-between;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     color: var(--muted);
     margin-bottom: 3px;
@@ -1254,12 +1455,13 @@
   .challenge-track {
     height: 5px;
     background: rgba(42,39,32,0.12);
+    border-radius: 99px;
     overflow: hidden;
   }
   .challenge-fill { height: 100%; transition: width 0.4s ease; }
   .challenge-done-badge {
     display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -1284,11 +1486,11 @@
     background: none;
     border: 1px solid var(--muted);
     color: var(--muted);
-    font-size: 9px;
+    font-size: 10px;
     cursor: pointer;
     padding: 0;
     margin: 0 4px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     border-radius: 50%;
     line-height: 1;
     flex-shrink: 0;
@@ -1310,7 +1512,7 @@
   .tt-popup[hidden] { display: none; }
   .tt-popup .tt-title {
     display: block;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -1321,7 +1523,7 @@
   .tt-popup .tt-quelle {
     display: block;
     margin-top: 8px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     color: rgba(251,249,244,0.45);
     border-top: 1px solid rgba(255,255,255,0.1);
@@ -1331,7 +1533,7 @@
   /* RECHENWEG PANEL */
   details.rw-details > summary {
     cursor: pointer;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.15em;
@@ -1351,7 +1553,7 @@
   .rw-body { margin-top: 20px; }
   .rw-section { margin-bottom: 20px; }
   .rw-section-title {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -1361,7 +1563,7 @@
     margin-bottom: 10px;
   }
   .rw-formula {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
     background: var(--bg);
     padding: 10px 14px;
@@ -1379,10 +1581,10 @@
   .rw-hl { color: var(--accent); font-weight: 600; }
   .rw-good { color: var(--good); font-weight: 600; }
   .rw-bad { color: var(--bad); font-weight: 600; }
-  .rw-zone-table { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-bottom: 8px; }
+  .rw-zone-table { width: 100%; border-collapse: collapse; font-family: 'DM Mono', monospace; font-size: 11px; margin-bottom: 8px; }
   .rw-zone-table th { text-align: left; border-bottom: 1px solid var(--rule); padding: 3px 8px; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
   .rw-zone-table td { padding: 3px 8px; border-bottom: 1px dashed rgba(42,39,32,0.15); }
-  .rw-zone-table tr.active-zone td { background: rgba(37,99,235,0.08); color: var(--accent); font-weight: 600; }
+  .rw-zone-table tr.active-zone td { background: rgba(194,65,12,0.08); color: var(--accent); font-weight: 600; }
 
 /* ── MODUL-SYSTEM ────────────────────────────────── */
 @keyframes modFadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
@@ -1400,7 +1602,7 @@
   border: 1px dashed var(--border);
   border-radius: 6px;
   color: var(--accent);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'DM Mono', monospace;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -1408,7 +1610,7 @@
   transition: background 0.15s, border-color 0.15s;
 }
 .mod-add-btn:hover {
-  background: rgba(37,99,235,0.05);
+  background: rgba(194,65,12,0.05);
   border-color: var(--accent);
 }
 .mod-add-btn span {
@@ -1466,7 +1668,7 @@
   margin-bottom: 4px;
 }
 .mod-drawer-sub {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'DM Mono', monospace;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -1497,7 +1699,7 @@
 
 .mod-card {
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--r);
   padding: 14px 16px;
   cursor: pointer;
   transition: box-shadow 0.15s, border-color 0.15s, background 0.15s;
@@ -1506,11 +1708,11 @@
 }
 .mod-card:hover {
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  border-color: rgba(37,99,235,0.3);
+  border-color: rgba(194,65,12,0.3);
 }
 .mod-card.active {
   border-color: var(--accent);
-  background: rgba(37,99,235,0.04);
+  background: rgba(194,65,12,0.04);
 }
 .mod-card.active::after {
   content: '✓';
@@ -1535,8 +1737,8 @@
   margin-bottom: 8px;
 }
 .mod-card-level {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 2px 7px;
@@ -1579,6 +1781,13 @@
   <!-- ============ CONTROLS ============ -->
   <aside class="controls" id="controls-sidebar">
 
+    <!-- SIDEBAR HEAD -->
+    <div class="sidebar-head">
+      <div class="sidebar-eyebrow">Steuer-Simulator</div>
+      <div class="sidebar-title">Dein Haushalt</div>
+      <div class="sidebar-desc">Verschiebe die Regler und beobachte live die Auswirkungen auf Staatsfinanzen und Verteilung.</div>
+    </div>
+
     <!-- SCENARIO MODE INDICATOR -->
     <div class="scenario-mode-bar" id="scenario-mode-bar">
       <div class="scenario-mode-bar-dot"></div>
@@ -1586,55 +1795,58 @@
       <button class="scenario-mode-bar-exit" title="Modus verlassen" onclick="exitScenarioMode()">✕</button>
     </div>
 
-    <div class="preset-group">
-      <div class="preset-label">Szenario laden</div>
-      <div class="preset-buttons" id="presets">
-        <button data-preset="status_quo" class="active">Status&nbsp;Quo&nbsp;2025</button>
-        <button data-preset="synthetisch">Synthetisch&nbsp;Progressiv</button>
-        <button data-preset="kirchhof">Kirchhof&nbsp;Flat</button>
-        <button data-preset="radikal">Stark&nbsp;Umverteilend</button>
-        <button data-preset="simpel">5-Steuern-System</button>
-        <button data-preset="nordisch">Nordisches&nbsp;Modell</button>
-        <button data-preset="koalition27">Koalition&nbsp;2027</button>
-        <button data-preset="bge">BGE-Modell</button>
+    <details class="sidebar-collapsible">
+      <summary class="sidebar-collapsible-summary">Szenarien</summary>
+      <div class="preset-group">
+        <div class="preset-buttons" id="presets">
+          <button data-preset="status_quo" class="active">Status&nbsp;Quo&nbsp;2025</button>
+          <button data-preset="synthetisch">Synthetisch&nbsp;Progressiv</button>
+          <button data-preset="kirchhof">Kirchhof&nbsp;Flat</button>
+          <button data-preset="radikal">Stark&nbsp;Umverteilend</button>
+          <button data-preset="simpel">5-Steuern-System</button>
+          <button data-preset="nordisch">Nordisches&nbsp;Modell</button>
+          <button data-preset="koalition27">Koalition&nbsp;2027</button>
+          <button data-preset="bge">BGE-Modell</button>
+        </div>
       </div>
-    </div>
+    </details>
 
     <!-- REFORM TOURS -->
-    <div class="tour-group">
-      <div class="tour-group-label">▶ Reform-Tour starten</div>
-      <div class="tour-buttons">
+    <details class="sidebar-collapsible">
+      <summary class="sidebar-collapsible-summary">Reform-Tour</summary>
+      <div class="tour-buttons" style="padding:4px 0 8px;">
         <button class="tour-btn" onclick="startTour('kirchhof')">Kirchhof-Reform (Flat Tax)</button>
         <button class="tour-btn" onclick="startTour('skandinavisch')">Skandinavisches Modell</button>
         <button class="tour-btn" onclick="startTour('umverteilung')">Starke Umverteilung</button>
       </div>
-    </div>
+    </details>
 
     <!-- Slider-Tipps Toggle -->
     <div class="toggle-row" style="margin-bottom:16px;padding-top:4px;border-top:1px dashed var(--rule);">
-      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Regler-Tipps</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Regler-Tipps</span>
       <input type="checkbox" id="toggle_slider_tips" checked>
     </div>
 
     <!-- Einkommensteuer -->
-    <div class="mod-section" data-mod="est" data-mod-type="control">
-    <div class="section-title" data-toggle>Einkommensteuer</div>
-    <div class="section-body">
+    <div class="mod-section ctrl-box" data-mod="est" data-mod-type="control" style="--box-accent:#C2410C">
+    <div class="ctrl-section">
+    <div class="ctrl-section-head" data-toggle>Einkommensteuer <span class="ctrl-chevron">▾</span></div>
+    <div class="ctrl-section-body">
       <div class="slider-row">
         <label>Grundfreibetrag <span class="value" id="v_freibetrag"></span></label>
-        <input type="range" id="freibetrag" min="0" max="30000" step="500" value="12084">
+        <div class="slider-track" data-accent="#C2410C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="freibetrag" min="0" max="30000" step="500" value="12084"></div>
       </div>
       <div class="slider-row">
         <label>Eingangssteuersatz <span class="value" id="v_eingang"></span></label>
-        <input type="range" id="eingang" min="0" max="30" step="1" value="14">
+        <div class="slider-track" data-accent="#C2410C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="eingang" min="0" max="30" step="1" value="14"></div>
       </div>
       <div class="slider-row">
         <label>Spitzensteuersatz <span class="value" id="v_spitze"></span></label>
-        <input type="range" id="spitze" min="25" max="70" step="1" value="45">
+        <div class="slider-track" data-accent="#C2410C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="spitze" min="25" max="70" step="1" value="45"></div>
       </div>
       <div class="slider-row">
         <label>Einkommen ab Spitzensatz <span class="value" id="v_grenze"></span></label>
-        <input type="range" id="grenze" min="50000" max="500000" step="10000" value="277826">
+        <div class="slider-track" data-accent="#C2410C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="grenze" min="50000" max="500000" step="10000" value="277826"></div>
       </div>
       <div class="toggle-row">
         <span>Kapital wie Arbeit besteuern</span>
@@ -1642,22 +1854,24 @@
       </div>
       <div class="slider-row" id="row_abgeltung">
         <label>Abgeltungsteuer (bei dual) <span class="value" id="v_abgeltung"></span></label>
-        <input type="range" id="abgeltung" min="0" max="50" step="1" value="25">
+        <div class="slider-track" data-accent="#C2410C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="abgeltung" min="0" max="50" step="1" value="25"></div>
       </div>
+    </div>
     </div>
     </div>
 
     <!-- Unternehmen -->
-    <div class="mod-section" data-mod="kst" data-mod-type="control">
-    <div class="section-title" data-toggle>Unternehmen</div>
-    <div class="section-body">
+    <div class="mod-section ctrl-box" data-mod="kst" data-mod-type="control" style="--box-accent:#1D4ED8">
+    <div class="ctrl-section">
+    <div class="ctrl-section-head" data-toggle>Unternehmen <span class="ctrl-chevron">▾</span></div>
+    <div class="ctrl-section-body">
       <div class="slider-row">
         <label>Körperschaftsteuer <span class="value" id="v_kst"></span></label>
-        <input type="range" id="kst" min="0" max="35" step="1" value="15">
+        <div class="slider-track" data-accent="#1D4ED8"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="kst" min="0" max="35" step="1" value="15"></div>
       </div>
       <div class="slider-row">
         <label>Gewerbesteuer (Durchschnitt) <span class="value" id="v_gewst"></span></label>
-        <input type="range" id="gewst" min="0" max="20" step="1" value="14">
+        <div class="slider-track" data-accent="#1D4ED8"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="gewst" min="0" max="20" step="1" value="14"></div>
       </div>
       <div class="toggle-row">
         <span>Gewerbesteuer abschaffen</span>
@@ -1665,29 +1879,33 @@
       </div>
     </div>
     </div>
+    </div>
 
     <!-- Mehrwertsteuer -->
-    <div class="mod-section" data-mod="mwst" data-mod-type="control">
-    <div class="section-title" data-toggle>Mehrwertsteuer</div>
-    <div class="section-body">
+    <div class="mod-section ctrl-box" data-mod="mwst" data-mod-type="control" style="--box-accent:#7C3AED">
+    <div class="ctrl-section">
+    <div class="ctrl-section-head" data-toggle>Mehrwertsteuer <span class="ctrl-chevron">▾</span></div>
+    <div class="ctrl-section-body">
       <div class="slider-row">
         <label>Regelsatz <span class="value" id="v_mwst"></span></label>
-        <input type="range" id="mwst" min="0" max="30" step="1" value="19">
+        <div class="slider-track" data-accent="#7C3AED"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="mwst" min="0" max="30" step="1" value="19"></div>
       </div>
       <div class="slider-row">
         <label>Ermäßigter Satz <span class="value" id="v_mwst_erm"></span></label>
-        <input type="range" id="mwst_erm" min="0" max="19" step="1" value="7">
+        <div class="slider-track" data-accent="#7C3AED"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="mwst_erm" min="0" max="19" step="1" value="7"></div>
       </div>
+    </div>
     </div>
     </div>
 
     <!-- CO2 & Klima -->
-    <div class="mod-section" data-mod="co2" data-mod-type="control">
-    <div class="section-title" data-toggle>CO₂-Steuer · Klimageld</div>
-    <div class="section-body">
+    <div class="mod-section ctrl-box" data-mod="co2" data-mod-type="control" style="--box-accent:#166534">
+    <div class="ctrl-section">
+    <div class="ctrl-section-head" data-toggle>CO₂-Steuer · Klimageld <span class="ctrl-chevron">▾</span></div>
+    <div class="ctrl-section-body">
       <div class="slider-row">
         <label>CO₂-Preis <span class="value" id="v_co2"></span></label>
-        <input type="range" id="co2" min="0" max="300" step="5" value="55">
+        <div class="slider-track" data-accent="#166534"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="co2" min="0" max="300" step="5" value="55"></div>
       </div>
       <div class="toggle-row">
         <span>Klimageld pro Kopf zurück</span>
@@ -1695,14 +1913,16 @@
       </div>
     </div>
     </div>
+    </div>
 
     <!-- Vermögen & Erbschaft -->
-    <div class="mod-section" data-mod="verm" data-mod-type="control" style="display:none">
-    <div class="section-title" data-toggle>Vermögen · Erbschaft</div>
-    <div class="section-body">
+    <div class="mod-section ctrl-box" data-mod="verm" data-mod-type="control" style="display:none;--box-accent:#B45309">
+    <div class="ctrl-section">
+    <div class="ctrl-section-head" data-toggle>Vermögen · Erbschaft <span class="ctrl-chevron">▾</span></div>
+    <div class="ctrl-section-body">
       <div class="slider-row">
         <label>Erbschaftsteuer (Spitzensatz) <span class="value" id="v_erb"></span></label>
-        <input type="range" id="erb" min="0" max="70" step="1" value="20">
+        <div class="slider-track" data-accent="#B45309"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="erb" min="0" max="70" step="1" value="20"></div>
       </div>
       <div class="toggle-row">
         <span>Betriebsvermögen-Ausnahme</span>
@@ -1710,38 +1930,40 @@
       </div>
       <div class="slider-row">
         <label>Bodenwertsteuer <span class="value" id="v_boden"></span></label>
-        <input type="range" id="boden" min="0" max="3" step="0.1" value="0.4">
+        <div class="slider-track" data-accent="#B45309"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="boden" min="0" max="3" step="0.1" value="0.4"></div>
       </div>
       <div class="slider-row">
         <label>Vermögensteuer (ab 2 Mio) <span class="value" id="v_verm"></span></label>
-        <input type="range" id="verm" min="0" max="3" step="0.1" value="0">
+        <div class="slider-track" data-accent="#B45309"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="verm" min="0" max="3" step="0.1" value="0"></div>
       </div>
       <div class="slider-row">
         <label>Zucman-Mindeststeuer (Mrd.) <span class="value" id="v_zucman"></span></label>
-        <input type="range" id="zucman" min="0" max="3" step="0.1" value="0">
+        <div class="slider-track" data-accent="#B45309"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="zucman" min="0" max="3" step="0.1" value="0"></div>
       </div>
+    </div>
     </div>
     </div>
 
     <!-- Sozialversicherung -->
-    <div class="mod-section" data-mod="sv" data-mod-type="control" style="display:none">
-    <div class="section-title" data-toggle>Sozialversicherung</div>
-    <div class="section-body">
+    <div class="mod-section ctrl-box" data-mod="sv" data-mod-type="control" style="display:none;--box-accent:#0F766E">
+    <div class="ctrl-section">
+    <div class="ctrl-section-head" data-toggle>Sozialversicherung <span class="ctrl-chevron">▾</span></div>
+    <div class="ctrl-section-body">
       <div class="slider-row">
         <label>Rente (AN+AG) <span class="value" id="v_rv"></span></label>
-        <input type="range" id="rv" min="10" max="30" step="0.1" value="18.6">
+        <div class="slider-track" data-accent="#0F766E"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="rv" min="10" max="30" step="0.1" value="18.6"></div>
       </div>
       <div class="slider-row">
         <label>Krankenversicherung <span class="value" id="v_kv"></span></label>
-        <input type="range" id="kv" min="8" max="25" step="0.1" value="16.3">
+        <div class="slider-track" data-accent="#0F766E"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="kv" min="8" max="25" step="0.1" value="16.3"></div>
       </div>
       <div class="slider-row">
         <label>Arbeitslosen+Pflege <span class="value" id="v_alpf"></span></label>
-        <input type="range" id="alpf" min="2" max="10" step="0.1" value="6.2">
+        <div class="slider-track" data-accent="#0F766E"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="alpf" min="2" max="10" step="0.1" value="6.2"></div>
       </div>
       <div class="slider-row">
         <label>Beitr.-Bemessungsgrenze <span class="value" id="v_bbg"></span></label>
-        <input type="range" id="bbg" min="40000" max="160000" step="5000" value="90000">
+        <div class="slider-track" data-accent="#0F766E"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="bbg" min="40000" max="160000" step="5000" value="90000"></div>
       </div>
       <div class="toggle-row">
         <span>Bürgerversicherung (alle zahlen)</span>
@@ -1749,22 +1971,24 @@
       </div>
     </div>
     </div>
+    </div>
 
     <!-- BGE -->
-    <div class="mod-section" data-mod="bge" data-mod-type="control" style="display:none">
-    <div class="section-title bge-section collapsed" id="bge-section-title" data-toggle>BGE · Grundeinkommen</div>
-    <div class="section-body">
+    <div class="mod-section ctrl-box" data-mod="bge" data-mod-type="control" style="display:none;--box-accent:#6D28D9">
+    <div class="ctrl-section">
+    <div class="ctrl-section-head bge-section collapsed" id="bge-section-title" data-toggle>BGE · Grundeinkommen <span class="ctrl-chevron">▾</span></div>
+    <div class="ctrl-section-body">
       <div class="bge-slider-wrap">
         <label class="slider-row" style="margin-bottom:4px;">
           <span>Monatsbetrag <span class="value" id="v_bge" style="color:var(--accent);font-weight:600;">aus</span></span>
         </label>
-        <input type="range" id="bge" min="0" max="2000" step="50" value="0" style="width:100%;margin-bottom:6px;">
-        <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);">
+        <div class="slider-track" data-accent="#6D28D9"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="bge" min="0" max="2000" step="50" value="0"></div>
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">
           <span>0 €</span><span>1.000 €</span><span>2.000 €</span>
         </div>
       </div>
       <!-- Warnung: BGE > Grundfreibetrag/12 → Staat besteuert eigene Ausgaben -->
-      <div id="bge-freibetrag-warning" style="display:none;margin-top:10px;background:rgba(200,64,31,0.1);border-left:3px solid var(--accent);padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.6;color:var(--ink);">
+      <div id="bge-freibetrag-warning" style="display:none;margin-top:10px;background:rgba(200,64,31,0.1);border-left:3px solid var(--accent);padding:8px 10px;font-family:'DM Mono',monospace;font-size:10px;line-height:1.6;color:var(--ink);">
         <span style="font-weight:600;color:var(--accent);">⚠ Konsistenz-Problem</span><br>
         BGE (<span id="bge-warn-val">—</span> €/M) übersteigt den steuerfreien Grundfreibetrag (<span id="bge-warn-fb">—</span> €/M). Der Staat würde seine eigenen Transferzahlungen mit Einkommensteuer belasten — eine fiskalische Kreisrechnung. Lösung: BGE steuerfrei stellen (§ 3 EStG) oder Freibetrag entsprechend anheben.
       </div>
@@ -1778,43 +2002,45 @@
 
       <!-- Rentensystem bei BGE — nur sichtbar wenn BGE > 0 -->
       <div id="bge-rente-box" style="display:none;margin-top:14px;border-top:1px dashed var(--accent);padding-top:12px;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:10px;font-weight:600;">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:10px;font-weight:600;">
           Aufstockungs-Rente bei BGE
         </div>
         <div class="slider-row">
           <label>Rentenniveau Geringverdiener <span class="value" id="v_rente_niveau_gering"></span></label>
-          <input type="range" id="rente_niveau_gering" min="60" max="100" step="5" value="80">
+          <div class="slider-track" data-accent="#6D28D9"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="rente_niveau_gering" min="60" max="100" step="5" value="80"></div>
         </div>
         <div class="slider-row">
           <label>Rentenniveau Gutverdiener <span class="value" id="v_rente_niveau_hoch"></span></label>
-          <input type="range" id="rente_niveau_hoch" min="30" max="70" step="5" value="50">
+          <div class="slider-track" data-accent="#6D28D9"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="rente_niveau_hoch" min="30" max="70" step="5" value="50"></div>
         </div>
         <div class="slider-row">
           <label>Einkommensgrenze <span class="value" id="v_rente_grenze"></span></label>
-          <input type="range" id="rente_grenze" min="20000" max="60000" step="5000" value="35000">
+          <div class="slider-track" data-accent="#6D28D9"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="rente_grenze" min="20000" max="60000" step="5000" value="35000"></div>
         </div>
-        <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px;line-height:1.5;">
+        <p style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px;line-height:1.5;">
           BGE = Sockel · Rente = Aufstockung<br>auf % des früheren Nettoeinkommens
         </p>
       </div>
 
-      <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:8px;line-height:1.5;">
+      <p style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:8px;line-height:1.5;">
         Quellen: DIW Pilot 2024 · RWI 2024<br>ifo Mikrosimulation 2021 (Blömer/Peichl)
       </p>
     </div>
     </div>
+    </div>
 
     <!-- Transfers -->
-    <div class="mod-section" data-mod="transfers" data-mod-type="control" style="display:none">
-    <div class="section-title" data-toggle>Transfers · Sozialstaat</div>
-    <div class="section-body">
+    <div class="mod-section ctrl-box" data-mod="transfers" data-mod-type="control" style="display:none;--box-accent:#BE185D">
+    <div class="ctrl-section">
+    <div class="ctrl-section-head" data-toggle>Transfers · Sozialstaat <span class="ctrl-chevron">▾</span></div>
+    <div class="ctrl-section-body">
       <div class="slider-row">
         <label>Bürgergeld-Regelsatz <span class="value" id="v_bg"></span></label>
-        <input type="range" id="bg" min="0" max="1500" step="10" value="563">
+        <div class="slider-track" data-accent="#BE185D"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="bg" min="0" max="1500" step="10" value="563"></div>
       </div>
       <div class="slider-row">
         <label>Kindergeld <span class="value" id="v_kg"></span></label>
-        <input type="range" id="kg" min="0" max="500" step="5" value="255">
+        <div class="slider-track" data-accent="#BE185D"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="kg" min="0" max="500" step="5" value="255"></div>
       </div>
       <div class="toggle-row">
         <span>Negative Einkommensteuer</span>
@@ -1822,41 +2048,47 @@
       </div>
     </div>
     </div>
+    </div>
 
     <!-- Staat / Sonstiges -->
-    <div class="mod-section" data-mod="kleine" data-mod-type="control" style="display:none">
-    <div class="section-title" data-toggle>Kleine Verbrauchsteuern</div>
-    <div class="section-body">
+    <div class="mod-section ctrl-box" data-mod="kleine" data-mod-type="control" style="display:none;--box-accent:#64748B">
+    <div class="ctrl-section">
+    <div class="ctrl-section-head" data-toggle>Kleine Verbrauchsteuern <span class="ctrl-chevron">▾</span></div>
+    <div class="ctrl-section-body">
       <div class="toggle-row">
         <span>Energie, Tabak, Kfz etc. behalten</span>
         <input type="checkbox" id="kleine_st" checked>
       </div>
     </div>
     </div>
+    </div>
 
     <!-- Rentenreform -->
-    <div class="mod-section" data-mod="renten_ctrl" data-mod-type="control" style="display:none">
-    <div class="section-title collapsed" data-toggle>Rentenreform · Generationenkapital</div>
-    <div class="section-body">
+    <div class="mod-section ctrl-box" data-mod="renten_ctrl" data-mod-type="control" style="display:none;--box-accent:#EA580C">
+    <div class="ctrl-section">
+    <div class="ctrl-section-head collapsed" data-toggle>Rentenreform · Generationenkapital <span class="ctrl-chevron">▾</span></div>
+    <div class="ctrl-section-body">
       <div class="slider-row">
         <label>Fondsquote (% des RV-Aufkommens) <span class="value" id="v_kapitalquote"></span></label>
-        <input type="range" id="kapitalquote" min="0" max="30" step="1" value="0">
+        <div class="slider-track" data-accent="#EA580C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="kapitalquote" min="0" max="30" step="1" value="0"></div>
       </div>
       <div class="slider-row">
         <label>Erwartete Jahresrendite <span class="value" id="v_rendite_fonds"></span></label>
-        <input type="range" id="rendite_fonds" min="2" max="10" step="0.5" value="7">
+        <div class="slider-track" data-accent="#EA580C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="rendite_fonds" min="2" max="10" step="0.5" value="7"></div>
       </div>
       <div class="slider-row">
         <label>Investition ab Jahr <span class="value" id="v_startjahr"></span></label>
-        <input type="range" id="startjahr" min="2000" max="2025" step="1" value="2020">
+        <div class="slider-track" data-accent="#EA580C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="startjahr" min="2000" max="2025" step="1" value="2020"></div>
       </div>
+    </div>
     </div>
     </div>
 
     <!-- GKV Reform -->
-    <div class="mod-section" data-mod="gkv_ctrl" data-mod-type="control" style="display:none">
-    <div class="section-title collapsed" data-toggle>Gesundheitsreform · GKV</div>
-    <div class="section-body">
+    <div class="mod-section ctrl-box" data-mod="gkv_ctrl" data-mod-type="control" style="display:none;--box-accent:#0369A1">
+    <div class="ctrl-section">
+    <div class="ctrl-section-head collapsed" data-toggle>Gesundheitsreform · GKV <span class="ctrl-chevron">▾</span></div>
+    <div class="ctrl-section-body">
       <div class="toggle-row">
         <span>PKV abschaffen (alle in GKV)</span>
         <input type="checkbox" id="pkv_abschaffen">
@@ -1871,12 +2103,13 @@
       </div>
       <div class="slider-row">
         <label>Anzahl Krankenkassen <span class="value" id="v_anzahl_kv"></span></label>
-        <input type="range" id="anzahl_kv" min="5" max="105" step="5" value="95">
+        <div class="slider-track" data-accent="#0369A1"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="anzahl_kv" min="5" max="105" step="5" value="95"></div>
       </div>
       <div class="slider-row">
         <label>Prävention-Invest. (Mrd. €) <span class="value" id="v_praevention"></span></label>
-        <input type="range" id="praevention" min="0" max="20" step="1" value="0">
+        <div class="slider-track" data-accent="#0369A1"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="praevention" min="0" max="20" step="1" value="0"></div>
       </div>
+    </div>
     </div>
     </div>
 
@@ -1905,40 +2138,16 @@
     </div>
 
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-      <button id="card-btn" class="toolbar-btn-primary">↓ Bild speichern</button>
-      <button id="share-btn" class="toolbar-btn">⇥ Link kopieren</button>
-      <button id="undo-btn" class="toolbar-btn" disabled>↩ Rückgängig</button>
-      <button id="save-a-btn" class="scenario-btn scenario-btn-a" title="Klicken um Szenario A zu bearbeiten">▣ Szenario A</button>
-      <button id="save-b-btn" class="scenario-btn scenario-btn-b" title="Klicken um Szenario B zu bearbeiten">▣ Szenario B</button>
-      <button id="csv-export-btn" class="toolbar-btn">↓ CSV Export</button>
+      <button id="card-btn" class="toolbar-btn-primary">Bild speichern</button>
+      <button id="share-btn" class="toolbar-btn">Link kopieren</button>
+      <button id="undo-btn" class="toolbar-btn" disabled>Rückgängig</button>
+      <button id="save-a-btn" class="scenario-btn scenario-btn-a" title="Klicken um Szenario A zu bearbeiten">Szenario A</button>
+      <button id="save-b-btn" class="scenario-btn scenario-btn-b" title="Klicken um Szenario B zu bearbeiten">Szenario B</button>
+      <button id="csv-export-btn" class="toolbar-btn">CSV Export</button>
     </div>
     <canvas id="share-canvas"></canvas>
     <!-- Szenario-Vergleich Panel (erscheint wenn A+B gespeichert) -->
     <div id="szenario-panel" style="display:none"></div>
-
-    <!-- CHALLENGES -->
-    <details class="panel-collapsible" id="challenges-panel">
-      <summary>
-        <div class="summary-left">
-          <div>
-            <h2>Tages- · Wochen- · Monats-Challenge</h2>
-            <div class="panel-sub">Täglich neue Ziele — für alle gleich · Fortschritt wird live berechnet</div>
-          </div>
-        </div>
-        <span class="summary-chevron">▼</span>
-      </summary>
-      <div class="panel-body">
-        <div class="challenge-grid" id="challenges-grid" style="margin-top:16px"></div>
-      </div>
-    </details>
-
-    <!-- Wissenschafts-Kompass -->
-    <div class="panel" id="wissenschafts-panel">
-      <h2>Wissenschafts-Kompass</h2>
-      <div class="panel-sub">Welchem Reformlager entsprechen deine Einstellungen? · ifo/DIW/Zucman/Kirchhof</div>
-      <div id="wissenschafts_bars"></div>
-      <p id="wissenschafts_note" style="font-size:11px;color:var(--muted);margin-top:10px;font-style:italic;"></p>
-    </div>
 
     <details class="about">
       <summary>Wie funktioniert das? (Kurz)</summary>
@@ -1948,71 +2157,77 @@
     </details>
 
     <!-- KPI TOP ROW -->
-    <div class="kpi-grid">
-      <div class="kpi">
+    <div class="kpi-grid" id="kpi-grid">
+      <!-- 4 primäre KPIs — immer sichtbar -->
+      <div class="kpi" id="kpi_card_saldo">
         <div class="kpi-label">Staatssaldo</div>
         <div class="kpi-value" id="kpi_saldo">—</div>
         <div class="kpi-delta" id="kpi_saldo_d">—</div>
         <div class="kpi-bench" id="kpi_saldo_bench"></div>
       </div>
-      <div class="kpi">
-        <div class="kpi-label">Einnahmen gesamt</div>
-        <div class="kpi-value" id="kpi_einn">—</div>
-        <div class="kpi-delta neutral">Mrd. € / Jahr</div>
-        <div class="kpi-bench" id="kpi_einn_bench"></div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Gini-Koeffizient</div>
-        <div class="kpi-value" id="kpi_gini">—</div>
-        <div class="kpi-delta" id="kpi_gini_d">—</div>
-        <div class="kpi-bench" id="kpi_gini_bench"></div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Verwaltungskosten</div>
-        <div class="kpi-value" id="kpi_admin">—</div>
-        <div class="kpi-delta" id="kpi_admin_d">—</div>
-        <div class="kpi-bench" id="kpi_admin_bench"></div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Aktive Steuerarten</div>
-        <div class="kpi-value" id="kpi_nst">—</div>
-        <div class="kpi-delta neutral">Anzahl</div>
-        <div class="kpi-bench" id="kpi_nst_bench"></div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Arbeitsangebot</div>
-        <div class="kpi-value" id="kpi_arb">—</div>
-        <div class="kpi-delta" id="kpi_arb_d">vs. Basis</div>
-        <div class="kpi-bench" id="kpi_arb_bench"></div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Armutsrisikoquote</div>
-        <div class="kpi-value" id="kpi_armut">—</div>
-        <div class="kpi-delta" id="kpi_armut_d">—</div>
-        <div class="kpi-bench" id="kpi_armut_bench"></div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Schuldenquote Δ/Jahr</div>
-        <div class="kpi-value" id="kpi_schuld">—</div>
-        <div class="kpi-delta" id="kpi_schuld_d">% des BIP</div>
-        <div class="kpi-bench" id="kpi_schuld_bench"></div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Wohlfahrtsverlust</div>
-        <div class="kpi-value" id="kpi_dwl">—</div>
-        <div class="kpi-delta" id="kpi_dwl_d">Mrd. € / Jahr</div>
-        <div class="kpi-bench" id="kpi_dwl_bench"></div>
-      </div>
-      <div class="kpi">
+      <div class="kpi" id="kpi_card_sbremse">
         <div class="kpi-label">Schuldenbremse (Art. 109 GG)</div>
         <div class="kpi-value" id="kpi_sbremse" style="font-size:22px">—</div>
         <div class="kpi-delta" id="kpi_sbremse_d">struct. Saldo / BIP</div>
         <div class="kpi-bench">Grenze: −0,35 % BIP (Bund)</div>
       </div>
+      <div class="kpi" id="kpi_card_gini">
+        <div class="kpi-label">Gini-Koeffizient</div>
+        <div class="kpi-value" id="kpi_gini">—</div>
+        <div class="kpi-delta" id="kpi_gini_d">—</div>
+        <div class="kpi-bench" id="kpi_gini_bench"></div>
+      </div>
+      <div class="kpi" id="kpi_card_einn">
+        <div class="kpi-label">Einnahmen gesamt</div>
+        <div class="kpi-value" id="kpi_einn">—</div>
+        <div class="kpi-delta neutral">Mrd. € / Jahr</div>
+        <div class="kpi-bench" id="kpi_einn_bench"></div>
+      </div>
+      <!-- Toggle-Button -->
+      <button class="kpi-more-toggle" id="kpi-more-toggle" onclick="toggleKPIMore()">
+        6 weitere Metriken <span id="kpi-more-chevron">▼</span>
+      </button>
+      <!-- 6 sekundäre KPIs — zunächst ausgeblendet -->
+      <div class="kpi kpi-secondary">
+        <div class="kpi-label">Verwaltungskosten</div>
+        <div class="kpi-value" id="kpi_admin">—</div>
+        <div class="kpi-delta" id="kpi_admin_d">—</div>
+        <div class="kpi-bench" id="kpi_admin_bench"></div>
+      </div>
+      <div class="kpi kpi-secondary">
+        <div class="kpi-label">Aktive Steuerarten</div>
+        <div class="kpi-value" id="kpi_nst">—</div>
+        <div class="kpi-delta neutral">Anzahl</div>
+        <div class="kpi-bench" id="kpi_nst_bench"></div>
+      </div>
+      <div class="kpi kpi-secondary">
+        <div class="kpi-label">Arbeitsangebot</div>
+        <div class="kpi-value" id="kpi_arb">—</div>
+        <div class="kpi-delta" id="kpi_arb_d">vs. Basis</div>
+        <div class="kpi-bench" id="kpi_arb_bench"></div>
+      </div>
+      <div class="kpi kpi-secondary">
+        <div class="kpi-label">Armutsrisikoquote</div>
+        <div class="kpi-value" id="kpi_armut">—</div>
+        <div class="kpi-delta" id="kpi_armut_d">—</div>
+        <div class="kpi-bench" id="kpi_armut_bench"></div>
+      </div>
+      <div class="kpi kpi-secondary">
+        <div class="kpi-label">Schuldenquote Δ/Jahr</div>
+        <div class="kpi-value" id="kpi_schuld">—</div>
+        <div class="kpi-delta" id="kpi_schuld_d">% des BIP</div>
+        <div class="kpi-bench" id="kpi_schuld_bench"></div>
+      </div>
+      <div class="kpi kpi-secondary">
+        <div class="kpi-label">Wohlfahrtsverlust</div>
+        <div class="kpi-value" id="kpi_dwl">—</div>
+        <div class="kpi-delta" id="kpi_dwl_d">Mrd. € / Jahr</div>
+        <div class="kpi-bench" id="kpi_dwl_bench"></div>
+      </div>
     </div>
 
     <!-- GESAMTNOTE / SCORE PANEL -->
-    <div class="score-panel" id="score-panel">
+    <div class="score-panel" id="score-panel" style="display:none">
       <div class="score-left">
         <div class="score-label-tag">Gesamtnote</div>
         <div class="score-grade" id="score-grade">—</div>
@@ -2028,7 +2243,7 @@
           <h2>Grundeinkommen — Wirkungsanalyse</h2>
           <div class="panel-sub">Fiskalische und soziale Effekte · basierend auf Mikrosimulation</div>
         </div>
-        <span id="bge-panel-badge" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;padding:4px 10px;background:var(--accent);color:var(--paper);">— €/Monat</span>
+        <span id="bge-panel-badge" style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;padding:4px 10px;background:var(--accent);color:var(--paper);">— €/Monat</span>
       </div>
       <div class="bge-kpi-row" id="bge-kpi-row"></div>
       <div class="bge-financing-bar">
@@ -2039,27 +2254,27 @@
       <div class="bge-source-note">Quellen: RWI 2024 · DIW Pilotprojekt Grundeinkommen 2021–2024 · ifo Mikrosimulation (Blömer/Peichl 2021) · ZEW Heim et al.</div>
     </div>
 
-    <!-- FINANZTOOLS LINK PANEL -->
-    <div class="ft-link-panel">
-      <div>
-        <div class="ft-link-eyebrow">Nächster Schritt</div>
-        <div class="ft-link-text">Was bedeutet dein Szenario für deine persönlichen Finanzen?</div>
-      </div>
-      <button class="ft-link-btn" id="to-finanztools-btn">Finanztools öffnen →</button>
-    </div>
-
     <div class="warning-box" id="warnbox" style="display:none">
       <strong>Hinweis</strong>
       <span id="warntext"></span>
     </div>
 
     <!-- WIRTSCHAFTLICHE WIRKUNGSANALYSE -->
-    <div class="panel" data-mod="wirk">
-      <h2>Wirtschaftliche Wirkungsanalyse</h2>
-      <div class="panel-sub">Fiskalmultiplikator · Automatische Stabilisatoren · Dynamisches Scoring — ECB WP 1267 · Bundesbank DP 28/2018 · Dolls et al. 2020 · Elmendorf/Hubbard/Williams 2024</div>
-      <div class="bars" id="wirk_bars"></div>
-      <p style="font-size:11px;color:var(--muted);margin-top:10px;font-style:italic;">BIP-Impuls: Fiskalimpuls × Multiplikator 0,65 (ECB/Bundesbank-Konsens DE). Auto-Stabilisatoren: Ø METR D1–D4 — DE-Benchmark ~48 % Dämpfung (Dolls et al. 2020). Dyn. Scoring: Verhaltensbedingte Aufkommensreaktion (Gruber/Saez 2002 · Neumeier/SVR 2025).</p>
-    </div>
+    <details class="panel panel-collapsible" data-mod="wirk">
+      <summary>
+        <div class="summary-left">
+          <div>
+            <h2>Wirtschaftliche Wirkungsanalyse</h2>
+            <div class="panel-sub">Fiskalmultiplikator · Automatische Stabilisatoren · Dynamisches Scoring</div>
+          </div>
+        </div>
+        <span class="summary-chevron">▼</span>
+      </summary>
+      <div class="panel-body">
+        <div class="bars" id="wirk_bars" style="margin-top:16px"></div>
+        <p style="font-size:11px;color:var(--muted);margin-top:10px;font-style:italic;">BIP-Impuls: Fiskalimpuls × Multiplikator 0,65 (ECB/Bundesbank-Konsens DE). Auto-Stabilisatoren: Ø METR D1–D4 — DE-Benchmark ~48 % Dämpfung (Dolls et al. 2020). Dyn. Scoring: Verhaltensbedingte Aufkommensreaktion (Gruber/Saez 2002 · Neumeier/SVR 2025). Quellen: ECB WP 1267 · Bundesbank DP 28/2018 · Dolls et al. 2020 · Elmendorf/Hubbard/Williams 2024</p>
+      </div>
+    </details>
 
     <!-- EINNAHMEN NACH STEUERART -->
     <div class="panel" data-mod="einnahmen">
@@ -2139,11 +2354,11 @@
       <div id="renten_kpis" class="kpi-grid" style="margin-bottom:16px;border:none;background:transparent;gap:8px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))"></div>
       <div class="two-col" style="margin-top:8px;">
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">Kapitalstockaufbau (Mrd. €)</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">Kapitalstockaufbau (Mrd. €)</div>
           <div id="kapitalstock_chart"></div>
         </div>
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">RV-Beitragssatz Projektion 2025–2045 (%)</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">RV-Beitragssatz Projektion 2025–2045 (%)</div>
           <div id="beitrag_proj_chart"></div>
         </div>
       </div>
@@ -2159,6 +2374,30 @@
 
     <div class="mod-add-btn mod-add-result" onclick="openPicker('result')">
       <span>+</span> Darstellung hinzufügen
+    </div>
+
+    <!-- CHALLENGES -->
+    <details class="panel-collapsible" id="challenges-panel">
+      <summary>
+        <div class="summary-left">
+          <div>
+            <h2>Tages- · Wochen- · Monats-Challenge</h2>
+            <div class="panel-sub">Täglich neue Ziele — für alle gleich · Fortschritt wird live berechnet</div>
+          </div>
+        </div>
+        <span class="summary-chevron">▼</span>
+      </summary>
+      <div class="panel-body">
+        <div class="challenge-grid" id="challenges-grid" style="margin-top:16px"></div>
+      </div>
+    </details>
+
+    <!-- Wissenschafts-Kompass -->
+    <div class="panel" id="wissenschafts-panel">
+      <h2>Wissenschafts-Kompass</h2>
+      <div class="panel-sub">Welchem Reformlager entsprechen deine Einstellungen? · ifo/DIW/Zucman/Kirchhof</div>
+      <div id="wissenschafts_bars"></div>
+      <p id="wissenschafts_note" style="font-size:11px;color:var(--muted);margin-top:10px;font-style:italic;"></p>
     </div>
 
     <details class="panel rw-details" id="rw-details">
@@ -2909,16 +3148,16 @@ function renderRenten(p, r) {
 
   const maxAbs = Math.max(1, ...gkvItems.map(x => Math.abs(x.v)));
   document.getElementById('gkv_panel').innerHTML = `
-    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px;">GKV-Struktureffekte (Mrd. € / Jahr)</div>
+    <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px;">GKV-Struktureffekte (Mrd. € / Jahr)</div>
     <div style="display:flex;flex-direction:column;gap:14px;">
     ${gkvItems.map(item => {
       const pct = Math.max(2, Math.abs(item.v) / maxAbs * 100);
       const cls = item.v >= 0 ? 'pos' : 'neg';
       return `<div>
         <div style="display:grid;grid-template-columns:180px 1fr 72px;align-items:center;gap:10px;margin-bottom:4px;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${item.label}">${item.label}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${item.label}">${item.label}</div>
           <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;white-space:nowrap;">${item.v >= 0 ? '+' : ''}${f1(item.v)} Mrd.</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;text-align:right;white-space:nowrap;">${item.v >= 0 ? '+' : ''}${f1(item.v)} Mrd.</div>
         </div>
         <div style="font-size:11px;color:var(--muted);font-style:italic;padding-left:4px;">${item.note}</div>
       </div>`;
@@ -2950,12 +3189,12 @@ function renderKapitalstockSVG(rente, p) {
     const y = yOf(v);
     const label = v >= 1000 ? (v/1000).toFixed(1).replace('.',',') + 'k' : Math.round(v);
     return `<line x1="${pl}" y1="${y}" x2="${pl+iW}" y2="${y}" stroke="rgba(42,39,32,0.08)" stroke-width="1"/>
-            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${label}</text>`;
+            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">${label}</text>`;
   }).join('');
 
   const xLabels = [];
   for (let j = minJahr; j <= maxJahr; j += Math.max(1, Math.ceil((maxJahr - minJahr) / 5))) {
-    xLabels.push(`<text x="${xOf(j)}" y="${pt+iH+16}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${j}</text>`);
+    xLabels.push(`<text x="${xOf(j)}" y="${pt+iH+16}" text-anchor="middle" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">${j}</text>`);
   }
 
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
@@ -2964,7 +3203,7 @@ function renderKapitalstockSVG(rente, p) {
     <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
     <polygon points="${area}" fill="var(--good)" opacity="0.15"/>
     <polyline points="${pts}" fill="none" stroke="var(--good)" stroke-width="2.5"/>
-    <text x="${xOf(maxJahr)-4}" y="${yOf(data[data.length-1].ks)-8}" text-anchor="end" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="var(--good)">${Math.round(rente.kapitalstock)} Mrd. €</text>
+    <text x="${xOf(maxJahr)-4}" y="${yOf(data[data.length-1].ks)-8}" text-anchor="end" font-size="11" font-family="DM Mono,monospace" font-weight="600" fill="var(--good)">${Math.round(rente.kapitalstock)} Mrd. €</text>
   </svg>`;
 }
 
@@ -2985,19 +3224,19 @@ function renderBeitragProjSVG(rente, p) {
   const yVals = [Math.ceil(minV), Math.round((minV+maxV)/2), Math.floor(maxV)].map(v => {
     const y = yOf(v);
     return `<line x1="${pl}" y1="${y}" x2="${pl+iW}" y2="${y}" stroke="rgba(42,39,32,0.08)" stroke-width="1"/>
-            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${v}%</text>`;
+            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">${v}%</text>`;
   }).join('');
 
   const xLabels = [2025,2030,2035,2040,2045].map(j =>
-    `<text x="${xOf(j)}" y="${pt+iH+16}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${j}</text>`
+    `<text x="${xOf(j)}" y="${pt+iH+16}" text-anchor="middle" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">${j}</text>`
   ).join('');
 
   const legend = p.kapitalquote > 0
     ? `<line x1="${pl+8}" y1="${pt+8}" x2="${pl+26}" y2="${pt+8}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4,2"/>
-       <text x="${pl+30}" y="${pt+12}" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">ohne Reform</text>
+       <text x="${pl+30}" y="${pt+12}" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">ohne Reform</text>
        <line x1="${pl+130}" y1="${pt+8}" x2="${pl+148}" y2="${pt+8}" stroke="var(--good)" stroke-width="2.5"/>
-       <text x="${pl+152}" y="${pt+12}" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--good)">mit Reform</text>`
-    : `<text x="${pl+8}" y="${pt+14}" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--muted)" font-style="italic">Fondsquote = 0 — kein Unterschied sichtbar</text>`;
+       <text x="${pl+152}" y="${pt+12}" font-size="10" font-family="DM Mono,monospace" fill="var(--good)">mit Reform</text>`
+    : `<text x="${pl+8}" y="${pt+14}" font-size="11" font-family="DM Mono,monospace" fill="var(--muted)" font-style="italic">Fondsquote = 0 — kein Unterschied sichtbar</text>`;
 
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
     ${yVals}${xLabels}
@@ -3060,13 +3299,13 @@ function _renderLafferNow(p) {
   const yVals = [...yTickSet].filter(v => v >= minEst && v <= maxEst*1.1).map(v => {
     const y = yOf(v);
     return `<line x1="${pl}" y1="${y}" x2="${pl+iW}" y2="${y}" stroke="rgba(42,39,32,0.08)" stroke-width="1"/>
-            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${Math.round(v)}</text>`;
+            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">${Math.round(v)}</text>`;
   }).join('');
 
   const xVals = [10,20,30,40,50,60,70].map(s => {
     const x = xOf(s);
     return `<line x1="${x}" y1="${pt2}" x2="${x}" y2="${pt2+iH}" stroke="rgba(42,39,32,0.08)" stroke-width="1"/>
-            <text x="${x}" y="${pt2+iH+16}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${s}%</text>`;
+            <text x="${x}" y="${pt2+iH+16}" text-anchor="middle" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">${s}%</text>`;
   }).join('');
 
   // Peak-Markierung — text-anchor rechts wenn zu nah am Rand
@@ -3075,7 +3314,7 @@ function _renderLafferNow(p) {
   const peakMark = `
     <line x1="${px}" y1="${pt2}" x2="${px}" y2="${pt2+iH}" stroke="var(--good)" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
     <circle cx="${px}" cy="${py}" r="5" fill="var(--good)" opacity="0.9"/>
-    <text x="${peakNearRight ? px-8 : px+8}" y="${py-8}" text-anchor="${peakNearRight ? 'end' : 'start'}" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="var(--good)">Max: ${peakPt.s}% → ${Math.round(peakPt.est)} Mrd.</text>`;
+    <text x="${peakNearRight ? px-8 : px+8}" y="${py-8}" text-anchor="${peakNearRight ? 'end' : 'start'}" font-size="11" font-family="DM Mono,monospace" font-weight="600" fill="var(--good)">Max: ${peakPt.s}% → ${Math.round(peakPt.est)} Mrd.</text>`;
 
   // Aktuelle Position
   const cx = xOf(p.spitze), cy = yOf(curPt.est);
@@ -3083,7 +3322,7 @@ function _renderLafferNow(p) {
   const curMark = `
     <line x1="${cx}" y1="${pt2}" x2="${cx}" y2="${pt2+iH}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3,2"/>
     <circle cx="${cx}" cy="${cy}" r="5" fill="var(--accent)"/>
-    <text x="${curNearRight ? cx-8 : cx+8}" y="${cy-6}" text-anchor="${curNearRight ? 'end' : 'start'}" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--accent)">${p.spitze}%</text>`;
+    <text x="${curNearRight ? cx-8 : cx+8}" y="${cy-6}" text-anchor="${curNearRight ? 'end' : 'start'}" font-size="11" font-family="DM Mono,monospace" fill="var(--accent)">${p.spitze}%</text>`;
 
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
     ${yVals}${xVals}
@@ -3092,7 +3331,7 @@ function _renderLafferNow(p) {
     <polygon points="${area}" fill="var(--accent)" opacity="0.07"/>
     <polyline points="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
     ${peakMark}${curMark}
-    <text x="${pl+8}" y="${pt2+14}" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">ESt-Aufkommen (Mrd. €)</text>
+    <text x="${pl+8}" y="${pt2+14}" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">ESt-Aufkommen (Mrd. €)</text>
   </svg>`;
 }
 
@@ -3404,6 +3643,19 @@ function render() {
   arbDelta.textContent = (dArb >= 0 ? '+' : '') + dArb.toFixed(1) + ' Index';
   arbDelta.className = 'kpi-delta ' + (dArb > 1 ? 'good' : dArb < -1 ? 'bad' : 'neutral');
 
+  // KPI card tone backgrounds
+  function setKpiTone(id, tone) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'kpi' + (tone ? ' tone-' + tone : '');
+  }
+  const saldoTone = r.saldo > 0 ? 'good' : r.saldo > -50 ? 'warn' : 'bad';
+  setKpiTone('kpi_card_saldo', saldoTone);
+  setKpiTone('kpi_card_sbremse', r.schuldenbremse_ok ? 'good' : 'bad');
+  const giniTone = (r.gini - REF.gini) > 0.005 ? 'bad' : (r.gini - REF.gini) < -0.005 ? 'good' : 'neu';
+  setKpiTone('kpi_card_gini', giniTone);
+  setKpiTone('kpi_card_einn', 'neu');
+
   // Warnungen
   const warnbox = document.getElementById('warnbox');
   const warnings = [];
@@ -3582,7 +3834,7 @@ function render() {
   const sbEl  = document.getElementById('kpi_sbremse');
   const sbDEl = document.getElementById('kpi_sbremse_d');
   sbEl.textContent = r.schuldenbremse_ok ? '✓ eingehalten' : '✗ verletzt';
-  sbEl.style.color = r.schuldenbremse_ok ? 'var(--good)' : 'var(--bad)';
+  sbEl.style.color = '';
   sbDEl.textContent = (r.saldo_bip_pct >= 0 ? '+' : '') + r.saldo_bip_pct.toFixed(2).replace('.', ',') + ' % BIP';
   sbDEl.className = 'kpi-delta ' + (r.schuldenbremse_ok ? 'good' : 'bad');
 
@@ -3913,7 +4165,7 @@ function renderChallenges(r) {
 
     const badge = allDone
       ? `<div class="challenge-done-badge" style="color:${slot.accent};border-color:${slot.accent}">✓ Geschafft!</div>`
-      : `<div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px;">${c.subs.filter(s=>s.check(r)).length}/${c.subs.length} Ziele erreicht</div>`;
+      : `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px;">${c.subs.filter(s=>s.check(r)).length}/${c.subs.length} Ziele erreicht</div>`;
 
     return `<div class="challenge-card${allDone ? ' done' : ''}">
       <div class="challenge-accent-bar" style="background:${slot.accent}"></div>
@@ -3988,9 +4240,9 @@ function renderWissenschaftsPanel(p) {
   const barsHtml = lager.map(l => `
     <div style="margin-bottom:10px;">
       <div style="display:grid;grid-template-columns:220px 1fr 42px;align-items:center;gap:10px;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${l.desc}">${l.label}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${l.desc}">${l.label}</div>
         <div class="bar-track"><div class="bar-fill neu" style="width:${l.score}%;background:${l.color};opacity:${l.score > 0 ? 0.8 : 0.2}"></div></div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;">${l.score}%</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;text-align:right;">${l.score}%</div>
       </div>
     </div>`).join('');
 
@@ -4391,10 +4643,32 @@ Quoten: ESt Arbeit 2,5% · MwSt 1,0% · KSt 4,0% · GewSt 5,0%
 // INIT
 // ============================================================
 
-// Section toggles
-document.querySelectorAll('.section-title[data-toggle]').forEach(el => {
+// Section toggles (ctrl-section-head + legacy section-title)
+document.querySelectorAll('.ctrl-section-head[data-toggle], .section-title[data-toggle]').forEach(el => {
   el.addEventListener('click', () => el.classList.toggle('collapsed'));
 });
+
+// Visual slider sync
+function syncSlider(input) {
+  const track = input.closest('.slider-track');
+  if (!track) return;
+  const pct = ((input.value - input.min) / (input.max - input.min)) * 100;
+  const fill = track.querySelector('.slider-fill');
+  const thumb = track.querySelector('.slider-thumb');
+  if (fill) fill.style.width = pct + '%';
+  if (thumb) thumb.style.left = pct + '%';
+  const col = track.dataset.accent;
+  if (col) {
+    if (fill) fill.style.background = col;
+    if (thumb) thumb.style.borderColor = col;
+    const row = track.closest('.slider-row');
+    const valSpan = row && row.querySelector('.value');
+    if (valSpan) valSpan.style.color = col;
+  }
+}
+function syncAllSliders() {
+  document.querySelectorAll('.styled-slider').forEach(syncSlider);
+}
 
 // Preset buttons
 document.querySelectorAll('#presets button').forEach(btn => {
@@ -4404,12 +4678,14 @@ document.querySelectorAll('#presets button').forEach(btn => {
     btn.classList.add('active');
     setParams(PRESETS[btn.dataset.preset]);
     render();
+    syncAllSliders();
   });
 });
 
 // Listen on all inputs
 document.querySelectorAll('input[type="range"], input[type="checkbox"]').forEach(inp => {
   inp.addEventListener('input', () => {
+    if (inp.classList.contains('styled-slider')) syncSlider(inp);
     pushHistory();
     document.querySelectorAll('#presets button').forEach(b => b.classList.remove('active'));
     render();
@@ -4438,12 +4714,12 @@ function renderEstKurve(p) {
   const yGrid = [0,10,20,30,40,50].map(v => {
     const y = pt + iH - (v / maxRate) * iH;
     return `<line x1="${pl}" y1="${y}" x2="${pl+iW}" y2="${y}" stroke="rgba(42,39,32,0.1)" stroke-width="1"/>
-            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${v}%</text>`;
+            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">${v}%</text>`;
   }).join('');
   const xGrid = [50,100,150,200,250,300,350].map(v => {
     const x = pl + (v*1000 / maxInc) * iW;
     return `<line x1="${x}" y1="${pt}" x2="${x}" y2="${pt+iH}" stroke="rgba(42,39,32,0.1)" stroke-width="1"/>
-            <text x="${x}" y="${pt+iH+18}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${v}k</text>`;
+            <text x="${x}" y="${pt+iH+18}" text-anchor="middle" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">${v}k</text>`;
   }).join('');
 
   // Dezil-Markierungen
@@ -4452,7 +4728,7 @@ function renderEstKurve(p) {
     const gs = grenzsteuersatz(d.brutto*(1-d.kapital), p.freibetrag, p.eingang, p.spitze, p.grenze)*100;
     const y = pt + iH - Math.min(iH, (gs / maxRate) * iH);
     return `<circle cx="${x}" cy="${y}" r="3" fill="var(--accent)" opacity="0.7"/>
-            <text x="${x}" y="${pt+iH+28}" text-anchor="middle" font-size="9" font-family="JetBrains Mono,monospace" fill="var(--muted)">${d.label}</text>`;
+            <text x="${x}" y="${pt+iH+28}" text-anchor="middle" font-size="9" font-family="DM Mono,monospace" fill="var(--muted)">${d.label}</text>`;
   }).join('');
 
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H+10}" style="width:100%;overflow:visible">
@@ -4464,9 +4740,9 @@ function renderEstKurve(p) {
     ${dezilMarks}
     <g transform="translate(${pl+8},${pt+10})">
       <line x1="0" y1="0" x2="18" y2="0" stroke="var(--accent)" stroke-width="2.5"/>
-      <text x="22" y="4" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--ink)">Grenzsteuersatz</text>
+      <text x="22" y="4" font-size="11" font-family="DM Mono,monospace" fill="var(--ink)">Grenzsteuersatz</text>
       <line x1="0" y1="16" x2="18" y2="16" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5,3"/>
-      <text x="22" y="20" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--ink)">Effektivsteuersatz</text>
+      <text x="22" y="20" font-size="11" font-family="DM Mono,monospace" fill="var(--ink)">Effektivsteuersatz</text>
     </g>
   </svg>`;
 }
@@ -4490,21 +4766,21 @@ function renderIncomeDist(r, p) {
     const lbl = DEZILE[i].label;
     const fontSize = nBars > 10 ? '8' : '9';
     return `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" fill="${fill}" opacity="${isPoor?'1':'0.75'}"/>
-            <text x="${x+barW/2}" y="${y-4}" text-anchor="middle" font-size="${fontSize}" font-family="JetBrains Mono,monospace" fill="var(--muted)">${nStr}</text>
-            <text x="${x+barW/2}" y="${pt+iH+18}" text-anchor="middle" font-size="${fontSize}" font-family="JetBrains Mono,monospace" fill="var(--muted)">${lbl}</text>`;
+            <text x="${x+barW/2}" y="${y-4}" text-anchor="middle" font-size="${fontSize}" font-family="DM Mono,monospace" fill="var(--muted)">${nStr}</text>
+            <text x="${x+barW/2}" y="${pt+iH+18}" text-anchor="middle" font-size="${fontSize}" font-family="DM Mono,monospace" fill="var(--muted)">${lbl}</text>`;
   }).join('');
 
   // Armutsgrenze
   const povertyY = pt + iH - (r.poverty_line / maxNetto) * iH;
   const povertyLine = r.poverty_line > 0 ?
     `<line x1="${pl}" y1="${povertyY}" x2="${pl+iW}" y2="${povertyY}" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="6,3"/>
-     <text x="${pl+iW-4}" y="${povertyY-5}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--bad)">Armutsgrenze ${Math.round(r.poverty_line/1000)}k €</text>` : '';
+     <text x="${pl+iW-4}" y="${povertyY-5}" text-anchor="end" font-size="10" font-family="DM Mono,monospace" fill="var(--bad)">Armutsgrenze ${Math.round(r.poverty_line/1000)}k €</text>` : '';
 
   const yLabels = [0, 0.25, 0.5, 0.75, 1.0].map(f => {
     const v = Math.round(f * maxNetto / 1000);
     const y = pt + iH - f * iH;
     return `<line x1="${pl}" y1="${y}" x2="${pl+iW}" y2="${y}" stroke="rgba(42,39,32,0.08)" stroke-width="1"/>
-            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${v}k</text>`;
+            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">${v}k</text>`;
   }).join('');
 
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H+10}" style="width:100%;overflow:visible">
@@ -4628,12 +4904,12 @@ function renderSchuldenpfad(r) {
     const isM = v===60, isR = v===90;
     const col = isM ? 'rgba(200,64,31,0.5)' : isR ? 'rgba(200,64,31,0.8)' : 'rgba(42,39,32,0.08)';
     return `<line x1="${pl}" y1="${y}" x2="${pl+iW}" y2="${y}" stroke="${col}" stroke-width="${isM||isR?1.5:1}" stroke-dasharray="${isM||isR?'6,3':''}"/>
-            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="${isM||isR?'var(--bad)':'var(--muted)'}">
+            <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="DM Mono,monospace" fill="${isM||isR?'var(--bad)':'var(--muted)'}">
               ${v}%${isM?' ←Maas.':isR?' ←R/R':''}
             </text>`;
   }).join('');
   const xLabels = [2025,2030,2035,2040,2045].map(j=>
-    `<text x="${xOf(j)}" y="${pt+iH+16}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${j}</text>`
+    `<text x="${xOf(j)}" y="${pt+iH+16}" text-anchor="middle" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">${j}</text>`
   ).join('');
 
   const endNeu = pfad[pfad.length-1].neu.toFixed(1);
@@ -4646,13 +4922,13 @@ function renderSchuldenpfad(r) {
     <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
     ${!sameScenario?`<polyline points="${pts_sq}" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.6"/>`:'' }
     <polyline points="${pts_neu}" fill="none" stroke="${r.saldo>0?'var(--good)':'var(--bad)'}" stroke-width="2.5"/>
-    <text x="${xOf(2045)-4}" y="${yOf(pfad[20].neu)-8}" text-anchor="end" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="${r.saldo>0?'var(--good)':'var(--bad)'}">${(+endNeu).toFixed(1).replace('.',',')} %</text>
-    ${!sameScenario?`<text x="${xOf(2045)-4}" y="${yOf(pfad[20].sq)+14}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">SQ: ${endSQ} %</text>`:''}
+    <text x="${xOf(2045)-4}" y="${yOf(pfad[20].neu)-8}" text-anchor="end" font-size="11" font-family="DM Mono,monospace" font-weight="600" fill="${r.saldo>0?'var(--good)':'var(--bad)'}">${(+endNeu).toFixed(1).replace('.',',')} %</text>
+    ${!sameScenario?`<text x="${xOf(2045)-4}" y="${yOf(pfad[20].sq)+14}" text-anchor="end" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">SQ: ${endSQ} %</text>`:''}
     <g transform="translate(${pl+8},${pt+8})">
       <line x1="0" y1="0" x2="18" y2="0" stroke="${r.saldo>0?'var(--good)':'var(--bad)'}" stroke-width="2.5"/>
-      <text x="22" y="4" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--ink)">Aktuelles Szenario</text>
+      <text x="22" y="4" font-size="10" font-family="DM Mono,monospace" fill="var(--ink)">Aktuelles Szenario</text>
       ${!sameScenario?`<line x1="0" y1="14" x2="18" y2="14" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4,2"/>
-      <text x="22" y="18" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">Status Quo</text>`:''}
+      <text x="22" y="18" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">Status Quo</text>`:''}
     </g>
   </svg>`;
 }
@@ -4676,7 +4952,7 @@ function copyShareLink() {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(url).then(() => {
         btn.textContent = '✓ Kopiert!';
-        setTimeout(() => btn.textContent = '⇥ Link kopieren', 1800);
+        setTimeout(() => btn.textContent = 'Link kopieren', 1800);
       }).catch(fallback);
     } else {
       fallback();
@@ -4752,8 +5028,8 @@ function renderSzenarioVergleich() {
   if (!A || !B) {
     el.style.display = A ? 'block' : 'none';
     if (A && !B) el.innerHTML = `<div class="panel" style="border-top:3px solid var(--accent);padding:16px 20px;display:flex;align-items:center;gap:12px;">
-      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);">▣ Szenario A gespeichert</span>
-      <span style="font-size:13px;color:var(--muted);">Klicke „▣ Szenario B" um ein zweites Szenario zu bearbeiten und zu vergleichen.</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);">Szenario A gespeichert</span>
+      <span style="font-size:13px;color:var(--muted);">Klicke „Szenario B" um ein zweites Szenario zu bearbeiten und zu vergleichen.</span>
     </div>`;
     return;
   }
@@ -4782,9 +5058,9 @@ function renderSzenarioVergleich() {
       Math.round(delta).toString());
     return `<tr>
       <td style="padding:6px 12px;font-size:13px;border-bottom:1px solid rgba(42,39,32,0.08)">${m.label}</td>
-      <td style="padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);border-bottom:1px solid rgba(42,39,32,0.08)">${m.fmt(m.fA)}</td>
-      <td style="padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--good);border-bottom:1px solid rgba(42,39,32,0.08)">${m.fmt(m.fB)}</td>
-      <td style="padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--${cls});border-bottom:1px solid rgba(42,39,32,0.08)">${deltaStr}</td>
+      <td style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);border-bottom:1px solid rgba(42,39,32,0.08)">${m.fmt(m.fA)}</td>
+      <td style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--good);border-bottom:1px solid rgba(42,39,32,0.08)">${m.fmt(m.fB)}</td>
+      <td style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--${cls});border-bottom:1px solid rgba(42,39,32,0.08)">${deltaStr}</td>
     </tr>`;
   }).join('');
 
@@ -4793,10 +5069,10 @@ function renderSzenarioVergleich() {
     <div class="panel-sub">Spalte Δ = B minus A · Grün = Verbesserung nach Szenario B</div>
     <table style="width:100%;border-collapse:collapse;margin-top:12px;">
       <thead><tr>
-        <th style="padding:6px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);border-bottom:2px solid var(--rule)">Kennzahl</th>
-        <th style="padding:6px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);border-bottom:2px solid var(--rule)">Szenario A</th>
-        <th style="padding:6px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--good);border-bottom:2px solid var(--rule)">Szenario B</th>
-        <th style="padding:6px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);border-bottom:2px solid var(--rule)">Δ (B−A)</th>
+        <th style="padding:6px 12px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);border-bottom:2px solid var(--rule)">Kennzahl</th>
+        <th style="padding:6px 12px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);border-bottom:2px solid var(--rule)">Szenario A</th>
+        <th style="padding:6px 12px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--good);border-bottom:2px solid var(--rule)">Szenario B</th>
+        <th style="padding:6px 12px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);border-bottom:2px solid var(--rule)">Δ (B−A)</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
@@ -4870,6 +5146,7 @@ function undoHistory() {
   const prev = JSON.parse(_history.pop());
   setParams(prev);
   render();
+  syncAllSliders();
   document.getElementById('undo-btn').disabled = _history.length === 0;
 }
 
@@ -4928,6 +5205,7 @@ function applyTourStep() {
   }
   setParams(accumulated);
   render();
+  syncAllSliders();
 
   const bar = document.getElementById('reform-tour-bar');
   const step = tour.steps[_tourStep];
@@ -5008,6 +5286,7 @@ if (window.location.hash) {
   if (fromHash) setParams(fromHash);
 }
 render();
+syncAllSliders();
 // Laffer-Kurve sofort beim Start berechnen (kein Debounce-Delay)
 _renderLafferNow(getParams());
 injectTooltips();
@@ -5148,7 +5427,7 @@ function downloadResultCard(fmt = 'landscape', theme = 'dark') {
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
     const C = _cardColors(theme);
-    const mono = '"JetBrains Mono", monospace';
+    const mono = '"DM Mono", monospace';
     const serif = '"Fraunces", Georgia, serif';
     const kpis = _cardKpis(r, p);
     const shareUrl = 'kassensturz.de';
@@ -5352,15 +5631,12 @@ function downloadResultCard(fmt = 'landscape', theme = 'dark') {
     link.click();
 
     btn.textContent = '✓ Gespeichert'; btn.disabled = false;
-    setTimeout(() => { btn.textContent = '↓ Bild speichern'; }, 2000);
+    setTimeout(() => { btn.textContent = 'Bild speichern'; }, 2000);
   });
 }
 
 document.getElementById('card-btn').addEventListener('click', openCardModal);
 
-document.getElementById('to-finanztools-btn').addEventListener('click', function() {
-  window.location.href = '/finanz.html';
-});
 
 </script>
 
@@ -5397,8 +5673,8 @@ document.getElementById('to-finanztools-btn').addEventListener('click', function
     <hr class="csp-divider">
     <div class="csp-theme-row">
       <span class="csp-theme-label">Stil:</span>
-      <button class="csp-theme-btn active" id="csp-dark" onclick="setCardTheme('dark')">◼ Dunkel</button>
-      <button class="csp-theme-btn" id="csp-light" onclick="setCardTheme('light')">◻ Hell</button>
+      <button class="csp-theme-btn active" id="csp-dark" onclick="setCardTheme('dark')">Dunkel</button>
+      <button class="csp-theme-btn" id="csp-light" onclick="setCardTheme('light')">Hell</button>
       <span class="csp-hint">Klicke ein Format um sofort zu speichern</span>
     </div>
   </div>
@@ -5557,7 +5833,17 @@ const MOD_DEFS = {
 };
 
 // Welche Module sind gerade aktiv (sichtbar)?
-const activeModules = new Set(['est','kst','mwst','co2','wirk','einnahmen','haushalt']);
+const activeModules = new Set(['est','kst','mwst','co2']);
+
+let kpiMoreOpen = false;
+function toggleKPIMore() {
+  kpiMoreOpen = !kpiMoreOpen;
+  document.querySelectorAll('.kpi-secondary').forEach(el => el.classList.toggle('kpi-shown', kpiMoreOpen));
+  const toggle = document.getElementById('kpi-more-toggle');
+  const chevron = document.getElementById('kpi-more-chevron');
+  toggle.childNodes[0].textContent = kpiMoreOpen ? '6 weitere ausblenden ' : '6 weitere Metriken ';
+  chevron.textContent = kpiMoreOpen ? '▲' : '▼';
+}
 
 function applyModules() {
   document.querySelectorAll('[data-mod]').forEach(el => {

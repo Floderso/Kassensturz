@@ -28,7 +28,7 @@
     background: var(--bg);
     color: var(--ink);
     font-family: 'Inter', sans-serif;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.5;
   }
   body {
@@ -76,7 +76,7 @@
   }
   h1 em { font-style: italic; color: var(--accent); }
   .subtitle {
-    font-size: 15px;
+    font-size: 16px;
     color: var(--muted);
     font-style: italic;
     max-width: 620px;
@@ -137,7 +137,7 @@
     padding: 13px 18px;
     cursor: pointer;
     font-family: 'Fraunces', serif;
-    font-size: 15px;
+    font-size: 16px;
     text-align: left;
     display: flex;
     align-items: center;
@@ -146,6 +146,7 @@
     color: var(--ink);
   }
   .quiz-option:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .quiz-option:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .quiz-option.selected { background: var(--accent); color: var(--paper); border-color: var(--accent); }
   .quiz-option-key {
     font-family: 'JetBrains Mono', monospace;
@@ -175,6 +176,7 @@
     display: none;
   }
   .quiz-next-btn:hover { background: var(--accent); }
+  .quiz-next-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .quiz-next-btn.visible { display: inline-block; }
   .quiz-skip-row {
     margin-top: 20px;
@@ -219,7 +221,7 @@
   }
   .security-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 18px; height: 18px;
+    width: 20px; height: 20px;
     background: var(--accent);
     cursor: pointer;
     border: 2px solid var(--paper);
@@ -347,7 +349,7 @@
   .hs-banner-tag {
     background: var(--accent);
     color: var(--paper);
-    font-size: 9px;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     padding: 2px 7px;
@@ -430,7 +432,7 @@
   }
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 16px; height: 16px;
+    width: 20px; height: 20px;
     background: var(--accent);
     cursor: pointer;
     border: 2px solid var(--paper);
@@ -443,7 +445,7 @@
     transform: scale(1.1);
   }
   input[type="range"]::-moz-range-thumb {
-    width: 16px; height: 16px;
+    width: 20px; height: 20px;
     background: var(--accent);
     cursor: pointer;
     border: 2px solid var(--paper);
@@ -487,7 +489,7 @@
   .kpi { background: var(--paper); padding: 15px 17px; }
   .kpi-label {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--muted);
@@ -650,11 +652,11 @@
   <div id="quiz-section">
     <div class="quiz-wrapper">
       <div class="quiz-meta">
-        <span class="quiz-step-label" id="quiz-step-label">Schritt 1 von 5</span>
+        <span class="quiz-step-label" id="quiz-step-label">Schritt 1 von 7</span>
         <button class="quiz-skip" onclick="skipQuiz()">Überspringen →</button>
       </div>
       <div class="quiz-progress">
-        <div class="quiz-progress-fill" id="quiz-progress-fill" style="width:20%"></div>
+        <div class="quiz-progress-fill" id="quiz-progress-fill" style="width:14.3%"></div>
       </div>
 
       <!-- ── STEP 1: Alter ── -->
@@ -670,7 +672,7 @@
         </div>
       </div>
 
-      <!-- ── STEP 2: Einkommen & Sparrate ── -->
+      <!-- ── STEP 2: Einkommen ── -->
       <div class="quiz-step" id="step-2">
         <div class="quiz-question">Was ist dein monatliches Nettoeinkommen?</div>
         <div class="quiz-options">
@@ -680,21 +682,21 @@
           <button class="quiz-option" data-key="income" data-val="4000-7000" onclick="selectOption(this)"><span class="quiz-option-key">D</span>4.000 – 7.000 €</button>
           <button class="quiz-option" data-key="income" data-val="7000p" onclick="selectOption(this)"><span class="quiz-option-key">E</span>Über 7.000 €</button>
         </div>
-        <hr class="quiz-divider">
-        <div class="quiz-question-sub">Wie viel kannst du monatlich anlegen?</div>
+      </div>
+
+      <!-- ── STEP 3: Sparrate ── -->
+      <div class="quiz-step" id="step-3">
+        <div class="quiz-question">Wie viel kannst du monatlich anlegen?</div>
         <div class="quiz-options">
           <button class="quiz-option" data-key="saverate" data-val="u100" onclick="selectOption(this)"><span class="quiz-option-key">A</span>Kaum etwas — unter 100 €</button>
           <button class="quiz-option" data-key="saverate" data-val="100-300" onclick="selectOption(this)"><span class="quiz-option-key">B</span>Ein bisschen — 100 bis 300 €</button>
           <button class="quiz-option" data-key="saverate" data-val="300-1000" onclick="selectOption(this)"><span class="quiz-option-key">C</span>Regelmäßig — 300 bis 1.000 €</button>
           <button class="quiz-option" data-key="saverate" data-val="1000p" onclick="selectOption(this)"><span class="quiz-option-key">D</span>Deutlich mehr — über 1.000 €</button>
         </div>
-        <div class="quiz-skip-row">
-          <button class="quiz-next-btn" id="step2-next" onclick="goToStep(3)">Weiter →</button>
-        </div>
       </div>
 
-      <!-- ── STEP 3: Ziel & Horizont ── -->
-      <div class="quiz-step" id="step-3">
+      <!-- ── STEP 4: Ziel ── -->
+      <div class="quiz-step" id="step-4">
         <div class="quiz-question">Wofür sparst oder investierst du?</div>
         <div class="quiz-options">
           <button class="quiz-option" data-key="goal" data-val="notgroschen" onclick="selectOption(this)"><span class="quiz-option-key">A</span>Notgroschen / Sicherheitspolster</button>
@@ -703,21 +705,21 @@
           <button class="quiz-option" data-key="goal" data-val="rente" onclick="selectOption(this)"><span class="quiz-option-key">D</span>Altersvorsorge</button>
           <button class="quiz-option" data-key="goal" data-val="aufbau" onclick="selectOption(this)"><span class="quiz-option-key">E</span>Langfristiger Vermögensaufbau</button>
         </div>
-        <hr class="quiz-divider">
-        <div class="quiz-question-sub">Wann könntest du das Geld brauchen?</div>
+      </div>
+
+      <!-- ── STEP 5: Zeithorizont ── -->
+      <div class="quiz-step" id="step-5">
+        <div class="quiz-question">Wann könntest du das Geld brauchen?</div>
         <div class="quiz-options">
           <button class="quiz-option" data-key="horizon" data-val="u1" onclick="selectOption(this)"><span class="quiz-option-key">A</span>Jederzeit — unter 1 Jahr</button>
           <button class="quiz-option" data-key="horizon" data-val="1-5" onclick="selectOption(this)"><span class="quiz-option-key">B</span>In 1 bis 5 Jahren</button>
           <button class="quiz-option" data-key="horizon" data-val="5-15" onclick="selectOption(this)"><span class="quiz-option-key">C</span>In 5 bis 15 Jahren</button>
           <button class="quiz-option" data-key="horizon" data-val="15p" onclick="selectOption(this)"><span class="quiz-option-key">D</span>Erst in 15+ Jahren</button>
         </div>
-        <div class="quiz-skip-row">
-          <button class="quiz-next-btn" id="step3-next" onclick="goToStep(4)">Weiter →</button>
-        </div>
       </div>
 
-      <!-- ── STEP 4: Risiko ── -->
-      <div class="quiz-step" id="step-4">
+      <!-- ── STEP 6: Risiko ── -->
+      <div class="quiz-step" id="step-6">
         <div class="quiz-question">Stell dir vor: Dein Depot verliert in einem Jahr 25% an Wert. Was tust du?</div>
         <div class="quiz-options">
           <button class="quiz-option" data-key="crash" data-val="sell" onclick="selectOption(this)"><span class="quiz-option-key">A</span>Ich verkaufe alles — das ist mir zu riskant</button>
@@ -734,12 +736,12 @@
         </div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:6px;" id="security-label">Ausgewogen (3/5)</div>
         <div class="quiz-skip-row">
-          <button class="quiz-next-btn" id="step4-next" onclick="goToStep(5)">Weiter →</button>
+          <button class="quiz-next-btn" id="step6-next" onclick="goToStep(7)">Weiter →</button>
         </div>
       </div>
 
-      <!-- ── STEP 5: Vorwissen ── -->
-      <div class="quiz-step" id="step-5">
+      <!-- ── STEP 7: Vorwissen ── -->
+      <div class="quiz-step" id="step-7">
         <div class="quiz-question">Wie gut kennst du dich mit Geldanlage aus?</div>
         <div class="quiz-sub">Beeinflusst die Tiefe der Erklärungen in den Rechnern.</div>
         <div class="quiz-options">
@@ -1090,18 +1092,21 @@ let currentStep = 1;
 // Step requirements: which keys must be answered before advancing
 const stepKeys = {
   1: ['age'],
-  2: ['income', 'saverate'],
-  3: ['goal', 'horizon'],
-  4: ['crash'],
-  5: ['knowledge']
+  2: ['income'],
+  3: ['saverate'],
+  4: ['goal'],
+  5: ['horizon'],
+  6: ['crash'],
+  7: ['knowledge']
 };
+const TOTAL_STEPS = 7;
 
 document.getElementById('security-slider').addEventListener('input', function() {
   const v = +this.value;
   const labels = ['', 'Sehr sicherheitsorientiert (1/5)', 'Eher sicher (2/5)', 'Ausgewogen (3/5)', 'Eher renditestark (4/5)', 'Renditeoptimiert (5/5)'];
   document.getElementById('security-label').textContent = labels[v];
   answers.security = v;
-  checkStepReady(4);
+  checkStepReady(6);
 });
 
 function selectOption(btn) {
@@ -1119,22 +1124,17 @@ function selectOption(btn) {
   // Single-question steps auto-advance
   if (stepKeys[step].length === 1) {
     setTimeout(() => {
-      if (step === 5) finishQuiz();
+      if (step === TOTAL_STEPS) finishQuiz();
       else goToStep(step + 1);
     }, 280);
   }
 }
 
 function checkStepReady(step) {
-  const required = stepKeys[step];
-  const allAnswered = required.every(k => answers[k] !== undefined);
-  if (step === 2) { const btn = document.getElementById('step2-next'); if(btn) btn.classList.toggle('visible', allAnswered); }
-  if (step === 3) { const btn = document.getElementById('step3-next'); if(btn) btn.classList.toggle('visible', allAnswered); }
-  if (step === 4) {
-    // security has a default value, so only crash is needed
+  if (step === 6) {
     const ready = answers.crash !== undefined;
-    const btn = document.getElementById('step4-next');
-    if(btn) btn.classList.toggle('visible', ready);
+    const btn = document.getElementById('step6-next');
+    if (btn) btn.classList.toggle('visible', ready);
   }
 }
 
@@ -1142,8 +1142,8 @@ function goToStep(n) {
   document.getElementById(`step-${currentStep}`).classList.remove('active');
   currentStep = n;
   document.getElementById(`step-${n}`).classList.add('active');
-  document.getElementById('quiz-step-label').textContent = `Schritt ${n} von 5`;
-  document.getElementById('quiz-progress-fill').style.width = (n / 5 * 100) + '%';
+  document.getElementById('quiz-step-label').textContent = `Schritt ${n} von ${TOTAL_STEPS}`;
+  document.getElementById('quiz-progress-fill').style.width = (n / TOTAL_STEPS * 100) + '%';
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
@@ -1177,8 +1177,8 @@ function retakeQuiz() {
   currentStep = 1;
   document.querySelectorAll('.quiz-step').forEach(s => s.classList.remove('active'));
   document.getElementById('step-1').classList.add('active');
-  document.getElementById('quiz-step-label').textContent = 'Schritt 1 von 5';
-  document.getElementById('quiz-progress-fill').style.width = '20%';
+  document.getElementById('quiz-step-label').textContent = `Schritt 1 von ${TOTAL_STEPS}`;
+  document.getElementById('quiz-progress-fill').style.width = (1 / TOTAL_STEPS * 100) + '%';
   document.getElementById('quiz-section').style.display = '';
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
