@@ -74,7 +74,7 @@
     letter-spacing: -0.02em;
     margin-bottom: 10px;
   }
-  h1 em { font-style: italic; color: var(--accent3); }
+  h1 em { font-style: italic; color: var(--accent); }
   .subtitle {
     font-size: 15px;
     color: var(--muted);
@@ -105,7 +105,7 @@
   }
   .quiz-progress-fill {
     height: 100%;
-    background: var(--accent3);
+    background: var(--accent);
     transition: width 0.4s ease;
   }
   .quiz-step { display: none; animation: fadeIn 0.25s ease; }
@@ -146,7 +146,7 @@
     color: var(--ink);
   }
   .quiz-option:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-  .quiz-option.selected { background: var(--accent3); color: var(--paper); border-color: var(--accent3); }
+  .quiz-option.selected { background: var(--accent); color: var(--paper); border-color: var(--accent); }
   .quiz-option-key {
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
@@ -174,7 +174,7 @@
     transition: background 0.15s;
     display: none;
   }
-  .quiz-next-btn:hover { background: var(--accent3); }
+  .quiz-next-btn:hover { background: var(--accent); }
   .quiz-next-btn.visible { display: inline-block; }
   .quiz-skip-row {
     margin-top: 20px;
@@ -214,16 +214,22 @@
     background: var(--rule);
     outline: none;
     -webkit-appearance: none;
-    border-radius: 0;
+    border-radius: 99px;
     cursor: pointer;
   }
   .security-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 18px; height: 18px;
-    background: var(--accent3);
+    background: var(--accent);
     cursor: pointer;
     border: 2px solid var(--paper);
-    border-radius: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    transition: box-shadow 0.2s, transform 0.15s;
+  }
+  .security-slider::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 6px rgba(37,99,235,0.2);
+    transform: scale(1.1);
   }
 
   /* ── PROFILE CARD ── */
@@ -232,7 +238,7 @@
     margin: 0 auto 40px;
     background: var(--paper);
     border: 1px solid var(--rule);
-    border-left: 5px solid var(--accent3);
+    border-left: 5px solid var(--accent);
     padding: 24px 28px;
     display: none;
     animation: fadeIn 0.35s ease;
@@ -242,7 +248,7 @@
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    color: var(--accent3);
+    color: var(--accent);
     margin-bottom: 10px;
   }
   .profile-type {
@@ -280,7 +286,7 @@
     text-transform: uppercase;
     letter-spacing: 0.12em;
     padding: 11px 26px;
-    background: var(--accent3);
+    background: var(--accent);
     color: var(--paper);
     border: none;
     cursor: pointer;
@@ -324,7 +330,7 @@
     transition: color 0.15s;
   }
   .tool-tab:hover { color: var(--ink); }
-  .tool-tab.active { color: var(--ink); border-bottom-color: var(--accent3); font-weight: 600; }
+  .tool-tab.active { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
   .tool-pane { display: none; }
   .tool-pane.active { display: block; }
   .hs-banner {
@@ -410,7 +416,7 @@
   .slider-row .value {
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
-    color: var(--accent3);
+    color: var(--accent);
     font-weight: 600;
   }
   input[type="range"] {
@@ -419,23 +425,29 @@
     background: var(--rule);
     outline: none;
     -webkit-appearance: none;
-    border-radius: 0;
+    border-radius: 99px;
     cursor: pointer;
   }
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 16px; height: 16px;
-    background: var(--accent3);
+    background: var(--accent);
     cursor: pointer;
     border: 2px solid var(--paper);
-    border-radius: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    transition: box-shadow 0.2s, transform 0.15s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 6px rgba(37,99,235,0.2);
+    transform: scale(1.1);
   }
   input[type="range"]::-moz-range-thumb {
     width: 16px; height: 16px;
-    background: var(--accent3);
+    background: var(--accent);
     cursor: pointer;
     border: 2px solid var(--paper);
-    border-radius: 0;
+    border-radius: 50%;
   }
   .toggle-row {
     display: flex;
@@ -453,7 +465,7 @@
     transition: background 0.2s;
     flex-shrink: 0;
   }
-  .toggle-row input[type="checkbox"]:checked { background: var(--accent3); }
+  .toggle-row input[type="checkbox"]:checked { background: var(--accent); }
   .toggle-row input[type="checkbox"]::before {
     content: ''; position: absolute;
     width: 14px; height: 14px;
@@ -535,7 +547,7 @@
     letter-spacing: 0.1em;
     margin-bottom: 20px;
   }
-  .winner-banner.kredit { background: var(--accent3); color: var(--paper); }
+  .winner-banner.kredit { background: var(--accent); color: var(--paper); }
   .winner-banner.invest { background: var(--good); color: var(--paper); }
   .winner-banner.gleich { background: var(--ink); color: var(--paper); }
 
@@ -553,7 +565,7 @@
   .bar-fill { height: 100%; transition: width 0.4s cubic-bezier(0.2,0.8,0.2,1); min-width: 0; background: var(--ink); }
   .bar-fill.pos { background: var(--good); }
   .bar-fill.neg { background: var(--bad); }
-  .bar-fill.neu { background: var(--accent3); }
+  .bar-fill.neu { background: var(--accent); }
   .bar-value { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-align: right; }
 
   /* ── PROFILE STRIP (shown in tools) ── */
@@ -588,7 +600,7 @@
   /* ── INFO BOX ── */
   .info-box {
     background: rgba(42,77,122,0.06);
-    border-left: 3px solid var(--accent3);
+    border-left: 3px solid var(--accent);
     padding: 12px 16px;
     font-size: 13px;
     line-height: 1.55;
@@ -868,7 +880,7 @@
                 <div style="width:20px;height:8px;background:rgba(30,95,58,0.35);"></div>Zinseszins
               </div>
               <div style="display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);">
-                <div style="width:20px;height:3px;background:var(--accent3);border-top:2px dashed var(--accent3);"></div>Real
+                <div style="width:20px;height:3px;background:var(--accent);border-top:2px dashed var(--accent);"></div>Real
               </div>
             </div>
           </div>
@@ -1233,8 +1245,8 @@ function showProfileCard(p) {
   document.getElementById('profile-type-desc').textContent = p.profileDesc;
 
   const alloc = [
-    { label: 'Aktien / ETFs', pct: p.stockPct, color: 'var(--accent2)' },
-    { label: 'Anleihen', pct: p.bondPct, color: 'var(--accent3)' },
+    { label: 'Aktien / ETFs', pct: p.stockPct, color: 'var(--good)' },
+    { label: 'Anleihen', pct: p.bondPct, color: 'var(--accent)' },
     { label: 'Tagesgeld', pct: p.cashPct, color: 'var(--muted)' },
   ];
   document.getElementById('profile-alloc').innerHTML = alloc.map(a => `
@@ -1436,7 +1448,7 @@ function renderInvestChart(r, p) {
     <polygon points="${depArea}"  fill="rgba(30,95,58,0.28)"/>
     <polyline points="${depPts}"  fill="none" stroke="var(--good)" stroke-width="2"/>
     <polyline points="${einzPts}" fill="none" stroke="rgba(42,39,32,0.35)" stroke-width="1.5"/>
-    <polyline points="${realPts}" fill="none" stroke="var(--accent3)" stroke-width="1.5" stroke-dasharray="5,3"/>
+    <polyline points="${realPts}" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="5,3"/>
     <text x="${xOf(last)-4}" y="${yOf(last.depot)-8}" text-anchor="end" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="var(--good)">${fmtEUR(r.depot)}</text>
   </svg>`;
 }
@@ -1608,9 +1620,9 @@ function renderKreditChart(r, p) {
     <line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
     <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
     <line x1="${pl}" y1="${Math.min(pt+iH, Math.max(pt, zero_y))}" x2="${pl+iW}" y2="${Math.min(pt+iH, Math.max(pt, zero_y))}" stroke="var(--rule)" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.5"/>
-    <polyline points="${ptsA}" fill="none" stroke="var(--accent3)" stroke-width="2.5"/>
+    <polyline points="${ptsA}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
     <polyline points="${ptsB}" fill="none" stroke="var(--good)" stroke-width="2.5" stroke-dasharray="6,3"/>
-    <text x="${pl+6}" y="${pt+14}" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--accent3)">— Tilgung</text>
+    <text x="${pl+6}" y="${pt+14}" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--accent)">— Tilgung</text>
     <text x="${pl+80}" y="${pt+14}" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--good)">- - Investieren</text>
   </svg>`;
 }
@@ -1753,8 +1765,8 @@ function renderRenteChart(r, p) {
     <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
     ${targetLine}
     <polygon points="${area}" fill="rgba(42,77,122,0.18)"/>
-    <polyline points="${pts}" fill="none" stroke="var(--accent3)" stroke-width="2.5"/>
-    <text x="${xOf(data[data.length-1])-4}" y="${yOf(data[data.length-1].depot)-8}" text-anchor="end" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="var(--accent3)">${fmtEUR(data[data.length-1].depot)}</text>
+    <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    <text x="${xOf(data[data.length-1])-4}" y="${yOf(data[data.length-1].depot)-8}" text-anchor="end" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="var(--accent)">${fmtEUR(data[data.length-1].depot)}</text>
   </svg>`;
 }
 

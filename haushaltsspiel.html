@@ -337,15 +337,15 @@
   }
   .scenario-mode-bar.mode-a {
     display: flex;
-    background: rgba(42,77,122,0.09);
-    border-left-color: var(--accent3);
-    color: var(--accent3);
+    background: rgba(37,99,235,0.09);
+    border-left-color: var(--accent);
+    color: var(--accent);
   }
   .scenario-mode-bar.mode-b {
     display: flex;
-    background: rgba(30,95,58,0.09);
-    border-left-color: var(--accent2);
-    color: var(--accent2);
+    background: rgba(5,150,105,0.09);
+    border-left-color: var(--good);
+    color: var(--good);
   }
   .scenario-mode-bar-dot {
     width: 8px; height: 8px;
@@ -385,20 +385,20 @@
   }
   .scenario-btn-a {
     background: transparent;
-    border-color: var(--accent3);
-    color: var(--accent3);
+    border-color: var(--accent);
+    color: var(--accent);
   }
   .scenario-btn-a:hover, .scenario-btn-a.active {
-    background: var(--accent3);
+    background: var(--accent);
     color: var(--paper);
   }
   .scenario-btn-b {
     background: transparent;
-    border-color: var(--accent2);
-    color: var(--accent2);
+    border-color: var(--good);
+    color: var(--good);
   }
   .scenario-btn-b:hover, .scenario-btn-b.active {
-    background: var(--accent2);
+    background: var(--good);
     color: var(--paper);
   }
 
@@ -980,9 +980,39 @@
   /* ── UNDO BUTTON DISABLED ── */
   #undo-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
+  /* ── ACTION TOOLBAR BUTTONS ── */
+  .toolbar-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 14px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .toolbar-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .toolbar-btn-primary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: var(--paper);
+    padding: 6px 14px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .toolbar-btn-primary:hover { background: var(--ink); border-color: var(--ink); }
+
   /* ── REFORM TOUR BAR ── */
   .reform-tour-bar {
-    background: var(--accent3);
+    background: var(--accent);
     color: var(--paper);
     padding: 12px 20px;
     display: none;
@@ -1225,7 +1255,7 @@
     flex-shrink: 0;
     vertical-align: middle;
   }
-  .tt-btn:hover { border-color: var(--accent3); color: var(--accent3); }
+  .tt-btn:hover { border-color: var(--accent); color: var(--accent); }
   .tt-popup {
     position: fixed;
     z-index: 1000;
@@ -1235,7 +1265,7 @@
     max-width: 300px;
     font-size: 12px;
     line-height: 1.55;
-    border-left: 3px solid var(--accent3);
+    border-left: 3px solid var(--accent);
     box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
   }
   .tt-popup[hidden] { display: none; }
@@ -1246,7 +1276,7 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-bottom: 6px;
-    color: var(--accent3);
+    color: var(--accent);
     font-weight: 600;
   }
   .tt-popup .tt-quelle {
@@ -1296,7 +1326,7 @@
     font-size: 11px;
     background: var(--bg);
     padding: 10px 14px;
-    border-left: 3px solid var(--accent3);
+    border-left: 3px solid var(--accent);
     margin-bottom: 8px;
     line-height: 1.7;
     white-space: pre-wrap;
@@ -1313,9 +1343,13 @@
   .rw-zone-table { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-bottom: 8px; }
   .rw-zone-table th { text-align: left; border-bottom: 1px solid var(--rule); padding: 3px 8px; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
   .rw-zone-table td { padding: 3px 8px; border-bottom: 1px dashed rgba(42,39,32,0.15); }
-  .rw-zone-table tr.active-zone td { background: rgba(42,77,122,0.08); color: var(--accent3); font-weight: 600; }
+  .rw-zone-table tr.active-zone td { background: rgba(37,99,235,0.08); color: var(--accent); font-weight: 600; }
 
 /* ── MODUL-SYSTEM ────────────────────────────────── */
+@keyframes modFadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+.mod-section { animation: none; }
+.mod-section.mod-appeared { animation: modFadeIn 0.3s ease both; }
+
 .mod-add-btn {
   display: flex;
   align-items: center;
@@ -1836,12 +1870,12 @@
     </div>
 
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-      <button id="card-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:var(--accent);border:1px solid var(--accent);color:var(--paper);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.borderColor='var(--ink)'" onmouseout="this.style.background='var(--accent)';this.style.borderColor='var(--accent)'">↓ Bild speichern</button>
-      <button id="share-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">⇥ Link kopieren</button>
-      <button id="undo-btn" disabled style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="if(!this.disabled){this.style.background='var(--ink)';this.style.color='var(--paper)'}" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">↩ Rückgängig</button>
+      <button id="card-btn" class="toolbar-btn-primary">↓ Bild speichern</button>
+      <button id="share-btn" class="toolbar-btn">⇥ Link kopieren</button>
+      <button id="undo-btn" class="toolbar-btn" disabled>↩ Rückgängig</button>
       <button id="save-a-btn" class="scenario-btn scenario-btn-a" title="Klicken um Szenario A zu bearbeiten">▣ Szenario A</button>
       <button id="save-b-btn" class="scenario-btn scenario-btn-b" title="Klicken um Szenario B zu bearbeiten">▣ Szenario B</button>
-      <button id="csv-export-btn" style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;background:transparent;border:1px solid var(--rule);color:var(--muted);padding:6px 14px;cursor:pointer;" onmouseover="this.style.background='var(--ink)';this.style.color='var(--paper)'" onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">↓ CSV Export</button>
+      <button id="csv-export-btn" class="toolbar-btn">↓ CSV Export</button>
     </div>
     <canvas id="share-canvas"></canvas>
     <!-- Szenario-Vergleich Panel (erscheint wenn A+B gespeichert) -->
@@ -2884,9 +2918,9 @@ function renderKapitalstockSVG(rente, p) {
     ${yVals}${xLabels.join('')}
     <line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
     <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
-    <polygon points="${area}" fill="var(--accent2)" opacity="0.15"/>
-    <polyline points="${pts}" fill="none" stroke="var(--accent2)" stroke-width="2.5"/>
-    <text x="${xOf(maxJahr)-4}" y="${yOf(data[data.length-1].ks)-8}" text-anchor="end" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="var(--accent2)">${Math.round(rente.kapitalstock)} Mrd. €</text>
+    <polygon points="${area}" fill="var(--good)" opacity="0.15"/>
+    <polyline points="${pts}" fill="none" stroke="var(--good)" stroke-width="2.5"/>
+    <text x="${xOf(maxJahr)-4}" y="${yOf(data[data.length-1].ks)-8}" text-anchor="end" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="var(--good)">${Math.round(rente.kapitalstock)} Mrd. €</text>
   </svg>`;
 }
 
@@ -2917,8 +2951,8 @@ function renderBeitragProjSVG(rente, p) {
   const legend = p.kapitalquote > 0
     ? `<line x1="${pl+8}" y1="${pt+8}" x2="${pl+26}" y2="${pt+8}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4,2"/>
        <text x="${pl+30}" y="${pt+12}" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">ohne Reform</text>
-       <line x1="${pl+130}" y1="${pt+8}" x2="${pl+148}" y2="${pt+8}" stroke="var(--accent2)" stroke-width="2.5"/>
-       <text x="${pl+152}" y="${pt+12}" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--accent2)">mit Reform</text>`
+       <line x1="${pl+130}" y1="${pt+8}" x2="${pl+148}" y2="${pt+8}" stroke="var(--good)" stroke-width="2.5"/>
+       <text x="${pl+152}" y="${pt+12}" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--good)">mit Reform</text>`
     : `<text x="${pl+8}" y="${pt+14}" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--muted)" font-style="italic">Fondsquote = 0 — kein Unterschied sichtbar</text>`;
 
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
@@ -2926,7 +2960,7 @@ function renderBeitragProjSVG(rente, p) {
     <line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
     <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
     <polyline points="${pts_ohne}" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.7"/>
-    <polyline points="${pts_mit}"  fill="none" stroke="var(--accent2)" stroke-width="2.5"/>
+    <polyline points="${pts_mit}"  fill="none" stroke="var(--good)" stroke-width="2.5"/>
     ${legend}
   </svg>`;
 }
@@ -2995,9 +3029,9 @@ function _renderLafferNow(p) {
   const px = xOf(peakPt.s), py = yOf(peakPt.est);
   const peakNearRight = px > pl + iW * 0.6;
   const peakMark = `
-    <line x1="${px}" y1="${pt2}" x2="${px}" y2="${pt2+iH}" stroke="var(--accent2)" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
-    <circle cx="${px}" cy="${py}" r="5" fill="var(--accent2)" opacity="0.9"/>
-    <text x="${peakNearRight ? px-8 : px+8}" y="${py-8}" text-anchor="${peakNearRight ? 'end' : 'start'}" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="var(--accent2)">Max: ${peakPt.s}% → ${Math.round(peakPt.est)} Mrd.</text>`;
+    <line x1="${px}" y1="${pt2}" x2="${px}" y2="${pt2+iH}" stroke="var(--good)" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
+    <circle cx="${px}" cy="${py}" r="5" fill="var(--good)" opacity="0.9"/>
+    <text x="${peakNearRight ? px-8 : px+8}" y="${py-8}" text-anchor="${peakNearRight ? 'end' : 'start'}" font-size="11" font-family="JetBrains Mono,monospace" font-weight="600" fill="var(--good)">Max: ${peakPt.s}% → ${Math.round(peakPt.est)} Mrd.</text>`;
 
   // Aktuelle Position
   const cx = xOf(p.spitze), cy = yOf(curPt.est);
@@ -3806,8 +3840,8 @@ function lsKey(diff) { return 'challenge_done_' + diff + '_' + challengeKey(diff
 function renderChallenges(r) {
   const slots = [
     { diff:'daily',   label:'TAGES-CHALLENGE',   period: new Date().toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long'}), accent:'var(--accent)' },
-    { diff:'weekly',  label:'WOCHEN-CHALLENGE',   period: 'KW ' + isoWeek(new Date()) + ' · ' + new Date().getFullYear(), accent:'var(--accent3)' },
-    { diff:'monthly', label:'MONATS-CHALLENGE',   period: new Date().toLocaleDateString('de-DE', {month:'long', year:'numeric'}), accent:'var(--accent2)' },
+    { diff:'weekly',  label:'WOCHEN-CHALLENGE',   period: 'KW ' + isoWeek(new Date()) + ' · ' + new Date().getFullYear(), accent:'var(--accent)' },
+    { diff:'monthly', label:'MONATS-CHALLENGE',   period: new Date().toLocaleDateString('de-DE', {month:'long', year:'numeric'}), accent:'var(--good)' },
   ];
 
   const html = slots.map(slot => {
@@ -3900,8 +3934,8 @@ function renderWissenschaftsPanel(p) {
   const scores = berechneWissenschaftsScore(p);
   const lager = [
     { key: 'ifo',      label: 'ifo/Fuest · Angebotsorientiert',   score: scores.ifo,      color: 'var(--accent)',  desc: 'Niedrige Unternehmensteuern, keine Vermögensteuer, Entlastung Mitte' },
-    { key: 'diw',      label: 'DIW/Bach · Verteilungsorientiert',  score: scores.diw,      color: 'var(--accent3)', desc: 'Synthetisch, höhere Spitze, Erbschafts-/Vermögensteuer, hohe BBG' },
-    { key: 'zucman',   label: 'Zucman · Internationalistisch',     score: scores.zucman,   color: 'var(--accent2)', desc: 'Zucman-Mindeststeuer, CO₂-Preis, internationale Koordination' },
+    { key: 'diw',      label: 'DIW/Bach · Verteilungsorientiert',  score: scores.diw,      color: 'var(--accent)', desc: 'Synthetisch, höhere Spitze, Erbschafts-/Vermögensteuer, hohe BBG' },
+    { key: 'zucman',   label: 'Zucman · Internationalistisch',     score: scores.zucman,   color: 'var(--good)', desc: 'Zucman-Mindeststeuer, CO₂-Preis, internationale Koordination' },
     { key: 'kirchhof', label: 'Kirchhof · Vereinfachung',          score: scores.kirchhof, color: 'var(--warn)',    desc: 'Flat Tax, wenige Steuerarten, GewSt abschaffen' }
   ];
 
@@ -4381,13 +4415,13 @@ function renderEstKurve(p) {
     ${yGrid}${xGrid}
     <line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
     <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
-    <polyline points="${pts_eff.join(' ')}" fill="none" stroke="var(--accent3)" stroke-width="2" stroke-dasharray="5,3" opacity="0.8"/>
+    <polyline points="${pts_eff.join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5,3" opacity="0.8"/>
     <polyline points="${pts_grenz.join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
     ${dezilMarks}
     <g transform="translate(${pl+8},${pt+10})">
       <line x1="0" y1="0" x2="18" y2="0" stroke="var(--accent)" stroke-width="2.5"/>
       <text x="22" y="4" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--ink)">Grenzsteuersatz</text>
-      <line x1="0" y1="16" x2="18" y2="16" stroke="var(--accent3)" stroke-width="2" stroke-dasharray="5,3"/>
+      <line x1="0" y1="16" x2="18" y2="16" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5,3"/>
       <text x="22" y="20" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--ink)">Effektivsteuersatz</text>
     </g>
   </svg>`;
@@ -4673,8 +4707,8 @@ function renderSzenarioVergleich() {
   const { A, B } = SZENARIO;
   if (!A || !B) {
     el.style.display = A ? 'block' : 'none';
-    if (A && !B) el.innerHTML = `<div class="panel" style="border-top:3px solid var(--accent3);padding:16px 20px;display:flex;align-items:center;gap:12px;">
-      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent3);">▣ Szenario A gespeichert</span>
+    if (A && !B) el.innerHTML = `<div class="panel" style="border-top:3px solid var(--accent);padding:16px 20px;display:flex;align-items:center;gap:12px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);">▣ Szenario A gespeichert</span>
       <span style="font-size:13px;color:var(--muted);">Klicke „▣ Szenario B" um ein zweites Szenario zu bearbeiten und zu vergleichen.</span>
     </div>`;
     return;
@@ -4704,20 +4738,20 @@ function renderSzenarioVergleich() {
       Math.round(delta).toString());
     return `<tr>
       <td style="padding:6px 12px;font-size:13px;border-bottom:1px solid rgba(42,39,32,0.08)">${m.label}</td>
-      <td style="padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent3);border-bottom:1px solid rgba(42,39,32,0.08)">${m.fmt(m.fA)}</td>
-      <td style="padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent2);border-bottom:1px solid rgba(42,39,32,0.08)">${m.fmt(m.fB)}</td>
+      <td style="padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);border-bottom:1px solid rgba(42,39,32,0.08)">${m.fmt(m.fA)}</td>
+      <td style="padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--good);border-bottom:1px solid rgba(42,39,32,0.08)">${m.fmt(m.fB)}</td>
       <td style="padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--${cls});border-bottom:1px solid rgba(42,39,32,0.08)">${deltaStr}</td>
     </tr>`;
   }).join('');
 
-  el.innerHTML = `<div class="panel" style="border-top:3px solid var(--accent3)">
+  el.innerHTML = `<div class="panel" style="border-top:3px solid var(--accent)">
     <h2>Szenario-Vergleich A vs. B</h2>
     <div class="panel-sub">Spalte Δ = B minus A · Grün = Verbesserung nach Szenario B</div>
     <table style="width:100%;border-collapse:collapse;margin-top:12px;">
       <thead><tr>
         <th style="padding:6px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);border-bottom:2px solid var(--rule)">Kennzahl</th>
-        <th style="padding:6px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent3);border-bottom:2px solid var(--rule)">Szenario A</th>
-        <th style="padding:6px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent2);border-bottom:2px solid var(--rule)">Szenario B</th>
+        <th style="padding:6px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);border-bottom:2px solid var(--rule)">Szenario A</th>
+        <th style="padding:6px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--good);border-bottom:2px solid var(--rule)">Szenario B</th>
         <th style="padding:6px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);border-bottom:2px solid var(--rule)">Δ (B−A)</th>
       </tr></thead>
       <tbody>${rows}</tbody>
@@ -5485,7 +5519,14 @@ function applyModules() {
   document.querySelectorAll('[data-mod]').forEach(el => {
     const id = el.dataset.mod;
     if (!id || !MOD_DEFS[id]) return;
-    el.style.display = activeModules.has(id) ? '' : 'none';
+    const wasHidden = el.style.display === 'none';
+    const shouldShow = activeModules.has(id);
+    el.style.display = shouldShow ? '' : 'none';
+    if (shouldShow && wasHidden) {
+      el.classList.remove('mod-appeared');
+      void el.offsetWidth;
+      el.classList.add('mod-appeared');
+    }
   });
 }
 
