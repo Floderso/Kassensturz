@@ -10,35 +10,37 @@
 <title>Das große Haushaltsspiel Deutschlands</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f4f1ea;
-    --ink: #1a1814;
-    --paper: #fbf9f4;
-    --rule: #2a2720;
-    --accent: #c8401f;
+    --bg:      #F5F2EB;
+    --paper:   #FEFCF8;
+    --ink:     #1C1917;
+    --border:  #E5E1D8;
+    --rule:    #E5E1D8;
+    --muted:   #78716C;
+    --accent:  #2563EB;
     --accent2: #1e5f3a;
     --accent3: #2a4d7a;
-    --muted: #6b6359;
-    --good: #1e5f3a;
-    --bad: #c8401f;
-    --warn: #b8801f;
+    --good:    #059669;
+    --bad:     #DC2626;
+    --warn:    #D97706;
+    --r:       8px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     background: var(--bg);
     color: var(--ink);
-    font-family: 'Fraunces', Georgia, serif;
+    font-family: 'Inter', sans-serif;
     font-size: 15px;
     line-height: 1.5;
   }
   body {
     background-image:
-      radial-gradient(circle at 15% 30%, rgba(200,64,31,0.04) 0%, transparent 40%),
-      radial-gradient(circle at 85% 70%, rgba(30,95,58,0.04) 0%, transparent 40%);
+      radial-gradient(circle at 15% 30%, rgba(37,99,235,0.025) 0%, transparent 40%),
+      radial-gradient(circle at 85% 70%, rgba(5,150,105,0.025) 0%, transparent 40%);
     min-height: 100vh;
-    padding: 24px 16px 80px;
+    padding: 0 16px 80px;
   }
   .wrap { max-width: 1400px; margin: 0 auto; }
   header {
@@ -183,11 +185,12 @@
     font-size: 10px;
     text-transform: uppercase;
     background: transparent;
-    border: 1px solid var(--rule);
+    border: 1px solid var(--border);
     color: var(--ink);
     padding: 5px 9px;
     cursor: pointer;
     transition: all 0.15s;
+    border-radius: 4px;
   }
   .preset-buttons button:hover {
     background: var(--ink);
@@ -222,7 +225,7 @@
   .section-body { padding-bottom: 8px; }
   .section-title.collapsed + .section-body { display: none; }
   .section-title.bge-section { color: var(--accent); border-bottom-color: var(--accent); }
-  .section-title.bge-section.bge-on { background: rgba(200,64,31,0.06); padding: 4px 6px; margin-left: -6px; margin-right: -6px; }
+  .section-title.bge-section.bge-on { background: rgba(37,99,235,0.06); padding: 4px 6px; margin-left: -6px; margin-right: -6px; }
 
   /* ── BGE SIDEBAR ── */
   .bge-slider-wrap { padding: 4px 0 2px; }
@@ -230,7 +233,7 @@
   .bge-live-cost {
     display: none;
     margin-top: 10px;
-    background: rgba(200,64,31,0.07);
+    background: rgba(37,99,235,0.07);
     border-left: 2px solid var(--accent);
     padding: 8px 12px;
     font-family: 'JetBrains Mono', monospace;
@@ -417,10 +420,10 @@
   input[type="range"] {
     width: 100%;
     height: 4px;
-    background: var(--rule);
+    background: var(--border);
     outline: none;
     -webkit-appearance: none;
-    border-radius: 0;
+    border-radius: 99px;
   }
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -429,7 +432,13 @@
     background: var(--accent);
     cursor: pointer;
     border: 2px solid var(--paper);
-    border-radius: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    transition: box-shadow 0.2s, transform 0.15s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 6px rgba(37,99,235,0.2);
+    transform: scale(1.1);
   }
   input[type="range"]::-moz-range-thumb {
     width: 16px;
@@ -437,7 +446,7 @@
     background: var(--accent);
     cursor: pointer;
     border: 2px solid var(--paper);
-    border-radius: 0;
+    border-radius: 50%;
   }
   /* ── SLIDER TOOLTIP ── */
   .slider-tooltip {
@@ -482,7 +491,7 @@
     cursor: pointer;
     transition: background 0.2s;
   }
-  .toggle-row input[type="checkbox"]:checked { background: var(--accent2); }
+  .toggle-row input[type="checkbox"]:checked { background: var(--accent); }
   .toggle-row input[type="checkbox"]::before {
     content: '';
     position: absolute;
@@ -504,14 +513,18 @@
   .kpi-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1px;
-    background: var(--rule);
-    border: 1px solid var(--rule);
+    gap: 8px;
+    background: transparent;
+    border: none;
   }
   .kpi {
     background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 8px;
     padding: 16px 18px;
+    transition: box-shadow 0.2s, transform 0.2s;
   }
+  .kpi:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.08); transform: translateY(-1px); }
   .kpi-label {
     font-family: 'JetBrains Mono', monospace;
     font-size: 9px;
@@ -537,9 +550,12 @@
 
   .panel {
     background: var(--paper);
-    border: 1px solid var(--rule);
+    border: 1px solid var(--border);
+    border-radius: 8px;
     padding: 20px 24px;
+    transition: box-shadow 0.2s;
   }
+  .panel:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
   .panel h2 {
     font-size: 20px;
     font-weight: 600;
@@ -579,7 +595,10 @@
     background: var(--ink);
     transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
     min-width: 0;
+    animation: growBar 0.5s cubic-bezier(0.16,1,0.3,1) both;
+    transform-origin: left;
   }
+  @keyframes growBar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
   .bar-fill.pos { background: var(--good); }
   .bar-fill.neg { background: var(--bad); }
   .bar-fill.neu { background: var(--ink); }
@@ -1078,37 +1097,15 @@
     white-space: nowrap;
     transition: background 0.15s;
   }
-  .ft-link-btn:hover { background: #a03318; }
+  .ft-link-btn:hover { background: #1d4ed8; }
 
   /* ── SITE NAV ── */
-  .site-nav-bar {
-    background: var(--ink);
-    margin: -24px -16px 28px;
-    padding: 0 16px;
-  }
-  .site-nav-bar-inner {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    overflow-x: auto;
-  }
-  .site-nav-bar a {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: rgba(251,249,244,0.55);
-    text-decoration: none;
-    padding: 11px 16px;
-    border-bottom: 2px solid transparent;
-    white-space: nowrap;
-    transition: color 0.15s;
-    display: inline-block;
-  }
-  .site-nav-bar a:hover { color: var(--paper); }
-  .site-nav-bar a.active { color: var(--paper); border-bottom-color: var(--accent); }
-  .site-nav-bar-sep { color: rgba(251,249,244,0.2); padding: 0 2px; font-size: 12px; }
+  .site-nav-bar { background: var(--ink); padding: 0 24px; height: 40px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; margin: 0 -16px 28px; }
+  .site-nav-bar-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; width: 100%; }
+  .nav-logo { font-family: 'Fraunces', serif; font-weight: 800; font-size: 17px; color: #fff; letter-spacing: -0.02em; margin-right: 28px; text-decoration: none; }
+  .nav-link { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); padding: 0 12px; height: 40px; display: flex; align-items: center; text-decoration: none; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
+  .nav-link:hover { color: rgba(255,255,255,0.85); }
+  .nav-link.active { color: #fff; border-bottom-color: var(--accent); }
 
   details.about {
     background: var(--paper);
@@ -1324,15 +1321,12 @@
 
 <nav class="site-nav-bar">
   <div class="site-nav-bar-inner">
-    <a href="/" class="active">Haushaltsspiel</a>
-    <span class="site-nav-bar-sep">·</span>
-    <a href="/finanz.html">Finanztools</a>
-    <span class="site-nav-bar-sep">·</span>
-    <a href="/mikro.html">Mikrolabor</a>
-    <span class="site-nav-bar-sep">·</span>
-    <a href="/quellen.html">Quellen</a>
-    <span class="site-nav-bar-sep">·</span>
-    <a href="/impressum.html">Impressum</a>
+    <a href="/" class="nav-logo">Kassensturz</a>
+    <a href="/" class="nav-link active">Haushaltsspiel</a>
+    <a href="/finanz.html" class="nav-link">Finanztools</a>
+    <a href="/mikro.html" class="nav-link">Mikrolabor</a>
+    <a href="/quellen.html" class="nav-link">Quellen</a>
+    <a href="/impressum.html" class="nav-link">Impressum</a>
   </div>
 </nav>
 

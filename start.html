@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kassensturz — Startseite</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #F5F2EB;
+    --paper:   #FEFCF8;
+    --ink:     #1C1917;
+    --border:  #E5E1D8;
+    --muted:   #78716C;
+    --accent:  #2563EB;
+    --good:    #059669;
+    --bad:     #DC2626;
+    --warn:    #D97706;
+    --r:       8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.6; }
+
+  /* ── NAV ────────────────────────────────────────────── */
+  nav {
+    background: var(--ink);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 17px;
+    color: #fff;
+    letter-spacing: -0.02em;
+    margin-right: 36px;
+    text-decoration: none;
+  }
+  .nav-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.4);
+    padding: 0 14px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .nav-link:hover { color: rgba(255,255,255,0.85); }
+  .nav-link.active { color: #fff; border-bottom-color: var(--accent); }
+  .nav-right { margin-left: auto; }
+  .btn-nav {
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.15s;
+  }
+  .btn-nav:hover { opacity: 0.88; }
+
+  /* ── HERO ───────────────────────────────────────────── */
+  .hero {
+    background: var(--ink);
+    color: #fff;
+    padding: 72px 32px 64px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-inner { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: 1fr 420px; gap: 48px; align-items: center; }
+  .hero-left { }
+  .hero-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: rgba(37,99,235,0.9);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-tag::before { content: ''; width: 28px; height: 2px; background: var(--accent); display: inline-block; }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 58px;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.0;
+    margin-bottom: 20px;
+  }
+  h1 em { color: #6EA8FF; font-style: normal; }
+  .hero-dek { font-size: 16px; color: rgba(255,255,255,0.6); line-height: 1.65; max-width: 440px; margin-bottom: 32px; }
+  .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 16px rgba(37,99,235,0.4);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.5); }
+  .btn-secondary {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.85);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.15);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.15s;
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,0.13); }
+
+  /* HERO PREVIEW CARD */
+  .hero-preview {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    animation: floatUp 0.6s ease both 0.2s;
+  }
+  @keyframes floatUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform:none; } }
+  .preview-header {
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .preview-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .preview-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-left: 4px;
+  }
+  .preview-body { padding: 16px; }
+  .preview-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .pk {
+    background: rgba(255,255,255,0.04);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .pk-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.09em; color: rgba(255,255,255,0.3); margin-bottom: 4px; }
+  .pk-val { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+  .preview-bar-list { display: flex; flex-direction: column; gap: 7px; }
+  .pb-row { display: grid; grid-template-columns: 90px 1fr 48px; align-items: center; gap: 8px; }
+  .pb-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.3); }
+  .pb-track { background: rgba(255,255,255,0.07); border-radius: 99px; height: 5px; overflow: hidden; }
+  .pb-fill { height: 100%; border-radius: 99px; background: var(--accent); animation: growBar 0.8s cubic-bezier(0.16,1,0.3,1) both; }
+  .pb-fill.g { background: #34D399; }
+  @keyframes growBar { from { transform: scaleX(0); transform-origin: left; } to { transform: scaleX(1); } }
+  .pb-val { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-align: right; color: rgba(255,255,255,0.4); }
+
+  /* ── TRUST BAR ──────────────────────────────────────── */
+  .trust-bar {
+    background: var(--paper);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+  }
+  .trust-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .trust-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .trust-sep { width: 1px; height: 20px; background: var(--border); }
+  .trust-item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(28,25,23,0.5);
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── SECTIONS SHARED ────────────────────────────────── */
+  section { padding: 72px 32px; }
+  .section-inner { max-width: 960px; margin: 0 auto; }
+  .section-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-eyebrow::before { content: ''; width: 20px; height: 2px; background: var(--accent); display: inline-block; }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .section-sub { font-size: 15px; color: var(--muted); max-width: 520px; line-height: 1.65; margin-bottom: 48px; }
+
+  /* ── EINSTIEGSPUNKTE ────────────────────────────────── */
+  .entry-section { background: var(--paper); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .entry-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+  .entry-card {
+    padding: 28px 28px 24px;
+    border-right: 1px solid var(--border);
+    background: var(--paper);
+    text-decoration: none;
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .entry-card:last-child { border-right: none; }
+  .entry-card:hover { background: #F8F5EE; }
+  .entry-card::after {
+    content: '→';
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    font-size: 18px;
+    color: var(--accent);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .entry-card:hover::after { opacity: 1; transform: translateX(0); }
+  .entry-icon { font-size: 28px; }
+  .entry-who {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+  .entry-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+  .entry-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .entry-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(37,99,235,0.08);
+    color: var(--accent);
+    align-self: flex-start;
+    margin-top: auto;
+  }
+
+  /* ── SZENARIEN ──────────────────────────────────────── */
+  .szenario-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .sz-card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 22px 24px;
+    text-decoration: none;
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: box-shadow 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .sz-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.09); transform: translateY(-2px); }
+  .sz-stripe {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+  .sz-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .sz-name { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+  .sz-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .sz-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
+  .sz-kpis { display: flex; gap: 16px; }
+  .sz-kpi { }
+  .sz-kpi-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .sz-kpi-val { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+
+  /* ── WIE FUNKTIONIERT ES ────────────────────────────── */
+  .how-section { background: var(--paper); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .how-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; }
+  .how-steps::before {
+    content: '';
+    position: absolute;
+    top: 24px;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: var(--border);
+    z-index: 0;
+  }
+  .how-step { padding: 0 20px; text-align: center; position: relative; z-index: 1; }
+  .how-num {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--accent);
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .how-step:hover .how-num { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .how-step-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.01em; }
+  .how-step-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+  /* ── LIVE VORSCHAU ──────────────────────────────────── */
+  .preview-section { background: var(--bg); }
+  .preview-demo {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.08);
+  }
+  .demo-topbar {
+    background: var(--ink);
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .demo-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .demo-url {
+    flex: 1;
+    background: rgba(255,255,255,0.07);
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    margin: 0 8px;
+    text-align: center;
+  }
+  .demo-body { padding: 24px; }
+  .demo-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+  .dk {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+  .dk-l { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; }
+  .dk-v { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+  .demo-slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .demo-slider-row:last-of-type { border-bottom: none; }
+  .demo-s-name { font-size: 12px; min-width: 170px; color: rgba(28,25,23,0.75); }
+  .demo-s-bar { flex: 1; height: 3px; background: var(--border); border-radius: 99px; position: relative; }
+  .demo-s-bar::after { content: ''; position: absolute; left: 0; top: -4px; height: 11px; width: 11px; background: var(--accent); border-radius: 50%; border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--accent); }
+  .demo-s-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--accent); min-width: 52px; text-align: right; }
+
+  /* ── MODULE VORSCHAU ────────────────────────────────── */
+  .module-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .mod-card {
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 18px 20px;
+    background: var(--paper);
+    cursor: pointer;
+    transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+  }
+  .mod-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.07); transform: translateY(-2px); border-color: rgba(37,99,235,0.3); }
+  .mod-icon { font-size: 20px; margin-bottom: 10px; }
+  .mod-cat { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 5px; }
+  .mod-name { font-weight: 700; font-size: 14px; margin-bottom: 5px; }
+  .mod-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .mod-level {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  .mod-level.ein { background: rgba(5,150,105,0.08); color: var(--good); }
+  .mod-level.fort { background: rgba(217,119,6,0.08); color: var(--warn); }
+  .mod-level.exp  { background: rgba(220,38,38,0.08); color: var(--bad); }
+
+  /* ── FOOTER ─────────────────────────────────────────── */
+  footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.45);
+    padding: 40px 32px;
+  }
+  .footer-inner { max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 24px; }
+  .footer-logo { font-family: 'Fraunces', serif; font-weight: 800; font-size: 22px; color: #fff; letter-spacing: -0.02em; }
+  .footer-tagline { font-size: 12px; margin-top: 4px; }
+  .footer-links { display: flex; gap: 20px; }
+  .footer-link { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); text-decoration: none; transition: color 0.15s; }
+  .footer-link:hover { color: rgba(255,255,255,0.7); }
+  .footer-copy { font-family: 'JetBrains Mono', monospace; font-size: 10px; width: 100%; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.07); }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ────────────────────────────────────────────── -->
+<nav>
+  <a class="nav-logo" href="/">Kassensturz</a>
+  <a class="nav-link active" href="/start.html">Start</a>
+  <a class="nav-link" href="/">Haushaltsspiel</a>
+  <a class="nav-link" href="/finanz.html">Finanztools</a>
+  <a class="nav-link" href="/mikro.html">Mikrolabor</a>
+  <a class="nav-link" href="/quellen.html">Quellen</a>
+  <div class="nav-right">
+    <a class="btn-nav" href="/">Simulation starten →</a>
+  </div>
+</nav>
+
+<!-- ── HERO ──────────────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-tag">Fiskalmodell · Deutschland 2025</div>
+      <h1>Gestalte den <em>Bundes&shy;haushalt</em></h1>
+      <p class="hero-dek">Verändere Steuern und Sozialabgaben in Echtzeit — und sieh sofort, was das für den Staat, die Wirtschaft und jeden Haushalt bedeutet. Wissenschaftlich kalibriert.</p>
+      <div class="hero-ctas">
+        <a class="btn-primary" href="/">Jetzt simulieren →</a>
+        <a class="btn-secondary" href="#szenarien">Szenarien entdecken</a>
+      </div>
+    </div>
+    <div class="hero-preview">
+      <div class="preview-header">
+        <div class="preview-dot" style="background:#ff5f57"></div>
+        <div class="preview-dot" style="background:#febc2e"></div>
+        <div class="preview-dot" style="background:#28c840"></div>
+        <span class="preview-title">Haushaltsspiel · Echtzeit-Simulation</span>
+      </div>
+      <div class="preview-body">
+        <div class="preview-kpis">
+          <div class="pk"><div class="pk-label">Saldo</div><div class="pk-val" style="color:#DC2626">−42 Mrd.</div></div>
+          <div class="pk"><div class="pk-label">Gini-Δ</div><div class="pk-val" style="color:#059669">−0,8 Pkt.</div></div>
+          <div class="pk"><div class="pk-label">BIP-Impuls</div><div class="pk-val" style="color:#D97706">+6,2 Mrd.</div></div>
+          <div class="pk"><div class="pk-label">Schuldenbremse</div><div class="pk-val" style="color:#DC2626;font-size:13px">verletzt</div></div>
+        </div>
+        <div class="preview-bar-list">
+          <div class="pb-row"><span class="pb-label">Einkommensteuer</span><div class="pb-track"><div class="pb-fill g" style="width:88%;animation-delay:0.1s"></div></div><span class="pb-val">+265</span></div>
+          <div class="pb-row"><span class="pb-label">Mehrwertsteuer</span><div class="pb-track"><div class="pb-fill g" style="width:100%;animation-delay:0.2s"></div></div><span class="pb-val">+303</span></div>
+          <div class="pb-row"><span class="pb-label">CO₂-Abgabe</span><div class="pb-track"><div class="pb-fill" style="width:14%;animation-delay:0.3s"></div></div><span class="pb-val">+42</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TRUST BAR ─────────────────────────────────────── -->
+<div class="trust-bar">
+  <div class="trust-inner">
+    <span class="trust-label">Kalibriert auf Basis von</span>
+    <div class="trust-sep"></div>
+    <span class="trust-item">SOEP v40</span>
+    <span class="trust-item">IMF Article IV 2025</span>
+    <span class="trust-item">ifo Schnelldienst 01/2025</span>
+    <span class="trust-item">DIW Wochenbericht 4/2026</span>
+    <span class="trust-item">ECB WP 1267</span>
+    <span class="trust-item">BMF Steuerschätzung 2025</span>
+  </div>
+</div>
+
+<!-- ── EINSTIEGSPUNKTE ──────────────────────────────── -->
+<section class="entry-section">
+  <div class="section-inner">
+    <div class="section-eyebrow">Womit möchtest du starten?</div>
+    <div class="section-title">Dein Einstieg</div>
+    <p class="section-sub">Kassensturz funktioniert für alle — wähle den Weg, der zu dir passt.</p>
+    <div class="entry-grid">
+      <a class="entry-card" href="/">
+        <div class="entry-icon">📖</div>
+        <div class="entry-who">Einsteiger · Schüler</div>
+        <div class="entry-title">Szenarien erkunden</div>
+        <div class="entry-desc">Entdecke echte Reformideen in einfacher Sprache — von Koalitionsvertrag bis Bürgerversicherung. Keine Vorkenntnis nötig.</div>
+        <span class="entry-tag">5 Min. · kein Vorwissen</span>
+      </a>
+      <a class="entry-card" href="/">
+        <div class="entry-icon">🎛️</div>
+        <div class="entry-who">Interessierte · Journalisten</div>
+        <div class="entry-title">Simulation starten</div>
+        <div class="entry-desc">Verändere einzelne Regler und sieh sofort die Auswirkungen auf Haushalt, Verteilung und Wirtschaft. Vollständige Kontrolle.</div>
+        <span class="entry-tag">Interaktiv · unbegrenzt</span>
+      </a>
+      <a class="entry-card" href="/mikro.html">
+        <div class="entry-icon">🔬</div>
+        <div class="entry-who">Experten · Studierende</div>
+        <div class="entry-title">Mikrolabor öffnen</div>
+        <div class="entry-desc">Fünf interaktive ökonomische Modelle — Steuerinzidenz, Elastizität, Mindestlohn, Monopol. Mit Quellenangaben.</div>
+        <span class="entry-tag">Wissenschaftlich · vertiefend</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── SZENARIEN ─────────────────────────────────────── -->
+<section id="szenarien" style="background:var(--bg)">
+  <div class="section-inner">
+    <div class="section-eyebrow">Vorgefertigte Reformpakete</div>
+    <div class="section-title">Szenarien</div>
+    <p class="section-sub">Echte Reformideen aus Wissenschaft, Politik und Praxis — sofort ladbar und vergleichbar.</p>
+    <div class="szenario-grid">
+      <a class="sz-card" href="/">
+        <div class="sz-stripe" style="background:#2563EB"></div>
+        <div class="sz-header">
+          <div class="sz-name">Koalitionsvertrag 2025</div>
+          <span class="sz-badge" style="background:rgba(37,99,235,0.08);color:var(--accent)">Aktuell</span>
+        </div>
+        <div class="sz-desc">CDU/SPD-Vorhaben: KSt −5 PP bis 2033, Grundfreibetrag+, Klimageld. Moderate Reformagenda mit Investitionsfokus.</div>
+        <div class="sz-kpis">
+          <div class="sz-kpi"><div class="sz-kpi-label">Saldo</div><div class="sz-kpi-val" style="color:var(--warn)">−18 Mrd.</div></div>
+          <div class="sz-kpi"><div class="sz-kpi-label">Gini</div><div class="sz-kpi-val" style="color:var(--good)">−0,3</div></div>
+          <div class="sz-kpi"><div class="sz-kpi-label">BIP</div><div class="sz-kpi-val" style="color:var(--good)">+15 Mrd.</div></div>
+        </div>
+      </a>
+      <a class="sz-card" href="/">
+        <div class="sz-stripe" style="background:#059669"></div>
+        <div class="sz-header">
+          <div class="sz-name">Nordisches Modell</div>
+          <span class="sz-badge" style="background:rgba(5,150,105,0.08);color:var(--good)">Progressiv</span>
+        </div>
+        <div class="sz-desc">Höhere ESt, Bürgerversicherung, starke Umverteilung. Inspiriert von Skandinavien — hohe Steuern, hohe Leistungen.</div>
+        <div class="sz-kpis">
+          <div class="sz-kpi"><div class="sz-kpi-label">Saldo</div><div class="sz-kpi-val" style="color:var(--good)">+22 Mrd.</div></div>
+          <div class="sz-kpi"><div class="sz-kpi-label">Gini</div><div class="sz-kpi-val" style="color:var(--good)">−2,1</div></div>
+          <div class="sz-kpi"><div class="sz-kpi-label">BIP</div><div class="sz-kpi-val" style="color:var(--bad)">−8 Mrd.</div></div>
+        </div>
+      </a>
+      <a class="sz-card" href="/">
+        <div class="sz-stripe" style="background:#D97706"></div>
+        <div class="sz-header">
+          <div class="sz-name">Kirchhof-Modell</div>
+          <span class="sz-badge" style="background:rgba(217,119,6,0.08);color:var(--warn)">Liberal</span>
+        </div>
+        <div class="sz-desc">Einheitssteuersatz 25%, radikale Vereinfachung, Abschaffung fast aller Sonderregelungen. Maximale Transparenz.</div>
+        <div class="sz-kpis">
+          <div class="sz-kpi"><div class="sz-kpi-label">Saldo</div><div class="sz-kpi-val" style="color:var(--bad)">−65 Mrd.</div></div>
+          <div class="sz-kpi"><div class="sz-kpi-label">Gini</div><div class="sz-kpi-val" style="color:var(--bad)">+1,2</div></div>
+          <div class="sz-kpi"><div class="sz-kpi-label">BIP</div><div class="sz-kpi-val" style="color:var(--good)">+28 Mrd.</div></div>
+        </div>
+      </a>
+      <a class="sz-card" href="/">
+        <div class="sz-stripe" style="background:#7C3AED"></div>
+        <div class="sz-header">
+          <div class="sz-name">Bedingungsloses Grundeinkommen</div>
+          <span class="sz-badge" style="background:rgba(124,58,237,0.08);color:#7C3AED">Radikal</span>
+        </div>
+        <div class="sz-desc">1.200 € monatlich für alle, finanziert durch höhere Steuern. Ablösung aller Transferleistungen. Kontrovers.</div>
+        <div class="sz-kpis">
+          <div class="sz-kpi"><div class="sz-kpi-label">Saldo</div><div class="sz-kpi-val" style="color:var(--bad)">−180 Mrd.</div></div>
+          <div class="sz-kpi"><div class="sz-kpi-label">Gini</div><div class="sz-kpi-val" style="color:var(--good)">−3,4</div></div>
+          <div class="sz-kpi"><div class="sz-kpi-label">BIP</div><div class="sz-kpi-val" style="color:var(--warn)">±0</div></div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── WIE FUNKTIONIERT ES ───────────────────────────── -->
+<section class="how-section">
+  <div class="section-inner">
+    <div class="section-eyebrow">So einfach geht's</div>
+    <div class="section-title">In vier Schritten</div>
+    <p class="section-sub">Keine Registrierung, keine Installation — direkt im Browser.</p>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-num">1</div>
+        <div class="how-step-title">Einstieg wählen</div>
+        <div class="how-step-desc">Szenario laden oder direkt mit den Kernreglern starten — du entscheidest die Komplexität.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">2</div>
+        <div class="how-step-title">Regler bewegen</div>
+        <div class="how-step-desc">Steuersätze, Freibeträge, CO₂-Preis — alle Parameter in Echtzeit veränderbar.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">3</div>
+        <div class="how-step-title">Module hinzufügen</div>
+        <div class="how-step-desc">Mehr Details gewünscht? Füge Darstellungen und Regler modular hinzu — so tief wie du willst.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">4</div>
+        <div class="how-step-title">Ergebnisse verstehen</div>
+        <div class="how-step-desc">Dezilverteilung, Schuldenprojektion, Wirtschaftseffekte — mit Quellenangaben zu jeder Zahl.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MODULE VORSCHAU ───────────────────────────────── -->
+<section style="background:var(--bg)">
+  <div class="section-inner">
+    <div class="section-eyebrow">Modularer Aufbau</div>
+    <div class="section-title">Deine Komplexität,<br>dein Tempo</div>
+    <p class="section-sub">Starte mit dem Wesentlichen — und füge Module hinzu wenn du mehr wissen möchtest.</p>
+    <div class="module-grid">
+      <div class="mod-card">
+        <div class="mod-icon">⚡</div>
+        <div class="mod-cat">Einstellungen</div>
+        <div class="mod-name">Kernparameter</div>
+        <div class="mod-desc">5 Regler: Spitzensteuersatz, Grundfreibetrag, MwSt, CO₂, KSt. Immer sichtbar.</div>
+        <span class="mod-level ein">● Einsteiger</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">👥</div>
+        <div class="mod-cat">Darstellung</div>
+        <div class="mod-name">Wer zahlt was?</div>
+        <div class="mod-desc">Belastungsveränderung für alle 10 Einkommensdezile — visualisiert als Balkendiagramm.</div>
+        <span class="mod-level ein">● Einsteiger</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">📉</div>
+        <div class="mod-cat">Darstellung</div>
+        <div class="mod-name">Schuldenprojektion</div>
+        <div class="mod-desc">Schuldenquote 2025–2045 unter deinen Annahmen vs. Status quo.</div>
+        <span class="mod-level fort">● Fortgeschritten</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">🏥</div>
+        <div class="mod-cat">Einstellungen</div>
+        <div class="mod-name">GKV-Reformen</div>
+        <div class="mod-desc">Kapitalerträge KV-pflichtig, BBG abschaffen, PKV abschaffen — drei Strukturreformen.</div>
+        <span class="mod-level fort">● Fortgeschritten</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">🔬</div>
+        <div class="mod-cat">Darstellung</div>
+        <div class="mod-name">METR-Analyse</div>
+        <div class="mod-desc">Marginale Effektivsteuersätze je Dezil — zentral für Arbeitsanreizeffekte.</div>
+        <span class="mod-level exp">● Experte</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">📐</div>
+        <div class="mod-cat">Darstellung</div>
+        <div class="mod-name">Laffer-Kurve</div>
+        <div class="mod-desc">Aufkommensverlauf in Abhängigkeit vom Steuersatz — mit Elastizitätskalibrierung.</div>
+        <span class="mod-level exp">● Experte</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA FINAL ─────────────────────────────────────── -->
+<section style="background:var(--ink);padding:64px 32px;text-align:center;">
+  <div style="max-width:560px;margin:0 auto;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:rgba(37,99,235,0.9);margin-bottom:16px;">Kostenlos · Im Browser · Keine Anmeldung</div>
+    <h2 style="font-family:'Fraunces',serif;font-size:42px;font-weight:800;color:#fff;letter-spacing:-0.03em;line-height:1.1;margin-bottom:16px;">Bereit loszulegen?</h2>
+    <p style="color:rgba(255,255,255,0.5);font-size:15px;margin-bottom:32px;line-height:1.65;">Starte mit dem Haushaltsspiel und entdecke, wie steuerpolitische Entscheidungen wirklich funktionieren.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a class="btn-primary" href="/" style="font-size:15px;padding:14px 28px;">Simulation starten →</a>
+      <a class="btn-secondary" href="#szenarien" style="font-size:15px;padding:14px 28px;">Szenarien ansehen</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">Kassensturz</div>
+      <div class="footer-tagline">Steuerpolitik verstehen — für alle.</div>
+    </div>
+    <div class="footer-links">
+      <a class="footer-link" href="/">Haushaltsspiel</a>
+      <a class="footer-link" href="/finanz.html">Finanztools</a>
+      <a class="footer-link" href="/mikro.html">Mikrolabor</a>
+      <a class="footer-link" href="/quellen.html">Quellen</a>
+      <a class="footer-link" href="/impressum.html">Impressum</a>
+    </div>
+    <div class="footer-copy">Privates Bildungsprojekt · Florian Aram Feuerriegel · Bielefeld · Alle Berechnungen sind vereinfachte Modelle ohne Rechtsverbindlichkeit.</div>
+  </div>
+</footer>
+
+</body>
+</html>

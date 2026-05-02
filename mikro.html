@@ -7,54 +7,47 @@
 <title>Mikrolabor · Kassensturz</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f4f1ea;
-    --ink: #1a1814;
-    --paper: #fbf9f4;
-    --rule: #2a2720;
-    --accent: #c8401f;
+    --bg:      #F5F2EB;
+    --paper:   #FEFCF8;
+    --ink:     #1C1917;
+    --border:  #E5E1D8;
+    --rule:    #E5E1D8;
+    --muted:   #78716C;
+    --accent:  #2563EB;
     --accent2: #1e5f3a;
     --accent3: #2a4d7a;
-    --muted: #6b6359;
-    --good: #1e5f3a;
-    --bad: #c8401f;
-    --warn: #b8801f;
+    --good:    #059669;
+    --bad:     #DC2626;
+    --warn:    #D97706;
+    --r:       8px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     background: var(--bg);
     color: var(--ink);
-    font-family: 'Fraunces', Georgia, serif;
+    font-family: 'Inter', sans-serif;
     font-size: 15px;
     line-height: 1.5;
   }
   body {
     background-image:
-      radial-gradient(circle at 20% 20%, rgba(42,77,122,0.05) 0%, transparent 40%),
-      radial-gradient(circle at 80% 75%, rgba(30,95,58,0.05) 0%, transparent 40%);
+      radial-gradient(circle at 15% 30%, rgba(37,99,235,0.025) 0%, transparent 40%),
+      radial-gradient(circle at 85% 70%, rgba(5,150,105,0.025) 0%, transparent 40%);
     min-height: 100vh;
     padding: 0 0 80px;
   }
   .wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
 
   /* NAV */
-  .site-nav { background: var(--ink); padding: 0 16px; }
-  .site-nav-inner {
-    max-width: 1200px; margin: 0 auto;
-    display: flex; align-items: center; overflow-x: auto;
-  }
-  .site-nav a {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em;
-    color: rgba(251,249,244,0.55); text-decoration: none;
-    padding: 11px 16px; border-bottom: 2px solid transparent;
-    white-space: nowrap; transition: color 0.15s;
-  }
-  .site-nav a:hover { color: #fbf9f4; }
-  .site-nav a.active { color: #fbf9f4; border-bottom-color: var(--accent); }
-  .site-nav-sep { color: rgba(251,249,244,0.2); padding: 0 4px; font-size: 12px; }
+  .site-nav-bar { background: var(--ink); padding: 0 24px; height: 40px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; }
+  .site-nav-bar-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; width: 100%; }
+  .nav-logo { font-family: 'Fraunces', serif; font-weight: 800; font-size: 17px; color: #fff; letter-spacing: -0.02em; margin-right: 28px; text-decoration: none; }
+  .nav-link { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); padding: 0 12px; height: 40px; display: flex; align-items: center; text-decoration: none; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
+  .nav-link:hover { color: rgba(255,255,255,0.85); }
+  .nav-link.active { color: #fff; border-bottom-color: var(--accent); }
 
   /* HEADER */
   header { border-bottom: 2px solid var(--rule); padding: 24px 0; margin-bottom: 32px; }
@@ -163,17 +156,14 @@
 </head>
 <body>
 
-<nav class="site-nav">
-  <div class="site-nav-inner">
-    <a href="/">Haushaltsspiel</a>
-    <span class="site-nav-sep">·</span>
-    <a href="/finanz.html">Finanztools</a>
-    <span class="site-nav-sep">·</span>
-    <a href="/mikro.html" class="active">Mikrolabor</a>
-    <span class="site-nav-sep">·</span>
-    <a href="/quellen.html">Quellen</a>
-    <span class="site-nav-sep">·</span>
-    <a href="/impressum.html">Impressum</a>
+<nav class="site-nav-bar">
+  <div class="site-nav-bar-inner">
+    <a href="/" class="nav-logo">Kassensturz</a>
+    <a href="/" class="nav-link">Haushaltsspiel</a>
+    <a href="/finanz.html" class="nav-link">Finanztools</a>
+    <a href="/mikro.html" class="nav-link active">Mikrolabor</a>
+    <a href="/quellen.html" class="nav-link">Quellen</a>
+    <a href="/impressum.html" class="nav-link">Impressum</a>
   </div>
 </nav>
 
