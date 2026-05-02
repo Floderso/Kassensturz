@@ -994,21 +994,25 @@ function computeRef() {
 // ── 6. RENDER — render() Hauptfunktion ──
 
 let _heavyTimer = null;
-function scheduleHeavyRender(p, r) {
+function scheduleHeavyRender() {
   clearTimeout(_heavyTimer);
   _heavyTimer = setTimeout(() => {
+    const p = getParams();
+    const r = berechne(p);
     renderEstKurve(p);
     renderLaffer(p);
-    const metrHtml = r.metr.map((m, i) => {
-      const pct = Math.min(100, m * 100);
-      const cls = m > 0.70 ? 'neg' : m > 0.50 ? 'neu' : 'pos';
-      return `<div class="bar-row">
-        <div class="bar-label">${DEZILE[i].label}</div>
-        <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
-        <div class="bar-value">${Math.round(m * 100)} %</div>
-      </div>`;
-    }).join('');
-    document.getElementById('metr_bars').innerHTML = metrHtml;
+    const metrEl = document.getElementById('metr_bars');
+    if (metrEl) {
+      metrEl.innerHTML = r.metr.map((m, i) => {
+        const pct = Math.min(100, m * 100);
+        const cls = m > 0.70 ? 'neg' : m > 0.50 ? 'neu' : 'pos';
+        return `<div class="bar-row">
+          <div class="bar-label">${DEZILE[i].label}</div>
+          <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
+          <div class="bar-value">${Math.round(m * 100)} %</div>
+        </div>`;
+      }).join('');
+    }
     renderIncomeDist(r, p);
     renderRenten(p, r);
     renderSchuldenpfad(r);
@@ -1296,8 +1300,8 @@ function render() {
   // SCORE PANEL
   renderScore(r);
 
-  // SCHWERE CHART-RENDERS — debounced, feuern 150ms nach letzter Änderung
-  scheduleHeavyRender(p, r);
+  // SCHWERE CHART-RENDERS — 150ms nach letzter Änderung, mit aktuellen Params
+  scheduleHeavyRender();
 
   // KPI PULSE — detect changed KPI values and flash them
   const _kpiPulseIds = ['kpi_saldo','kpi_einn','kpi_gini','kpi_admin','kpi_nst','kpi_arb','kpi_armut','kpi_schuld','kpi_dwl','kpi_sbremse'];
