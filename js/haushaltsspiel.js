@@ -1282,13 +1282,17 @@ function render() {
 
   // ZINSLASTQUOTE
   // Gesamtstaat 2025: ~68 Mrd. € Zinsen (BMF Stabilitätsprogramm 2025, Tab. 5)
+  // Steuereinnahmen 2025: ~903 Mrd. € (BMF Stabilitätsprogramm 2025) — ohne SV-Beiträge
   // Marginalzins ~2,8 % auf neue Bundesanleihen (Bundesbank Renditedaten April 2025)
   // Methodik: Δ Saldo × Marginalzins = Δ Zinsausgaben (Hallerberg/Wolff 2008, IMF WP 23/47)
   const ZINSEN_BASIS = 68;    // Mrd. € Gesamtstaat 2025
   const MARGINALZINS = 0.028; // Bundesbank April 2025
+  // Nenner = nur Steuereinnahmen (SV-Beiträge herausgerechnet) — 68/903 = 7,5 Ct/€
+  const steuer_einnahmen     = r.einnahmen_total   - r.rev.rv - r.rev.kv - r.rev.al;
+  const steuer_einnahmen_ref = REF.einnahmen_total - REF.rev.rv - REF.rev.kv - REF.rev.al;
   const zinsen = Math.max(0, ZINSEN_BASIS - (r.saldo - REF.saldo) * MARGINALZINS);
-  const zins_cent = zinsen / r.einnahmen_total * 100;
-  const zins_cent_ref = ZINSEN_BASIS / REF.einnahmen_total * 100;
+  const zins_cent = zinsen / steuer_einnahmen * 100;
+  const zins_cent_ref = ZINSEN_BASIS / steuer_einnahmen_ref * 100;
   const dZins = zins_cent - zins_cent_ref;
   document.getElementById('kpi_zins').textContent = zins_cent.toFixed(1).replace('.', ',') + ' Ct';
   const zinsDEl = document.getElementById('kpi_zins_d');
