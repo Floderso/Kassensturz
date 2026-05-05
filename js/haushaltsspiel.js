@@ -1097,6 +1097,9 @@ function render() {
   const giniTone = (r.gini - REF.gini) > 0.005 ? 'bad' : (r.gini - REF.gini) < -0.005 ? 'good' : 'neu';
   setKpiTone('kpi_card_gini', giniTone);
   setKpiTone('kpi_card_einn', 'neu');
+  setKpiTone('kpi_card_admin', dA > 1 ? 'bad' : dA < -1 ? 'good' : 'neu');
+  setKpiTone('kpi_card_nst', 'neu');
+  setKpiTone('kpi_card_arb', dArb < -1 ? 'bad' : dArb > 1 ? 'good' : 'neu');
 
   // Warnungen
   const warnbox = document.getElementById('warnbox');
@@ -1268,15 +1271,16 @@ function render() {
   const schuldEl = document.getElementById('kpi_schuld');
   const schuldDEl = document.getElementById('kpi_schuld_d');
   schuldEl.textContent = (r.schuldenquote_delta >= 0 ? '+' : '') + r.schuldenquote_delta.toFixed(2).replace('.', ',') + ' %';
-  schuldEl.style.color = r.schuldenquote_delta > 0.5 ? 'var(--bad)' : r.schuldenquote_delta < -0.2 ? 'var(--good)' : 'var(--ink)';
   schuldDEl.textContent = r.schuldenquote_delta > 0 ? 'Schulden steigen' : r.schuldenquote_delta < 0 ? 'Schulden sinken' : 'Ausgeglichen';
   schuldDEl.className = 'kpi-delta ' + (r.schuldenquote_delta > 0.5 ? 'bad' : r.schuldenquote_delta < 0 ? 'good' : 'neutral');
+  setKpiTone('kpi_card_schuld', r.schuldenquote_delta > 0.5 ? 'bad' : r.schuldenquote_delta < 0 ? 'good' : 'neu');
 
   document.getElementById('kpi_dwl').textContent = r.dwl.toFixed(0) + ' Mrd.';
   const dwlDEl = document.getElementById('kpi_dwl_d');
   const dDwl = r.dwl - REF.dwl;
   dwlDEl.textContent = (dDwl >= 0 ? '+' : '') + dDwl.toFixed(0) + ' Mrd. vs. Basis';
   dwlDEl.className = 'kpi-delta ' + (dDwl > 5 ? 'bad' : dDwl < -5 ? 'good' : 'neutral');
+  setKpiTone('kpi_card_dwl', dDwl > 5 ? 'bad' : dDwl < -5 ? 'good' : 'neu');
 
   // SCHULDENBREMSE-KPI (Art. 109 GG) — R05
   const sbEl  = document.getElementById('kpi_sbremse');
