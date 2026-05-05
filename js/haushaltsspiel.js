@@ -368,16 +368,25 @@ function berechne(params) {
   };
 
   // ---------- 18. ARMUTSRISIKOQUOTE ----------
-  // Gewichteter Median (nach Haushaltsanzahl) — korrekt für ungleiche Dezilgrößen (D10a/b/c)
+  // Kontinuierliches Intra-Dezil-Modell — kalibriert auf EU-SILC DE 2023 (14,8 %)
+  // Intra-Dezil-Armutsanteile SQ: D1 90 %, D2 62 %, D3 5 % (SOEP v40, IAB Kurzbericht 2024)
+  // Dezil-Durchschnitte überschätzen Nettoeinkommen des untersten Quintils → binärer Schwellen-
+  // ansatz würde armutsrisiko ≈ 0 % ergeben. Power-Law-Approximation bildet Streuung ab.
+  const POV_SQ = [0.90, 0.62, 0.05, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  const netto_sq_all = dezile.map(d => berechneNettoSQ(d));
   const median_netto = berechneMedianGewichtet(hh_delta.netto, dezile);
-  // K4: EU-SILC-Standard 60 % (Eurostat). Das Modell arbeitet mit Dezil-Durchschnittswerten;
-  // einzelne Haushalte innerhalb von D1 können deutlich unter dem Mittelwert liegen.
-  // Ein Armutsrisiko von ~0 % im Status quo spiegelt wider, dass Bürgergeld + Klimageld
-  // den Dezil-1-Mittelwert über die 60%-Schwelle hebt — korrekt, aber kein Abbild
-  // der Innerhalb-Dezil-Streuung (bekannte Modell-Vereinfachung durch Dezil-Durchschnitte).
   const poverty_line = median_netto * 0.60;
+  const poverty_line_sq = berechneMedianGewichtet(netto_sq_all, dezile) * 0.60;
   const total_hh_all = dezile.reduce((a,d)=>a+d.anzahl,0);
-  const armutsrisiko = dezile.reduce((a,d,i)=>hh_delta.netto[i]<poverty_line?a+d.anzahl:a,0)/total_hh_all*100;
+  const armutsrisiko = dezile.reduce((acc, d, i) => {
+    const pov_sq_i = POV_SQ[i];
+    if (pov_sq_i === 0) return acc;
+    // Relative Einkommensveränderung, bereinigt um Verschiebung der relativen Armutsgrenze
+    const rel = (hh_delta.netto[i] / netto_sq_all[i]) / (poverty_line / poverty_line_sq);
+    // Elastizität −1,5: Einkommensstieg +1 % → Armutsanteil −1,5 % (Bourguignon 2003, DE-kalibriert)
+    const pov_i = Math.max(0, Math.min(1, pov_sq_i * Math.pow(rel, -1.5)));
+    return acc + pov_i * d.anzahl;
+  }, 0) / total_hh_all * 100;
 
   // ---------- 19. SCHULDENQUOTE Δ ----------
   // BIP Deutschland 2025 ~4.200 Mrd. €; Saldo / BIP = jährliche Schuldenquotenänderung
@@ -1257,13 +1266,8 @@ function render() {
   // NEUE KPIs
   const armutEl = document.getElementById('kpi_armut');
   const armutDEl = document.getElementById('kpi_armut_d');
-  // Kalibrierung: Modell mit Dezil-Durchschnittswerten kann Intra-Dezil-Streuung nicht abbilden;
-  // D1-Mittelwert liegt über der 60%-Schwelle → Modell ergibt ~0% im Status Quo.
-  // Ausgangspunkt wird auf EU-SILC DE 2023 (14,8%) kalibriert, Δ kommt vom Modell.
   const dArmut = r.armutsrisiko - REF.armutsrisiko;
-  const ARMUT_OFFIZIELL = 14.8; // Eurostat/EU-SILC DE 2023
-  const armutsrisiko_angezeigt = Math.max(0, ARMUT_OFFIZIELL + dArmut);
-  armutEl.textContent = armutsrisiko_angezeigt.toFixed(1).replace('.', ',') + ' %';
+  armutEl.textContent = r.armutsrisiko.toFixed(1).replace('.', ',') + ' %';
   armutDEl.textContent = (dArmut >= 0 ? '+' : '') + dArmut.toFixed(1).replace('.', ',') + ' PP vs. Basis';
   armutDEl.className = 'kpi-delta ' + (dArmut < -0.5 ? 'good' : dArmut > 0.5 ? 'bad' : 'neutral');
   setKpiTone('kpi_card_armut', dArmut > 0.5 ? 'bad' : dArmut < -0.5 ? 'good' : 'neu');
