@@ -1254,10 +1254,16 @@ function render() {
   // NEUE KPIs
   const armutEl = document.getElementById('kpi_armut');
   const armutDEl = document.getElementById('kpi_armut_d');
-  armutEl.textContent = r.armutsrisiko.toFixed(1).replace('.', ',') + ' %';
+  // Kalibrierung: Modell mit Dezil-Durchschnittswerten kann Intra-Dezil-Streuung nicht abbilden;
+  // D1-Mittelwert liegt über der 60%-Schwelle → Modell ergibt ~0% im Status Quo.
+  // Ausgangspunkt wird auf EU-SILC DE 2023 (14,8%) kalibriert, Δ kommt vom Modell.
   const dArmut = r.armutsrisiko - REF.armutsrisiko;
+  const ARMUT_OFFIZIELL = 14.8; // Eurostat/EU-SILC DE 2023
+  const armutsrisiko_angezeigt = Math.max(0, ARMUT_OFFIZIELL + dArmut);
+  armutEl.textContent = armutsrisiko_angezeigt.toFixed(1).replace('.', ',') + ' %';
   armutDEl.textContent = (dArmut >= 0 ? '+' : '') + dArmut.toFixed(1).replace('.', ',') + ' PP vs. Basis';
   armutDEl.className = 'kpi-delta ' + (dArmut < -0.5 ? 'good' : dArmut > 0.5 ? 'bad' : 'neutral');
+  setKpiTone('kpi_card_armut', dArmut > 0.5 ? 'bad' : dArmut < -0.5 ? 'good' : 'neu');
 
   const schuldEl = document.getElementById('kpi_schuld');
   const schuldDEl = document.getElementById('kpi_schuld_d');
