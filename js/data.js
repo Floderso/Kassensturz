@@ -524,6 +524,7 @@ const KPI_BENCH = {
   armut:  'DE 2023: 14,8 % (EU-SILC) · EU-Ø: 16,5 %',
   schuld: 'DE Schuldenquote 2025: ~64 % BIP (IMF Art. IV 2025)',
   dwl:    'Schätzung: 5–15 % des Steueraufkommens',
+  zins:   'DE 2025: ~68 Mrd. € · 4,5 Cent/€ · Tief 2021: 1,2 Ct · Quelle: BMF Stabilitätsprogramm 2025 · Bundesbank',
 };
 const CHALLENGE_CTX = {
   'Saldo':            'DE 2024: ca. −85 Mrd. €',
