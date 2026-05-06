@@ -31,7 +31,7 @@ const STAATSAUSGABEN = {
   verteidigung:   90,
   infrastruktur: 120,
   verwaltung:    140,
-  zinsen:         40,
+  zinsen:         30,  // Bund 2025: 30,2 Mrd. € (Finanzplan des Bundes 2025–2029, Abbildung 4)
   sonstiges:     140
 };
 const AUSGABEN_TOTAL = Object.values(STAATSAUSGABEN).reduce((a,b)=>a+b,0);
@@ -524,7 +524,7 @@ const KPI_BENCH = {
   armut:  'DE 2023: 14,8 % (EU-SILC) · EU-Ø: 16,5 %',
   schuld: 'DE Schuldenquote 2025: ~64 % BIP (IMF Art. IV 2025)',
   dwl:    'Schätzung: 5–15 % des Steueraufkommens',
-  zins:   'Bund 2025: 7,7 Ct/€ · Gesamtstaat: 7,5 Ct/€ · Projektion 2030: 18,1 Ct/€ · Tief 2021: 4,6 Ct · Quelle: IW Köln (Hentze 2025) · BMF Stabilitätsprogramm 2025',
+  zins:   'Bund 2025: 7,7 Ct/€ (30,2 Mrd.) · Projektion 2029: 17,2 Ct/€ (66,5 Mrd.) · Tief 2021: 4,6 Ct · Quelle: IW Köln (Hentze 2025) · BMF Finanzplan 2025–2029 (Abbildung 4)',
 };
 const CHALLENGE_CTX = {
   'Saldo':            'DE 2024: ca. −85 Mrd. €',

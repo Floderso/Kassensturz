@@ -1295,15 +1295,15 @@ function render() {
   sbDEl.className = 'kpi-delta ' + (r.schuldenbremse_ok ? 'good' : 'bad');
 
   // ZINSLASTQUOTE
-  // Gesamtstaat 2025: ~68 Mrd. € Zinsen → 7,5 Ct/€ (BMF Stabilitätsprogramm 2025, Tab. 5)
-  // Bundeshaushalt 2025: 7,7 Ct/€ (IW Köln, Hentze April 2025) — Projektion 2030: 18,1 Ct/€
-  // Steuereinnahmen 2025: ~903 Mrd. € (ohne SV-Beiträge) · Marginalzins 2,8 % (Bundesbank)
-  // Methodik: Δ Saldo × Marginalzins = Δ Zinsausgaben (Hallerberg/Wolff 2008, IMF WP 23/47)
-  const ZINSEN_BASIS = 68;    // Mrd. € Gesamtstaat 2025
-  const MARGINALZINS = 0.028; // Bundesbank April 2025
-  // Nenner = nur Steuereinnahmen (SV-Beiträge herausgerechnet) — 68/903 = 7,5 Ct/€
-  const steuer_einnahmen     = r.einnahmen_total   - r.rev.rv - r.rev.kv - r.rev.al;
-  const steuer_einnahmen_ref = REF.einnahmen_total - REF.rev.rv - REF.rev.kv - REF.rev.al;
+  // Bundeshaushalt 2025: 30,2 Mrd. € Zinsen → 7,7 Ct/€ (Finanzplan 2025–2029, Abbildung 4; IW Köln, Hentze 2025)
+  // Projektion 2029: 66,5 Mrd. → 17,2 Ct/€ (Finanzplan, Abbildung 4)
+  // Methodik: Bund-Zinsen / Bund-Steuereinnahmen · Δ Saldo × Marginalzins = Δ Zinsausgaben (IMF WP 23/47)
+  const ZINSEN_BASIS  = 30;     // Mrd. € Bund 2025 (Finanzplan, Abbildung 4: 30,2 Mrd.)
+  const MARGINALZINS  = 0.028;  // Bundesbank April 2025
+  const BUND_ST_SHARE = 0.421;  // Bund-Anteil Steuereinnahmen (Finanzplan Tab. 16: 386,8 / ~919 Mrd. Gesamtstaat)
+  // Nenner = Bund-Steuereinnahmen (SV herausgerechnet, Bund-Anteil skaliert) — 30/387 = 7,75 Ct/€
+  const steuer_einnahmen     = (r.einnahmen_total   - r.rev.rv - r.rev.kv - r.rev.al) * BUND_ST_SHARE;
+  const steuer_einnahmen_ref = (REF.einnahmen_total - REF.rev.rv - REF.rev.kv - REF.rev.al) * BUND_ST_SHARE;
   const zinsen = Math.max(0, ZINSEN_BASIS - (r.saldo - REF.saldo) * MARGINALZINS);
   const zins_cent = zinsen / steuer_einnahmen * 100;
   const zins_cent_ref = ZINSEN_BASIS / steuer_einnahmen_ref * 100;
