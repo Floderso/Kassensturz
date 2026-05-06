@@ -1295,9 +1295,9 @@ function render() {
   sbDEl.className = 'kpi-delta ' + (r.schuldenbremse_ok ? 'good' : 'bad');
 
   // ZINSLASTQUOTE
-  // Gesamtstaat 2025: ~68 Mrd. € Zinsen (BMF Stabilitätsprogramm 2025, Tab. 5)
-  // Steuereinnahmen 2025: ~903 Mrd. € (BMF Stabilitätsprogramm 2025) — ohne SV-Beiträge
-  // Marginalzins ~2,8 % auf neue Bundesanleihen (Bundesbank Renditedaten April 2025)
+  // Gesamtstaat 2025: ~68 Mrd. € Zinsen → 7,5 Ct/€ (BMF Stabilitätsprogramm 2025, Tab. 5)
+  // Bundeshaushalt 2025: 7,7 Ct/€ (IW Köln, Hentze April 2025) — Projektion 2030: 18,1 Ct/€
+  // Steuereinnahmen 2025: ~903 Mrd. € (ohne SV-Beiträge) · Marginalzins 2,8 % (Bundesbank)
   // Methodik: Δ Saldo × Marginalzins = Δ Zinsausgaben (Hallerberg/Wolff 2008, IMF WP 23/47)
   const ZINSEN_BASIS = 68;    // Mrd. € Gesamtstaat 2025
   const MARGINALZINS = 0.028; // Bundesbank April 2025
