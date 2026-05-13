@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Claude Code
+.claude/
+
+# Interne Arbeitsdokumente
+QUELLENRECHERCHE.md
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
