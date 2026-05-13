@@ -94,3 +94,5 @@ function berechneRente(params, rv_aufkommen_aktuell) {
     pkv_netto_effekt, kassen_ersparnis, praevention_ersparnis, gkv_gesamt_effekt
   };
 }
+
+export { berechneRente, FORMEL_QUELLEN_RENTE };

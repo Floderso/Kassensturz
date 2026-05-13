@@ -1,3 +1,6 @@
+import { grenzsteuersatz, effSteuersatz } from '../rechner/einkommensteuer.js';
+import { DEZILE } from '../data.js';
+
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Diagramme — ESt-Kurve, Einkommensverteilung, Schuldenquotenpfad
 // Abhängigkeiten: grenzsteuersatz, effSteuersatz (rechner/einkommensteuer.js),
@@ -103,9 +106,7 @@ function renderIncomeDist(r, p) {
   </svg>`;
 }
 
-function exportCSV() {
-  const p = getParams();
-  const r = berechne(p);
+function exportCSV(p, r, ref) {
   const rows = [];
   const sep = ';';
 
@@ -157,7 +158,7 @@ function exportCSV() {
 
   rows.push(['=== VERTEILUNGS- & VERHALTENSKENNZAHLEN ===']);
   rows.push(['Gini-Koeffizient (neu)', r.gini.toFixed(4)]);
-  rows.push(['Gini-Koeffizient (Basis)', REF.gini.toFixed(4)]);
+  rows.push(['Gini-Koeffizient (Basis)', ref.gini.toFixed(4)]);
   rows.push(['Palma-Ratio', r.palma.toFixed(3)]);
   rows.push(['Arbeitsangebot Index', r.behavior.labor.toFixed(1)]);
   rows.push(['Konsum Index', r.behavior.konsum.toFixed(1)]);
@@ -193,10 +194,10 @@ function berechneSchuldenpfad(saldo_neu, saldo_sq) {
   return pfad;
 }
 
-function renderSchuldenpfad(r) {
+function renderSchuldenpfad(r, ref) {
   const el = document.getElementById('schulden_pfad_chart');
   if (!el) return;
-  const pfad = berechneSchuldenpfad(r.saldo, REF.saldo);
+  const pfad = berechneSchuldenpfad(r.saldo, ref.saldo);
   const W=640, H=160, pl=48, pr=16, pt=12, pb=28;
   const iW=W-pl-pr, iH=H-pt-pb;
   const allV = pfad.flatMap(p=>[p.neu,p.sq]);
@@ -222,7 +223,7 @@ function renderSchuldenpfad(r) {
 
   const endNeu = pfad[pfad.length-1].neu.toFixed(1);
   const endSQ  = pfad[pfad.length-1].sq.toFixed(1).replace('.',',');
-  const sameScenario = Math.abs(r.saldo - REF.saldo) < 0.5;
+  const sameScenario = Math.abs(r.saldo - ref.saldo) < 0.5;
 
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
     ${yVals}${xLabels}
@@ -240,3 +241,5 @@ function renderSchuldenpfad(r) {
     </g>
   </svg>`;
 }
+
+export { renderEstKurve, renderIncomeDist, exportCSV, berechneSchuldenpfad, renderSchuldenpfad };

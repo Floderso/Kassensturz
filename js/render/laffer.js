@@ -1,3 +1,5 @@
+import { berechne } from '../rechner/berechne.js';
+
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Laffer-Kurve — Render
 // Abhängigkeiten: berechne() (rechner/berechne.js)
@@ -85,3 +87,5 @@ function _renderLafferNow(p) {
     <text x="${pl+8}" y="${pt2+14}" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">ESt-Aufkommen (Mrd. €)</text>
   </svg>`;
 }
+
+export { renderLaffer, _renderLafferNow };

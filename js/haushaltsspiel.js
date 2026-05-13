@@ -1,12 +1,13 @@
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Haushaltsspiel — UI & Render
-// Berechnungslogik: js/rechner/
-//   einkommensteuer.js  → estTarif, grenzsteuersatz, effSteuersatz
-//   verteilung.js       → berechneGini, berechnePalma, berechneDezilDelta, berechneNettoSQ
-//   berechne.js         → berechne()  (Hauptsimulation)
-//   rente.js            → berechneRente()
-// Statische Daten: js/data.js
 // ═══════════════════════════════════════════════════════
+
+import { DEZILE, ELAST, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH } from './data.js';
+import { estTarif, grenzsteuersatz, effSteuersatz } from './rechner/einkommensteuer.js';
+import { berechne } from './rechner/berechne.js';
+import { renderEstKurve, renderIncomeDist, exportCSV, renderSchuldenpfad } from './render/charts.js';
+import { renderRenten } from './render/renten.js';
+import { renderLaffer, _renderLafferNow } from './render/laffer.js';
 
 
 
@@ -123,6 +124,7 @@ function fmtSignedMrd(x) {
 let REF = null;
 function computeRef() {
   REF = berechne(PRESETS.status_quo);
+  window.REF = REF; // needed by CHALLENGES refFn lambdas in data.js
 }
 
 
@@ -150,7 +152,7 @@ function scheduleHeavyRender() {
     }
     renderIncomeDist(r, p);
     renderRenten(p, r);
-    renderSchuldenpfad(r);
+    renderSchuldenpfad(r, REF);
     renderChallenges(r);
     renderWissenschaftsPanel(p);
     renderRechenweg(r, p);
@@ -1341,7 +1343,7 @@ renderEstKurve(_initP);
 _renderLafferNow(_initP);
 renderIncomeDist(_initR, _initP);
 renderRenten(_initP, _initR);
-renderSchuldenpfad(_initR);
+renderSchuldenpfad(_initR, REF);
 renderChallenges(_initR);
 renderWissenschaftsPanel(_initP);
 renderRechenweg(_initR, _initP);
@@ -1349,7 +1351,7 @@ injectTooltips();
 updateScenarioModeUI();
 
 // Rechenweg-Panel: bei Aufklappen rendern
-document.getElementById('csv-export-btn').addEventListener('click', exportCSV);
+document.getElementById('csv-export-btn').addEventListener('click', () => { const p = getParams(); exportCSV(p, berechne(p), REF); });
 document.getElementById('share-btn').addEventListener('click', copyShareLink);
 document.getElementById('undo-btn').addEventListener('click', undoHistory);
 document.getElementById('save-a-btn').addEventListener('click', () => enterScenarioMode('A'));
@@ -1853,6 +1855,21 @@ function toggleMod(id) {
   applyModules();
   renderModGrid(pickerType);
 }
+
+// Expose functions needed by inline onclick handlers in HTML
+window.exitScenarioMode = exitScenarioMode;
+window.startTour        = startTour;
+window.tourPrev         = tourPrev;
+window.tourNext         = tourNext;
+window.endTour          = endTour;
+window.openPicker       = openPicker;
+window.closePicker      = closePicker;
+window.closeCardModal   = closeCardModal;
+window.pickCardStyle    = pickCardStyle;
+window.setCardTheme     = setCardTheme;
+window.startWith        = startWith;
+window.closeOnboarding  = closeOnboarding;
+window.toggleMod        = toggleMod;
 
 // Initial anwenden
 applyModules();

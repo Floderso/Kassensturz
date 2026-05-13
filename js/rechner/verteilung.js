@@ -1,3 +1,6 @@
+import { DEZILE, PRESETS, ELAST, BASIS_MAKRO } from '../data.js';
+import { estTarif } from './einkommensteuer.js';
+
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Verteilungsmetriken & Dezilberechnung
 // Abhängigkeiten: DEZILE, ELAST (aus data.js), estTarif, grenzsteuersatz (aus einkommensteuer.js)
@@ -163,3 +166,5 @@ function berechneNettoSQ(d) {
   transfers += sq.kg * 12 * kg_quote_sq[d.idx];
   return brutto - est - sv - mwst - co2_last + klimageld_per_hh + transfers;
 }
+
+export { FORMEL_QUELLEN_VERT, berechneGini, berechneMedianGewichtet, berechnePalma, berechneDezilDelta, berechneNettoSQ };

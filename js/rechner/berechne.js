@@ -1,3 +1,7 @@
+import { DEZILE, ELAST, BASIS_MAKRO, PRESETS, BASIS_AUFKOMMEN, ADMIN_QUOTE, AUSGABEN_TOTAL } from '../data.js';
+import { estTarif, grenzsteuersatz } from './einkommensteuer.js';
+import { berechneGini, berechneMedianGewichtet, berechnePalma, berechneDezilDelta, berechneNettoSQ } from './verteilung.js';
+
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Hauptsimulation
 // Abhängigkeiten (Ladereihenfolge beachten):
@@ -391,3 +395,5 @@ function berechne(params) {
     kv_bbg_frei_bonus, kv_kapital_bonus
   };
 }
+
+export { berechne, FORMEL_QUELLEN_BERECHNE };

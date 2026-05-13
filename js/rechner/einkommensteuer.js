@@ -102,3 +102,5 @@ function effSteuersatz(einkommen, freibetrag, eingang, spitze, grenze) {
   if (einkommen <= freibetrag) return 0;
   return estTarif(einkommen, freibetrag, eingang, spitze, grenze) / einkommen;
 }
+
+export { estTarif, grenzsteuersatz, effSteuersatz, FORMEL_QUELLEN_EST };

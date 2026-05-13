@@ -1,3 +1,5 @@
+import { berechneRente } from '../rechner/rente.js';
+
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Rentenreform & GKV — Render
 // Abhängigkeiten: berechneRente() (rechner/rente.js), DEZILE (data.js)
@@ -157,3 +159,5 @@ function renderBeitragProjSVG(rente, p) {
     ${legend}
   </svg>`;
 }
+
+export { renderRenten, renderKapitalstockSVG, renderBeitragProjSVG };
