@@ -57,6 +57,22 @@ const BASIS_AUFKOMMEN = {
   al_pflege:      105
 };
 
+// Makroökonomische Basiszahlen (Deutschland 2025)
+// Quellen: Destatis VGR, BMF Finanzplan 2025, Deutsche Rentenversicherung Rentenbericht 2024
+const BASIS_MAKRO = {
+  bip:               4200,  // BIP Deutschland 2025, Mrd. €
+  gewinn:             400,  // Unternehmensgewinne vor Steuern, Mrd. €
+  emissions:          500,  // CO₂-beprieste Emissionen (BEHG + ETS), Mio. t
+  erb_masse:          400,  // Erbschaftsmasse pro Jahr, Mrd. €
+  boden_wert:        5000,  // Bodenwert Deutschland gesamt, Mrd. €
+  verm_basis:        3500,  // Steuerpflichtiges Vermögen > 2 Mio €, Mrd. €
+  lohnsumme_sv:      1750,  // Sozialversicherungspflichtige Lohnsumme, Mrd. €
+  rv_ausgaben_sq:     430,  // RV-Gesamtausgaben inkl. Bundeszuschuss (Status quo), Mrd. €
+  kv_bbg_kv_sq:     62100,  // Beitragsbemessungsgrenze KV/PV 2025, € p.a.
+  kv_bbg_frei_bonus:   18,  // Aufkommensgewinn kv_bbg_frei bei kv=16,3 %, Mrd. €
+  kv_kapital_bonus:     8,  // Aufkommensgewinn kv_kapital bei kv=16,3 %, Mrd. €
+};
+
 // Verwaltungskosten-Quoten (% des jeweiligen Aufkommens)
 // BRH, OECD Tax Admin, Normenkontrollrat
 const ADMIN_QUOTE = {

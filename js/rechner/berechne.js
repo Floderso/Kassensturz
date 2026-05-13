@@ -124,10 +124,8 @@ function berechne(params) {
   }
 
   // ---------- 3. KÖRPERSCHAFTSTEUER + GEWERBE ----------
-  // Basis-Unternehmensgewinn 2025 ca. 400 Mrd. (Vor-Steuer)
-  const gewinn_basis = 400;
   const investment_factor = 1 + ELAST.investment * ((params.kst + (params.gewst_aus ? 0 : params.gewst))/100 - 0.30);
-  const gewinn = gewinn_basis * Math.max(0.7, Math.min(1.2, investment_factor));
+  const gewinn = BASIS_MAKRO.gewinn * Math.max(0.7, Math.min(1.2, investment_factor));
   const kst_auf = gewinn * params.kst / 100;
   const gewst_auf = params.gewst_aus ? 0 : gewinn * params.gewst / 100;
 
@@ -141,7 +139,7 @@ function berechne(params) {
     // Netto nach ESt und SV (SV-Basis = Arbeitseinkommen, K3-Vorkorrektur hier vereinfacht)
     const est_d = est_pro_dezil.find(x => x.d === d.d).est;
     const arbeit_mwst = d.brutto_adj * (1 - d.kapital);
-    const bbg_kv_mwst = params.kv_bbg_frei ? Infinity : Math.round((params.bbg ?? 90000) * (62100 / 90000));
+    const bbg_kv_mwst = params.kv_bbg_frei ? Infinity : Math.round((params.bbg ?? 90000) * (BASIS_MAKRO.kv_bbg_kv_sq / 90000));
     const sv_d = Math.min(arbeit_mwst, params.bbg ?? 90000) * (params.rv + params.alpf * 0.42) / 100 * 0.5
                + Math.min(arbeit_mwst, bbg_kv_mwst) * (params.kv + params.alpf * 0.58) / 100 * 0.5;
     const netto = d.brutto_adj - est_d - sv_d;
@@ -155,39 +153,28 @@ function berechne(params) {
   mwst_auf *= 0.963;
 
   // ---------- 5. CO2 ----------
-  // Emissionen Deutschland ca. 650 Mio t, davon ~500 Mio t im CO2-Bepreisungsbereich
-  const emissions_basis = 500;
   const co2_factor = 1 + ELAST.co2 * ((params.co2 - 55) / 100);
-  const emissionen = emissions_basis * Math.max(0.4, Math.min(1.1, co2_factor));
+  const emissionen = BASIS_MAKRO.emissions * Math.max(0.4, Math.min(1.1, co2_factor));
   const co2_auf = emissionen * params.co2 / 1000;
   const klimageld_auszahlung = params.klimageld ? co2_auf * 0.7 : 0; // 70% zurück als Klimageld
 
   // ---------- 6. VERMÖGEN / ERBSCHAFT / BODEN ----------
-  // Erbschaftsmasse pro Jahr ca. 400 Mrd., oberste 10% erben ~60%
-  const erb_masse_top = 400 * 0.6;
-  const erb_masse_unten = 400 * 0.4;
-  const erb_satz_eff = params.erb * (params.betriebs ? 0.3 : 0.9) / 100; // Ausnahmen senken eff. Satz
-  const erb_auf = erb_masse_top * erb_satz_eff + erb_masse_unten * Math.min(params.erb, 15)/100 * 0.5;
-
-  // Bodenwert Deutschland ca. 5000 Mrd.
-  const boden_auf = 5000 * params.boden / 100;
-
-  // Vermögensteuer: Vermögen > 2 Mio € ca. 3500 Mrd.
-  const verm_auf = 3500 * params.verm / 100;
+  const erb_satz_eff = params.erb * (params.betriebs ? 0.3 : 0.9) / 100;
+  const erb_auf = BASIS_MAKRO.erb_masse * 0.6 * erb_satz_eff
+                + BASIS_MAKRO.erb_masse * 0.4 * Math.min(params.erb, 15) / 100 * 0.5;
+  const boden_auf = BASIS_MAKRO.boden_wert * params.boden / 100;
+  const verm_auf  = BASIS_MAKRO.verm_basis  * params.verm  / 100;
 
   // ---------- 7. SV-BEITRÄGE ----------
-  // Versicherungspflichtige Lohnsumme ca. 1750 Mrd., BBG begrenzt
   const bbg = params.bbg ?? 90000;
   // BBG-Erhöhung: ~12% der sozialversicherungspflichtigen Löhne liegt zwischen 90k und 160k
   const bbg_lohnsumme_factor = 1 + Math.max(0, (bbg - 90000) / 90000) * 0.12;
-  const lohnsumme_sv = 1750 * bbg_lohnsumme_factor;
-  const buerger_boost = params.buergerv ? 1.15 : 1.0; // breitere Basis
+  const lohnsumme_sv = BASIS_MAKRO.lohnsumme_sv * bbg_lohnsumme_factor;
+  const buerger_boost = params.buergerv ? 1.15 : 1.0;
   const rv_auf = lohnsumme_sv * params.rv / 100 * buerger_boost;
-  // KV-Reformboni (Bürgerversicherungs-Bausteine — ifo Forschungsbericht 159/2025, DIW):
-  // kv_bbg_frei: Lohnbasis über KV-BBG (62.100 €) wird beitragspflichtig → +~18 Mrd. bei 16,3%
-  // kv_kapital:  Kapital- und Mieteinkünfte GKV-Mitglieder KV-pflichtig → +~8 Mrd. bei 16,3%
-  const kv_bbg_frei_bonus = params.kv_bbg_frei ? 18 * (params.kv / 16.3) : 0;
-  const kv_kapital_bonus  = params.kv_kapital  ?  8 * (params.kv / 16.3) : 0;
+  // kv_bbg_frei/kv_kapital: Aufkommensschätzung skaliert mit aktuellem KV-Satz (ifo 159/2025, DIW)
+  const kv_bbg_frei_bonus = params.kv_bbg_frei ? BASIS_MAKRO.kv_bbg_frei_bonus * (params.kv / 16.3) : 0;
+  const kv_kapital_bonus  = params.kv_kapital  ? BASIS_MAKRO.kv_kapital_bonus  * (params.kv / 16.3) : 0;
   const kv_auf = lohnsumme_sv * params.kv / 100 * buerger_boost + kv_bbg_frei_bonus + kv_kapital_bonus;
   const al_auf = lohnsumme_sv * params.alpf / 100 * buerger_boost;
 
@@ -211,8 +198,7 @@ function berechne(params) {
   // M3: Ausgabenbasis skaliert mit rv-Regler (Umlagesystem: niedrigere Beiträge = niedrigeres Leistungsniveau).
   // Damit wird verhindert, dass rv_einsparung gegen eine feste Basis gerechnet wird, die der rv-Slider
   // schon implizit abgesenkt hat (Doppelkorrektur-Vermeidung).
-  const RV_AUSGABEN_SQ = 430;
-  const rv_ausgaben_basis = RV_AUSGABEN_SQ * (params.rv / 18.6); // skaliert mit Beitragssatz
+  const rv_ausgaben_basis = BASIS_MAKRO.rv_ausgaben_sq * (params.rv / 18.6); // skaliert mit Beitragssatz
   let rv_einsparung = 0;
   if (bge > 0) {
     const rl = params.rente_grenze || 35000;              // €/Jahr Einkommensgrenze
@@ -344,9 +330,7 @@ function berechne(params) {
   }, 0) / total_hh_all * 100;
 
   // ---------- 19. SCHULDENQUOTE Δ ----------
-  // BIP Deutschland 2025 ~4.200 Mrd. €; Saldo / BIP = jährliche Schuldenquotenänderung
-  const bip = 4200;
-  const schuldenquote_delta = -(saldo / bip) * 100; // negativ = Schulden steigen
+  const schuldenquote_delta = -(saldo / BASIS_MAKRO.bip) * 100;
 
   // ---------- 20. METR (Marginal Effective Tax Rate) je Dezil ----------
   // METR = ESt-Grenzsteuersatz + SV-Grenzbelastung (AN-Anteil) + Transfer-Entzug
@@ -357,7 +341,7 @@ function berechne(params) {
     // K3: Separate BBG für KV/PV (62.100 €) und RV/AL (params.bbg).
     // RV+AL Grenzbelastung fällt weg sobald Arbeitseinkommen ≥ RV-BBG
     const bbg_rv_m = params.bbg ?? 90000;
-    const bbg_kv_m = Math.round(bbg_rv_m * (62100 / 90000));
+    const bbg_kv_m = Math.round(bbg_rv_m * (BASIS_MAKRO.kv_bbg_kv_sq / 90000));
     const sv_grenz_rv = arbeit < bbg_rv_m ? (params.rv + params.alpf * 0.42) / 100 * 0.5 : 0;
     // kv_bbg_frei: kein Deckel → Grenzbelastung gilt bei jedem Einkommensniveau
     const sv_grenz_kv = (params.kv_bbg_frei || arbeit < bbg_kv_m) ? (params.kv + params.alpf * 0.58) / 100 * 0.5 : 0;
@@ -382,13 +366,13 @@ function berechne(params) {
 
   // ---------- 19b. SCHULDENBREMSE (Art. 109 GG) ----------
   // Vereinfacht: struktureller Saldo ≈ Gesamtsaldo / BIP (keine Konjunkturbereinigung im Modell)
-  const saldo_bip_pct = saldo / bip * 100;
+  const saldo_bip_pct = saldo / BASIS_MAKRO.bip * 100;
   const schuldenbremse_ok = saldo_bip_pct >= -0.35;
 
   // ---------- 19c. DYNAMISCHES SCORING ----------
   // Verhaltensbedingte Aufkommensänderung gegenüber mechanischer (statischer) Wirkung
   // KSt: investment_factor-Abweichung von 1 = Investitionsreaktion auf KSt-Änderung
-  const dynamisch_kst = gewinn_basis * params.kst / 100 * (investment_factor - 1);
+  const dynamisch_kst = BASIS_MAKRO.gewinn * params.kst / 100 * (investment_factor - 1);
   // ESt: labor_factor-Abweichung → Arbeitsangebotsreaktion (Saez/Chetty-Konsens ε = 0,20)
   const dynamisch_est = est_aufkommen * (avg_labor - 1);
   const dynamisch_delta = dynamisch_kst + dynamisch_est;

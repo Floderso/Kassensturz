@@ -138,7 +138,7 @@ function berechneNettoSQ(d) {
   const arbeit_sq = brutto * (1 - d.kapital);
   const kapital_sq = brutto * d.kapital;
   const bbg_rv = sq.bbg;
-  const bbg_kv = Math.round(bbg_rv * (62100 / 90000));
+  const bbg_kv = Math.round(bbg_rv * (BASIS_MAKRO.kv_bbg_kv_sq / 90000));
   const est = estTarif(arbeit_sq, sq.freibetrag, sq.eingang, sq.spitze, sq.grenze)
             + kapital_sq * sq.abgeltung / 100;
   const sv = Math.min(arbeit_sq, bbg_rv) * (sq.rv + sq.alpf * 0.42) / 100 * 0.5
