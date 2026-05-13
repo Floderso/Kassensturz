@@ -1806,10 +1806,15 @@ if (_urlPreset && PRESETS[_urlPreset]) {
   setParams(PRESETS[_urlPreset]);
   document.querySelectorAll('#presets button').forEach(b =>
     b.classList.toggle('active', b.dataset.preset === _urlPreset));
-}
-if (window.location.hash) {
+} else if (window.location.hash) {
   const fromHash = hashToParams(window.location.hash);
   if (fromHash) setParams(fromHash);
+} else {
+  // Letzte Session wiederherstellen (kein URL-Override vorhanden)
+  try {
+    const saved = localStorage.getItem('haushaltsspiel_params');
+    if (saved) setParams(JSON.parse(saved));
+  } catch {}
 }
 render();
 syncAllSliders();
