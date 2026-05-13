@@ -1,6 +1,10 @@
+// SPDX-License-Identifier: CC-BY-4.0
+// Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
+import { BASIS_MAKRO } from '../data.js';
+
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Rentenreform & GKV-Strukturreformen
-// Abhängigkeiten: keine (eigenständiges Modul)
+// Abhängigkeiten: BASIS_MAKRO (aus data.js)
 // ═══════════════════════════════════════════════════════
 
 // Quellenmetadaten — parallel zu den Berechnungsfunktionen
@@ -34,7 +38,7 @@ const FORMEL_QUELLEN_RENTE = {
 
 
 function berechneRente(params, rv_aufkommen_aktuell) {
-  const lohnsumme_sv = 1750; // Mrd. Beitragsbasis
+  const lohnsumme_sv = BASIS_MAKRO.lohnsumme_sv; // Mrd. Beitragsbasis
 
   // --- Generationenkapital: historisches Was-wäre-wenn ---
   // Jedes Jahr wird Fondsquote % des RV-Aufkommens investiert

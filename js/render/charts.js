@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-4.0
+// Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
 import { grenzsteuersatz, effSteuersatz } from '../rechner/einkommensteuer.js';
 import { DEZILE } from '../data.js';
 

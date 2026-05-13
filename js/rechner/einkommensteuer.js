@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-4.0
+// Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Einkommensteuer-Tariffunktionen
 // Rechtsgrundlage: § 32a EStG 2025 (Formeltarif, 5 Zonen)

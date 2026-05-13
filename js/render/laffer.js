@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-4.0
+// Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
 import { berechne } from '../rechner/berechne.js';
 
 // ═══════════════════════════════════════════════════════
