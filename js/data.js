@@ -88,6 +88,19 @@ const ELAST = {
   d10c_wegzug: 0.10        // Steuerbedingte Emigration bei GS > 60% (Brülhart et al. 2019)
 };
 
+// Strukturierte Quellenmetadaten zu ELAST — Werte bleiben oben kompatibel
+const ELAST_QUELLEN = {
+  labor_supply:   { ref: 'Saez/Chetty/Gruber Konsens · ifo Schnelldienst 01/2025',         range: '0,1–0,3', note: 'intensive margin, konservativ; extensive margin untere Dezile 0,2–0,5 (Meghir/Phillips)' },
+  capital_supply: { ref: 'Kleven/Schultz (2014) JPubEc',                                    range: '0,4–0,8', note: 'dänische Daten, auf DE übertragbar; hohe Elastizität wegen Ausweichoptionen' },
+  consumption:    { ref: 'Lewbel/Pendakur (2009) JPubEc · Metaanalyse Havranek et al. 2018',range: '−0,2 bis −0,5', note: 'MwSt-Pass-Through auf Konsum; getrennt für Regel- und Ermäßigungssatz' },
+  co2:            { ref: 'EWI/DIW BEHG-Evaluation 2023 · Edenhofer/PIK 2024',               range: '−0,2 bis −0,4', note: 'kurzfristig konservativ; langfristig höher durch Infrastruktur-/Verhaltensanpassung' },
+  evasion:        { ref: 'Schneider (2023) Shadow Economy DE · IfW Kiel 2024',              range: '0,1–0,3', note: 'Schwarzarbeit/Schattenwirtschaft-Reaktion auf Gesamtsteuerlast' },
+  investment:     { ref: 'Gechert/Heimberger (2022) NIER · Neumeier SVR Arbeitspapier 03/2025', range: '−0,3 bis −0,5', note: 'KSt-Investitionselastizität; Effekte kleiner als oft behauptet (Meta-Analyse)' },
+  d10c_labor:     { ref: 'Piketty/Saez/Stantcheva (2014) AER',                              range: '0,3–0,5', note: 'extensive margin Top 1%: Stunden, Ruhestandsentscheidung, Einkommensverschiebung' },
+  d10c_avoidance: { ref: 'Kleven/Schultz (2014) JPubEc · Chetty/Friedman/Saez (2013)',      range: '0,3–0,7', note: 'Einkommensverschiebung/Avoidance ab Grenzsteuersatz > 45 %' },
+  d10c_wegzug:    { ref: 'Brülhart/Gruber/Krapf/Schmidheiny (2019) JPubEc',                 range: '0,05–0,15', note: 'steuerbedingte Emigration ab Grenzsteuersatz > 60 %; DE-Effekt kleiner als CH-Schätzung' }
+};
+
 
 // ── PRESETS ──
 
