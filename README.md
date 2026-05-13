@@ -12,12 +12,7 @@ Kassensturz ist ein interaktives Bildungsprojekt, mit dem du Steuern und Sozialr
 
 ---
 
-<!--
-  Screenshot: Bitte eine Aufnahme des Haushaltsspiels mit ausgeklappten Reglern und KPI-Panel
-  als docs/screenshot.png einchecken und die folgende Zeile einkommentieren:
-
-  ![Kassensturz – Steuer-Simulator](docs/screenshot.png)
--->
+[![Kassensturz – Steuer-Simulator](docs/screenshot.png)](https://floderso.github.io/Kassensturz)
 
 ---
 
