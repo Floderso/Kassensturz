@@ -339,11 +339,16 @@ function setParams(p) {
   document.getElementById('rendite_fonds').value = p.rendite_fonds ?? 7;
   document.getElementById('startjahr').value = p.startjahr ?? 2020;
   document.getElementById('pkv_abschaffen').checked = p.pkv_abschaffen ?? false;
+  document.getElementById('kv_kapital').checked    = p.kv_kapital    ?? false;
+  document.getElementById('kv_bbg_frei').checked   = p.kv_bbg_frei   ?? false;
   document.getElementById('anzahl_kv').value = p.anzahl_kv ?? 95;
   document.getElementById('praevention').value = p.praevention ?? 0;
   document.getElementById('bbg').value = p.bbg ?? 90000;
   document.getElementById('zucman').value = p.zucman ?? 0;
   document.getElementById('bge').value = p.bge ?? 0;
+  document.getElementById('rente_niveau_gering').value = p.rente_niveau_gering ?? 80;
+  document.getElementById('rente_niveau_hoch').value   = p.rente_niveau_hoch   ?? 50;
+  document.getElementById('rente_grenze').value        = p.rente_grenze        ?? 35000;
 }
 
 function fmtEUR(x) {
