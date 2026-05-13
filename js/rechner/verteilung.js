@@ -133,29 +133,28 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg) {
 }
 
 function berechneNettoSQ(d) {
-  // Status Quo: freibetrag 12084, eingang 14, spitze 45, grenze 277826
+  const sq = PRESETS.status_quo;
   const brutto = d.brutto;
-  // F2: Kapital und Arbeit getrennt besteuern — konsistent mit berechne()
-  // Vorher wurde estTarif(brutto) genutzt, was Kapitalanteil doppelt progressiv besteuert hätte.
   const arbeit_sq = brutto * (1 - d.kapital);
   const kapital_sq = brutto * d.kapital;
-  const est = estTarif(arbeit_sq, 12084, 14, 45, 277826) + kapital_sq * 0.25; // Abgeltungsteuer SQ
-  // SV nur auf Arbeitseinkommen; KV-BBG (62.100 €) < RV/AL-BBG (90.000 €)
-  const sv = Math.min(arbeit_sq, 90000) * (18.6 + 2.6) / 100 * 0.5   // RV + AL
-           + Math.min(arbeit_sq, 62100) * (16.3 + 3.6) / 100 * 0.5;  // KV + PV
+  const bbg_rv = sq.bbg;
+  const bbg_kv = Math.round(bbg_rv * (62100 / 90000));
+  const est = estTarif(arbeit_sq, sq.freibetrag, sq.eingang, sq.spitze, sq.grenze)
+            + kapital_sq * sq.abgeltung / 100;
+  const sv = Math.min(arbeit_sq, bbg_rv) * (sq.rv + sq.alpf * 0.42) / 100 * 0.5
+           + Math.min(arbeit_sq, bbg_kv) * (sq.kv + sq.alpf * 0.58) / 100 * 0.5;
   const vornetto = brutto - est - sv;
   const konsum = vornetto * d.konsum;
-  const mwst = konsum * (0.7 * 19/119 + 0.3 * 7/107);
+  const mwst = konsum * (0.7 * sq.mwst / (100 + sq.mwst) + 0.3 * sq.mwst_erm / (100 + sq.mwst_erm));
   const co2_share = [0.040, 0.038, 0.036, 0.034, 0.032, 0.030, 0.028, 0.025, 0.022, 0.018, 0.015, 0.010];
   const co2_last = brutto * co2_share[d.idx];
-  // Klimageld SQ konsistent mit PRESETS.status_quo (co2=55, 500 Mio.t Basis)
-  const sq_co2_auf = 500 * 55 / 1000; // 27,5 Mrd.
+  const sq_co2_auf = 500 * sq.co2 / 1000;
   const total_hh_sq = DEZILE.reduce((a,x)=>a+x.anzahl,0);
   const klimageld_per_hh = sq_co2_auf * 0.7 * 1000 / total_hh_sq;
   let transfers = 0;
   const bg_quote_sq = [0.60, 0.25, 0.08, 0.02, 0, 0, 0, 0, 0, 0, 0, 0];
   const kg_quote_sq = [0.80, 1.10, 1.20, 1.15, 1.05, 0.95, 0.85, 0.75, 0.65, 0.50, 0.35, 0.20];
-  transfers += 563 * 12 * bg_quote_sq[d.idx];
-  transfers += 255 * 12 * kg_quote_sq[d.idx];
+  transfers += sq.bg * 12 * bg_quote_sq[d.idx];
+  transfers += sq.kg * 12 * kg_quote_sq[d.idx];
   return brutto - est - sv - mwst - co2_last + klimageld_per_hh + transfers;
 }
