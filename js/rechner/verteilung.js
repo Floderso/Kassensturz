@@ -6,9 +6,9 @@
 // Quellenmetadaten — parallel zu den Berechnungsfunktionen
 const FORMEL_QUELLEN_VERT = {
   berechneGini: {
-    formel: 'G = (2 ∑ i·yᵢ) / (n · ∑ yᵢ) − (n+1)/n  (aufsteigend sortierte Werte)',
-    ref:    'Sen (1973) On Economic Inequality · Cowell (2011) Measuring Inequality',
-    note:   'Ungewichtet über 12 Deziltypen; gewichteter Gini (nach Haushaltszahl) wäre präziser, Unterschied <0,003'
+    formel: 'G = 1 − 2·∫Lorenz(x)dx  (Trapezregel, gewichtet nach Haushaltszahl)',
+    ref:    'Sen (1973) On Economic Inequality · Cowell (2011) Measuring Inequality · Destatis Methodik Gini-Koeffizient',
+    note:   'Gewichtet nach DEZILE[i].anzahl; D10a/b/c (2,05 / 1,64 / 0,41 Mio. HH) werden korrekt gewichtet'
   },
   berechnePalma: {
     formel: 'Palma = Ø(Top 10%) / Ø(Bottom 40%)',
@@ -38,15 +38,19 @@ const FORMEL_QUELLEN_VERT = {
 };
 
 
-function berechneGini(werte) {
-  const sorted = [...werte].sort((a,b)=>a-b);
-  const n = sorted.length;
-  const sum = sorted.reduce((a,b)=>a+b,0);
-  if (sum <= 0) return 0;
-  let cum = 0;
-  for (let i = 0; i < n; i++) cum += (i+1) * sorted[i];
-  const gini = (2*cum) / (n*sum) - (n+1)/n;
-  return Math.max(0, Math.min(1, gini));
+function berechneGini(werte, dezile) {
+  const pairs = werte.map((v, i) => ({ v, w: dezile[i].anzahl })).sort((a, b) => a.v - b.v);
+  const W = pairs.reduce((s, p) => s + p.w, 0);
+  const S = pairs.reduce((s, p) => s + p.w * p.v, 0);
+  if (S <= 0 || W <= 0) return 0;
+  let cumW = 0, cumS = 0, area = 0;
+  for (const p of pairs) {
+    const x0 = cumW / W, y0 = cumS / S;
+    cumW += p.w;
+    cumS += p.w * p.v;
+    area += (cumW / W - x0) * (cumS / S + y0) / 2; // Trapezregel
+  }
+  return Math.max(0, Math.min(1, 1 - 2 * area));
 }
 
 function berechneMedianGewichtet(werte, dez) {
@@ -60,15 +64,16 @@ function berechneMedianGewichtet(werte, dez) {
 
 function berechnePalma(werte) {
   // Palma-Ratio: Durchschnittseinkommen Top-10% / Durchschnitt Bottom-40%
-  // Mit D10-Split: top 10% = D10a+D10b+D10c (je nach Anzahl genau 10%)
   const pairs = werte.map((v,i) => ({v, n: DEZILE[i].anzahl})).sort((a,b)=>a.v-b.v);
   const total_n = pairs.reduce((a,p)=>a+p.n,0);
+  const bot_limit = total_n * 0.40;
+  const top_limit = total_n * 0.10;
   let bot_sum=0, bot_n=0, top_sum=0, top_n=0, cum_bot=0, cum_top=0;
   for (const p of pairs) {
-    if (cum_bot < total_n*0.40+0.05) { bot_sum+=p.v*p.n; bot_n+=p.n; cum_bot+=p.n; }
+    if (cum_bot + p.n <= bot_limit + 1e-9) { bot_sum+=p.v*p.n; bot_n+=p.n; cum_bot+=p.n; }
   }
   for (let j=pairs.length-1; j>=0; j--) {
-    if (cum_top < total_n*0.10+0.05) { top_sum+=pairs[j].v*pairs[j].n; top_n+=pairs[j].n; cum_top+=pairs[j].n; }
+    if (cum_top + pairs[j].n <= top_limit + 1e-9) { top_sum+=pairs[j].v*pairs[j].n; top_n+=pairs[j].n; cum_top+=pairs[j].n; }
   }
   return (bot_n>0&&top_n>0) ? (top_sum/top_n)/(bot_sum/bot_n) : 0;
 }

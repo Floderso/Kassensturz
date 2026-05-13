@@ -296,7 +296,7 @@ function berechne(params) {
   const hh_delta = berechneDezilDelta(dezile, params, est_pro_dezil, klimageld_auszahlung, bg_auszahlung, kg_auszahlung);
 
   // ---------- 16. GINI ----------
-  const gini = berechneGini(hh_delta.netto);
+  const gini = berechneGini(hh_delta.netto, dezile);
   const palma = berechnePalma(hh_delta.netto);
 
   // ---------- 17. VERHALTENSINDIZES ----------
