@@ -4,6 +4,21 @@
 
 Kassensturz ist ein interaktives Bildungsprojekt, mit dem du Steuern und Sozialregeln anpassen und die Auswirkungen auf Staatshaushalt, Ungleichheit und einzelne Haushalte in Echtzeit beobachten kannst. Alle Kennzahlen basieren auf echten Daten (Bundeshaushalt 2025, SOEP, Destatis).
 
+> **Live-Demo:** [floderso.github.io/Kassensturz](https://floderso.github.io/Kassensturz)
+
+---
+
+> **English summary:** Kassensturz is an interactive browser-based simulation of the German tax and fiscal system. Adjust sliders for income tax, VAT, CO₂ tax, social contributions and more — and observe real-time effects on the federal budget, income inequality (Gini, Palma), poverty risk, and individual households across all income deciles. Data sources: Federal Budget 2025 (BMF), SOEP v40 (DIW), Destatis. No build step, no dependencies — open `index.html` to run locally.
+
+---
+
+<!--
+  Screenshot: Bitte eine Aufnahme des Haushaltsspiels mit ausgeklappten Reglern und KPI-Panel
+  als docs/screenshot.png einchecken und die folgende Zeile einkommentieren:
+
+  ![Kassensturz – Steuer-Simulator](docs/screenshot.png)
+-->
+
 ---
 
 ## Module
