@@ -76,7 +76,7 @@ const ADMIN_QUOTE = {
 
 // Verhaltens-Elastizitäten (konservativ)
 const ELAST = {
-  labor_supply: 0.20,      // Saez/Chetty konsens
+  labor_supply: 0.22,      // Chetty et al. (2011) AER — Teständerung
   capital_supply: 0.50,    // Kleven/Schultz
   consumption: -0.35,      // MwSt-Pass-Through
   co2: -0.30,              // BEHG Evaluation
