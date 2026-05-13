@@ -68,7 +68,7 @@ const BASIS_MAKRO = {
   verm_basis:        3500,  // Steuerpflichtiges Vermögen > 2 Mio €, Mrd. €
   lohnsumme_sv:      1750,  // Sozialversicherungspflichtige Lohnsumme, Mrd. €
   rv_ausgaben_sq:     430,  // RV-Gesamtausgaben inkl. Bundeszuschuss (Status quo), Mrd. €
-  kv_bbg_kv_sq:     62100,  // Beitragsbemessungsgrenze KV/PV 2025, € p.a.
+  kv_bbg_kv_sq:     66150,  // Beitragsbemessungsgrenze KV/PV 2025, € p.a. (GKV-Beitragsbemessungsgrenze 2025)
   kv_bbg_frei_bonus:   18,  // Aufkommensgewinn kv_bbg_frei bei kv=16,3 %, Mrd. €
   kv_kapital_bonus:     8,  // Aufkommensgewinn kv_kapital bei kv=16,3 %, Mrd. €
 };
@@ -122,14 +122,14 @@ const ELAST_QUELLEN = {
 
 const PRESETS = {
   status_quo: {
-    freibetrag: 12084, eingang: 14, spitze: 45, grenze: 277826,
+    freibetrag: 12348, eingang: 14, spitze: 45, grenze: 277826,
     synthetisch: false, abgeltung: 25,
     kst: 15, gewst: 14, gewst_aus: false,
     mwst: 19, mwst_erm: 7,
     co2: 55, klimageld: true,
     erb: 20, betriebs: true, boden: 0.4, verm: 0, zucman: 0,
     rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
-    bg: 563, kg: 255, neg_est: false, kleine_st: true,
+    bg: 563, kg: 259, neg_est: false, kleine_st: true,
     kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
     pkv_abschaffen: false, kv_kapital: false, kv_bbg_frei: false, anzahl_kv: 95, praevention: 0, bge: 0
   },

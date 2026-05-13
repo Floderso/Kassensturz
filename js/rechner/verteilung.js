@@ -126,7 +126,9 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg) {
     let transfers = 0;
     transfers += bg_effektiv_hh * 12 * bg_quote[i];
     transfers += params.kg * 12 * kg_quote[i];
-    transfers += bge_p * 12; // BGE: jeder Erwachsene erhält vollen Betrag (bedingungslos)
+    // BGE: ~1,7 Erwachsene/Haushalt (Destatis Mikrozensus 2024: 70 Mio. Erwachsene / 41 Mio. HH)
+    // konsistent mit Kostenseite in berechne.js (bge * 12 * 70 Mio.)
+    transfers += bge_p * 12 * 1.7;
     if (params.neg_est && i < 3) transfers += 3000;
 
     const netto_final = brutto - est - sv - mwst - co2_last + klimageld_per_hh + transfers;
