@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-4.0
+// Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
 import { DEZILE, PRESETS, ELAST, BASIS_MAKRO } from '../data.js';
 import { estTarif } from './einkommensteuer.js';
 
@@ -41,19 +43,19 @@ const FORMEL_QUELLEN_VERT = {
 };
 
 
-function berechneGini(werte, dezile) {
-  const pairs = werte.map((v, i) => ({ v, w: dezile[i].anzahl })).sort((a, b) => a.v - b.v);
-  const W = pairs.reduce((s, p) => s + p.w, 0);
-  const S = pairs.reduce((s, p) => s + p.w * p.v, 0);
-  if (S <= 0 || W <= 0) return 0;
-  let cumW = 0, cumS = 0, area = 0;
+function berechneGini(werte, dez) {
+  const pairs = werte.map((v, i) => ({ v, n: dez[i].anzahl })).sort((a, b) => a.v - b.v);
+  const total_n = pairs.reduce((a, p) => a + p.n, 0);
+  const total_y = pairs.reduce((a, p) => a + p.v * p.n, 0);
+  if (total_y <= 0) return 0;
+  let cum_n = 0, cum_y = 0, gini = 0;
   for (const p of pairs) {
-    const x0 = cumW / W, y0 = cumS / S;
-    cumW += p.w;
-    cumS += p.w * p.v;
-    area += (cumW / W - x0) * (cumS / S + y0) / 2; // Trapezregel
+    const prev_n = cum_n, prev_y = cum_y;
+    cum_n += p.n / total_n;
+    cum_y += p.v * p.n / total_y;
+    gini += (cum_n - prev_n) * (cum_y + prev_y);
   }
-  return Math.max(0, Math.min(1, 1 - 2 * area));
+  return Math.max(0, Math.min(1, 1 - gini));
 }
 
 function berechneMedianGewichtet(werte, dez) {
@@ -126,9 +128,8 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg) {
     let transfers = 0;
     transfers += bg_effektiv_hh * 12 * bg_quote[i];
     transfers += params.kg * 12 * kg_quote[i];
-    // BGE: ~1,7 Erwachsene/Haushalt (Destatis Mikrozensus 2024: 70 Mio. Erwachsene / 41 Mio. HH)
-    // konsistent mit Kostenseite in berechne.js (bge * 12 * 70 Mio.)
-    transfers += bge_p * 12 * 1.7;
+    const ERWACHSENE_PRO_HH = 1.71; // Destatis Mikrozensus 2024: 70 Mio. Erwachsene / 41 Mio. Haushalte
+    transfers += bge_p * 12 * ERWACHSENE_PRO_HH;
     if (params.neg_est && i < 3) transfers += 3000;
 
     const netto_final = brutto - est - sv - mwst - co2_last + klimageld_per_hh + transfers;
@@ -147,12 +148,10 @@ function berechneNettoSQ(d) {
   const brutto = d.brutto;
   const arbeit_sq = brutto * (1 - d.kapital);
   const kapital_sq = brutto * d.kapital;
-  const bbg_rv = sq.bbg;
-  const bbg_kv = Math.round(bbg_rv * (BASIS_MAKRO.kv_bbg_kv_sq / 90000));
   const est = estTarif(arbeit_sq, sq.freibetrag, sq.eingang, sq.spitze, sq.grenze)
             + kapital_sq * sq.abgeltung / 100;
-  const sv = Math.min(arbeit_sq, bbg_rv) * (sq.rv + sq.alpf * 0.42) / 100 * 0.5
-           + Math.min(arbeit_sq, bbg_kv) * (sq.kv + sq.alpf * 0.58) / 100 * 0.5;
+  const sv = Math.min(arbeit_sq, 90600) * (18.6 + 2.6) / 100 * 0.5   // RV-BBG 2025: 90.600 €
+           + Math.min(arbeit_sq, 66150) * (16.3 + 3.6) / 100 * 0.5;  // KV-BBG 2025: 66.150 €
   const vornetto = brutto - est - sv;
   const konsum = vornetto * d.konsum;
   const mwst = konsum * (0.7 * sq.mwst / (100 + sq.mwst) + 0.3 * sq.mwst_erm / (100 + sq.mwst_erm));

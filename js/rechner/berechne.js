@@ -1,4 +1,6 @@
-import { DEZILE, ELAST, BASIS_MAKRO, PRESETS, BASIS_AUFKOMMEN, ADMIN_QUOTE, AUSGABEN_TOTAL } from '../data.js';
+// SPDX-License-Identifier: CC-BY-4.0
+// Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
+import { DEZILE, ELAST, BASIS_MAKRO, PRESETS, BASIS_AUFKOMMEN, ADMIN_QUOTE, AUSGABEN_TOTAL, BGE_LABOR_EFF } from '../data.js';
 import { estTarif, grenzsteuersatz } from './einkommensteuer.js';
 import { berechneGini, berechneMedianGewichtet, berechnePalma, berechneDezilDelta, berechneNettoSQ } from './verteilung.js';
 
@@ -75,7 +77,6 @@ function berechne(params) {
   // Quellen: RWI 2024 (bis −30 % bei 1.500 €), DIW Pilot 2024 (−2 % kurzfristig, n=107),
   // ZEW Heim et al. (extensiver Margin D1–D4), ifo Mikrosimulation 2021.
   // Kompromiss: deutlicher Effekt bei unteren Dezilen, minimal bei oberen.
-  const BGE_LABOR_EFF = [0.15, 0.12, 0.09, 0.06, 0.04, 0.025, 0.015, 0.01, 0.005, 0.00, 0.00, 0.00];
   const bge_labor_scale = Math.min(1.67, (params.bge || 0) / 1200);
 
   const dezile = DEZILE.map((d, idx) => {
@@ -175,12 +176,12 @@ function berechne(params) {
   const bbg_lohnsumme_factor = 1 + Math.max(0, (bbg - 90000) / 90000) * 0.12;
   const lohnsumme_sv = BASIS_MAKRO.lohnsumme_sv * bbg_lohnsumme_factor;
   const buerger_boost = params.buergerv ? 1.15 : 1.0;
-  const rv_auf = lohnsumme_sv * params.rv / 100 * buerger_boost;
+  const rv_auf = lohnsumme_sv * params.rv / 100;
   // kv_bbg_frei/kv_kapital: Aufkommensschätzung skaliert mit aktuellem KV-Satz (ifo 159/2025, DIW)
   const kv_bbg_frei_bonus = params.kv_bbg_frei ? BASIS_MAKRO.kv_bbg_frei_bonus * (params.kv / 16.3) : 0;
   const kv_kapital_bonus  = params.kv_kapital  ? BASIS_MAKRO.kv_kapital_bonus  * (params.kv / 16.3) : 0;
   const kv_auf = lohnsumme_sv * params.kv / 100 * buerger_boost + kv_bbg_frei_bonus + kv_kapital_bonus;
-  const al_auf = lohnsumme_sv * params.alpf / 100 * buerger_boost;
+  const al_auf = lohnsumme_sv * params.alpf / 100;
 
   // ---------- 7b. ZUCMAN-MINDESTSTEUER ----------
   // 2%-Mindeststeuer auf Nettovermögen ultra-Reicher (Zucman G20 2024)
@@ -386,7 +387,7 @@ function berechne(params) {
     hh_delta, gini, palma, behavior, klimageld_auszahlung,
     bg_auszahlung, kg_auszahlung, neg_est_auszahlung,
     armutsrisiko, schuldenquote_delta, metr, dwl, poverty_line,
-    rv_einsparung,
+    rv_einsparung, bge_brutto,
     // Research-basierte Erweiterungen (QUELLENRECHERCHE.md)
     saldo_bip_pct, schuldenbremse_ok,
     dynamisch_kst, dynamisch_est, dynamisch_delta,

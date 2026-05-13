@@ -1,8 +1,10 @@
+// SPDX-License-Identifier: CC-BY-4.0
+// Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Haushaltsspiel — UI & Render
 // ═══════════════════════════════════════════════════════
 
-import { DEZILE, ELAST, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH } from './data.js';
+import { DEZILE, ELAST, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF } from './data.js';
 import { estTarif, grenzsteuersatz, effSteuersatz } from './rechner/einkommensteuer.js';
 import { berechne } from './rechner/berechne.js';
 import { renderEstKurve, renderIncomeDist, exportCSV, renderSchuldenpfad } from './render/charts.js';
@@ -124,7 +126,6 @@ function fmtSignedMrd(x) {
 let REF = null;
 function computeRef() {
   REF = berechne(PRESETS.status_quo);
-  window.REF = REF; // needed by CHALLENGES refFn lambdas in data.js
 }
 
 
@@ -295,7 +296,16 @@ function render() {
     { label: 'Gini (neu)', value: r.gini, ref: REF.gini, max: 0.5, fmt: v => v.toFixed(3).replace('.',',') },
     { label: 'Gini (Basis)', value: REF.gini, ref: REF.gini, max: 0.5, fmt: v => v.toFixed(3).replace('.',','), muted: true },
     { label: 'Palma', value: r.palma, ref: REF.palma, max: 10, fmt: v => v.toFixed(2).replace('.',',') },
-    { label: 'Arm. 20%/reich.20%', value: Math.max(...r.hh_delta.netto) / Math.min(...r.hh_delta.netto.filter(x=>x>0)) || 0, ref: 0, max: 15, fmt: v => v.toFixed(1).replace('.',',') }
+    { label: 'S80/S20',
+      value: (() => {
+        const sorted = [...r.hh_delta.netto].sort((a,b)=>a-b);
+        const bot = sorted.slice(0, 3);  // D1–D3 ≈ unteres Quintil
+        const top = sorted.slice(-3);    // D10a/b/c ≈ oberstes Quintil
+        const avgBot = bot.reduce((a,b)=>a+b,0)/bot.length;
+        const avgTop = top.reduce((a,b)=>a+b,0)/top.length;
+        return avgBot > 0 ? avgTop/avgBot : 0;
+      })(),
+      ref: 0, max: 15, fmt: v => v.toFixed(1).replace('.',',') }
   ];
   const dHtml = dBars.map(b => {
     const pct = (b.value / b.max) * 100;
@@ -365,7 +375,7 @@ function render() {
       fmt: v => (v >= 0 ? '+' : '') + v.toFixed(1) + ' Mrd. €',
       cls: r.dynamisch_kst > 0 ? 'pos' : r.dynamisch_kst < 0 ? 'neg' : 'neu',
       pct: Math.min(100, Math.abs(r.dynamisch_kst) / 20 * 100),
-      hint: 'Verhaltensbedingte KSt-Aufkommensänderung via Investitionselastizität (Neumeier SVR 2025)'
+      hint: 'Anteil des KSt-Aufkommens der auf Verhaltensreaktion zurückgeht (bereits in Gesamtaufkommen enthalten) — Neumeier SVR 2025'
     },
     {
       label: 'Dyn. Scoring: ESt-Arbeitsangebotseffekt',
@@ -373,7 +383,7 @@ function render() {
       fmt: v => (v >= 0 ? '+' : '') + v.toFixed(1) + ' Mrd. €',
       cls: r.dynamisch_est > 0 ? 'pos' : r.dynamisch_est < 0 ? 'neg' : 'neu',
       pct: Math.min(100, Math.abs(r.dynamisch_est) / 20 * 100),
-      hint: 'Verhaltensbedingte ESt-Aufkommensänderung via Arbeitselastizität ε = 0,20 (Gruber/Saez 2002)'
+      hint: 'Anteil des ESt-Aufkommens der auf Arbeitsangebotsreaktion zurückgeht (bereits in Gesamtaufkommen enthalten) — ε = 0,20, Gruber/Saez 2002'
     },
     {
       label: 'Dyn. Scoring gesamt (KSt + ESt)',
@@ -517,7 +527,7 @@ function render() {
       if (bgeSectionTitle) bgeSectionTitle.classList.add('bge-on');
       document.getElementById('bge-panel-badge').textContent = bge_p + ' €/Monat';
 
-      const bge_brutto = bge_p * 12 * 70 / 1000;
+      const bge_brutto = r.bge_brutto;
       const bg_saved = bge_p >= p.bg ? 5.5 * p.bg * 12 / 1000 : 0;
       const rv_saved = r.rv_einsparung || 0;
       const bge_netto = bge_brutto - bg_saved - rv_saved;
@@ -533,9 +543,8 @@ function render() {
       const renteBox = document.getElementById('bge-rente-box');
       if (renteBox) renteBox.style.display = 'block';
 
-      const BGE_EFF_r = [0.15,0.12,0.09,0.06,0.04,0.025,0.015,0.01,0.005,0,0,0];
       const bge_sc = Math.min(1.67, bge_p / 1200);
-      const avg_eff = BGE_EFF_r.reduce((a,v) => a + v, 0) / BGE_EFF_r.length * bge_sc * 100;
+      const avg_eff = BGE_LABOR_EFF.reduce((a,v) => a + v, 0) / BGE_LABOR_EFF.length * bge_sc * 100;
 
       const kpiNetClass = bge_netto > 300 ? 'bad' : bge_netto > 100 ? 'neutral' : 'good';
       document.getElementById('bge-kpi-row').innerHTML = [
@@ -603,7 +612,7 @@ function pickChallenge(diff) {
 }
 
 function challengeProgress(sub, r) {
-  const cur = sub.cur(r), ref = sub.refFn(), tgt = sub.tgt;
+  const cur = sub.cur(r), ref = sub.refFn(REF), tgt = sub.tgt;
   if (sub.dir === 'down') {
     if (ref <= tgt) return 100; // already at/below target in ref
     return Math.max(0, Math.min(100, (ref - cur) / (ref - tgt) * 100));
@@ -929,7 +938,7 @@ Saldo:      ${r.saldo >= 0 ? '+' : ''}${f(r.saldo)} Mrd. €</div>
       <div class="rw-section-title">7 · Gini-Koeffizient</div>
       <div class="rw-formula">Gini = (2 × Σ(rank_i × Netto_i)) / (n × Σ Netto_i) − (n+1)/n
 Basis: Nettoeinkommen nach ESt, SV, MwSt, CO₂-Last und Transfers pro Dezil
-n = 10 (Dezile als repräsentative Punkte)</div>
+n = 12 (D1–D9 + D10a/b/c-Split)</div>
       <div class="rw-text">Gini aktuell: <span class="${r.gini < REF.gini - 0.005 ? 'rw-good' : r.gini > REF.gini + 0.005 ? 'rw-bad' : 'rw-hl'}">${r.gini.toFixed(3).replace('.',',')}</span>
         · Basis (Status Quo 2025): ${REF.gini.toFixed(3).replace('.',',')}
         · SOEP-Basis Deutschland 2023: ~0,295 (nach Steuern) · Quelle: SOEP v40, DIW</div>
@@ -1144,7 +1153,6 @@ function renderSzenarioVergleich() {
     const delta = m.fB - m.fA;
     const cls = m.good ? (m.good(delta) ? 'good' : delta===0 ? 'neutral' : 'bad') : 'neutral';
     const sign = delta >= 0 ? '+' : '';
-    const deltaFmt = m.fmt(delta).replace(m.fmt(0).replace(/[+\-]/, ''), ''); // rough delta fmt
     const deltaStr = (delta >= 0 ? '+' : '') + (Math.abs(delta) < 0.005 ? '0' :
       Math.abs(delta) < 1 ? delta.toFixed(3).replace('.',',') :
       Math.abs(delta) < 100 ? delta.toFixed(1).replace('.',',') :
