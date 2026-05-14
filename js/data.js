@@ -255,6 +255,24 @@ const CHALLENGES = [
   { id:'invest_101', diff:'daily', title:'Standortpflege',
     desc:'Investitionsindex über 101',
     subs:[{ label:'Investition', check:r=>r.behavior.invest>101, cur:r=>r.behavior.invest, tgt:101, refFn:()=>100, dir:'up', fmt:v=>v.toFixed(1) }]},
+  { id:'palma_18', diff:'daily', title:'Einkommensschere',
+    desc:'Palma-Koeffizient unter 1,8 senken',
+    subs:[{ label:'Palma', check:r=>r.palma<1.8, cur:r=>r.palma, tgt:1.8, refFn:ref=>ref.palma, dir:'down', fmt:v=>v.toFixed(2).replace('.',',') }]},
+  { id:'dwl_50', diff:'daily', title:'Effizienzgewinn',
+    desc:'Wohlfahrtsverlust des Steuersystems unter 50 Mrd. €',
+    subs:[{ label:'Wohlfahrtsverlust', check:r=>r.dwl<50, cur:r=>r.dwl, tgt:50, refFn:ref=>ref.dwl, dir:'down', fmt:v=>v.toFixed(0)+' Mrd.' }]},
+  { id:'co2_80', diff:'daily', title:'Klimaschritt',
+    desc:'CO₂-Emissionen auf Index unter 80',
+    subs:[{ label:'CO₂-Index', check:r=>r.behavior.co2<80, cur:r=>r.behavior.co2, tgt:80, refFn:()=>100, dir:'down', fmt:v=>v.toFixed(1) }]},
+  { id:'schuld_plus1', diff:'daily', title:'Schuldendisziplin',
+    desc:'Schuldenquote um weniger als 1 % BIP steigen lassen',
+    subs:[{ label:'Schulden-Δ', check:r=>r.schuldenquote_delta<1.0, cur:r=>r.schuldenquote_delta, tgt:1.0, refFn:ref=>ref.schuldenquote_delta, dir:'down', fmt:v=>v.toFixed(2)+' %' }]},
+  { id:'armut_12', diff:'daily', title:'Armutsbekämpfung',
+    desc:'Armutsrisikoquote unter 12 %',
+    subs:[{ label:'Armutsrisiko', check:r=>r.armutsrisiko<12, cur:r=>r.armutsrisiko, tgt:12, refFn:ref=>ref.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' }]},
+  { id:'invest_103', diff:'daily', title:'Investitionsklima',
+    desc:'Investitionsindex über 103',
+    subs:[{ label:'Investition', check:r=>r.behavior.invest>103, cur:r=>r.behavior.invest, tgt:103, refFn:()=>100, dir:'up', fmt:v=>v.toFixed(1) }]},
 
   // ── WÖCHENTLICH (mittel, anspruchsvoller) ───────────────
   { id:'gini_270', diff:'weekly', title:'Starke Umverteilung',
@@ -281,6 +299,12 @@ const CHALLENGES = [
   { id:'admin_100', diff:'weekly', title:'Effizienzreform',
     desc:'Verwaltungskosten unter 100 Mrd. €',
     subs:[{ label:'Verwaltung', check:r=>r.admin_kosten<100, cur:r=>r.admin_kosten, tgt:100, refFn:ref=>ref.admin_kosten, dir:'down', fmt:v=>v.toFixed(0)+' Mrd.' }]},
+  { id:'schuldenbremse', diff:'weekly', title:'Schuldenbremse',
+    desc:'Strukturellen Saldo auf ≥ −0,35 % BIP bringen (Art. 109 GG)',
+    subs:[{ label:'Saldo % BIP', check:r=>r.saldo_bip_pct>=-0.35, cur:r=>r.saldo_bip_pct, tgt:-0.35, refFn:ref=>ref.saldo_bip_pct, dir:'up', fmt:v=>(v>=0?'+':'')+v.toFixed(2)+' %' }]},
+  { id:'metr_d1_70', diff:'weekly', title:'Armutsfalle durchbrechen',
+    desc:'Grenzbelastung des untersten Dezils unter 70 % senken',
+    subs:[{ label:'METR D1', check:r=>r.metr[0]<0.70, cur:r=>r.metr[0]*100, tgt:70, refFn:()=>99, dir:'down', fmt:v=>v.toFixed(0)+' %' }]},
 
   // ── MONATLICH (schwer, Kombinationen) ───────────────────
   { id:'gini_saldo', diff:'monthly', title:'Quadratur des Kreises',
@@ -321,6 +345,20 @@ const CHALLENGES = [
       { label:'Gini < 0,278',   check:r=>r.gini<0.278,          cur:r=>r.gini,            tgt:0.278, refFn:ref=>ref.gini,              dir:'down', fmt:v=>v.toFixed(3).replace('.',',') },
       { label:'Invest. > 102',  check:r=>r.behavior.invest>102, cur:r=>r.behavior.invest,  tgt:102,   refFn:()=>100,                  dir:'up',   fmt:v=>v.toFixed(1) },
       { label:'Schulden-Δ < 0', check:r=>r.schuldenquote_delta<0, cur:r=>r.schuldenquote_delta, tgt:0, refFn:ref=>ref.schuldenquote_delta, dir:'down', fmt:v=>v.toFixed(2)+' %' }
+    ]},
+  { id:'dwl_gini', diff:'monthly', title:'Gerecht & effizient',
+    desc:'Wohlfahrtsverlust < 45 Mrd., Gini < 0,285, Saldo > −55 Mrd.',
+    subs:[
+      { label:'DWL < 45 Mrd.',  check:r=>r.dwl<45,              cur:r=>r.dwl,             tgt:45,    refFn:ref=>ref.dwl,               dir:'down', fmt:v=>v.toFixed(0)+' Mrd.' },
+      { label:'Gini < 0,285',   check:r=>r.gini<0.285,          cur:r=>r.gini,            tgt:0.285, refFn:ref=>ref.gini,              dir:'down', fmt:v=>v.toFixed(3).replace('.',',') },
+      { label:'Saldo > −55',    check:r=>r.saldo>-55,           cur:r=>r.saldo,           tgt:-55,   refFn:ref=>ref.saldo,             dir:'up',   fmt:v=>v.toFixed(0)+' Mrd.' }
+    ]},
+  { id:'generationen', diff:'monthly', title:'Generationengerechtigkeit',
+    desc:'Schuldenquote sinkend, CO₂-Index < 80, Investitionen > 102',
+    subs:[
+      { label:'Schulden-Δ < 0',  check:r=>r.schuldenquote_delta<0,     cur:r=>r.schuldenquote_delta,    tgt:0,   refFn:ref=>ref.schuldenquote_delta, dir:'down', fmt:v=>v.toFixed(2)+' %' },
+      { label:'CO₂-Index < 80',  check:r=>r.behavior.co2<80,           cur:r=>r.behavior.co2,           tgt:80,  refFn:()=>100,                      dir:'down', fmt:v=>v.toFixed(1) },
+      { label:'Invest. > 102',   check:r=>r.behavior.invest>102,       cur:r=>r.behavior.invest,        tgt:102, refFn:()=>100,                      dir:'up',   fmt:v=>v.toFixed(1) }
     ]},
 ];
 
@@ -568,6 +606,13 @@ const CHALLENGE_CTX = {
   'CO₂':              'DE 2030-Ziel: −65 % ggü. 1990',
   'Schuldenquote':    'Verfassungsgrenze: 0,35 % BIP/Jahr',
   'Wohlfahrtsverlust':'ca. 5–15 % des Steueraufkommens (Lit.)',
+  'Saldo % BIP':      'Art. 109 GG: Schuldenbremse greift bei < −0,35 % BIP',
+  'METR D1':          'Status quo ~99 % (80 % Bürgergeld-Entzug + ~20 % SV · ifo 2025)',
+  'DWL < 45 Mrd.':    'Harberger-Effizienzkosten: sinken mit flacheren Grenzsteuersätzen',
+  'CO₂-Index < 80':   'Basis 100 = 500 Mio. t · DE 2030-Ziel: −65 % ggü. 1990',
+  'Palma':            'DE heute ~1,9 · Dänemark ~1,4 · USA ~2,3 (Eurostat)',
+  'Wohlfahrtsverlust':'Harberger-Dreieck je Dezil · sinkt mit flacherem Tarif',
+  'Schulden-Δ':       'Status quo: +2 % BIP/Jahr · Schuldenbremse: < +0,35 %',
 };
 
 
