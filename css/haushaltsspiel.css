@@ -1714,3 +1714,61 @@
 .mod-card-level.ein  { background: rgba(5,150,105,0.08); color: var(--good); }
 .mod-card-level.fort { background: rgba(217,119,6,0.08);  color: var(--warn); }
 .mod-card-level.exp  { background: rgba(220,38,38,0.08);  color: var(--bad); }
+
+/* ═══════════════════════════════════════════════════════════════
+   PHONE RESPONSIVE FIXES (≤ 600px)
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+
+  /* ── Navigation: horizontal scrollbar statt quetschen ── */
+  .site-nav-bar { padding: 0 10px; margin: 0 -10px 20px; }
+  .site-nav-bar-inner { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+  .nav-logo { margin-right: 14px; flex-shrink: 0; }
+  .nav-link { padding: 0 8px; flex-shrink: 0; }
+
+  /* ── Slider Thumb: größeres Touch-Target ── */
+  input[type="range"]::-webkit-slider-thumb { width: 28px; height: 28px; }
+  input[type="range"]::-moz-range-thumb      { width: 28px; height: 28px; }
+
+  /* ── Tooltip-Button: vergrößert ── */
+  .tt-btn { width: 22px; height: 22px; font-size: 11px; }
+
+  /* ── Panel & Controls: weniger Padding ── */
+  .panel    { padding: 12px 14px; }
+  .controls { padding: 14px; }
+
+  /* ── Bar-Row Labels: mehr Platz ── */
+  .bar-row   { grid-template-columns: 80px 1fr 65px; }
+  .bar-label { font-size: 10px; }
+
+  /* ── KPI Grid: kleinere Mindestbreite für 360px ── */
+  .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important; }
+  .kpi      { padding: 12px 14px; }
+
+  /* ── Divergent Chart (Wer gewinnt/verliert): kompaktes Layout ── */
+  .divergent-row { grid-template-columns: 45px 1fr 8px 1fr 54px; gap: 4px; }
+  .div-label     { font-size: 10px; }
+  .div-center    { font-size: 9px; }
+  .div-value     { font-size: 10px; }
+
+  /* ── Onboarding-Card: weniger Padding ── */
+  .onboarding-card { padding: 22px 20px; }
+
+  /* ── Card Style Picker: 2 Spalten statt 3 ── */
+  .csp-formats { grid-template-columns: repeat(2, 1fr); }
+
+  /* ── Score-Panel: kompakter auf kleinen Screens ── */
+  .score-panel { gap: 14px; padding: 14px 16px; }
+  .score-dims  { gap: 10px; }
+  .score-dim   { min-width: 80px; }
+
+  /* ── Reform Tour: Info-Bereich schrumpft mit ── */
+  .reform-tour-bar  { padding: 10px 14px; gap: 8px; }
+  .reform-tour-info { min-width: 0; }
+
+  /* ── Rechenweg-Tabelle: horizontal scrollbar ── */
+  .rw-zone-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* ── Mod-Drawer: weniger Padding ── */
+  .mod-drawer { padding: 18px 16px 24px; }
+}

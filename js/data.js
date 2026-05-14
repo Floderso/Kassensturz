@@ -333,7 +333,7 @@ const CHALLENGES = [
       { label:'CO₂ < 80',       check:r=>r.behavior.co2<80,    cur:r=>r.behavior.co2,  tgt:80,    refFn:()=>100,       dir:'down', fmt:v=>v.toFixed(1) }
     ]},
   { id:'sozmark', diff:'monthly', title:'Soziale Marktwirtschaft',
-    desc:'Armut < 14%, Investitionen > 101, Saldo > −40 Mrd.',
+    desc:'Armut < 6 %, Investitionen > 101, Saldo > −40 Mrd.',
     subs:[
       { label:'Armut < 6 %',    check:r=>r.armutsrisiko<6,      cur:r=>r.armutsrisiko,   tgt:6,   refFn:ref=>ref.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' },
       { label:'Invest. > 101',  check:r=>r.behavior.invest>101, cur:r=>r.behavior.invest, tgt:101, refFn:()=>100,              dir:'up',   fmt:v=>v.toFixed(1) },
@@ -599,19 +599,17 @@ const CHALLENGE_CTX = {
   'Saldo':            'DE 2024: ca. −85 Mrd. €',
   'Gini':             'DE heute: 0,295 · Dänemark: 0,281',
   'Armutsrisiko':     'DE 2023: 14,8 % (EU-SILC)',
-  'Verwaltungskosten':'DE ~2 % Steueraufkommen (OECD)',
-  'Arbeitsangebot':   'Indexbasis = 100 (Status quo)',
-  'Einnahmen':        'DE Steuerquote ~22 % BIP',
+  'Verwaltung':       'DE ~2 % Steueraufkommen (OECD)',
+  'Arbeit-Index':     'Indexbasis = 100 (Status quo)',
   'Steuerarten':      'Kirchhof-Ideal: 4–5 Steuerarten',
-  'CO₂':              'DE 2030-Ziel: −65 % ggü. 1990',
-  'Schuldenquote':    'Verfassungsgrenze: 0,35 % BIP/Jahr',
-  'Wohlfahrtsverlust':'ca. 5–15 % des Steueraufkommens (Lit.)',
+  'CO₂-Index':        'DE 2030-Ziel: −65 % ggü. 1990',
+  'Schulden-Δ < 0':   'Verfassungsgrenze: 0,35 % BIP/Jahr',
+  'Wohlfahrtsverlust':'ca. 5–15 % des Steueraufkommens (Lit.) · Harberger-Dreieck je Dezil · sinkt mit flacherem Tarif',
   'Saldo % BIP':      'Art. 109 GG: Schuldenbremse greift bei < −0,35 % BIP',
   'METR D1':          'Status quo ~99 % (80 % Bürgergeld-Entzug + ~20 % SV · ifo 2025)',
   'DWL < 45 Mrd.':    'Harberger-Effizienzkosten: sinken mit flacheren Grenzsteuersätzen',
   'CO₂-Index < 80':   'Basis 100 = 500 Mio. t · DE 2030-Ziel: −65 % ggü. 1990',
   'Palma':            'DE heute ~1,9 · Dänemark ~1,4 · USA ~2,3 (Eurostat)',
-  'Wohlfahrtsverlust':'Harberger-Dreieck je Dezil · sinkt mit flacherem Tarif',
   'Schulden-Δ':       'Status quo: +2 % BIP/Jahr · Schuldenbremse: < +0,35 %',
 };
 
