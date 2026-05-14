@@ -13,6 +13,11 @@ QUELLENRECHERCHE.md
 instagram-assets.html
 marketing/
 
+# Credentials — niemals committen
+.env
+.env.local
+social/instagram/.env
+
 # Editor
 .vscode/
 .idea/

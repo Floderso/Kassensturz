@@ -1,0 +1,18 @@
+[
+  {
+    "id": "post-001",
+    "status": "pending",
+    "scheduled_for": "2026-05-16T10:00:00",
+    "caption": "💡 Wusstest du? Mit dem Kassensturz-Haushaltsspiel kannst du das deutsche Steuersystem selbst simulieren — und live sehen, was deine Reformen bewirken.\n\n📊 Heute: Tages-Challenge aktiv. Schaffst du es, den Gini-Koeffizienten unter 0,285 zu senken, ohne das Defizit zu erhöhen?\n\n🔗 Link in Bio\n\n#Kassensturz #Steuern #Deutschland #Haushaltsspiel #Wirtschaft #Finanzpolitik #Datenjournalismus",
+    "image_url": "https://raw.githubusercontent.com/Floderso/Kassensturz/main/social/instagram/images/post-001.png",
+    "type": "feed"
+  },
+  {
+    "id": "post-002",
+    "status": "pending",
+    "scheduled_for": "2026-05-19T10:00:00",
+    "caption": "📅 Wochen-Challenge: Schuldenbremse einhalten.\n\nArt. 109 GG erlaubt maximal −0,35 % BIP Defizit. Klingt einfach — ist es nicht.\n\nProbier es selbst 👇\n\n🔗 Link in Bio\n\n#Schuldenbremse #Haushaltspolitik #Kassensturz #Finanzpolitik",
+    "image_url": "https://raw.githubusercontent.com/Floderso/Kassensturz/main/social/instagram/images/post-002.png",
+    "type": "feed"
+  }
+]
