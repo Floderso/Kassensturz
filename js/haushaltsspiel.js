@@ -812,13 +812,17 @@ function hideTooltip() {
 }
 
 function positionTooltip(target) {
+  if (window.innerWidth <= 600) return; // CSS positioniert als Bottom-Sheet
   const popup = document.getElementById('tt-popup');
   const rect = target.getBoundingClientRect();
+  const pw = popup.offsetWidth || 300;
+  const ph = popup.offsetHeight || 180;
   let top = rect.bottom + 8;
   let left = rect.left - 10;
-  if (left + 310 > window.innerWidth) left = window.innerWidth - 315;
+  if (left + pw + 4 > window.innerWidth) left = window.innerWidth - pw - 4;
   if (left < 4) left = 4;
-  if (top + 180 > window.innerHeight) top = rect.top - 185;
+  if (top + ph + 4 > window.innerHeight) top = rect.top - ph - 8;
+  if (top < 4) top = 4;
   popup.style.top = top + 'px';
   popup.style.left = left + 'px';
 }
