@@ -1496,6 +1496,57 @@
     padding-top: 6px;
   }
 
+  /* DEZIL-LEGENDE */
+  details.dezil-legend {
+    margin-top: 10px;
+    border-top: 1px solid var(--rule);
+    padding-top: 8px;
+    margin-bottom: 14px;
+  }
+  details.dezil-legend > summary {
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    color: var(--muted);
+  }
+  details.dezil-legend > summary::-webkit-details-marker { display: none; }
+  details.dezil-legend[open] > summary { color: var(--ink); }
+  .dezil-legend-hint { font-weight: 400; opacity: 0.5; font-size: 9px; }
+  details.dezil-legend[open] .dezil-legend-hint { display: none; }
+  .dezil-legend-body { margin-top: 10px; }
+  .dezil-legend-grid {
+    display: grid;
+    grid-template-columns: 2.8rem 6rem 1fr;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+  }
+  .dezil-legend-grid > span {
+    padding: 3px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .dezil-legend-grid .dlg-head {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    padding-bottom: 5px;
+  }
+  .dezil-legend-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
   /* RECHENWEG PANEL */
   details.rw-details > summary {
     cursor: pointer;
