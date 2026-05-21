@@ -1804,7 +1804,7 @@ document.getElementById('card-btn').addEventListener('click', openCardModal);
 
 
 // Welche Module sind gerade aktiv (sichtbar)?
-const activeModules = new Set(['est','kst','mwst','co2']);
+const activeModules = new Set(['est','kst','mwst','co2', 'wirk', 'einnahmen', 'haushalt']);
 
 let kpiMoreOpen = false;
 function toggleKPIMore() {
