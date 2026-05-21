@@ -18,3 +18,7 @@ marketing/
 .idea/
 *.swp
 *.swo
+
+# Generierte Screenshots / Assets
+docs/*.png
+docs/*.jpg
