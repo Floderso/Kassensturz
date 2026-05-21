@@ -257,6 +257,7 @@ function render() {
   if (p.gewst > 0 && p.gewst_aus === false && p.kst > 25) warnings.push('Körperschaft- + Gewerbesteuer zusammen > 30 % — international unwettbewerbsfähig.');
   if (p.mwst > 25) warnings.push('MwSt sehr hoch — trifft untere Dezile überproportional (regressiv).');
   if (r.gini > REF.gini + 0.02) warnings.push('Ungleichheit nimmt spürbar zu.');
+  if (p.eingang > p.spitze) warnings.push('Eingangssteuersatz (' + p.eingang + ' %) liegt über dem Spitzensteuersatz (' + p.spitze + ' %) — der Tarif ist regressiv (Höhere Einkommen zahlen weniger).');
 
   if (warnings.length > 0) {
     warnbox.style.display = 'block';
@@ -307,12 +308,17 @@ function render() {
     { label: 'Palma', value: r.palma, ref: REF.palma, max: 10, fmt: v => v.toFixed(2).replace('.',',') },
     { label: 'S80/S20',
       value: (() => {
-        const sorted = [...r.hh_delta.netto].sort((a,b)=>a-b);
-        const bot = sorted.slice(0, 3);  // D1–D3 ≈ unteres Quintil
-        const top = sorted.slice(-3);    // D10a/b/c ≈ oberstes Quintil
-        const avgBot = bot.reduce((a,b)=>a+b,0)/bot.length;
-        const avgTop = top.reduce((a,b)=>a+b,0)/top.length;
-        return avgBot > 0 ? avgTop/avgBot : 0;
+        // Korrektes S80/S20: gewichteter Durchschnitt nach Haushaltszahl.
+        // Unterste 20 %: D1+D2 (je 4,1 Mio. = 8,2 Mio. ≈ 20 % der 41,1 Mio. Haushalte)
+        // Oberste 20 %:  D9+D10a+D10b+D10c (4,1+2,05+1,64+0,41 = 8,2 Mio.)
+        const n = r.hh_delta.netto;
+        const botSum = n[0]*DEZILE[0].anzahl + n[1]*DEZILE[1].anzahl;
+        const botN   = DEZILE[0].anzahl + DEZILE[1].anzahl;
+        const topSum = n[8]*DEZILE[8].anzahl + n[9]*DEZILE[9].anzahl + n[10]*DEZILE[10].anzahl + n[11]*DEZILE[11].anzahl;
+        const topN   = DEZILE[8].anzahl + DEZILE[9].anzahl + DEZILE[10].anzahl + DEZILE[11].anzahl;
+        const avgBot = botSum / botN;
+        const avgTop = topSum / topN;
+        return avgBot > 0 ? avgTop / avgBot : 0;
       })(),
       ref: 0, max: 15, fmt: v => v.toFixed(1).replace('.',',') }
   ];

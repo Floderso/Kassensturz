@@ -63,9 +63,8 @@ function berechneRente(params, rv_aufkommen_aktuell) {
   for (let y = 0; y <= 20; y++) {
     const beitrag_ohne = sq_beitrag + y * demo_anstieg;
     // Fonds wächst weiter: jedes Projektionsjahr investiert man weiter + Zinseszins
-    if (params.kapitalquote > 0) {
-      ks_proj = (ks_proj + annual_inv) * (1 + params.rendite_fonds / 100);
-    }
+    // Kompoundierung immer — auch wenn kapitalquote=0 (Bestand verdient weiter Rendite)
+    ks_proj = (ks_proj + annual_inv) * (1 + params.rendite_fonds / 100);
     const ertrag_y = ks_proj * params.rendite_fonds / 100;
     const entlastung_y = (ertrag_y / lohnsumme_sv) * 100;
     proj_ohne.push({ jahr: 2025 + y, beitrag: beitrag_ohne });

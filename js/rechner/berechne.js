@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: CC-BY-4.0
 // Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
-import { DEZILE, ELAST, BASIS_MAKRO, PRESETS, BASIS_AUFKOMMEN, ADMIN_QUOTE, AUSGABEN_TOTAL, BGE_LABOR_EFF } from '../data.js';
+import { DEZILE, ELAST, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, BASIS_AUFKOMMEN, ADMIN_QUOTE, AUSGABEN_TOTAL, BGE_LABOR_EFF, PERIOD_STATE_0 } from '../data.js';
 import { estTarif, grenzsteuersatz } from './einkommensteuer.js';
 import { berechneGini, berechneMedianGewichtet, berechnePalma, berechneDezilDelta, berechneNettoSQ } from './verteilung.js';
 
@@ -73,6 +73,14 @@ function berechne(params, zustand = null) {
   const bip_faktor       = zustand ? zustand.bip / BASIS_MAKRO.bip : 1.0;
   const renten_faktor    = zustand ? (zustand.renten_faktor    ?? 1.0) : 1.0;
   const lohnbasis_faktor = zustand ? (zustand.lohnbasis_faktor ?? 1.0) : 1.0;
+
+  // Dynamische Zinslast: im Multi-Perioden-Modus aus aktuellem Schuldenstand ableiten.
+  // Effektivzins SQ: 30 Mrd. / (64 % × 4.200 Mrd.) ≈ 1,12 % (Altschulden nahe 0 %, Rollover ~2,5 %)
+  const schuld_sq_mrd = PERIOD_STATE_0.schuldenquote / 100 * PERIOD_STATE_0.bip; // 2.688 Mrd.
+  const zins_effektivrate = STAATSAUSGABEN.zinsen / schuld_sq_mrd;               // ≈ 0.01116
+  const zinsen_dyn = zustand
+    ? (zustand.schuldenquote / 100 * zustand.bip) * zins_effektivrate
+    : STAATSAUSGABEN.zinsen;
 
   // ---------- 1. ARBEITSANGEBOT-REAKTION pro Dezil ----------
   // Basisgrenzsteuersatz-Vergleich zum Status Quo
@@ -286,7 +294,7 @@ function berechne(params, zustand = null) {
   const demografie_aufschlag = 390 * (renten_faktor - 1.0);
   // invest_impuls: zusätzliche öffentliche Investitionen (Mrd./Jahr, reduziert Saldo)
   const invest_impuls = params.invest_impuls || 0;
-  const ausgaben_total = AUSGABEN_TOTAL + bg_auszahlung + kg_auszahlung + neg_est_auszahlung + bge_brutto + admin_kosten - 140 - rv_einsparung + sv_ausgaben_delta + demografie_aufschlag + invest_impuls;
+  const ausgaben_total = AUSGABEN_TOTAL + bg_auszahlung + kg_auszahlung + neg_est_auszahlung + bge_brutto + admin_kosten - STAATSAUSGABEN.verwaltung - STAATSAUSGABEN.zinsen + zinsen_dyn - rv_einsparung + sv_ausgaben_delta + demografie_aufschlag + invest_impuls;
 
   // ---------- 13. SALDO ----------
   const saldo = einnahmen_total - ausgaben_total;
@@ -406,7 +414,7 @@ function berechne(params, zustand = null) {
     // GKV-Reform-Boni (für GKV-Panel-Darstellung)
     kv_bbg_frei_bonus, kv_kapital_bonus,
     // Multi-Perioden-Felder
-    emissionen, bip_aktuell, invest_impuls, demografie_aufschlag, sv_ausgaben_delta,
+    emissionen, bip_aktuell, invest_impuls, demografie_aufschlag, sv_ausgaben_delta, zinsen_dyn,
   };
 }
 

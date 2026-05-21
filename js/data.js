@@ -64,7 +64,7 @@ const BASIS_AUFKOMMEN = {
 const BASIS_MAKRO = {
   bip:               4200,  // BIP Deutschland 2025, Mrd. €
   gewinn:             400,  // Unternehmensgewinne vor Steuern, Mrd. €
-  emissions:          500,  // CO₂-beprieste Emissionen (BEHG + ETS), Mio. t
+  emissions:          327,  // CO₂-bepreiste Emissionen (aufkommensrelevanter Scope: BEHG + DE-ETS-Anteil); kalibriert auf BASIS_AUFKOMMEN.co2=18 Mrd. bei 55 €/t (327×55/1000≈18)
   erb_masse:          400,  // Erbschaftsmasse pro Jahr, Mrd. €
   boden_wert:        5000,  // Bodenwert Deutschland gesamt, Mrd. €
   verm_basis:        3500,  // Steuerpflichtiges Vermögen > 2 Mio €, Mrd. €
@@ -705,4 +705,4 @@ const ZUKUNFTS_SZENARIEN = [
   },
 ];
 
-export { DEZILE, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };
+export { DEZILE, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };
