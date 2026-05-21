@@ -8,6 +8,15 @@
 <meta property="og:description" content="Datenbasierte Steuer- und Sozialstaats-Simulation. Echte Zahlen aus Bundeshaushalt 2025.">
 <meta property="og:type" content="website">
 <title>Das große Haushaltsspiel Deutschlands</title>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18178856279"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-18178856279');
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -668,6 +677,39 @@
       <span>+</span> Darstellung hinzufügen
     </div>
 
+
+    <!-- ZUKUNFTSSIMULATION -->
+    <div class="panel" id="zukunft-panel">
+      <h2>Zukunftssimulation 2025–2041</h2>
+      <div class="panel-sub">5 Perioden à 4 Jahre · Demografiewandel · BIP-Dynamik · CO₂-Pfad · Schuldenfortschreibung</div>
+
+      <!-- Szenario-Picker -->
+      <div id="zukunft-szenarien" class="zukunft-szenarien-grid"></div>
+
+      <!-- Perioden-Timeline -->
+      <div class="perioden-timeline" id="perioden-timeline">
+        <button class="perioden-tab active" data-periode="0">2025–28</button>
+        <button class="perioden-tab" data-periode="1">2029–32</button>
+        <button class="perioden-tab" data-periode="2">2033–36</button>
+        <button class="perioden-tab" data-periode="3">2037–40</button>
+        <button class="perioden-tab" data-periode="4">2041–44</button>
+      </div>
+      <div class="perioden-hint" id="perioden-hint">Passe die Regler für die aktive Periode an — Änderungen propagieren automatisch in die Folgeperioden.</div>
+
+      <!-- KPI-Zeitreihen -->
+      <div style="margin-top:16px;">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">Entwicklung über alle Perioden</div>
+        <div id="zeitreihe_chart"></div>
+      </div>
+
+      <!-- Staatsausgaben je Periode -->
+      <details class="zukunft-ausgaben-details" style="margin-top:16px;">
+        <summary style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;">
+          <span id="ausgaben-chevron" style="transition:transform .2s;">▸</span> Staatsausgaben aktive Periode
+        </summary>
+        <div style="margin-top:10px;"><div id="staatsausgaben_chart"></div></div>
+      </details>
+    </div>
 
     <!-- Wissenschafts-Kompass -->
     <div class="panel" id="wissenschafts-panel">
