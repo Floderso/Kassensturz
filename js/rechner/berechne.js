@@ -68,7 +68,12 @@ const FORMEL_QUELLEN_BERECHNE = {
 };
 
 
-function berechne(params) {
+function berechne(params, zustand = null) {
+  // Periodenübergreifender Zustand für Multi-Perioden-Simulation
+  const bip_faktor       = zustand ? zustand.bip / BASIS_MAKRO.bip : 1.0;
+  const renten_faktor    = zustand ? (zustand.renten_faktor    ?? 1.0) : 1.0;
+  const lohnbasis_faktor = zustand ? (zustand.lohnbasis_faktor ?? 1.0) : 1.0;
+
   // ---------- 1. ARBEITSANGEBOT-REAKTION pro Dezil ----------
   // Basisgrenzsteuersatz-Vergleich zum Status Quo
   const sqGrenze = dez => grenzsteuersatz(dez.brutto*(1-dez.kapital), 12084, 14, 45, 277826);
@@ -130,7 +135,7 @@ function berechne(params) {
 
   // ---------- 3. KÖRPERSCHAFTSTEUER + GEWERBE ----------
   const investment_factor = 1 + ELAST.investment * ((params.kst + (params.gewst_aus ? 0 : params.gewst))/100 - 0.30);
-  const gewinn = BASIS_MAKRO.gewinn * Math.max(0.7, Math.min(1.2, investment_factor));
+  const gewinn = BASIS_MAKRO.gewinn * bip_faktor * Math.max(0.7, Math.min(1.2, investment_factor));
   const kst_auf = gewinn * params.kst / 100;
   const gewst_auf = params.gewst_aus ? 0 : gewinn * params.gewst / 100;
 
@@ -174,7 +179,7 @@ function berechne(params) {
   const bbg = params.bbg ?? 90000;
   // BBG-Erhöhung: ~12% der sozialversicherungspflichtigen Löhne liegt zwischen 90k und 160k
   const bbg_lohnsumme_factor = 1 + Math.max(0, (bbg - 90000) / 90000) * 0.12;
-  const lohnsumme_sv = BASIS_MAKRO.lohnsumme_sv * bbg_lohnsumme_factor;
+  const lohnsumme_sv = BASIS_MAKRO.lohnsumme_sv * lohnbasis_faktor * bbg_lohnsumme_factor;
   const buerger_boost = params.buergerv ? 1.15 : 1.0;
   const rv_auf = lohnsumme_sv * params.rv / 100;
   // kv_bbg_frei/kv_kapital: Aufkommensschätzung skaliert mit aktuellem KV-Satz (ifo 159/2025, DIW)
@@ -203,7 +208,8 @@ function berechne(params) {
   // M3: Ausgabenbasis skaliert mit rv-Regler (Umlagesystem: niedrigere Beiträge = niedrigeres Leistungsniveau).
   // Damit wird verhindert, dass rv_einsparung gegen eine feste Basis gerechnet wird, die der rv-Slider
   // schon implizit abgesenkt hat (Doppelkorrektur-Vermeidung).
-  const rv_ausgaben_basis = BASIS_MAKRO.rv_ausgaben_sq * (params.rv / 18.6); // skaliert mit Beitragssatz
+  // renten_faktor: demografisch bedingte Mehrkosten (Baby-Boomer-Rentenwelle, Destatis 2021)
+  const rv_ausgaben_basis = BASIS_MAKRO.rv_ausgaben_sq * (params.rv / 18.6) * renten_faktor;
   let rv_einsparung = 0;
   if (bge > 0) {
     const rl = params.rente_grenze || 35000;              // €/Jahr Einkommensgrenze
@@ -276,7 +282,11 @@ function berechne(params) {
     SV_AUSG.rv   * (params.rv   / 18.6 - 1) +
     SV_AUSG.kv   * (params.kv   / 16.3 - 1) +
     SV_AUSG.alpf * (params.alpf /  6.2 - 1);
-  const ausgaben_total = AUSGABEN_TOTAL + bg_auszahlung + kg_auszahlung + neg_est_auszahlung + bge_brutto + admin_kosten - 140 - rv_einsparung + sv_ausgaben_delta;
+  // Demografieaufschlag: steigende RV-Ausgaben durch Alterung (RV-Anteil ~390 Mrd.)
+  const demografie_aufschlag = 390 * (renten_faktor - 1.0);
+  // invest_impuls: zusätzliche öffentliche Investitionen (Mrd./Jahr, reduziert Saldo)
+  const invest_impuls = params.invest_impuls || 0;
+  const ausgaben_total = AUSGABEN_TOTAL + bg_auszahlung + kg_auszahlung + neg_est_auszahlung + bge_brutto + admin_kosten - 140 - rv_einsparung + sv_ausgaben_delta + demografie_aufschlag + invest_impuls;
 
   // ---------- 13. SALDO ----------
   const saldo = einnahmen_total - ausgaben_total;
@@ -335,7 +345,8 @@ function berechne(params) {
   }, 0) / total_hh_all * 100;
 
   // ---------- 19. SCHULDENQUOTE Δ ----------
-  const schuldenquote_delta = -(saldo / BASIS_MAKRO.bip) * 100;
+  const bip_aktuell = BASIS_MAKRO.bip * bip_faktor;
+  const schuldenquote_delta = -(saldo / bip_aktuell) * 100;
 
   // ---------- 20. METR (Marginal Effective Tax Rate) je Dezil ----------
   // METR = ESt-Grenzsteuersatz + SV-Grenzbelastung (AN-Anteil) + Transfer-Entzug
@@ -371,13 +382,13 @@ function berechne(params) {
 
   // ---------- 19b. SCHULDENBREMSE (Art. 109 GG) ----------
   // Vereinfacht: struktureller Saldo ≈ Gesamtsaldo / BIP (keine Konjunkturbereinigung im Modell)
-  const saldo_bip_pct = saldo / BASIS_MAKRO.bip * 100;
+  const saldo_bip_pct = saldo / bip_aktuell * 100;
   const schuldenbremse_ok = saldo_bip_pct >= -0.35;
 
   // ---------- 19c. DYNAMISCHES SCORING ----------
   // Verhaltensbedingte Aufkommensänderung gegenüber mechanischer (statischer) Wirkung
   // KSt: investment_factor-Abweichung von 1 = Investitionsreaktion auf KSt-Änderung
-  const dynamisch_kst = BASIS_MAKRO.gewinn * params.kst / 100 * (investment_factor - 1);
+  const dynamisch_kst = BASIS_MAKRO.gewinn * bip_faktor * params.kst / 100 * (investment_factor - 1);
   // ESt: labor_factor-Abweichung → Arbeitsangebotsreaktion (Saez/Chetty-Konsens ε = 0,20)
   const dynamisch_est = est_aufkommen * (avg_labor - 1);
   const dynamisch_delta = dynamisch_kst + dynamisch_est;
@@ -393,7 +404,9 @@ function berechne(params) {
     dynamisch_kst, dynamisch_est, dynamisch_delta,
     investment_factor, avg_labor,
     // GKV-Reform-Boni (für GKV-Panel-Darstellung)
-    kv_bbg_frei_bonus, kv_kapital_bonus
+    kv_bbg_frei_bonus, kv_kapital_bonus,
+    // Multi-Perioden-Felder
+    emissionen, bip_aktuell, invest_impuls, demografie_aufschlag, sv_ausgaben_delta,
   };
 }
 

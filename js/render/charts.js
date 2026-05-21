@@ -244,4 +244,151 @@ function renderSchuldenpfad(r, ref) {
   </svg>`;
 }
 
-export { renderEstKurve, renderIncomeDist, exportCSV, berechneSchuldenpfad, renderSchuldenpfad };
+// ── ZEITREIHEN-CHART (Multi-Perioden) ──────────────────────────────────
+
+function renderZeitreihe(pfad) {
+  const el = document.getElementById('zeitreihe_chart');
+  if (!el || !pfad || pfad.length === 0) return;
+
+  const W = 640, H = 280, pad = { t: 12, r: 16, b: 28, l: 52 };
+  const iW = W - pad.l - pad.r;
+  const rowH = (H - pad.t - pad.b) / 2 - 8;
+  const cols = [0, W / 2];
+  const rows = [pad.t, pad.t + rowH + 24];
+
+  const labels = pfad.map(p => p.label);
+  const n = pfad.length;
+  const xOf = (i, col) => cols[col] + pad.l + (i / (n - 1)) * (iW / 2 - pad.l - pad.r / 2);
+
+  function sparkline(data, x0, y0, h, color, domain, refLine = null, labelFn = v => v.toFixed(0)) {
+    const [dmin, dmax] = domain;
+    const range = dmax - dmin || 1;
+    const yOf = v => y0 + h - ((v - dmin) / range) * h;
+    const pts = data.map((v, i) => `${x0 + pad.l + (i / (n - 1)) * (iW / 2 - pad.l - 4)},${yOf(v)}`).join(' ');
+
+    let refSvg = '';
+    if (refLine !== null) {
+      const ry = yOf(refLine);
+      if (ry >= y0 && ry <= y0 + h) {
+        refSvg = `<line x1="${x0 + pad.l}" y1="${ry}" x2="${x0 + pad.l + iW / 2 - pad.l - 4}" y2="${ry}"
+          stroke="var(--bad)" stroke-width="1" stroke-dasharray="4,2" opacity="0.6"/>`;
+      }
+    }
+
+    const dotLast = data[n - 1];
+    const xLast = x0 + pad.l + iW / 2 - pad.l - 4;
+    const yLast = yOf(dotLast);
+
+    const yLabels = [dmin, (dmin + dmax) / 2, dmax].map(v => {
+      const y = yOf(v);
+      return `<text x="${x0 + pad.l - 5}" y="${y + 4}" text-anchor="end"
+        font-size="9" font-family="DM Mono,monospace" fill="var(--muted)">${labelFn(v)}</text>`;
+    }).join('');
+
+    const xTicks = labels.map((lbl, i) => {
+      const x = x0 + pad.l + (i / (n - 1)) * (iW / 2 - pad.l - 4);
+      return `<text x="${x}" y="${y0 + h + 14}" text-anchor="middle"
+        font-size="9" font-family="DM Mono,monospace" fill="var(--muted)">${lbl.split('–')[0]}</text>`;
+    }).join('');
+
+    return `
+      <line x1="${x0 + pad.l}" y1="${y0}" x2="${x0 + pad.l}" y2="${y0 + h}" stroke="var(--rule)" stroke-width="1"/>
+      <line x1="${x0 + pad.l}" y1="${y0 + h}" x2="${x0 + pad.l + iW / 2 - pad.l - 4}" y2="${y0 + h}" stroke="var(--rule)" stroke-width="1"/>
+      ${refSvg}
+      <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>
+      <circle cx="${xLast}" cy="${yLast}" r="3.5" fill="${color}"/>
+      <text x="${xLast + 5}" y="${yLast + 4}" font-size="10" font-family="DM Mono,monospace" font-weight="600" fill="${color}">${labelFn(dotLast)}</text>
+      ${yLabels}
+      ${xTicks}`;
+  }
+
+  // KPI-Daten aus Pfad extrahieren
+  const saldos     = pfad.map(p => p.result.saldo);
+  const schulden   = pfad.map(p => p.zustand.schuldenquote);
+  const ginis      = pfad.map(p => p.result.gini * 1000);
+  const co2s       = pfad.map(p => p.result.behavior.co2);
+
+  const saldoMin = Math.min(-120, ...saldos) - 10;
+  const saldoMax = Math.max(50, ...saldos) + 10;
+  const schulMax = Math.max(90, ...schulden) + 5;
+  const giniMin  = Math.min(260, ...ginis) - 5;
+  const giniMax  = Math.max(320, ...ginis) + 5;
+
+  // Titel-Texte
+  function kpiTitle(label, x0, y0) {
+    return `<text x="${x0 + pad.l}" y="${y0 - 4}" font-size="10" font-family="DM Mono,monospace"
+      font-weight="600" fill="var(--ink)" text-transform="uppercase" letter-spacing=".08em">${label}</text>`;
+  }
+
+  const svg = `<svg viewBox="0 0 ${W} ${H + 8}" style="width:100%;overflow:visible">
+    ${kpiTitle('Haushaltssaldo (Mrd. €)', cols[0], rows[0])}
+    ${sparkline(saldos, cols[0], rows[0], rowH, 'var(--accent)', [saldoMin, saldoMax], 0,
+        v => (v >= 0 ? '+' : '') + v.toFixed(0))}
+    ${kpiTitle('Schuldenquote (% BIP)', cols[1], rows[0])}
+    ${sparkline(schulden, cols[1], rows[0], rowH, 'var(--bad)', [30, schulMax], 60,
+        v => v.toFixed(0) + ' %')}
+    ${kpiTitle('Gini × 1000', cols[0], rows[1])}
+    ${sparkline(ginis, cols[0], rows[1], rowH, 'var(--warn)', [giniMin, giniMax], null,
+        v => v.toFixed(0))}
+    ${kpiTitle('CO₂-Index (100 = SQ)', cols[1], rows[1])}
+    ${sparkline(co2s, cols[1], rows[1], rowH, 'var(--good)', [40, 110], 50,
+        v => v.toFixed(0))}
+  </svg>`;
+
+  el.innerHTML = svg;
+}
+
+// ── STAATSAUSGABEN-DIAGRAMM ────────────────────────────────────────────
+
+function renderStaatsausgaben(r) {
+  const el = document.getElementById('staatsausgaben_chart');
+  if (!el) return;
+
+  // Ausgaben-Kategorien für die aktive Periode
+  const kategorien = [
+    { label: 'Sozial / Rente / SV',  wert: 850 + r.demografie_aufschlag + (r.sv_ausgaben_delta ?? 0),    sq: 850,  color: 'var(--accent)' },
+    { label: 'Gesundheit',           wert: 320,                                                            sq: 320,  color: 'var(--muted)' },
+    { label: 'Bildung',              wert: 180,                                                            sq: 180,  color: 'var(--muted)' },
+    { label: 'Transfers (BG/KG)',    wert: 140 + (r.bg_auszahlung ?? 0) + (r.kg_auszahlung ?? 0),         sq: 140,  color: 'var(--warn)' },
+    { label: 'Verteidigung',         wert: 90,                                                             sq: 90,   color: 'var(--muted)' },
+    { label: 'Infrastruktur',        wert: 120 + (r.invest_impuls ?? 0),                                  sq: 120,  color: 'var(--good)' },
+    { label: 'Verwaltung + Admin',   wert: 140 + (r.admin_kosten ?? 0),                                   sq: 140,  color: 'var(--muted)' },
+    { label: 'Zinsen',               wert: 30,                                                             sq: 30,   color: 'var(--bad)' },
+  ];
+
+  const maxWert = Math.max(...kategorien.map(k => Math.max(k.wert, k.sq))) * 1.08;
+  const W = 560, rowH = 22, gap = 4, padL = 156, padR = 56, padT = 6;
+  const iW = W - padL - padR;
+  const H = kategorien.length * (rowH + gap) + padT + 24;
+
+  const bars = kategorien.map((k, i) => {
+    const y = padT + i * (rowH + gap);
+    const wNeu = (k.wert / maxWert) * iW;
+    const wSQ  = (k.sq  / maxWert) * iW;
+    const diff = k.wert - k.sq;
+    const diffStr = diff === 0 ? '' : (diff > 0 ? '+' : '') + diff.toFixed(0) + ' Mrd.';
+    const diffCol = diff > 0 ? 'var(--bad)' : diff < 0 ? 'var(--good)' : 'var(--muted)';
+    return `
+      <text x="${padL - 8}" y="${y + rowH * 0.7}" text-anchor="end"
+        font-size="10" font-family="DM Mono,monospace" fill="var(--ink)">${k.label}</text>
+      <rect x="${padL}" y="${y + 2}" width="${wSQ}" height="${rowH - 4}"
+        fill="var(--rule)" rx="2"/>
+      <rect x="${padL}" y="${y + 2}" width="${Math.max(2, wNeu)}" height="${rowH - 4}"
+        fill="${k.color}" opacity="0.75" rx="2"/>
+      <text x="${padL + Math.max(wNeu, wSQ) + 6}" y="${y + rowH * 0.7}"
+        font-size="10" font-family="DM Mono,monospace" fill="${diffCol}">${k.wert.toFixed(0)}${diffStr ? ' · ' + diffStr : ''}</text>`;
+  }).join('');
+
+  const legende = `
+    <rect x="${padL}" y="${H - 18}" width="12" height="8" fill="var(--rule)" rx="1"/>
+    <text x="${padL + 16}" y="${H - 11}" font-size="9" font-family="DM Mono,monospace" fill="var(--muted)">Status Quo</text>
+    <rect x="${padL + 90}" y="${H - 18}" width="12" height="8" fill="var(--accent)" opacity=".75" rx="1"/>
+    <text x="${padL + 106}" y="${H - 11}" font-size="9" font-family="DM Mono,monospace" fill="var(--muted)">Aktuelle Periode</text>`;
+
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;overflow:visible">
+    ${bars}
+    ${legende}
+  </svg>`;
+}
+
+export { renderEstKurve, renderIncomeDist, exportCSV, berechneSchuldenpfad, renderSchuldenpfad, renderZeitreihe, renderStaatsausgaben };

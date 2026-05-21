@@ -646,4 +646,63 @@ const MOD_DEFS = {
 // Quelle: RWI 2024, DIW Pilot 2024, ZEW Heim et al., ifo Mikrosimulation 2021
 const BGE_LABOR_EFF = [0.15, 0.12, 0.09, 0.06, 0.04, 0.025, 0.015, 0.01, 0.005, 0.00, 0.00, 0.00];
 
-export { DEZILE, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF };
+
+// ── MULTI-PERIODEN SIMULATION ──
+
+// Demografische Entwicklung 2025–2041 (Destatis 14. koordinierte Bev.-Vorausberechnung 2021)
+// renten_faktor: Multiplikator auf den RV-Ausgabenanteil (~390 Mrd.) — Basis 1,0 im Jahr 2025
+// altersquotient: Bevölkerung 65+ / Bevölkerung 20–64
+const DEMOGRAFIE_KURVE = [
+  { jahr: 2025, label: '2025–28', renten_faktor: 1.000, altersquotient: 0.350 },
+  { jahr: 2029, label: '2029–32', renten_faktor: 1.060, altersquotient: 0.375 },
+  { jahr: 2033, label: '2033–36', renten_faktor: 1.140, altersquotient: 0.410 },
+  { jahr: 2037, label: '2037–40', renten_faktor: 1.200, altersquotient: 0.445 },
+  { jahr: 2041, label: '2041–44', renten_faktor: 1.250, altersquotient: 0.480 },
+];
+
+// Anfangszustand der Multi-Perioden-Simulation (Periode 0, Jahr 2025)
+const PERIOD_STATE_0 = {
+  bip:              4200,   // Mrd. €  (Destatis VGR 2025)
+  schuldenquote:    64.0,   // % BIP   (IMF Article IV 2025)
+  co2_kumulat:      0,      // Mio. t CO₂e kumuliert seit 2025
+  lohnbasis_faktor: 1.0,    // Arbeitsmarkt-Zustandsindex (1,0 = Status quo 2025)
+  renten_faktor:    1.0,    // wird per Periode aus DEMOGRAFIE_KURVE gesetzt
+};
+
+// Wissenschaftliche Zukunftsszenarien — vordefinierte Parameter-Trajektorien für alle 5 Perioden
+const ZUKUNFTS_SZENARIEN = [
+  {
+    id: 'demografie_baseline',
+    name: 'Demografie-Baseline',
+    icon: '📊',
+    beschreibung: 'Status-quo-Politik — aber steigende Rentenlasten durch die Baby-Boomer-Rentenwelle erhöhen die Staatsausgaben automatisch.',
+    quelle: 'Destatis 14. Bev.-Vorausberechnung 2021 · DRV Rentenbericht 2024',
+    perioden_params: Array.from({ length: 5 }, () => ({ ...PRESETS.status_quo })),
+  },
+  {
+    id: 'klimatransformation',
+    name: 'Klimatransformation 2045',
+    icon: '🌱',
+    beschreibung: 'Stufenweise steigende CO₂-Preise (BEHG-Pfad) — Weg zur Klimaneutralität, aber steigende Haushaltsspannungen.',
+    quelle: 'PIK Klimaneutralpfad 2045 · Agora Energiewende 2024 · BEHG § 10-Fortschreibung',
+    perioden_params: [55, 80, 120, 180, 250].map(co2 => ({ ...PRESETS.status_quo, co2 })),
+  },
+  {
+    id: 'fiskalkonsolidierung',
+    name: 'Fiskalische Konsolidierung',
+    icon: '💶',
+    beschreibung: 'Moderate Steuererhöhungen und Ausgabendisziplin — Ziel: Schuldenquote unter 60 % BIP bis 2037.',
+    quelle: 'Bundesbank Monatsbericht Jan 2025 · SVR Jahresgutachten 2024/25',
+    perioden_params: Array.from({ length: 5 }, () => ({ ...PRESETS.status_quo, spitze: 47, erb: 28, co2: 65 })),
+  },
+  {
+    id: 'investitionsschub',
+    name: 'Investitionsschub (SVR)',
+    icon: '🏗️',
+    beschreibung: 'Frontgeladene öffentliche Investitionen — kurzfristig höheres Defizit, langfristig BIP-Wachstumsbonus durch Fiskalmultiplikator.',
+    quelle: 'SVR Jahresgutachten 2024/25 "Wirtschaftliche Wende" · KfW Research 2024 · Gechert/Heimberger (2022)',
+    perioden_params: [60, 60, 30, 0, 0].map(invest_impuls => ({ ...PRESETS.status_quo, invest_impuls })),
+  },
+];
+
+export { DEZILE, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };

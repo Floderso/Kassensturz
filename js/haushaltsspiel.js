@@ -4,10 +4,11 @@
 // KASSENSTURZ · Haushaltsspiel — UI & Render
 // ═══════════════════════════════════════════════════════
 
-import { DEZILE, ELAST, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF } from './data.js';
+import { DEZILE, ELAST, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, ZUKUNFTS_SZENARIEN } from './data.js';
 import { estTarif, grenzsteuersatz, effSteuersatz } from './rechner/einkommensteuer.js';
 import { berechne } from './rechner/berechne.js';
-import { renderEstKurve, renderIncomeDist, exportCSV, renderSchuldenpfad } from './render/charts.js';
+import { simulierePfad } from './rechner/transition.js';
+import { renderEstKurve, renderIncomeDist, exportCSV, renderSchuldenpfad, renderZeitreihe, renderStaatsausgaben } from './render/charts.js';
 import { renderRenten } from './render/renten.js';
 import { renderLaffer, _renderLafferNow } from './render/laffer.js';
 
@@ -157,6 +158,14 @@ function scheduleHeavyRender() {
     renderChallenges(r);
     renderWissenschaftsPanel(p);
     renderRechenweg(r, p);
+    // Multi-Perioden: aktive Periode mit neuen Params aktualisieren
+    if (document.getElementById('zeitreihe_chart')) {
+      perioden_params[aktivePeriodeIdx] = p;
+      const pfad = simulierePfad(perioden_params);
+      renderZeitreihe(pfad);
+      renderStaatsausgaben(pfad[aktivePeriodeIdx].result);
+      updatePeriodenkennzahlen(pfad);
+    }
   }, 150);
 }
 
@@ -1361,6 +1370,7 @@ renderWissenschaftsPanel(_initP);
 renderRechenweg(_initR, _initP);
 injectTooltips();
 updateScenarioModeUI();
+initZukunftssimulation();
 
 // Rechenweg-Panel: bei Aufklappen rendern
 document.getElementById('csv-export-btn').addEventListener('click', () => { const p = getParams(); exportCSV(p, berechne(p), REF); });
@@ -1868,6 +1878,96 @@ function toggleMod(id) {
   renderModGrid(pickerType);
 }
 
+// ============================================================
+// ZUKUNFTSSIMULATION — Multi-Perioden-Simulation
+// ============================================================
+
+let perioden_params = Array.from({ length: 5 }, () => ({ ...PRESETS.status_quo }));
+let aktivePeriodeIdx = 0;
+
+function recalcPfad() {
+  // Aktive Periode bekommt die aktuellen Slider-Werte
+  perioden_params[aktivePeriodeIdx] = getParams();
+  const pfad = simulierePfad(perioden_params);
+  renderZeitreihe(pfad);
+  renderStaatsausgaben(pfad[aktivePeriodeIdx].result);
+  updatePeriodenkennzahlen(pfad);
+}
+
+function updatePeriodenkennzahlen(pfad) {
+  const hint = document.getElementById('perioden-hint');
+  if (!hint) return;
+  const p = pfad[aktivePeriodeIdx];
+  const endP = pfad[pfad.length - 1];
+  const endSchulden = endP.zustand.schuldenquote.toFixed(1).replace('.', ',');
+  const endSaldo = (endP.result.saldo >= 0 ? '+' : '') + endP.result.saldo.toFixed(0);
+  hint.textContent =
+    `Aktive Periode: ${p.label} · BIP ${p.zustand.bip.toFixed(0)} Mrd. € · ` +
+    `Schuldenquote ${p.zustand.schuldenquote.toFixed(1).replace('.', ',')} % BIP · ` +
+    `Endstand 2041–44: Schulden ${endSchulden} %, Saldo ${endSaldo} Mrd.`;
+}
+
+function setAktivePeriode(idx) {
+  aktivePeriodeIdx = idx;
+  // Slider auf gespeicherte Params der Periode setzen
+  setParams(perioden_params[idx]);
+  document.querySelectorAll('.perioden-tab').forEach((btn, i) => {
+    btn.classList.toggle('active', i === idx);
+  });
+  const pfad = simulierePfad(perioden_params);
+  renderStaatsausgaben(pfad[idx].result);
+  updatePeriodenkennzahlen(pfad);
+}
+
+function ladeSzenario(szenario) {
+  // Alle 5 Perioden mit Szenario-Params befüllen
+  perioden_params = szenario.perioden_params.map(p => ({ ...p }));
+  aktivePeriodeIdx = 0;
+  setParams(perioden_params[0]);
+  document.querySelectorAll('.perioden-tab').forEach((btn, i) => {
+    btn.classList.toggle('active', i === 0);
+  });
+  // Szenario-Buttons aktualisieren
+  document.querySelectorAll('.zukunft-sz-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.szId === szenario.id);
+  });
+  recalcPfad();
+}
+
+function initZukunftssimulation() {
+  // Szenario-Picker rendern
+  const grid = document.getElementById('zukunft-szenarien');
+  if (grid) {
+    grid.innerHTML = ZUKUNFTS_SZENARIEN.map(sz => `
+      <button class="zukunft-sz-btn" data-sz-id="${sz.id}" title="${sz.quelle}" onclick="ladeSzenario_global('${sz.id}')">
+        <span class="zukunft-sz-icon">${sz.icon}</span>
+        <span class="zukunft-sz-name">${sz.name}</span>
+      </button>
+    `).join('') + `
+      <button class="zukunft-sz-btn" data-sz-id="custom" onclick="ladeSzenario_global('custom')">
+        <span class="zukunft-sz-icon">✏️</span>
+        <span class="zukunft-sz-name">Eigenes Szenario</span>
+      </button>`;
+  }
+
+  // Perioden-Tab-Handler
+  document.querySelectorAll('.perioden-tab').forEach(btn => {
+    btn.addEventListener('click', () => setAktivePeriode(+btn.dataset.periode));
+  });
+
+  // Details-Chevron-Toggle
+  const ausgabenDetails = document.querySelector('.zukunft-ausgaben-details');
+  if (ausgabenDetails) {
+    ausgabenDetails.addEventListener('toggle', () => {
+      const chevron = document.getElementById('ausgaben-chevron');
+      if (chevron) chevron.textContent = ausgabenDetails.open ? '▾' : '▸';
+    });
+  }
+
+  // Initiale Simulation mit Status-quo-Params
+  recalcPfad();
+}
+
 // Expose functions needed by inline onclick handlers in HTML
 window.exitScenarioMode = exitScenarioMode;
 window.startTour        = startTour;
@@ -1882,6 +1982,19 @@ window.setCardTheme     = setCardTheme;
 window.startWith        = startWith;
 window.closeOnboarding  = closeOnboarding;
 window.toggleMod        = toggleMod;
+window.ladeSzenario_global = (id) => {
+  if (id === 'custom') {
+    // Eigenes Szenario: alle Perioden mit aktuellen Params vorbelegen
+    const p = getParams();
+    perioden_params = Array.from({ length: 5 }, () => ({ ...p }));
+    perioden_params[aktivePeriodeIdx] = p;
+    document.querySelectorAll('.zukunft-sz-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.szId === 'custom'));
+    recalcPfad();
+    return;
+  }
+  const sz = ZUKUNFTS_SZENARIEN.find(s => s.id === id);
+  if (sz) ladeSzenario(sz);
+};
 
 // Initial anwenden
 applyModules();
