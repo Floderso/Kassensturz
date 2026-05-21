@@ -1372,6 +1372,14 @@ injectTooltips();
 updateScenarioModeUI();
 initZukunftssimulation();
 
+// Modul-Picker Buttons — direkt per addEventListener (kein window.openPicker nötig)
+document.getElementById('mod-add-control-btn').addEventListener('click', () => openPicker('control'));
+document.getElementById('mod-add-result-btn').addEventListener('click', () => openPicker('result'));
+document.getElementById('mod-drawer-close-btn').addEventListener('click', () => closePicker());
+document.getElementById('mod-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closePicker();
+});
+
 // Rechenweg-Panel: bei Aufklappen rendern
 document.getElementById('csv-export-btn').addEventListener('click', () => { const p = getParams(); exportCSV(p, berechne(p), REF); });
 document.getElementById('share-btn').addEventListener('click', copyShareLink);
@@ -1845,8 +1853,7 @@ function openPicker(type) {
   document.body.style.overflow = 'hidden';
 }
 
-function closePicker(e) {
-  if (e && e.target !== document.getElementById('mod-overlay')) return;
+function closePicker() {
   document.getElementById('mod-overlay').classList.remove('open');
   document.body.style.overflow = '';
 }

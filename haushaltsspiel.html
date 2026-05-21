@@ -385,7 +385,7 @@
     </div>
     </div>
 
-    <div class="mod-add-btn" onclick="openPicker('control')">
+    <div class="mod-add-btn" id="mod-add-control-btn">
       <span>+</span> Regler-Modul hinzufügen
     </div>
 
@@ -673,7 +673,7 @@
       <div id="schulden_pfad_chart"></div>
     </div>
 
-    <div class="mod-add-btn mod-add-result" onclick="openPicker('result')">
+    <div class="mod-add-btn mod-add-result" id="mod-add-result-btn">
       <span>+</span> Darstellung hinzufügen
     </div>
 
@@ -814,14 +814,14 @@
 <div class="slider-tooltip" id="slider-tooltip"></div>
 
 <!-- MODUL-PICKER OVERLAY -->
-<div class="mod-overlay" id="mod-overlay" onclick="closePicker(event)">
+<div class="mod-overlay" id="mod-overlay">
   <div class="mod-drawer">
     <div class="mod-drawer-head">
       <div>
         <div class="mod-drawer-title" id="mod-drawer-title">Module hinzufügen</div>
         <div class="mod-drawer-sub" id="mod-drawer-sub">Wähle was du zur Simulation hinzufügen möchtest</div>
       </div>
-      <button class="mod-drawer-close" onclick="closePicker()">✕</button>
+      <button class="mod-drawer-close" id="mod-drawer-close-btn">✕</button>
     </div>
     <div class="mod-grid" id="mod-grid"></div>
   </div>
