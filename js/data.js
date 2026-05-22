@@ -62,7 +62,7 @@ const BASIS_AUFKOMMEN = {
 // Makroökonomische Basiszahlen (Deutschland 2025)
 // Quellen: Destatis VGR, BMF Finanzplan 2025, Deutsche Rentenversicherung Rentenbericht 2024
 const BASIS_MAKRO = {
-  bip:               4200,  // BIP Deutschland 2025, Mrd. €
+  bip:               4470,  // BIP Deutschland 2025, Mrd. € (nominal; abgeleitet: Schuldenstand 2.838 Mrd. ÷ 63,5 % · Bundesbank/Destatis Feb 2026)
   gewinn:             400,  // Unternehmensgewinne vor Steuern, Mrd. €
   emissions:          327,  // CO₂-bepreiste Emissionen (aufkommensrelevanter Scope: BEHG + DE-ETS-Anteil); kalibriert auf BASIS_AUFKOMMEN.co2=18 Mrd. bei 55 €/t (327×55/1000≈18)
   erb_masse:          400,  // Erbschaftsmasse pro Jahr, Mrd. €
@@ -584,19 +584,19 @@ const REFORM_TOURS = [
 // ── KPI_BENCH + CHALLENGE_CTX ──
 
 const KPI_BENCH = {
-  saldo:  'DE 2024: −85 Mrd. · EU-Ø: −180 Mrd.',
+  saldo:  'DE 2025: −119 Mrd. (VGR/Maastricht, Destatis Feb 2026) · DE 2024: −115 Mrd. · Defizitquote: −2,7 % BIP',
   einn:   'DE 2024: ~1.450 Mrd. · Steuerquote 22 % BIP',
   gini:   'DE: 0,295 · DK: 0,281 · SE: 0,273 · US: 0,395',
   admin:  'DE ~2 % Steueraufkommen (OECD-Ø)',
   nst:    'DE aktuell: ~40 Steuerarten',
   arb:    'Elastizitäten: Saez/Chetty/Gruber',
   armut:  'DE 2023: 14,8 % (EU-SILC) · EU-Ø: 16,5 %',
-  schuld: 'DE Schuldenquote 2025: ~64 % BIP (IMF Art. IV 2025)',
+  schuld: 'DE Schuldenquote 2025: 63,5 % BIP · Schuldenstand: 2.838 Mrd. € (Bundesbank Feb 2026) · Maastricht-Grenze: 60 %',
   dwl:    'Schätzung: 5–15 % des Steueraufkommens',
   zins:   'Bund 2025: 7,7 Ct/€ (30,2 Mrd.) · Projektion 2029: 17,2 Ct/€ (66,5 Mrd.) · Tief 2021: 4,6 Ct · Quelle: IW Köln (Hentze 2025) · BMF Finanzplan 2025–2029 (Abbildung 4)',
 };
 const CHALLENGE_CTX = {
-  'Saldo':            'DE 2024: ca. −85 Mrd. €',
+  'Saldo':            'DE 2025: −119 Mrd. € (VGR/Maastricht, Destatis Feb 2026) · Defizitquote −2,7 % BIP',
   'Gini':             'DE heute: 0,295 · Dänemark: 0,281',
   'Armutsrisiko':     'DE 2023: 14,8 % (EU-SILC)',
   'Verwaltung':       'DE ~2 % Steueraufkommen (OECD)',
@@ -662,8 +662,8 @@ const DEMOGRAFIE_KURVE = [
 
 // Anfangszustand der Multi-Perioden-Simulation (Periode 0, Jahr 2025)
 const PERIOD_STATE_0 = {
-  bip:              4200,   // Mrd. €  (Destatis VGR 2025)
-  schuldenquote:    64.0,   // % BIP   (IMF Article IV 2025)
+  bip:              4470,   // Mrd. €  (Destatis VGR 2025, nominal; Bundesbank Feb 2026)
+  schuldenquote:    63.5,   // % BIP   (Maastricht; Bundesbank Feb 2026 — Anstieg von 62,2 % auf 63,5 % durch Sondervermögen)
   co2_kumulat:      0,      // Mio. t CO₂e kumuliert seit 2025
   lohnbasis_faktor: 1.0,    // Arbeitsmarkt-Zustandsindex (1,0 = Status quo 2025)
   renten_faktor:    1.0,    // wird per Periode aus DEMOGRAFIE_KURVE gesetzt

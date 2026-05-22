@@ -1922,25 +1922,27 @@ function updatePeriodenkennzahlen(pfad) {
 
 function setAktivePeriode(idx) {
   aktivePeriodeIdx = idx;
-  // Slider auf gespeicherte Params der Periode setzen
   setParams(perioden_params[idx]);
+  render();
+  syncAllSliders();
   document.querySelectorAll('.perioden-tab').forEach((btn, i) => {
     btn.classList.toggle('active', i === idx);
   });
   const pfad = simulierePfad(perioden_params);
+  renderZeitreihe(pfad);
   renderStaatsausgaben(pfad[idx].result);
   updatePeriodenkennzahlen(pfad);
 }
 
 function ladeSzenario(szenario) {
-  // Alle 5 Perioden mit Szenario-Params befüllen
   perioden_params = szenario.perioden_params.map(p => ({ ...p }));
   aktivePeriodeIdx = 0;
   setParams(perioden_params[0]);
+  render();
+  syncAllSliders();
   document.querySelectorAll('.perioden-tab').forEach((btn, i) => {
     btn.classList.toggle('active', i === 0);
   });
-  // Szenario-Buttons aktualisieren
   document.querySelectorAll('.zukunft-sz-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.szId === szenario.id);
   });
