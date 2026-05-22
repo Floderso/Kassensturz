@@ -1341,6 +1341,10 @@ let _tourActive = null, _tourStep = 0, _tourBaseParams = null;
 // ── 13. KPI-ANIMATIONEN, KARTEN, SHARE ──
 
 
+// Zukunftssimulation-State — muss VOR initZukunftssimulation() deklariert sein
+let perioden_params = Array.from({ length: 5 }, () => ({ ...PRESETS.status_quo }));
+let aktivePeriodeIdx = 0;
+
 // Capture hash state BEFORE render() modifies window.location via replaceState
 const _hadInitialHash = !!window.location.hash;
 
@@ -1894,9 +1898,6 @@ function toggleMod(id) {
 // ============================================================
 // ZUKUNFTSSIMULATION — Multi-Perioden-Simulation
 // ============================================================
-
-let perioden_params = Array.from({ length: 5 }, () => ({ ...PRESETS.status_quo }));
-let aktivePeriodeIdx = 0;
 
 function recalcPfad() {
   // Aktive Periode bekommt die aktuellen Slider-Werte
