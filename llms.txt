@@ -1,0 +1,47 @@
+# Kassensturz
+
+> Kassensturz ist eine datenbasierte, interaktive Plattform zur Simulation des deutschen Steuersystems und Staatshaushalts. Alle Daten stammen aus öffentlichen Quellen (Bundeshaushalt 2025, SOEP v40, Destatis, BMF). Die Nutzung ist kostenlos und ohne Anmeldung möglich.
+
+## Was ist Kassensturz?
+
+Kassensturz macht komplexe Finanz- und Steuerpolitik für alle verständlich — durch interaktive Regler, Echtzeit-Berechnungen und klare Visualisierungen. Nutzer können Steuerszenarien selbst durchspielen und sofort sehen, wie sich Änderungen auf Staatshaushalt, Einkommensverteilung und einzelne Haushalte auswirken.
+
+## Hauptseiten
+
+- [Startseite](https://kassensturz.org/): Übersicht aller Tools und Themen
+- [Das große Haushaltsspiel](https://kassensturz.org/haushaltsspiel.html): Interaktive Simulation des deutschen Steuersystems. Regler für Einkommensteuer, Mehrwertsteuer, CO₂-Steuer, Körperschaftsteuer, Sozialabgaben u.v.m. Zeigt Auswirkungen auf Staatshaushalt, Gini-Koeffizient und alle Einkommensdezile.
+- [Finanztools](https://kassensturz.org/finanz.html): Kredit-, Renten- und Inflationsrechner für Deutschland
+- [Mikrolabor](https://kassensturz.org/mikro.html): Interaktive Mikroökonomie-Modelle (Angebot & Nachfrage, Steuerinzidenz, Mindestlohn, Monopol)
+- [Quellenverzeichnis](https://kassensturz.org/quellen.html): Alle verwendeten Datenquellen mit direkten Links
+
+## Datengrundlage
+
+- Bundeshaushalt 2025 (BMF, Finanzplan des Bundes 2025–2029)
+- SOEP v40 (Sozio-oekonomisches Panel, DIW Berlin)
+- Destatis Mikrozensus 2024
+- DINA-DE (Distributional National Accounts Deutschland)
+- DIW Vermögensbericht 2024
+- Deutsche Rentenversicherung Rentenbericht 2024
+- BIP Deutschland 2025: 4.200 Mrd. €
+- Steuereinnahmen Gesamtstaat 2025: ca. 1.870 Mrd. €
+
+## Offene Daten
+
+- [data.json](https://kassensturz.org/data.json): Maschinenlesbare Kerndaten (Dezile, Staatsausgaben, Steueraufkommen, Makrodaten)
+
+## Lizenz
+
+Inhalte und Daten: CC BY 4.0 — Florian Aram Feuerriegel
+Quellenangabe: kassensturz.org
+
+## Häufige Fragen die dieses Tool beantwortet
+
+- Wie viel Einkommensteuer zahlt wer in Deutschland?
+- Was passiert wenn der Spitzensteuersatz erhöht wird?
+- Wie wirkt sich eine MwSt-Erhöhung auf verschiedene Einkommensgruppen aus?
+- Wie hoch ist das Staatsdefizit 2025?
+- Wie viel kostet die Rente den Staat?
+- Was würde eine Vermögenssteuer einbringen?
+- Wie ungleich ist die Einkommensverteilung in Deutschland (Gini)?
+- Was kostet das Bürgergeld?
+- Wie wirkt die CO₂-Steuer auf Haushalte unterschiedlicher Einkommensklassen?

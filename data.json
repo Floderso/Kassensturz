@@ -1,0 +1,135 @@
+{
+  "meta": {
+    "quelle": "kassensturz.org",
+    "lizenz": "CC BY 4.0",
+    "stand": "2025-06-14",
+    "basis": [
+      "Bundeshaushalt 2025 (BMF)",
+      "SOEP v40 (DIW)",
+      "Destatis Mikrozensus 2024",
+      "DINA-DE",
+      "DIW Vermögensbericht 2024"
+    ]
+  },
+  "dezile": [
+    {
+      "dezil": "D1",
+      "haushalte_mio": 4.1,
+      "brutto_jahr_eur": 14000,
+      "anteil_kapital": 0.01,
+      "vermoegen_median_eur": 1000
+    },
+    {
+      "dezil": "D2",
+      "haushalte_mio": 4.1,
+      "brutto_jahr_eur": 21000,
+      "anteil_kapital": 0.01,
+      "vermoegen_median_eur": 5000
+    },
+    {
+      "dezil": "D3",
+      "haushalte_mio": 4.1,
+      "brutto_jahr_eur": 27000,
+      "anteil_kapital": 0.02,
+      "vermoegen_median_eur": 15000
+    },
+    {
+      "dezil": "D4",
+      "haushalte_mio": 4.1,
+      "brutto_jahr_eur": 33000,
+      "anteil_kapital": 0.02,
+      "vermoegen_median_eur": 35000
+    },
+    {
+      "dezil": "D5",
+      "haushalte_mio": 4.1,
+      "brutto_jahr_eur": 40000,
+      "anteil_kapital": 0.03,
+      "vermoegen_median_eur": 70000
+    },
+    {
+      "dezil": "D6",
+      "haushalte_mio": 4.1,
+      "brutto_jahr_eur": 48000,
+      "anteil_kapital": 0.03,
+      "vermoegen_median_eur": 120000
+    },
+    {
+      "dezil": "D7",
+      "haushalte_mio": 4.1,
+      "brutto_jahr_eur": 58000,
+      "anteil_kapital": 0.04,
+      "vermoegen_median_eur": 200000
+    },
+    {
+      "dezil": "D8",
+      "haushalte_mio": 4.1,
+      "brutto_jahr_eur": 72000,
+      "anteil_kapital": 0.05,
+      "vermoegen_median_eur": 340000
+    },
+    {
+      "dezil": "D9",
+      "haushalte_mio": 4.1,
+      "brutto_jahr_eur": 95000,
+      "anteil_kapital": 0.07,
+      "vermoegen_median_eur": 620000
+    },
+    {
+      "dezil": "D10a",
+      "haushalte_mio": 2.05,
+      "brutto_jahr_eur": 125000,
+      "anteil_kapital": 0.08,
+      "vermoegen_median_eur": 450000
+    },
+    {
+      "dezil": "D10b",
+      "haushalte_mio": 1.64,
+      "brutto_jahr_eur": 220000,
+      "anteil_kapital": 0.18,
+      "vermoegen_median_eur": 1500000
+    },
+    {
+      "dezil": "D10c_top1pct",
+      "haushalte_mio": 0.41,
+      "brutto_jahr_eur": 700000,
+      "anteil_kapital": 0.45,
+      "vermoegen_median_eur": 7000000
+    }
+  ],
+  "staatsausgaben_2025_mrd_eur": {
+    "soziales_rente_gkv_pflege_buergergeld": 850,
+    "gesundheit": 320,
+    "bildung": 180,
+    "verteidigung": 90,
+    "infrastruktur": 120,
+    "verwaltung": 140,
+    "zinsen": 30,
+    "sonstiges": 140,
+    "gesamt": 1870
+  },
+  "steueraufkommen_2025_mrd_eur": {
+    "lohnsteuer": 255,
+    "einkommensteuer_veranlagt": 90,
+    "mehrwertsteuer": 303,
+    "koerperschaftsteuer": 45,
+    "gewerbesteuer": 75,
+    "energiesteuer": 37,
+    "co2_steuer": 18,
+    "tabaksteuer": 15,
+    "grunderwerbsteuer": 16,
+    "erbschaftsteuer": 8,
+    "rentenversicherungsbeitraege": 310,
+    "krankenversicherungsbeitraege": 290,
+    "arbeitslosenversicherung_pflegeversicherung": 105
+  },
+  "makro_2025": {
+    "bip_mrd_eur": 4200,
+    "co2_emissionen_mio_tonnen": 500,
+    "erbschaftsmasse_pro_jahr_mrd_eur": 400,
+    "bodenwert_gesamt_mrd_eur": 5000,
+    "steuerpflichtiges_vermoegen_ueber_2mio_mrd_eur": 3500,
+    "sozialversicherungspflichtige_lohnsumme_mrd_eur": 1750,
+    "rentenversicherung_gesamtausgaben_mrd_eur": 430
+  }
+}

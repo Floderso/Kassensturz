@@ -3,11 +3,101 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Interaktive Simulation des deutschen Steuersystems. Verschiebe Regler für Einkommensteuer, MwSt, CO₂-Steuer und beobachte die Auswirkungen auf Staatshaushalt, Ungleichheit und Haushalte.">
-<meta property="og:title" content="Das große Haushaltsspiel Deutschlands">
-<meta property="og:description" content="Datenbasierte Steuer- und Sozialstaats-Simulation. Echte Zahlen aus Bundeshaushalt 2025.">
+<meta name="description" content="Simuliere das deutsche Steuersystem: Verschiebe Regler für Einkommensteuer, MwSt und CO₂-Steuer und sieh live, wer gewinnt und wer verliert. Daten aus Bundeshaushalt 2025 und SOEP.">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Kassensturz">
+<link rel="canonical" href="https://kassensturz.org/haushaltsspiel.html">
+<meta property="og:title" content="Das große Haushaltsspiel – Bundeshaushalt 2025 simulieren">
+<meta property="og:description" content="Verschiebe Regler für Steuern und sieh live, wer gewinnt und wer verliert. Datenbasiert mit echten Zahlen aus Bundeshaushalt 2025 und SOEP.">
 <meta property="og:type" content="website">
-<title>Das große Haushaltsspiel Deutschlands</title>
+<meta property="og:url" content="https://kassensturz.org/haushaltsspiel.html">
+<meta property="og:image" content="https://kassensturz.org/docs/haushaltsspiel_screenshot.png">
+<meta property="og:image:width" content="2880">
+<meta property="og:image:height" content="1800">
+<meta property="og:site_name" content="Kassensturz">
+<meta property="og:locale" content="de_DE">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Das große Haushaltsspiel – Bundeshaushalt 2025 simulieren">
+<meta name="twitter:description" content="Verschiebe Regler für Steuern und sieh live, wer gewinnt und wer verliert. Datenbasiert mit echten Zahlen aus Bundeshaushalt 2025.">
+<meta name="twitter:image" content="https://kassensturz.org/docs/haushaltsspiel_screenshot.png">
+<title>Das große Haushaltsspiel – Bundeshaushalt 2025 simulieren | Kassensturz</title>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Das große Haushaltsspiel",
+  "description": "Interaktive Simulation des deutschen Steuersystems mit echten Daten aus Bundeshaushalt 2025 und SOEP.",
+  "url": "https://kassensturz.org/haushaltsspiel.html",
+  "applicationCategory": "EducationalApplication",
+  "inLanguage": "de",
+  "isAccessibleForFree": true,
+  "operatingSystem": "Web",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"},
+  "provider": {"@type": "Organization", "name": "Kassensturz", "url": "https://kassensturz.org"}
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Kassensturz Haushaltsdaten Deutschland 2025",
+  "description": "Einkommensdezile, Staatsausgaben, Steueraufkommen und Makrodaten für Deutschland 2025. Basis: SOEP v40, Bundeshaushalt 2025, Destatis.",
+  "url": "https://kassensturz.org/data.json",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "inLanguage": "de",
+  "temporalCoverage": "2025",
+  "spatialCoverage": "Deutschland",
+  "creator": {"@type": "Organization", "name": "Kassensturz", "url": "https://kassensturz.org"},
+  "distribution": {
+    "@type": "DataDownload",
+    "encodingFormat": "application/json",
+    "contentUrl": "https://kassensturz.org/data.json"
+  },
+  "isBasedOn": [
+    {"@type": "CreativeWork", "name": "Bundeshaushalt 2025", "publisher": "Bundesministerium der Finanzen"},
+    {"@type": "CreativeWork", "name": "SOEP v40", "publisher": "DIW Berlin"},
+    {"@type": "CreativeWork", "name": "Mikrozensus 2024", "publisher": "Destatis"}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Wie viel Einkommensteuer zahlt man in Deutschland?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Der Grundfreibetrag liegt 2025 bei 12.096 €. Darüber greift ein Eingangssteuersatz von 14 %, der progressiv bis zum Spitzensteuersatz von 42 % (ab ca. 68.430 €) steigt. Der Reichensteuersatz von 45 % gilt ab 277.826 €. Kassensturz simuliert die Auswirkungen aller Sätze auf alle Einkommensdezile."}
+    },
+    {
+      "@type": "Question",
+      "name": "Wie hoch ist das Staatsdefizit Deutschland 2025?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Die Gesamtausgaben des deutschen Staates betragen 2025 rund 1.870 Mrd. €. Das Staatsdefizit (Nettokreditaufnahme Bund) liegt bei ca. 70 Mrd. €. Im Kassensturz-Simulator können Nutzer eigene Steuerszenarien durchspielen, die das Defizit verringern oder erhöhen."}
+    },
+    {
+      "@type": "Question",
+      "name": "Was würde eine Vermögenssteuer in Deutschland einbringen?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Bei einem steuerpflichtigen Vermögen über 2 Mio. € von ca. 3.500 Mrd. € würde ein Satz von 1 % jährlich rund 35 Mrd. € einbringen. Der Kassensturz-Simulator berechnet verschiedene Szenarien mit unterschiedlichen Freibeträgen und Steuersätzen."}
+    },
+    {
+      "@type": "Question",
+      "name": "Wie wirkt die CO₂-Steuer auf unterschiedliche Einkommensgruppen?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Die CO₂-Steuer (BEHG) ist regressiv: Niedrigeinkommensbezieher geben einen höheren Anteil ihres Einkommens für Energie aus. Der Kassensturz-Simulator zeigt die Nettobelastung aller 12 Einkommensdezile und ermöglicht den Vergleich mit Entlastungsmaßnahmen wie dem Klimageld."}
+    },
+    {
+      "@type": "Question",
+      "name": "Wie ungleich ist die Einkommensverteilung in Deutschland?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Der Gini-Koeffizient für Markteinkommen liegt in Deutschland bei ca. 0,50, nach Steuern und Transfers bei ca. 0,29 (SOEP v40, 2024). Das oberste Dezil (D10) hat ein Bruttoeinkommen ab ca. 125.000 €/Jahr, das Top-1-%-Segment ab ca. 277.000 €."}
+    },
+    {
+      "@type": "Question",
+      "name": "Was kostet die Rente den deutschen Staat?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Die Rentenversicherung hatte 2025 Gesamtausgaben von ca. 430 Mrd. €, davon trägt der Bund einen Zuschuss von ca. 110 Mrd. €. Im Kassensturz-Simulator können Beitragssätze und Rentenniveau simuliert werden."}
+    }
+  ]
+}
+</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18178856279"></script>
 <script>
