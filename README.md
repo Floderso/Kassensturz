@@ -2,17 +2,17 @@
 
 **Datenbasierte Simulation des deutschen Steuersystems und Staatshaushalts**
 
-Kassensturz ist ein interaktives Bildungsprojekt, mit dem du Steuern und Sozialregeln anpassen und die Auswirkungen auf Staatshaushalt, Ungleichheit und einzelne Haushalte in Echtzeit beobachten kannst. Alle Kennzahlen basieren auf echten Daten (Bundeshaushalt 2025, SOEP, Destatis).
+Kassensturz ist ein interaktives Bildungsprojekt, mit dem du Steuern und Sozialregeln anpassen und die Auswirkungen auf Staatshaushalt, Ungleichheit und einzelne Haushalte in Echtzeit beobachten kannst. Alle Kennzahlen basieren auf echten Daten (Bundeshaushalt 2026, SOEP, Destatis).
 
-> **Live-Demo:** [floderso.github.io/Kassensturz](https://floderso.github.io/Kassensturz)
-
----
-
-> **English summary:** Kassensturz is an interactive browser-based simulation of the German tax and fiscal system. Adjust sliders for income tax, VAT, CO₂ tax, social contributions and more — and observe real-time effects on the federal budget, income inequality (Gini, Palma), poverty risk, and individual households across all income deciles. Data sources: Federal Budget 2025 (BMF), SOEP v40 (DIW), Destatis. No build step, no dependencies — open `index.html` to run locally.
+> **Live-Demo:** [kassensturz.org](https://kassensturz.org)
 
 ---
 
-[![Kassensturz – Steuer-Simulator](docs/screenshot.png)](https://floderso.github.io/Kassensturz)
+> **English summary:** Kassensturz is an interactive browser-based simulation of the German tax and fiscal system. Adjust sliders for income tax, VAT, CO₂ tax, social contributions and more — and observe real-time effects on the federal budget, income inequality (Gini, Palma), poverty risk, and individual households across all income deciles. Data sources: Federal Budget 2026 (BMF), SOEP v40 (DIW), Destatis. No build step, no dependencies — open `index.html` to run locally.
+
+---
+
+[![Kassensturz – Steuer-Simulator](docs/screenshot.png)](https://kassensturz.org)
 
 ---
 
@@ -20,7 +20,7 @@ Kassensturz ist ein interaktives Bildungsprojekt, mit dem du Steuern und Sozialr
 
 | Seite | Inhalt |
 |---|---|
-| **Haushaltsspiel** | Steuer-Simulator mit Reglern für Einkommensteuer, MwSt, CO₂-Steuer, Sozialabgaben u.v.m. Echtzeit-KPIs für Staatshaushalt, Gini-Koeffizient, Armutsrisiko und Verwaltungskosten. |
+| **Haushaltsspiel** | Steuer-Simulator mit Reglern für Einkommensteuer, MwSt, CO₂-Steuer, Sozialabgaben u.v.m. Echtzeit-KPIs für Staatshaushalt, Gini-Koeffizient, Armutsrisiko und Verwaltungskosten. Enthält eine Zukunftssimulation (2026–2045), die die gewählte Politik über mehrere Perioden fortschreibt, sowie tägliche/wöchentliche/monatliche Challenges. |
 | **Finanztools** | Einzelne Finanzrechner und Visualisierungen rund um persönliche Finanzen und Steuern. |
 | **Mikrolabor** | Interaktive mikroökonomische Modelle: Angebot & Nachfrage, Preiselastizität, Steuerinzidenz, Mindestlohn, Monopol. |
 | **Quellen** | Vollständige Quellenangaben zu allen verwendeten Daten und Elastizitäten. |
@@ -29,7 +29,7 @@ Kassensturz ist ein interaktives Bildungsprojekt, mit dem du Steuern und Sozialr
 
 Das Haushaltsspiel enthält acht vorgefertigte Szenarien zum direkten Vergleich:
 
-- Status quo 2025
+- Status quo 2026
 - Synthetisch Progressiv
 - Kirchhof Flat Tax
 - Stark Umverteilend
@@ -59,11 +59,11 @@ Das Projekt hat **keine Abhängigkeiten** und benötigt keinen Server — es fun
 
 | Bereich | Quelle | Stand |
 |---|---|---|
-| Bundeshaushalt | BMF (Finanzplan des Bundes) | 2025 |
-| Steueraufkommen | BMF-Steuerschätzung | 2025 |
+| Bundeshaushalt | BMF (Finanzplan des Bundes) | 2026 |
+| Steueraufkommen | BMF-Steuerschätzung | 2025 (teilw. 2026, s. Quellen) |
 | Einkommensverteilung | SOEP v40 / DIW, EU-SILC | 2024/25 |
 | Haushaltsstruktur | Destatis Mikrozensus | 2024 |
-| Sozialversicherung | Deutsche Rentenversicherung, GKV-Spitzenverband | 2025 |
+| Sozialversicherung | Deutsche Rentenversicherung, GKV-Spitzenverband | 2026 |
 | Verhaltens-Elastizitäten | ZEW, ifo, Saez/Chetty | 2012–2024 |
 
 Das Modell folgt dem **statischen Mikrosimulationsansatz**: 12 repräsentative Haushaltstypen (10 Dezile, D10 aufgespalten in P90–95, P95–99, Top-1%) werden durch das Steuer-Transfer-System gerechnet. Verhaltensreaktionen werden über kalibrierte Elastizitäten aus der empirischen Literatur modelliert.
@@ -77,7 +77,7 @@ Das Modell ist ein **Lernwerkzeug**, kein Prognosemodell. Es kann Größenordnun
 ```
 kassensturz/
 ├── index.html                  # Startseite
-├── haushaltsspiel.html         # Steuer-Simulator
+├── haushaltsspiel.html         # Steuer-Simulator + Zukunftssimulation + Challenges
 ├── finanz.html                 # Finanztools
 ├── mikro.html                  # Mikrolabor
 ├── quellen.html                # Quellenangaben
@@ -85,8 +85,21 @@ kassensturz/
 ├── css/
 │   └── haushaltsspiel.css      # Styles für den Simulator
 ├── js/
-│   ├── data.js                 # Datenkonstanten (Dezile, Staatsausgaben, Aufkommen)
-│   └── haushaltsspiel.js       # Simulationslogik
+│   ├── data.js                 # Datenkonstanten (Dezile, Staatsausgaben, Aufkommen, Challenges)
+│   ├── haushaltsspiel.js       # UI-Logik & State-Management
+│   ├── rechner/                # Reine Berechnungsmodule
+│   │   ├── berechne.js         # Kern-Simulation einer Periode
+│   │   ├── einkommensteuer.js  # ESt-Tarif
+│   │   ├── rente.js            # Rentenversicherung
+│   │   ├── transition.js       # Perioden-Übergänge der Zukunftssimulation
+│   │   └── verteilung.js       # Dezil-Verteilung, Gini, Palma
+│   └── render/                 # Chart- & Panel-Rendering
+│       ├── charts.js
+│       ├── laffer.js
+│       └── renten.js
+├── data.json                   # Maschinenlesbare Kerndaten (SEO/LLM-Zugriff)
+├── llms.txt                    # Strukturierte Projektbeschreibung für KI-Crawler
+├── sitemap.xml / robots.txt    # SEO
 └── Konzept_Steuersimulation.md # Modellarchitektur und wissenschaftliche Grundlage
 ```
 

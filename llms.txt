@@ -1,6 +1,6 @@
 # Kassensturz
 
-> Kassensturz ist eine datenbasierte, interaktive Plattform zur Simulation des deutschen Steuersystems und Staatshaushalts. Alle Daten stammen aus öffentlichen Quellen (Bundeshaushalt 2025, SOEP v40, Destatis, BMF). Die Nutzung ist kostenlos und ohne Anmeldung möglich.
+> Kassensturz ist eine datenbasierte, interaktive Plattform zur Simulation des deutschen Steuersystems und Staatshaushalts. Alle Daten stammen aus öffentlichen Quellen (Bundeshaushalt 2026, SOEP v40, Destatis, BMF). Die Nutzung ist kostenlos und ohne Anmeldung möglich.
 
 ## Was ist Kassensturz?
 
@@ -16,14 +16,14 @@ Kassensturz macht komplexe Finanz- und Steuerpolitik für alle verständlich —
 
 ## Datengrundlage
 
-- Bundeshaushalt 2025 (BMF, Finanzplan des Bundes 2025–2029)
+- Bundeshaushalt 2026 (BMF, Finanzplan des Bundes 2026–2030)
 - SOEP v40 (Sozio-oekonomisches Panel, DIW Berlin)
 - Destatis Mikrozensus 2024
 - DINA-DE (Distributional National Accounts Deutschland)
 - DIW Vermögensbericht 2024
 - Deutsche Rentenversicherung Rentenbericht 2024
-- BIP Deutschland 2025: 4.200 Mrd. €
-- Steuereinnahmen Gesamtstaat 2025: ca. 1.870 Mrd. €
+- BIP Deutschland 2026: ~4.622 Mrd. € (geschätzt, Bundesbank-Prognose Juni 2026)
+- Staatsausgaben Gesamtstaat 2026: ca. 1.888 Mrd. €
 
 ## Offene Daten
 
@@ -39,7 +39,7 @@ Quellenangabe: kassensturz.org
 - Wie viel Einkommensteuer zahlt wer in Deutschland?
 - Was passiert wenn der Spitzensteuersatz erhöht wird?
 - Wie wirkt sich eine MwSt-Erhöhung auf verschiedene Einkommensgruppen aus?
-- Wie hoch ist das Staatsdefizit 2025?
+- Wie hoch ist das Staatsdefizit 2026?
 - Wie viel kostet die Rente den Staat?
 - Was würde eine Vermögenssteuer einbringen?
 - Wie ungleich ist die Einkommensverteilung in Deutschland (Gini)?

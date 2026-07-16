@@ -25,21 +25,38 @@ const DEZILE = [
 // D10c = Top 1% (0,41 Mio. Haushalte). Brutto 700k ist Durchschnitt — echte Spitze deutlich höher.
 // Kapitalanteil D10c: ~45% des Einkommens aus Kapital (DINA-DE, Bach/Buggeln 2024).
 
-// Staatsausgaben 2025 (Gesamtstaat, grob aggregiert)
+// Marginale Konsumneigung (MPC) je Dezil — für den HANK-Fiskalmultiplikator in transition.js.
+// Getrennt von DEZILE[i].konsum (das ist die durchschnittliche Konsumquote am Nettoeinkommen,
+// für die MwSt-Berechnung), weil Durchschnitts- und Grenzgröße ökonomisch verschiedene Dinge sind.
+// Stilisierte, monoton fallende Kalibrierung — qualitativ konsistent mit dem empirischen Befund,
+// dass einkommensschwache/liquiditätsbeschränkte Haushalte eine deutlich höhere MPC haben als
+// vermögende Haushalte (Fagereng/Holm/Natvik 2021 "MPC Heterogeneity and Household Balance Sheets";
+// Kaplan/Violante 2014 "A Model of the Consumption Response to Fiscal Stimulus Payments").
+// Keine exakten Dezil-Punktschätzungen für Deutschland — Größenordnung/Monotonie ist der belastbare Teil.
+const MPC_DEZIL = [0.75, 0.70, 0.65, 0.60, 0.55, 0.50, 0.45, 0.38, 0.30, 0.22, 0.15, 0.08];
+
+// Staatsausgaben 2026 (Gesamtstaat, grob aggregiert)
+// Update Juli 2026: verteidigung auf bestätigten Gesamtstaat-Wert (BMF/Bundeshaushalt 2026) angehoben.
+// sozial/gesundheit/bildung/verwaltung/zinsen/sonstiges: noch 2025er-Schätzung — keine belastbare
+// Gesamtstaat-Aufschlüsselung (alle Ebenen) für 2026 zum Zeitpunkt der Recherche verfügbar, nur
+// Bund-Einzelplan-Zahlen (z.B. BMAS-Etat 197,4 Mrd. €, BMG-Etat 20,1 Mrd. €) — nicht 1:1 vergleichbar.
 const STAATSAUSGABEN = {
-  sozial:        850,  // inkl. Rente/GKV/Pflege/Bürgergeld (SV + Bund)
-  gesundheit:    320,
-  bildung:       180,
-  verteidigung:   90,
-  infrastruktur: 120,
-  verwaltung:    140,
-  zinsen:         30,  // Bund 2025: 30,2 Mrd. € (Finanzplan des Bundes 2025–2029, Abbildung 4)
-  sonstiges:     140
+  sozial:        850,  // inkl. Rente/GKV/Pflege/Bürgergeld (SV + Bund) — Stand 2025, s.o.
+  gesundheit:    320,  // Stand 2025, s.o.
+  bildung:       180,  // Stand 2025, s.o.
+  verteidigung: 108,   // Gesamtstaat 2026: 108,2 Mrd. € (Bundeshaushalt 2026, Höchststand seit Ende Kalter Krieg)
+  infrastruktur: 120,  // Stand 2025, s.o.
+  verwaltung:    140,  // Stand 2025, s.o.
+  zinsen:         30,  // Bund 2025: 30,2 Mrd. € (Finanzplan des Bundes 2025–2029, Abbildung 4) — 2026 noch nicht bestätigt
+  sonstiges:     140   // Stand 2025, s.o.
 };
 const AUSGABEN_TOTAL = Object.values(STAATSAUSGABEN).reduce((a,b)=>a+b,0);
 
-// Basis-Aufkommen Status Quo 2025 (Mrd. €)
-// Quelle: BMF, Destatis
+// Basis-Aufkommen Status Quo 2026 (Mrd. €)
+// Quelle: BMF, Destatis. Update Juli 2026: nur co2 (Preiskorridor-Anhebung 55→65 €/t) direkt neu
+// kalibriert. Für die übrigen Steuerarten liegt noch keine belastbare 2026-Einzelaufschlüsselung
+// vor (Mai-Steuerschätzung 2026 nennt nur den Gesamtstaat-Gesamtwert 998,7 Mrd. €, keine
+// Einzelsteuerarten-Tabelle) — bis dahin bleiben die 2025er-Werte als beste verfügbare Näherung stehen.
 const BASIS_AUFKOMMEN = {
   lohnsteuer:     255,
   estveranlagt:    90,   // vE + KapESt
@@ -48,7 +65,7 @@ const BASIS_AUFKOMMEN = {
   gewst:           75,
   solz_abgelt:     12,   // Abgeltung+Soli
   energie:         37,
-  co2:             18,   // BEHG + EU-ETS (nationaler Anteil)
+  co2:             21,   // BEHG + EU-ETS (nationaler Anteil); neu kalibriert auf 65 €/t (327×65/1000≈21)
   tabak:           15,
   grundst:         16,
   erbschaft:        8,
@@ -59,20 +76,20 @@ const BASIS_AUFKOMMEN = {
   al_pflege:      105
 };
 
-// Makroökonomische Basiszahlen (Deutschland 2025)
-// Quellen: Destatis VGR, BMF Finanzplan 2025, Deutsche Rentenversicherung Rentenbericht 2024
+// Makroökonomische Basiszahlen (Deutschland 2026)
+// Quellen: Destatis VGR, BMF Finanzplan 2026–2030, Deutsche Rentenversicherung, GKV-Spitzenverband
 const BASIS_MAKRO = {
-  bip:               4470,  // BIP Deutschland 2025, Mrd. € (nominal; abgeleitet: Schuldenstand 2.838 Mrd. ÷ 63,5 % · Bundesbank/Destatis Feb 2026)
+  bip:               4622,  // BIP Deutschland 2026, Mrd. € (geschätzt: 4470 (2025) × 1,034; Bundesbank Juni 2026: +0,5 % real + ~2,9 % Inflation ≈ +3,4 % nominal — keine offizielle Jahres-Nominalzahl für 2026 verfügbar)
   gewinn:             400,  // Unternehmensgewinne vor Steuern, Mrd. €
-  emissions:          327,  // CO₂-bepreiste Emissionen (aufkommensrelevanter Scope: BEHG + DE-ETS-Anteil); kalibriert auf BASIS_AUFKOMMEN.co2=18 Mrd. bei 55 €/t (327×55/1000≈18)
+  emissions:          327,  // CO₂-bepreiste Emissionen (aufkommensrelevanter Scope: BEHG + DE-ETS-Anteil); kalibriert auf BASIS_AUFKOMMEN.co2=21 Mrd. bei 65 €/t (327×65/1000≈21)
   erb_masse:          400,  // Erbschaftsmasse pro Jahr, Mrd. €
   boden_wert:        5000,  // Bodenwert Deutschland gesamt, Mrd. €
   verm_basis:        3500,  // Steuerpflichtiges Vermögen > 2 Mio €, Mrd. €
   lohnsumme_sv:      1750,  // Sozialversicherungspflichtige Lohnsumme, Mrd. €
-  rv_ausgaben_sq:     430,  // RV-Gesamtausgaben inkl. Bundeszuschuss (Status quo), Mrd. €
-  kv_bbg_kv_sq:     66150,  // Beitragsbemessungsgrenze KV/PV 2025, € p.a. (GKV-Beitragsbemessungsgrenze 2025)
-  kv_bbg_frei_bonus:   18,  // Aufkommensgewinn kv_bbg_frei bei kv=16,3 %, Mrd. €
-  kv_kapital_bonus:     8,  // Aufkommensgewinn kv_kapital bei kv=16,3 %, Mrd. €
+  rv_ausgaben_sq:     449,  // RV-Gesamtausgaben inkl. Bundeszuschuss (Status quo), Mrd. €; geschätzt 430×1,043 nach +4,24% Rentenanpassung 1.7.2026 u. +5 Mrd. Bundeszuschuss (Bundeshaushalt 2026) — kein offizieller Gesamtausgaben-Wert 2026 gefunden
+  kv_bbg_kv_sq:     69750,  // Beitragsbemessungsgrenze KV/PV 2026, € p.a. (GKV-Beitragsbemessungsgrenze 2026)
+  kv_bbg_frei_bonus:   18,  // Aufkommensgewinn kv_bbg_frei bei kv=17,5 %, Mrd. €
+  kv_kapital_bonus:     8,  // Aufkommensgewinn kv_kapital bei kv=17,5 %, Mrd. €
 };
 
 // Verwaltungskosten-Quoten (% des jeweiligen Aufkommens)
@@ -128,9 +145,9 @@ const PRESETS = {
     synthetisch: false, abgeltung: 25,
     kst: 15, gewst: 14, gewst_aus: false,
     mwst: 19, mwst_erm: 7,
-    co2: 55, klimageld: true,
+    co2: 65, klimageld: true,
     erb: 20, betriebs: true, boden: 0.4, verm: 0, zucman: 0,
-    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
+    rv: 18.6, kv: 17.5, alpf: 6.2, buergerv: false, bbg: 101400,
     bg: 563, kg: 259, neg_est: false, kleine_st: true,
     kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
     pkv_abschaffen: false, kv_kapital: false, kv_bbg_frei: false, anzahl_kv: 95, praevention: 0, bge: 0
@@ -152,9 +169,9 @@ const PRESETS = {
     synthetisch: true, abgeltung: 25,
     kst: 25, gewst: 0, gewst_aus: true,
     mwst: 19, mwst_erm: 7,
-    co2: 55, klimageld: true,
+    co2: 65, klimageld: true,
     erb: 10, betriebs: true, boden: 0.4, verm: 0, zucman: 0,
-    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
+    rv: 18.6, kv: 17.5, alpf: 6.2, buergerv: false, bbg: 101400,
     bg: 563, kg: 255, neg_est: false, kleine_st: false,
     kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
     pkv_abschaffen: false, kv_kapital: false, kv_bbg_frei: false, anzahl_kv: 95, praevention: 0, bge: 0
@@ -178,7 +195,7 @@ const PRESETS = {
     mwst: 19, mwst_erm: 7,
     co2: 100, klimageld: true,
     erb: 30, betriebs: false, boden: 1.5, verm: 0, zucman: 0,
-    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
+    rv: 18.6, kv: 17.5, alpf: 6.2, buergerv: false, bbg: 101400,
     bg: 600, kg: 280, neg_est: false, kleine_st: false,
     kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
     pkv_abschaffen: false, kv_kapital: false, kv_bbg_frei: false, anzahl_kv: 95, praevention: 0, bge: 0
@@ -196,14 +213,21 @@ const PRESETS = {
     pkv_abschaffen: true, kv_kapital: true, kv_bbg_frei: true, anzahl_kv: 30, praevention: 8, bge: 0
   },
   koalition27: {
-    freibetrag: 13000, eingang: 12, spitze: 44, grenze: 290000,
+    // Koalitionsausschuss-Einigung 01.07.2026 (schwarz-rote Koalition), ESt-Reform wirksam 1.1.2027.
+    // freibetrag/grenze/spitze: reale Einigung — Grundfreibetrag 1. Stufe Richtung 12.900 € (Zielwert 2028),
+    // Tarif zwischen 17.800–70.600 € abgeflacht, ab 250.000 € 45 %, ab 280.000 € 47 % (Reichensteuer).
+    // Modell-Limitation: estTarif() kennt nur EINEN Spitzensatz/EINE Grenze (wie schon bei status_quo als
+    // reine Top-Bracket-Näherung modelliert) — hier als grenze:280000/spitze:47 angenähert; die separate
+    // 45%-Zwischenstufe (250–280 Tsd. €) und die Minijob-Pauschalsteuer-Anhebung (2→5 %) sind NICHT abgebildet.
+    // KSt-Senkung (15→10 % ab 2028, 1 PP/Jahr bis 2032) hat 2027 noch nicht begonnen → kst/gewst wie status_quo.
+    freibetrag: 12900, eingang: 12, spitze: 47, grenze: 280000,
     synthetisch: false, abgeltung: 25,
-    kst: 13, gewst: 12, gewst_aus: false,
+    kst: 15, gewst: 14, gewst_aus: false,
     mwst: 19, mwst_erm: 7,
     co2: 65, klimageld: true,
     erb: 20, betriebs: true, boden: 0.4, verm: 0, zucman: 0,
-    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
-    bg: 550, kg: 259, neg_est: false, kleine_st: true,
+    rv: 18.6, kv: 17.5, alpf: 6.2, buergerv: false, bbg: 101400,
+    bg: 563, kg: 259, neg_est: false, kleine_st: true,
     kapitalquote: 10, rendite_fonds: 7, startjahr: 2024,
     pkv_abschaffen: false, kv_kapital: false, kv_bbg_frei: false, anzahl_kv: 95, praevention: 3, bge: 0
   },
@@ -219,7 +243,7 @@ const PRESETS = {
     mwst: 22, mwst_erm: 7,
     co2: 80, klimageld: false,
     erb: 30, betriebs: false, boden: 1.0, verm: 0, zucman: 0,
-    rv: 18.6, kv: 16.3, alpf: 6.2, buergerv: false, bbg: 90000,
+    rv: 18.6, kv: 17.5, alpf: 6.2, buergerv: false, bbg: 101400,
     bg: 0, kg: 255, neg_est: false, kleine_st: false,
     kapitalquote: 0, rendite_fonds: 7, startjahr: 2020,
     pkv_abschaffen: false, kv_kapital: false, kv_bbg_frei: false, anzahl_kv: 95, praevention: 0, bge: 1200
@@ -374,17 +398,17 @@ const TOOLTIPS = {
   eingang: {
     title: "Eingangssteuersatz",
     text: "Grenzsteuersatz auf den ersten Euro über dem Freibetrag. Im § 32a-Formeltarif quadratisch steigend — kein harter Knick. ifo (Blömer/Fuest/Peichl 2025): 'Mittelstandsbauch' entsteht, wenn Eingangssatz zu nah am Spitzensatz liegt.",
-    quelle: "§ 32a Abs. 1 Nr. 2 EStG · 2025: 14% · ifo Schnelldienst 01/2025"
+    quelle: "§ 32a Abs. 1 Nr. 2 EStG · 2026: 14% · ifo Schnelldienst 01/2025"
   },
   spitze: {
     title: "Spitzensteuersatz",
-    text: "42% ab ~66.760 € (Eckwert), 45% ab 277.826 € (Reichensteuer). DIW/Bach: Erhöhung auf 49–52% kaum Aufkommensverlust, hoher Verteilungseffekt. ifo/Fuest: ab ~55% sinkt Aufkommen durch Verhaltensreaktion (Laffer-Kurve sichtbar im Modell).",
-    quelle: "§ 32a Nr. 4+5 EStG · Piketty/Saez/Stantcheva (2014) AER · ifo Schnelldienst 01/2025"
+    text: "42% ab 69.879 € (Eckwert 2026), 45% ab 277.826 € (Reichensteuer). Koalitionsausschuss 01.07.2026: 42%-Zone soll bis 70.600 € abgeflacht werden, ab 2027 zusätzlich 45% ab 250.000 € und 47% ab 280.000 € (im Modell nicht als eigene Zwischenstufe abbildbar, s. Preset „Koalition 2027\"). DIW/Bach: Erhöhung auf 49–52% kaum Aufkommensverlust, hoher Verteilungseffekt. ifo/Fuest: ab ~55% sinkt Aufkommen durch Verhaltensreaktion (Laffer-Kurve sichtbar im Modell).",
+    quelle: "§ 32a Nr. 4+5 EStG · 2026: 69.879 € · Koalitionsausschuss 01.07.2026 · Piketty/Saez/Stantcheva (2014) AER"
   },
   grenze: {
     title: "Einkommen ab Spitzensatz",
-    text: "Ab diesem Brutto greift der volle Spitzensatz. 2025: 277.826 €. Das Modell skaliert alle Tarifzonen proportional zu diesem Wert — Änderungen simulieren eine Verschiebung des gesamten Progressionsverlaufs.",
-    quelle: "§ 32a Abs. 1 Nr. 5 EStG · 2025: 277.826 € · BMF Steuerschätzung 2025"
+    text: "Ab diesem Brutto greift der volle Spitzensatz. 2026: 277.826 €. Das Modell skaliert alle Tarifzonen proportional zu diesem Wert — Änderungen simulieren eine Verschiebung des gesamten Progressionsverlaufs.",
+    quelle: "§ 32a Abs. 1 Nr. 5 EStG · 2026: 277.826 € · BMF"
   },
   synthetisch: {
     title: "Synthetisch vs. Dual",
@@ -398,7 +422,7 @@ const TOOLTIPS = {
   },
   kst: {
     title: "Körperschaftsteuer",
-    text: "Steuer auf Gewinne von Kapitalgesellschaften. KSt (15%) + Soli + GewSt (~14%) = ~30% Gesamtbelastung. ifo/Fuest (2025): Senkung auf 25% würde Investitionen signifikant steigern. Meta-Analyse Gechert/Heimberger (2022): Effekte kleiner als behauptet. SVR (Neumeier 2025): −0,5% Investitionen je PP KSt-Senkung. Koalitionsvertrag 2025: −5 PP bis 2033 (5×1 PP ab 2028) → Investitionsimpuls ~+25 Mrd. €/Jahr laut SVR.",
+    text: "Steuer auf Gewinne von Kapitalgesellschaften. KSt (15%) + Soli + GewSt (~14%) = ~30% Gesamtbelastung. ifo/Fuest (2025): Senkung auf 25% würde Investitionen signifikant steigern. Meta-Analyse Gechert/Heimberger (2022): Effekte kleiner als behauptet. SVR (Neumeier 2025): −0,5% Investitionen je PP KSt-Senkung. Investitionssofortprogramm 2025: KSt sinkt ab 2028 in 5 Jahresschritten (1 PP/Jahr) von 15% auf 10% bis 2032 → Investitionsimpuls ~+25 Mrd. €/Jahr laut SVR.",
     quelle: "§ 23 KStG · Blömer/Fuest/Peichl ifo 01/2025 · Gechert/Heimberger 2022 · Neumeier SVR Arbeitspapier 03/2025 · Koalitionsvertrag 2025"
   },
   gewst: {
@@ -423,8 +447,8 @@ const TOOLTIPS = {
   },
   co2: {
     title: "CO₂-Preis (BEHG)",
-    text: "Nationaler Emissionshandel (BEHG) für Wärme und Verkehr. EU-ETS deckt Industrie/Strom separat. Emissionselastizität: −0,30 (EWI/DIW). Klima-Konsens: höherer CO₂-Preis ist effizientestes Klimainstrument, wenn sozial ausgeglichen (Klimageld). Pro-Kopf-Klimageld: bei 55 €/t ~150 €/Person/Jahr, bei 100 €/t ~190 €/Person/Jahr, bei 150 €/t ~250 €/Person/Jahr. IMK Policy-Brief 161 (Endres 2023): CO₂-Last trifft D1 relativ stärker (~4 % des Einkommens vs. ~1 % bei D10c) — Pro-Kopf-Rückzahlung macht Gesamteffekt für D1–D4 positiv.",
-    quelle: "BEHG § 10 · 2025: 55 €/t · Edenhofer/PIK 2024 · Endres IMK Policy-Brief 161/2023 · FÖS/Greenpeace 2024"
+    text: "Nationaler Emissionshandel (BEHG) für Wärme und Verkehr. 2026 endet die Festpreisphase (2021–2025); Zertifikate werden erstmals versteigert (Korridor 55–65 €/t, danach 68 €/t). EU-ETS deckt Industrie/Strom separat. Emissionselastizität: −0,30 (EWI/DIW). Klima-Konsens: höherer CO₂-Preis ist effizientestes Klimainstrument, wenn sozial ausgeglichen (Klimageld). Pro-Kopf-Klimageld: bei 65 €/t ~170 €/Person/Jahr, bei 100 €/t ~190 €/Person/Jahr, bei 150 €/t ~250 €/Person/Jahr. IMK Policy-Brief 161 (Endres 2023): CO₂-Last trifft D1 relativ stärker (~4 % des Einkommens vs. ~1 % bei D10c) — Pro-Kopf-Rückzahlung macht Gesamteffekt für D1–D4 positiv.",
+    quelle: "BEHG § 10 · 2026: 55–65 €/t (Versteigerung), danach 68 €/t · Edenhofer/PIK 2024 · Endres IMK Policy-Brief 161/2023"
   },
   klimageld: {
     title: "Klimageld (Pro-Kopf-Rückzahlung)",
@@ -453,18 +477,18 @@ const TOOLTIPS = {
   },
   rv: {
     title: "Rentenversicherungsbeitrag",
-    text: "AN+AG je hälftig. Nur bis BBG (90.600 € West 2025) fällig — wirkt regressiv. SVR-Projektion: ohne Reform steigt Beitragssatz bis 2045 auf ~25%. Generationenkapital (Rentenpaket II 2024): 12 Mrd./Jahr in Staatsfonds ab 2024.",
-    quelle: "§ 158 SGB VI · 2025: 18,6% · BBG 90.600 € · Rentenpaket II BT-Drs. 20/10749 · DRV"
+    text: "AN+AG je hälftig. Nur bis BBG (101.400 € 2026) fällig — wirkt regressiv. SVR-Projektion: ohne Reform steigt Beitragssatz bis 2045 auf ~25%. Generationenkapital (Rentenpaket II 2024): 12 Mrd./Jahr in Staatsfonds ab 2024.",
+    quelle: "§ 158 SGB VI · 2026: 18,6% · BBG 101.400 € · Rentenpaket II BT-Drs. 20/10749 · DRV"
   },
   kv: {
     title: "Krankenversicherungsbeitrag",
-    text: "GKV-Beitrag inkl. Zusatzbeitrag (~1,7%). BBG: 66.150 € (2025). Demografiedruck: GKV-Finanzierungslücke ~50 Mrd. bis 2030 (GKV-SV). Bürgerversicherung würde Basis verbreitern. PKV-Abschaffung: per Saldo leicht negativ (Mehrausgaben > Mehreinnahmen).",
-    quelle: "§ 241 SGB V · 2025: 16,3% · GKV-SV Jahresbericht 2025 · BMG Kassenstatistik"
+    text: "GKV-Beitrag (14,6%) inkl. Ø-Zusatzbeitrag (2,9% 2026). BBG: 69.750 € (2026). Demografiedruck: GKV-Finanzierungslücke ~50 Mrd. bis 2030 (GKV-SV). Bürgerversicherung würde Basis verbreitern. PKV-Abschaffung: per Saldo leicht negativ (Mehrausgaben > Mehreinnahmen).",
+    quelle: "§ 241 SGB V · 2026: 17,5% (14,6% + Ø 2,9%) · GKV-SV Jahresbericht 2026 · BMG Kassenstatistik"
   },
   alpf: {
     title: "Arbeitslosen- + Pflegeversicherung",
-    text: "ALV: 2,6% bis BBG 90.600 €. Pflegeversicherung: 3,6% (Kinderlose +0,6%) bis BBG 66.150 €. Pflegeversicherung unter massivem Reformdruck: Pflegebedürftige wachsen demografisch stark. Koalitionsvertrag 2025: Pflegereform für 2026 angekündigt.",
-    quelle: "§ 341 SGB III · § 55 SGB XI · 2025: 6,2% · Koalitionsvertrag CDU/SPD 2025 · BMG"
+    text: "ALV: 2,6% bis BBG 101.400 €. Pflegeversicherung: 3,6% (Kinderlose +0,6%) bis BBG 69.750 €. Pflegeversicherung unter massivem Reformdruck: Pflegebedürftige wachsen demografisch stark. Koalitionsvertrag 2025: Pflegereform für 2026 angekündigt.",
+    quelle: "§ 341 SGB III · § 55 SGB XI · 2026: 6,2% · Koalitionsvertrag CDU/SPD 2025 · BMG"
   },
   buergerv: {
     title: "Bürgerversicherung",
@@ -473,8 +497,8 @@ const TOOLTIPS = {
   },
   bg: {
     title: "Bürgergeld-Regelsatz",
-    text: "563 €/Monat für Alleinstehende (2025). ~5,5 Mio. Bedarfsgemeinschaften. ifo/Peichl (2025): Schlüsselreform ist METR-Senkung (Anrechnung 80% → 60%), nicht Regelsatz selbst. Simulation zeigt: METR D1 liegt bei 80%+ — stärkstes Arbeitsmarkthemmnis. ifo Forschungsbericht 159 (2025): Reformvariante mit 60% Anrechnungsquote senkt D1-METR auf ~64% und könnte das Arbeitsangebot im untersten Dezil spürbar steigern.",
-    quelle: "§ 20 SGB II · 2025: 563 € · Blömer/Fuest/Peichl ifo 01/2025 · ifo Forschungsbericht 159/2025 · ifo/ZEW METR-Simulation 2024"
+    text: "563 €/Monat für Alleinstehende (2026, Nullrunde ggü. 2025 — Regelsätze unverändert). Ab 1.7.2026 schrittweise in „Grundsicherungsgeld\" umbenannt, mit strengerem Vermittlungsvorrang; Regelsatz-Höhe bleibt davon unberührt. ~5,5 Mio. Bedarfsgemeinschaften. ifo/Peichl (2025): Schlüsselreform ist METR-Senkung (Anrechnung 80% → 60%), nicht Regelsatz selbst. Simulation zeigt: METR D1 liegt bei 80%+ — stärkstes Arbeitsmarkthemmnis. ifo Forschungsbericht 159 (2025): Reformvariante mit 60% Anrechnungsquote senkt D1-METR auf ~64% und könnte das Arbeitsangebot im untersten Dezil spürbar steigern.",
+    quelle: "§ 20 SGB II · 2026: 563 € (Nullrunde) · Grundsicherungsgeld-Reform ab 1.7.2026 · Blömer/Fuest/Peichl ifo 01/2025 · ifo Forschungsbericht 159/2025"
   },
   kg: {
     title: "Kindergeld",
@@ -524,7 +548,7 @@ const TOOLTIPS = {
   bbg: {
     title: "Beitragsbemessungsgrenze (BBG)",
     text: "Bis zu dieser Einkommenshöhe werden SV-Beiträge fällig — darüber nicht. Wirkt stark regressiv: Wer mehr verdient als die BBG, zahlt keinen Grenzanteil mehr. Erhöhung würde Finanzierungsbasis verbreitern und Progressivität erhöhen. DIW: BBG-Anhebung = günstigste Reform zur SV-Finanzierung.",
-    quelle: "§ 6 SGB IV · RV-BBG 2025: 90.600 € · KV-BBG: 66.150 € · DIW Wochenbericht 2025"
+    quelle: "§ 6 SGB IV · RV-BBG 2026: 101.400 € · KV-BBG: 69.750 € · DIW Wochenbericht 2025"
   },
   zucman: {
     title: "Zucman-Mindeststeuer (Milliardäre)",
@@ -652,23 +676,45 @@ const BGE_LABOR_EFF = [0.15, 0.12, 0.09, 0.06, 0.04, 0.025, 0.015, 0.01, 0.005, 
 // Demografische Entwicklung 2025–2041 (Destatis 14. koordinierte Bev.-Vorausberechnung 2021)
 // renten_faktor: Multiplikator auf den RV-Ausgabenanteil (~390 Mrd.) — Basis 1,0 im Jahr 2025
 // altersquotient: Bevölkerung 65+ / Bevölkerung 20–64
-const DEMOGRAFIE_KURVE = [
-  { jahr: 2025, label: '2025–28', renten_faktor: 1.000, altersquotient: 0.350 },
-  { jahr: 2029, label: '2029–32', renten_faktor: 1.060, altersquotient: 0.375 },
-  { jahr: 2033, label: '2033–36', renten_faktor: 1.140, altersquotient: 0.410 },
-  { jahr: 2037, label: '2037–40', renten_faktor: 1.200, altersquotient: 0.445 },
-  { jahr: 2041, label: '2041–44', renten_faktor: 1.250, altersquotient: 0.480 },
-];
+// Jährliche Interpolation zwischen Destatis-Ankerpunkten (14. Bev.-Vorausberechnung 2021)
+// IIFE erzeugt 21 Einträge: 2025–2045, indexierbar via DEMOGRAFIE_KURVE[jahr - 2025]
+const DEMOGRAFIE_KURVE = (() => {
+  const anchors = [
+    { jahr: 2025, renten_faktor: 1.000, altersquotient: 0.350 },
+    { jahr: 2029, renten_faktor: 1.060, altersquotient: 0.375 },
+    { jahr: 2033, renten_faktor: 1.140, altersquotient: 0.410 },
+    { jahr: 2037, renten_faktor: 1.200, altersquotient: 0.445 },
+    { jahr: 2041, renten_faktor: 1.250, altersquotient: 0.480 },
+    { jahr: 2045, renten_faktor: 1.270, altersquotient: 0.492 },
+  ];
+  const result = [];
+  for (let a = 0; a < anchors.length - 1; a++) {
+    const lo = anchors[a], hi = anchors[a + 1];
+    const steps = hi.jahr - lo.jahr;
+    for (let y = 0; y < steps; y++) {
+      const t = y / steps;
+      const jahr = lo.jahr + y;
+      result.push({
+        jahr,
+        label: `${jahr}–${String(jahr + 3).slice(-2)}`,
+        renten_faktor:  +(lo.renten_faktor  + t * (hi.renten_faktor  - lo.renten_faktor )).toFixed(4),
+        altersquotient: +(lo.altersquotient + t * (hi.altersquotient - lo.altersquotient)).toFixed(4),
+      });
+    }
+  }
+  const tail = anchors[anchors.length - 1];
+  result.push({ ...tail, label: '2045–48' });
+  return result;
+})();
 
-// Anfangszustand der Multi-Perioden-Simulation (Periode 0, Jahr 2025)
+// Anfangszustand der Multi-Perioden-Simulation (Periode 0, Jahr 2026)
 const PERIOD_STATE_0 = {
-  bip:              4470,   // Mrd. €  (Destatis VGR 2025, nominal; Bundesbank Feb 2026)
-  schuldenquote:    63.5,   // % BIP   (Maastricht; Bundesbank Feb 2026 — Anstieg von 62,2 % auf 63,5 % durch Sondervermögen)
-  co2_kumulat:      0,      // Mio. t CO₂e kumuliert seit 2025
-  lohnbasis_faktor: 1.0,    // Arbeitsmarkt-Zustandsindex (1,0 = Status quo 2025)
+  bip:              4622,   // Mrd. €  (BIP 2026, geschätzt — s. BASIS_MAKRO.bip)
+  schuldenquote:    65.3,   // % BIP   (geschätzt: 63,5 % Ende 2025 (Bundesbank) + ~180 Mrd. € Neuverschuldung 2026 inkl. Sondervermögen ÷ BIP 2026 — kein offizieller Maastricht-Wert für 2026 verfügbar)
+  co2_kumulat:      0,      // Mio. t CO₂e kumuliert seit Periode 0
+  lohnbasis_faktor: 1.0,    // Arbeitsmarkt-Zustandsindex (1,0 = Status quo 2026)
   renten_faktor:    1.0,    // wird per Periode aus DEMOGRAFIE_KURVE gesetzt
 };
-
 // Wissenschaftliche Zukunftsszenarien — vordefinierte Parameter-Trajektorien für alle 5 Perioden
 const ZUKUNFTS_SZENARIEN = [
   {
@@ -705,4 +751,4 @@ const ZUKUNFTS_SZENARIEN = [
   },
 ];
 
-export { DEZILE, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };
+export { DEZILE, MPC_DEZIL, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };

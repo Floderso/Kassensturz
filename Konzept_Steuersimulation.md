@@ -34,11 +34,11 @@ Die Struktur folgt dem **statischen Mikrosimulationsansatz**: Ein repräsentativ
 
 | Bereich | Quelle | Jahr |
 |---|---|---|
-| Bundeshaushalt | BMF (bundesfinanzministerium.de) | 2025 |
-| Steueraufkommen | BMF-Steuerschätzung | 2025 |
+| Bundeshaushalt | BMF (bundesfinanzministerium.de) | 2026 |
+| Steueraufkommen | BMF-Steuerschätzung | 2025 (teilw. 2026) |
 | Einkommensverteilung | SOEP / DIW, EU-SILC, IW Verteilungsbericht | 2024/25 |
 | Haushaltsstruktur | Destatis Mikrozensus | 2024 |
-| Sozialversicherung | Rentenversicherung Bund, GKV-Spitzenverband | 2025 |
+| Sozialversicherung | Rentenversicherung Bund, GKV-Spitzenverband | 2026 |
 | Verwaltungskosten | BRH, Normenkontrollrat, Wiss. Dienst BT | div. |
 | Elastizitäten | ZEW, ifo, Saez/Chetty Reviews | 2012–2024 |
 
@@ -197,7 +197,7 @@ Die Simulation zeigt in Echtzeit:
 
 Vorgefertigte "Paper-Szenarien" zum Vergleich:
 
-1. **Status quo 2025** — Deutschland aktuell
+1. **Status quo 2026** — Deutschland aktuell
 2. **Kirchhof-Modell** — Flat Tax 25 %, 4 Steuern
 3. **Synthetisch progressiv** — dein Modell aus den Vorgesprächen
 4. **Nordisches Modell** — hohe MwSt, niedrigere Kapitalsteuer

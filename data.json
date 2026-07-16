@@ -2,14 +2,15 @@
   "meta": {
     "quelle": "kassensturz.org",
     "lizenz": "CC BY 4.0",
-    "stand": "2025-06-14",
+    "stand": "2026-07-15",
     "basis": [
-      "Bundeshaushalt 2025 (BMF)",
+      "Bundeshaushalt 2026 (BMF)",
       "SOEP v40 (DIW)",
       "Destatis Mikrozensus 2024",
       "DINA-DE",
       "DIW Vermögensbericht 2024"
-    ]
+    ],
+    "hinweis": "dezile unverändert ggü. 2025 (keine neuere Verteilungserhebung verfügbar); staatsausgaben_2026: nur verteidigung auf bestätigten 2026-Gesamtstaat-Wert aktualisiert, übrige Posten noch 2025er-Schätzung; steueraufkommen_2026: nur co2_steuer neu kalibriert (Preiskorridor 55–65 €/t), übrige Posten noch 2025er-Schätzung mangels amtlicher Einzelsteuerarten-Aufschlüsselung für 2026"
   },
   "dezile": [
     {
@@ -97,25 +98,25 @@
       "vermoegen_median_eur": 7000000
     }
   ],
-  "staatsausgaben_2025_mrd_eur": {
+  "staatsausgaben_2026_mrd_eur": {
     "soziales_rente_gkv_pflege_buergergeld": 850,
     "gesundheit": 320,
     "bildung": 180,
-    "verteidigung": 90,
+    "verteidigung": 108,
     "infrastruktur": 120,
     "verwaltung": 140,
     "zinsen": 30,
     "sonstiges": 140,
-    "gesamt": 1870
+    "gesamt": 1888
   },
-  "steueraufkommen_2025_mrd_eur": {
+  "steueraufkommen_2026_mrd_eur": {
     "lohnsteuer": 255,
     "einkommensteuer_veranlagt": 90,
     "mehrwertsteuer": 303,
     "koerperschaftsteuer": 45,
     "gewerbesteuer": 75,
     "energiesteuer": 37,
-    "co2_steuer": 18,
+    "co2_steuer": 21,
     "tabaksteuer": 15,
     "grunderwerbsteuer": 16,
     "erbschaftsteuer": 8,
@@ -123,13 +124,13 @@
     "krankenversicherungsbeitraege": 290,
     "arbeitslosenversicherung_pflegeversicherung": 105
   },
-  "makro_2025": {
-    "bip_mrd_eur": 4200,
-    "co2_emissionen_mio_tonnen": 500,
+  "makro_2026": {
+    "bip_mrd_eur": 4622,
+    "co2_emissionen_mio_tonnen": 327,
     "erbschaftsmasse_pro_jahr_mrd_eur": 400,
     "bodenwert_gesamt_mrd_eur": 5000,
     "steuerpflichtiges_vermoegen_ueber_2mio_mrd_eur": 3500,
     "sozialversicherungspflichtige_lohnsumme_mrd_eur": 1750,
-    "rentenversicherung_gesamtausgaben_mrd_eur": 430
+    "rentenversicherung_gesamtausgaben_mrd_eur": 449
   }
 }

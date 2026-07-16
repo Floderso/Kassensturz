@@ -31,9 +31,9 @@ const FORMEL_QUELLEN_BERECHNE = {
     note:   '70/30-Split grob; feiner auflösbar mit EVS-Einzeldaten. VAT-Gap-Korrekturfaktor 0,963 (CASE 2024)'
   },
   co2_emissionen: {
-    formel: 'Emissionen = 500 × max(0,4; min(1,1; 1 + ε_CO₂ × (p − 55)/100))',
+    formel: 'Emissionen = 327 × max(0,4; min(1,1; 1 + ε_CO₂ × (p − 65)/100))',
     ref:    'BEHG § 10 · EWI/DIW BEHG-Evaluation 2023 · Edenhofer/PIK 2024',
-    note:   'Basis 500 Mio. t im Bepreisungsbereich; ε_CO₂ = −0,30 (kurzfristig konservativ)'
+    note:   'Basis 327 Mio. t im Bepreisungsbereich; ε_CO₂ = −0,30 (kurzfristig konservativ); Referenzpreis 65 €/t = Status quo 2026 (Ende Festpreisphase, Versteigerungskorridor 55–65 €)'
   },
   erbschaft: {
     formel: 'Erb_auf = Masse_top × Satz_eff + Masse_unten × min(Satz,15%)/2',
@@ -47,8 +47,8 @@ const FORMEL_QUELLEN_BERECHNE = {
   },
   sv_beitraege: {
     formel: 'SV = Lohnsumme_sv × Satz%  (nur bis BBG)',
-    ref:    '§ 158 SGB VI · § 241 SGB V · § 341 SGB III · § 55 SGB XI · DRV Beitragssätze 2025',
-    note:   'BBG-Lohnsummen-Faktor: +12 % je 90 k € BBG-Erhöhung (12 % der sozialversicherungspflichtigen Löhne)'
+    ref:    '§ 158 SGB VI · § 241 SGB V · § 341 SGB III · § 55 SGB XI · DRV/GKV-SV Beitragssätze 2026',
+    note:   'BBG-Lohnsummen-Faktor: +12 % je 101,4 k € BBG-Erhöhung (12 % der sozialversicherungspflichtigen Löhne)'
   },
   verwaltungskosten: {
     formel: 'Admin = ∑ Aufkommen_i × Quote_i  (ADMIN_QUOTE je Steuer)',
@@ -157,8 +157,8 @@ function berechne(params, zustand = null) {
     // Netto nach ESt und SV (SV-Basis = Arbeitseinkommen, K3-Vorkorrektur hier vereinfacht)
     const est_d = est_pro_dezil.find(x => x.d === d.d).est;
     const arbeit_mwst = d.brutto_adj * (1 - d.kapital);
-    const bbg_kv_mwst = params.kv_bbg_frei ? Infinity : Math.round((params.bbg ?? 90000) * (BASIS_MAKRO.kv_bbg_kv_sq / 90000));
-    const sv_d = Math.min(arbeit_mwst, params.bbg ?? 90000) * (params.rv + params.alpf * 0.42) / 100 * 0.5
+    const bbg_kv_mwst = params.kv_bbg_frei ? Infinity : Math.round((params.bbg ?? 101400) * (BASIS_MAKRO.kv_bbg_kv_sq / 101400));
+    const sv_d = Math.min(arbeit_mwst, params.bbg ?? 101400) * (params.rv + params.alpf * 0.42) / 100 * 0.5
                + Math.min(arbeit_mwst, bbg_kv_mwst) * (params.kv + params.alpf * 0.58) / 100 * 0.5;
     const netto = d.brutto_adj - est_d - sv_d;
     const konsum = netto * d.konsum;
@@ -171,7 +171,7 @@ function berechne(params, zustand = null) {
   mwst_auf *= 0.963;
 
   // ---------- 5. CO2 ----------
-  const co2_factor = 1 + ELAST.co2 * ((params.co2 - 55) / 100);
+  const co2_factor = 1 + ELAST.co2 * ((params.co2 - 65) / 100);
   const emissionen = BASIS_MAKRO.emissions * Math.max(0.4, Math.min(1.1, co2_factor));
   const co2_auf = emissionen * params.co2 / 1000;
   const klimageld_auszahlung = params.klimageld ? co2_auf * 0.7 : 0; // 70% zurück als Klimageld
@@ -184,15 +184,15 @@ function berechne(params, zustand = null) {
   const verm_auf  = BASIS_MAKRO.verm_basis  * params.verm  / 100;
 
   // ---------- 7. SV-BEITRÄGE ----------
-  const bbg = params.bbg ?? 90000;
-  // BBG-Erhöhung: ~12% der sozialversicherungspflichtigen Löhne liegt zwischen 90k und 160k
-  const bbg_lohnsumme_factor = 1 + Math.max(0, (bbg - 90000) / 90000) * 0.12;
+  const bbg = params.bbg ?? 101400;
+  // BBG-Erhöhung: ~12% der sozialversicherungspflichtigen Löhne liegt zwischen 101,4k und 170k
+  const bbg_lohnsumme_factor = 1 + Math.max(0, (bbg - 101400) / 101400) * 0.12;
   const lohnsumme_sv = BASIS_MAKRO.lohnsumme_sv * lohnbasis_faktor * bbg_lohnsumme_factor;
   const buerger_boost = params.buergerv ? 1.15 : 1.0;
   const rv_auf = lohnsumme_sv * params.rv / 100;
   // kv_bbg_frei/kv_kapital: Aufkommensschätzung skaliert mit aktuellem KV-Satz (ifo 159/2025, DIW)
-  const kv_bbg_frei_bonus = params.kv_bbg_frei ? BASIS_MAKRO.kv_bbg_frei_bonus * (params.kv / 16.3) : 0;
-  const kv_kapital_bonus  = params.kv_kapital  ? BASIS_MAKRO.kv_kapital_bonus  * (params.kv / 16.3) : 0;
+  const kv_bbg_frei_bonus = params.kv_bbg_frei ? BASIS_MAKRO.kv_bbg_frei_bonus * (params.kv / 17.5) : 0;
+  const kv_kapital_bonus  = params.kv_kapital  ? BASIS_MAKRO.kv_kapital_bonus  * (params.kv / 17.5) : 0;
   const kv_auf = lohnsumme_sv * params.kv / 100 * buerger_boost + kv_bbg_frei_bonus + kv_kapital_bonus;
   const al_auf = lohnsumme_sv * params.alpf / 100;
 
@@ -364,8 +364,8 @@ function berechne(params, zustand = null) {
     const gs_est = grenzsteuersatz(arbeit, params.freibetrag, params.eingang, params.spitze, params.grenze);
     // K3: Separate BBG für KV/PV (62.100 €) und RV/AL (params.bbg).
     // RV+AL Grenzbelastung fällt weg sobald Arbeitseinkommen ≥ RV-BBG
-    const bbg_rv_m = params.bbg ?? 90000;
-    const bbg_kv_m = Math.round(bbg_rv_m * (BASIS_MAKRO.kv_bbg_kv_sq / 90000));
+    const bbg_rv_m = params.bbg ?? 101400;
+    const bbg_kv_m = Math.round(bbg_rv_m * (BASIS_MAKRO.kv_bbg_kv_sq / 101400));
     const sv_grenz_rv = arbeit < bbg_rv_m ? (params.rv + params.alpf * 0.42) / 100 * 0.5 : 0;
     // kv_bbg_frei: kein Deckel → Grenzbelastung gilt bei jedem Einkommensniveau
     const sv_grenz_kv = (params.kv_bbg_frei || arbeit < bbg_kv_m) ? (params.kv + params.alpf * 0.58) / 100 * 0.5 : 0;

@@ -32,8 +32,8 @@ const FORMEL_QUELLEN_VERT = {
   },
   berechneNettoSQ: {
     formel: 'Netto_SQ = Brutto − ESt(SQ) − SV(SQ) − MwSt(SQ) − CO₂(SQ) + Klimageld(SQ) + Transfers(SQ)',
-    ref:    'PRESETS.status_quo (data.js) · § 32a EStG 2025 · § 158 SGB VI · § 241 SGB V',
-    note:   'Referenzpunkt für alle Δ-Berechnungen; Parameter: freibetrag 12.084, eingang 14 %, spitze 45 %'
+    ref:    'PRESETS.status_quo (data.js) · § 32a EStG 2026 · § 158 SGB VI · § 241 SGB V',
+    note:   'Referenzpunkt für alle Δ-Berechnungen; Parameter: freibetrag 12.348, eingang 14 %, spitze 45 %'
   },
   berechneDezilDelta: {
     formel: 'Δ_i = Netto_neu_i − Netto_SQ_i',
@@ -94,9 +94,9 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg) {
     const brutto = d.brutto_adj;
     // K3: SV nur auf Arbeitseinkommen (nicht Kapital); KV-BBG (62.100 €) < RV/AL-BBG
     const arbeit_dez = brutto * (1 - d.kapital);
-    const bbg_rv_dez = params.bbg ?? 90000;
+    const bbg_rv_dez = params.bbg ?? 101400;
     // kv_bbg_frei: kein KV-Beitragsdeckel → gesamtes Arbeitseinkommen KV-pflichtig
-    const bbg_kv_dez = params.kv_bbg_frei ? Infinity : Math.round(bbg_rv_dez * (BASIS_MAKRO.kv_bbg_kv_sq / 90000));
+    const bbg_kv_dez = params.kv_bbg_frei ? Infinity : Math.round(bbg_rv_dez * (BASIS_MAKRO.kv_bbg_kv_sq / 101400));
     const sv_lohn = Math.min(arbeit_dez, bbg_rv_dez) * (params.rv + params.alpf * 0.42) / 100 * 0.5
                   + Math.min(arbeit_dez, bbg_kv_dez) * (params.kv + params.alpf * 0.58) / 100 * 0.5;
     // kv_kapital: Kapitalerträge von GKV-Mitgliedern werden KV-pflichtig (Mieteinnahmen, Zinsen, Dividenden)
@@ -112,8 +112,8 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg) {
     // CO₂-Last: Dezil-Anteil am Einkommen × CO₂-Preis × Emissionsreaktion
     // D10a/b/c: sinkender CO2-Anteil am Einkommen, aber absolut höher
     const co2_share = [0.040, 0.038, 0.036, 0.034, 0.032, 0.030, 0.028, 0.025, 0.022, 0.018, 0.015, 0.010];
-    const co2_factor_dez = Math.max(0.4, Math.min(1.1, 1 + ELAST.co2 * (params.co2 - 55) / 100));
-    const co2_last = brutto * co2_share[i] * (params.co2 / 55) * co2_factor_dez;
+    const co2_factor_dez = Math.max(0.4, Math.min(1.1, 1 + ELAST.co2 * (params.co2 - 65) / 100));
+    const co2_last = brutto * co2_share[i] * (params.co2 / 65) * co2_factor_dez;
     // Klimageld zurück (gleichverteilt pro Kopf)
     const total_hh = DEZILE.reduce((a,d)=>a+d.anzahl,0);
     const klimageld_per_hh = klima * 1000 / total_hh;
@@ -150,8 +150,8 @@ function berechneNettoSQ(d) {
   const kapital_sq = brutto * d.kapital;
   const est = estTarif(arbeit_sq, sq.freibetrag, sq.eingang, sq.spitze, sq.grenze)
             + kapital_sq * sq.abgeltung / 100;
-  const sv = Math.min(arbeit_sq, 90600) * (18.6 + 2.6) / 100 * 0.5   // RV-BBG 2025: 90.600 €
-           + Math.min(arbeit_sq, 66150) * (16.3 + 3.6) / 100 * 0.5;  // KV-BBG 2025: 66.150 €
+  const sv = Math.min(arbeit_sq, 101400) * (18.6 + 2.6) / 100 * 0.5   // RV-BBG 2026: 101.400 €
+           + Math.min(arbeit_sq, 69750) * (17.5 + 3.6) / 100 * 0.5;   // KV-BBG 2026: 69.750 €; KV 17.5% = 14,6% allgemein + Ø 2,9% Zusatzbeitrag
   const vornetto = brutto - est - sv;
   const konsum = vornetto * d.konsum;
   const mwst = konsum * (0.7 * sq.mwst / (100 + sq.mwst) + 0.3 * sq.mwst_erm / (100 + sq.mwst_erm));
