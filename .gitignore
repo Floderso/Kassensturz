@@ -22,3 +22,10 @@ marketing/
 # Generierte Screenshots / Assets
 docs/*.png
 docs/*.jpg
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
