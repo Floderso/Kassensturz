@@ -112,15 +112,27 @@ function setParams(p) {
   document.getElementById('rente_grenze').value        = p.rente_grenze        ?? 35000;
 }
 
+// Deutsches Zahlenformat für alles, was der Nutzer als Zahl liest:
+// Dezimalkomma, Tausenderpunkt, typografisches Minus (U+2212).
+// NICHT für CSS-Breiten oder SVG-Koordinaten verwenden — die brauchen
+// den englischen Dezimalpunkt.
+function fmtDE(x, dec = 1) {
+  if (!Number.isFinite(x)) return '—';
+  return new Intl.NumberFormat('de-DE', {
+    minimumFractionDigits: dec,
+    maximumFractionDigits: dec,
+  }).format(x).replace('-', '−');
+}
+
 function fmtEUR(x) {
-  if (Math.abs(x) >= 1000) return (x/1000).toFixed(1).replace('.',',') + ' Bio.';
-  if (Math.abs(x) >= 1)    return x.toFixed(0) + ' Mrd.';
-  return (x*1000).toFixed(0) + ' Mio.';
+  if (Math.abs(x) >= 1000) return fmtDE(x / 1000, 1) + ' Bio.';
+  if (Math.abs(x) >= 1)    return fmtDE(x, 0) + ' Mrd.';
+  return fmtDE(x * 1000, 0) + ' Mio.';
 }
 
 function fmtSignedMrd(x) {
   const sign = x >= 0 ? '+' : '−';
-  return sign + Math.abs(x).toFixed(1) + ' Mrd.';
+  return sign + fmtDE(Math.abs(x), 1) + ' Mrd.';
 }
 
 // Referenz: Status Quo
@@ -184,11 +196,11 @@ function render() {
   document.getElementById('v_mwst_erm').textContent = p.mwst_erm + ' %';
   document.getElementById('v_co2').textContent = p.co2 + ' €/t';
   document.getElementById('v_erb').textContent = p.erb + ' %';
-  document.getElementById('v_boden').textContent = p.boden.toFixed(1) + ' %';
-  document.getElementById('v_verm').textContent = p.verm.toFixed(1) + ' %';
-  document.getElementById('v_rv').textContent = p.rv.toFixed(1) + ' %';
-  document.getElementById('v_kv').textContent = p.kv.toFixed(1) + ' %';
-  document.getElementById('v_alpf').textContent = p.alpf.toFixed(1) + ' %';
+  document.getElementById('v_boden').textContent = fmtDE(p.boden, 1) + ' %';
+  document.getElementById('v_verm').textContent = fmtDE(p.verm, 1) + ' %';
+  document.getElementById('v_rv').textContent = fmtDE(p.rv, 1) + ' %';
+  document.getElementById('v_kv').textContent = fmtDE(p.kv, 1) + ' %';
+  document.getElementById('v_alpf').textContent = fmtDE(p.alpf, 1) + ' %';
   document.getElementById('v_bge').textContent = p.bge > 0 ? p.bge + ' €/Monat' : 'aus';
   document.getElementById('v_bg').textContent = p.bg + ' €';
   document.getElementById('v_kg').textContent = p.kg + ' €';
@@ -198,7 +210,7 @@ function render() {
   document.getElementById('v_anzahl_kv').textContent = p.anzahl_kv;
   document.getElementById('v_praevention').textContent = p.praevention + ' Mrd.';
   document.getElementById('v_bbg').textContent = (p.bbg / 1000).toFixed(0) + '.000 €';
-  document.getElementById('v_zucman').textContent = p.zucman.toFixed(1) + ' %';
+  document.getElementById('v_zucman').textContent = fmtDE(p.zucman, 1) + ' %';
 
   // Abgeltungsteuer-Row nur zeigen wenn nicht synthetisch
   document.getElementById('row_abgeltung').style.opacity = p.synthetisch ? 0.3 : 1;
@@ -226,17 +238,20 @@ function render() {
   admDelta.className = 'kpi-delta ' + (dA < -1 ? 'good' : dA > 1 ? 'bad' : 'neutral');
 
   document.getElementById('kpi_nst').textContent = r.nst;
-  document.getElementById('kpi_arb').textContent = r.behavior.labor.toFixed(1);
+  document.getElementById('kpi_arb').textContent = fmtDE(r.behavior.labor, 1);
   const arbDelta = document.getElementById('kpi_arb_d');
   const dArb = r.behavior.labor - 100;
-  arbDelta.textContent = (dArb >= 0 ? '+' : '') + dArb.toFixed(1) + ' Index';
+  arbDelta.textContent = (dArb >= 0 ? '+' : '') + fmtDE(dArb, 1) + ' Index';
   arbDelta.className = 'kpi-delta ' + (dArb > 1 ? 'good' : dArb < -1 ? 'bad' : 'neutral');
 
   // KPI card tone backgrounds
   function setKpiTone(id, tone) {
     const el = document.getElementById(id);
     if (!el) return;
-    el.className = 'kpi' + (tone ? ' tone-' + tone : '');
+    // classList statt className: eine Vollzuweisung löschte hier bei jedem
+    // Render alle übrigen Klassen der Kachel mit (u.a. kpi-secondary).
+    el.classList.remove('tone-good', 'tone-bad', 'tone-warn', 'tone-neu');
+    if (tone) el.classList.add('tone-' + tone);
   }
   const saldoTone = r.saldo > 0 ? 'good' : r.saldo > -50 ? 'warn' : 'bad';
   setKpiTone('kpi_card_saldo', saldoTone);
@@ -671,7 +686,7 @@ function renderChallenges(r) {
 
     const badge = allDone
       ? `<div class="challenge-done-badge" style="color:${slot.accent};border-color:${slot.accent}">✓ Geschafft!</div>`
-      : `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px;">${c.subs.filter(s=>s.check(r)).length}/${c.subs.length} Ziele erreicht</div>`;
+      : `<div style="font-family:var(--ff-mono);font-size:var(--fs-micro);color:var(--muted);margin-top:8px;">${c.subs.filter(s=>s.check(r)).length}/${c.subs.length} Ziele erreicht</div>`;
 
     return `<div class="challenge-card${allDone ? ' done' : ''}">
       <div class="challenge-accent-bar" style="background:${slot.accent}"></div>
@@ -746,9 +761,9 @@ function renderWissenschaftsPanel(p) {
   const barsHtml = lager.map(l => `
     <div style="margin-bottom:10px;">
       <div style="display:grid;grid-template-columns:220px 1fr 42px;align-items:center;gap:10px;">
-        <div style="font-family:'DM Mono',monospace;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${l.desc}">${l.label}</div>
+        <div style="font-family:var(--ff-mono);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${l.desc}">${l.label}</div>
         <div class="bar-track"><div class="bar-fill neu" style="width:${l.score}%;background:${l.color};opacity:${l.score > 0 ? 0.8 : 0.2}"></div></div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;text-align:right;">${l.score}%</div>
+        <div style="font-family:var(--ff-mono);font-size:11px;text-align:right;">${l.score}%</div>
       </div>
     </div>`).join('');
 
@@ -981,7 +996,10 @@ Quoten: ESt Arbeit 2,5% · MwSt 1,0% · KSt 4,0% · GewSt 5,0%
 
 // Section toggles (ctrl-section-head + legacy section-title)
 document.querySelectorAll('.ctrl-section-head[data-toggle], .section-title[data-toggle]').forEach(el => {
-  el.addEventListener('click', () => el.classList.toggle('collapsed'));
+  el.addEventListener('click', () => {
+    const zu = el.classList.toggle('collapsed');
+    el.setAttribute('aria-expanded', String(!zu));
+  });
 });
 
 // Visual slider sync
@@ -1149,7 +1167,7 @@ function renderSzenarioVergleich() {
   if (!A || !B) {
     el.style.display = A ? 'block' : 'none';
     if (A && !B) el.innerHTML = `<div class="panel" style="border-top:3px solid var(--accent);padding:16px 20px;display:flex;align-items:center;gap:12px;">
-      <span style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);">Szenario A gespeichert</span>
+      <span style="font-family:var(--ff-mono);font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.1em;color:var(--accent);">Szenario A gespeichert</span>
       <span style="font-size:13px;color:var(--muted);">Klicke „Szenario B" um ein zweites Szenario zu bearbeiten und zu vergleichen.</span>
     </div>`;
     return;
@@ -1178,9 +1196,9 @@ function renderSzenarioVergleich() {
       Math.round(delta).toString());
     return `<tr>
       <td style="padding:6px 12px;font-size:13px;border-bottom:1px solid rgba(42,39,32,0.08)">${m.label}</td>
-      <td style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);border-bottom:1px solid rgba(42,39,32,0.08)">${m.fmt(m.fA)}</td>
-      <td style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--good);border-bottom:1px solid rgba(42,39,32,0.08)">${m.fmt(m.fB)}</td>
-      <td style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--${cls});border-bottom:1px solid rgba(42,39,32,0.08)">${deltaStr}</td>
+      <td style="padding:6px 12px;font-family:var(--ff-mono);font-size:12px;color:var(--accent);border-bottom:1px solid rgba(42,39,32,0.08)">${m.fmt(m.fA)}</td>
+      <td style="padding:6px 12px;font-family:var(--ff-mono);font-size:12px;color:var(--good);border-bottom:1px solid rgba(42,39,32,0.08)">${m.fmt(m.fB)}</td>
+      <td style="padding:6px 12px;font-family:var(--ff-mono);font-size:12px;font-weight:600;color:var(--${cls});border-bottom:1px solid rgba(42,39,32,0.08)">${deltaStr}</td>
     </tr>`;
   }).join('');
 
@@ -1189,10 +1207,10 @@ function renderSzenarioVergleich() {
     <div class="panel-sub">Spalte Δ = B minus A · Grün = Verbesserung nach Szenario B</div>
     <table style="width:100%;border-collapse:collapse;margin-top:12px;">
       <thead><tr>
-        <th style="padding:6px 12px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);border-bottom:2px solid var(--rule)">Kennzahl</th>
-        <th style="padding:6px 12px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);border-bottom:2px solid var(--rule)">Szenario A</th>
-        <th style="padding:6px 12px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--good);border-bottom:2px solid var(--rule)">Szenario B</th>
-        <th style="padding:6px 12px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);border-bottom:2px solid var(--rule)">Δ (B−A)</th>
+        <th style="padding:6px 12px;text-align:left;font-family:var(--ff-mono);font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);border-bottom:2px solid var(--rule)">Kennzahl</th>
+        <th style="padding:6px 12px;text-align:left;font-family:var(--ff-mono);font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.12em;color:var(--accent);border-bottom:2px solid var(--rule)">Szenario A</th>
+        <th style="padding:6px 12px;text-align:left;font-family:var(--ff-mono);font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.12em;color:var(--good);border-bottom:2px solid var(--rule)">Szenario B</th>
+        <th style="padding:6px 12px;text-align:left;font-family:var(--ff-mono);font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);border-bottom:2px solid var(--rule)">Δ (B−A)</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
@@ -1346,7 +1364,8 @@ let perioden_params = Array.from({ length: 5 }, () => ({ ...PRESETS.status_quo }
 let aktivePeriodeIdx = 0;
 
 // Capture hash state BEFORE render() modifies window.location via replaceState
-const _hadInitialHash = !!window.location.hash;
+const _hasSharedState = !!window.location.hash ||
+  new URLSearchParams(window.location.search).has('preset');
 
 computeRef();
 setParams(PRESETS.status_quo);
@@ -1398,14 +1417,30 @@ document.getElementById('save-a-btn').addEventListener('click', () => enterScena
 document.getElementById('save-b-btn').addEventListener('click', () => enterScenarioMode('B'));
 
 // Mobile Controls Toggle
+function setReglerSichtbar(sichtbar) {
+  const sidebar = document.getElementById('controls-sidebar');
+  const btn   = document.getElementById('mobile-toggle-btn');
+  const label = document.getElementById('mobile-toggle-label');
+  const icon  = document.getElementById('mobile-toggle-icon');
+  sidebar.classList.toggle('mobile-hidden', !sichtbar);
+  label.textContent = sichtbar ? 'Regler ausblenden' : 'Regler anzeigen';
+  icon.textContent  = sichtbar ? '−' : '+';
+  btn.setAttribute('aria-expanded', String(sichtbar));
+}
+
 document.getElementById('mobile-toggle-btn').addEventListener('click', () => {
   const sidebar = document.getElementById('controls-sidebar');
-  const label = document.getElementById('mobile-toggle-label');
-  const icon = document.getElementById('mobile-toggle-icon');
-  const hidden = sidebar.classList.toggle('mobile-hidden');
-  label.textContent = hidden ? 'Regler anzeigen' : 'Regler ausblenden';
-  icon.textContent = hidden ? '+' : '−';
+  setReglerSichtbar(sidebar.classList.contains('mobile-hidden'));
 });
+
+// Auf dem Telefon starten die Regler eingeklappt. Vorher lag der erste
+// Kennwert bei y≈1100px — man scrollte an 40 Reglern vorbei, bevor ein
+// Ergebnis sichtbar wurde. Eingeklappt steht das Ergebnis oben, und die
+// Lesereihenfolge für Tastatur und Screenreader bleibt unverändert
+// (kein CSS-order, das die sichtbare von der DOM-Folge trennt).
+if (window.matchMedia('(max-width: 600px)').matches) {
+  setReglerSichtbar(false);
+}
 
 document.getElementById('rw-details').addEventListener('toggle', function() {
   const hint = this.querySelector('.rw-hint');
@@ -1423,8 +1458,40 @@ document.getElementById('rw-details').addEventListener('toggle', function() {
 function closeOnboarding() {
   const el = document.getElementById('onboarding-overlay');
   if (el) el.style.display = 'none';
+  setHintergrundInert(false);
   localStorage.setItem('kassensturz_visited_v2', '1');
 }
+
+// ============================================================
+// OVERLAY-BEDIENUNG (Esc, Fokus, Hintergrund)
+// Vorher gab es keinen einzigen keydown-Listener im Projekt:
+// drei Overlays ohne Escape, ohne Fokusfang.
+// ============================================================
+
+// Der Hintergrund wird für Tastatur und Screenreader stillgelegt,
+// solange ein Overlay offen ist.
+function setHintergrundInert(an) {
+  const wrap = document.querySelector('.wrap');
+  const nav  = document.querySelector('.site-nav-bar');
+  [wrap, nav].forEach(el => { if (el) el.inert = an; });
+}
+
+// Gibt das oberste offene Overlay samt seiner Schließfunktion zurück.
+function offenesOverlay() {
+  const ob = document.getElementById('onboarding-overlay');
+  if (ob && ob.style.display !== 'none') return { el: ob, close: closeOnboarding };
+  const csp = document.getElementById('csp-modal');
+  if (csp && csp.style.display !== 'none') return { el: csp, close: closeCardModal };
+  const mod = document.getElementById('mod-overlay');
+  if (mod && mod.classList.contains('open')) return { el: mod, close: closePicker };
+  return null;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const offen = offenesOverlay();
+  if (offen) { e.preventDefault(); offen.close(); }
+});
 
 // Close onboarding by clicking the dark backdrop (not the card itself)
 // Must use setTimeout 0 — overlay element is parsed AFTER this script block
@@ -1446,11 +1513,26 @@ function startWith(preset) {
 }
 
 (function initOnboarding() {
-  // Use _hadInitialHash (captured before render() adds a hash via replaceState)
-  if (!localStorage.getItem('kassensturz_visited_v2') && !_hadInitialHash) {
+  // Use _hasSharedState (captured before render() adds a hash via replaceState)
+  if (!localStorage.getItem('kassensturz_visited_v2') && !_hasSharedState) {
     setTimeout(() => {
       const el = document.getElementById('onboarding-overlay');
-      if (el) el.style.display = 'flex';
+      if (!el) return;
+      // Die Lagezeile übernimmt den Wert der Kachel, die hinter dem Modal
+      // steht. Hart kodiert waren es 85 Mrd., während die Kachel −92,0 zeigte;
+      // REF.saldo weicht davon ebenfalls ab, weil berechne() nicht allein von
+      // den Parametern abhängt. Die angezeigte Zahl ist die einzige, die der
+      // Nutzer gegenprüfen kann — also ist sie die richtige Quelle.
+      const lage = document.getElementById('onboarding-lage');
+      const saldoTxt = document.getElementById('kpi_saldo')?.textContent.trim() || '';
+      if (lage && saldoTxt) {
+        const defizit = saldoTxt.startsWith('−');
+        lage.textContent = (defizit ? 'Das Defizit: ' : 'Der Überschuss: ')
+          + saldoTxt.replace(/^[−+]/, '') + '.';
+      }
+      el.style.display = 'flex';
+      setHintergrundInert(true);
+      el.querySelector('.onboarding-card')?.focus();
     }, 300);
   }
 })();
@@ -1464,9 +1546,11 @@ let _cardTheme = 'dark';
 
 function openCardModal() {
   document.getElementById('csp-modal').style.display = 'flex';
+  setHintergrundInert(true);
 }
 function closeCardModal() {
   document.getElementById('csp-modal').style.display = 'none';
+  setHintergrundInert(false);
 }
 function setCardTheme(theme) {
   _cardTheme = theme;
@@ -1826,12 +1910,16 @@ const activeModules = new Set(['est','kst','mwst','co2', 'wirk', 'einnahmen', 'h
 
 let kpiMoreOpen = false;
 function toggleKPIMore() {
+  const cards = document.querySelectorAll('.kpi-secondary');
   kpiMoreOpen = !kpiMoreOpen;
-  document.querySelectorAll('.kpi-secondary').forEach(el => el.classList.toggle('kpi-shown', kpiMoreOpen));
+  cards.forEach(el => el.classList.toggle('kpi-shown', kpiMoreOpen));
   const toggle = document.getElementById('kpi-more-toggle');
   const chevron = document.getElementById('kpi-more-chevron');
-  toggle.childNodes[0].textContent = kpiMoreOpen ? '6 weitere ausblenden ' : '6 weitere Metriken ';
-  chevron.textContent = kpiMoreOpen ? '▲' : '▼';
+  toggle.childNodes[0].textContent = kpiMoreOpen
+    ? `${cards.length} weitere ausblenden `
+    : `${cards.length} weitere Kennzahlen `;
+  toggle.setAttribute('aria-expanded', String(kpiMoreOpen));
+  chevron.textContent = kpiMoreOpen ? '▴' : '▾';
 }
 
 function applyModules() {
@@ -1861,10 +1949,12 @@ function openPicker(type) {
   renderModGrid(type);
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+  setHintergrundInert(true);
 }
 
 function closePicker() {
   document.getElementById('mod-overlay').classList.remove('open');
+  setHintergrundInert(false);
   document.body.style.overflow = '';
 }
 
@@ -1909,6 +1999,24 @@ function recalcPfad() {
 }
 
 function updatePeriodenkennzahlen(pfad) {
+  // Tab-Beschriftungen kommen aus derselben Quelle wie die Rechnung.
+  // Vorher standen sie hart im Markup und waren um ein Jahr verschoben.
+  document.querySelectorAll('.perioden-tab').forEach((btn, i) => {
+    if (pfad[i]) btn.textContent = pfad[i].label;
+  });
+
+  // Aktive Periode sichtbar machen, solange sie nicht die Gegenwart ist:
+  // sonst zeigen die KPIs Periodenwerte ohne jeden Hinweis darauf.
+  const pbar = document.getElementById('periode-bar');
+  if (pbar) {
+    const aktiv = aktivePeriodeIdx !== 0;
+    pbar.hidden = !aktiv;
+    if (aktiv) {
+      document.getElementById('periode-bar-value').textContent =
+        pfad[aktivePeriodeIdx].label;
+    }
+  }
+
   const hint = document.getElementById('perioden-hint');
   if (!hint) return;
   const p = pfad[aktivePeriodeIdx];
@@ -1918,7 +2026,7 @@ function updatePeriodenkennzahlen(pfad) {
   hint.textContent =
     `Aktive Periode: ${p.label} · BIP ${p.zustand.bip.toFixed(0)} Mrd. € · ` +
     `Schuldenquote ${p.zustand.schuldenquote.toFixed(1).replace('.', ',')} % BIP · ` +
-    `Endstand 2041–44: Schulden ${endSchulden} %, Saldo ${endSaldo} Mrd.`;
+    `Endstand ${endP.label}: Schulden ${endSchulden} %, Saldo ${endSaldo} Mrd.`;
 }
 
 function setAktivePeriode(idx) {
@@ -1998,6 +2106,7 @@ window.setCardTheme     = setCardTheme;
 window.startWith        = startWith;
 window.closeOnboarding  = closeOnboarding;
 window.toggleMod        = toggleMod;
+window.toggleKPIMore    = toggleKPIMore;
 window.ladeSzenario_global = (id) => {
   if (id === 'custom') {
     // Eigenes Szenario: alle Perioden mit aktuellen Params vorbelegen

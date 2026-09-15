@@ -141,11 +141,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/haushaltsspiel.css">
 </head>
 <body>
-<div class="wrap">
-
+<a class="skip-link" href="#main-content">Zum Inhalt springen</a>
 <nav class="site-nav-bar">
   <div class="site-nav-bar-inner">
     <a href="index.html" class="nav-logo">Kassensturz</a>
@@ -157,6 +157,8 @@
   </div>
 </nav>
 
+<div class="wrap">
+
 <header>
   <h1>Das <em>große</em> Haushaltsspiel</h1>
   <p class="subtitle">Datenbasierte Simulation des deutschen Steuersystems · Bundeshaushalt 2026 · SOEP</p>
@@ -165,7 +167,7 @@
 <div class="layout">
 
   <!-- MOBILE TOGGLE (nur auf kleinen Screens sichtbar) -->
-  <button class="mobile-toggle" id="mobile-toggle-btn">
+  <button class="mobile-toggle" id="mobile-toggle-btn" type="button" aria-expanded="true" aria-controls="controls-sidebar">
     <span id="mobile-toggle-label">Regler ausblenden</span>
     <span style="font-size:16px" id="mobile-toggle-icon">−</span>
   </button>
@@ -178,13 +180,6 @@
       <div class="sidebar-eyebrow">Steuer-Simulator</div>
       <div class="sidebar-title">Dein Haushalt</div>
       <div class="sidebar-desc">Verschiebe die Regler und beobachte live die Auswirkungen auf Staatsfinanzen und Verteilung.</div>
-    </div>
-
-    <!-- SCENARIO MODE INDICATOR -->
-    <div class="scenario-mode-bar" id="scenario-mode-bar">
-      <div class="scenario-mode-bar-dot"></div>
-      <span id="scenario-mode-label">Szenario A aktiv</span>
-      <button class="scenario-mode-bar-exit" title="Modus verlassen" onclick="exitScenarioMode()">✕</button>
     </div>
 
     <details class="sidebar-collapsible">
@@ -215,37 +210,37 @@
 
     <!-- Slider-Tipps Toggle -->
     <div class="toggle-row" style="margin-bottom:16px;padding-top:4px;border-top:1px dashed var(--rule);">
-      <span style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Regler-Tipps</span>
+      <label for="toggle_slider_tips" style="font-family:'DM Mono',monospace;font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Regler-Tipps</label>
       <input type="checkbox" id="toggle_slider_tips" checked>
     </div>
 
     <!-- Einkommensteuer -->
     <div class="mod-section ctrl-box" data-mod="est" data-mod-type="control" style="--box-accent:#C2410C">
     <div class="ctrl-section">
-    <div class="ctrl-section-head" data-toggle>Einkommensteuer <span class="ctrl-chevron">▾</span></div>
+    <button type="button" class="ctrl-section-head" data-toggle aria-expanded="true">Einkommensteuer <span class="ctrl-chevron" aria-hidden="true">▾</span></button>
     <div class="ctrl-section-body">
       <div class="slider-row">
-        <label>Grundfreibetrag <span class="value" id="v_freibetrag"></span></label>
+        <label for="freibetrag">Grundfreibetrag <span class="value" id="v_freibetrag"></span></label>
         <div class="slider-track" data-accent="#C2410C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="freibetrag" min="0" max="30000" step="500" value="12084"></div>
       </div>
       <div class="slider-row">
-        <label>Eingangssteuersatz <span class="value" id="v_eingang"></span></label>
+        <label for="eingang">Eingangssteuersatz <span class="value" id="v_eingang"></span></label>
         <div class="slider-track" data-accent="#C2410C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="eingang" min="0" max="30" step="1" value="14"></div>
       </div>
       <div class="slider-row">
-        <label>Spitzensteuersatz <span class="value" id="v_spitze"></span></label>
+        <label for="spitze">Spitzensteuersatz <span class="value" id="v_spitze"></span></label>
         <div class="slider-track" data-accent="#C2410C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="spitze" min="25" max="70" step="1" value="45"></div>
       </div>
       <div class="slider-row">
-        <label>Einkommen ab Spitzensatz <span class="value" id="v_grenze"></span></label>
+        <label for="grenze">Einkommen ab Spitzensatz <span class="value" id="v_grenze"></span></label>
         <div class="slider-track" data-accent="#C2410C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="grenze" min="50000" max="500000" step="10000" value="277826"></div>
       </div>
       <div class="toggle-row">
-        <span>Kapital wie Arbeit besteuern</span>
+        <label for="synthetisch">Kapital wie Arbeit besteuern</label>
         <input type="checkbox" id="synthetisch">
       </div>
       <div class="slider-row" id="row_abgeltung">
-        <label>Abgeltungsteuer (bei dual) <span class="value" id="v_abgeltung"></span></label>
+        <label for="abgeltung">Abgeltungsteuer (bei dual) <span class="value" id="v_abgeltung"></span></label>
         <div class="slider-track" data-accent="#C2410C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="abgeltung" min="0" max="50" step="1" value="25"></div>
       </div>
     </div>
@@ -255,18 +250,18 @@
     <!-- Unternehmen -->
     <div class="mod-section ctrl-box" data-mod="kst" data-mod-type="control" style="--box-accent:#1D4ED8">
     <div class="ctrl-section">
-    <div class="ctrl-section-head" data-toggle>Unternehmen <span class="ctrl-chevron">▾</span></div>
+    <button type="button" class="ctrl-section-head" data-toggle aria-expanded="true">Unternehmen <span class="ctrl-chevron" aria-hidden="true">▾</span></button>
     <div class="ctrl-section-body">
       <div class="slider-row">
-        <label>Körperschaftsteuer <span class="value" id="v_kst"></span></label>
+        <label for="kst">Körperschaftsteuer <span class="value" id="v_kst"></span></label>
         <div class="slider-track" data-accent="#1D4ED8"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="kst" min="0" max="35" step="1" value="15"></div>
       </div>
       <div class="slider-row">
-        <label>Gewerbesteuer (Durchschnitt) <span class="value" id="v_gewst"></span></label>
+        <label for="gewst">Gewerbesteuer (Durchschnitt) <span class="value" id="v_gewst"></span></label>
         <div class="slider-track" data-accent="#1D4ED8"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="gewst" min="0" max="20" step="1" value="14"></div>
       </div>
       <div class="toggle-row">
-        <span>Gewerbesteuer abschaffen</span>
+        <label for="gewst_aus">Gewerbesteuer abschaffen</label>
         <input type="checkbox" id="gewst_aus">
       </div>
     </div>
@@ -276,14 +271,14 @@
     <!-- Mehrwertsteuer -->
     <div class="mod-section ctrl-box" data-mod="mwst" data-mod-type="control" style="--box-accent:#7C3AED">
     <div class="ctrl-section">
-    <div class="ctrl-section-head" data-toggle>Mehrwertsteuer <span class="ctrl-chevron">▾</span></div>
+    <button type="button" class="ctrl-section-head" data-toggle aria-expanded="true">Mehrwertsteuer <span class="ctrl-chevron" aria-hidden="true">▾</span></button>
     <div class="ctrl-section-body">
       <div class="slider-row">
-        <label>Regelsatz <span class="value" id="v_mwst"></span></label>
+        <label for="mwst">Regelsatz <span class="value" id="v_mwst"></span></label>
         <div class="slider-track" data-accent="#7C3AED"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="mwst" min="0" max="30" step="1" value="19"></div>
       </div>
       <div class="slider-row">
-        <label>Ermäßigter Satz <span class="value" id="v_mwst_erm"></span></label>
+        <label for="mwst_erm">Ermäßigter Satz <span class="value" id="v_mwst_erm"></span></label>
         <div class="slider-track" data-accent="#7C3AED"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="mwst_erm" min="0" max="19" step="1" value="7"></div>
       </div>
     </div>
@@ -293,14 +288,14 @@
     <!-- CO2 & Klima -->
     <div class="mod-section ctrl-box" data-mod="co2" data-mod-type="control" style="--box-accent:#166534">
     <div class="ctrl-section">
-    <div class="ctrl-section-head" data-toggle>CO₂-Steuer · Klimageld <span class="ctrl-chevron">▾</span></div>
+    <button type="button" class="ctrl-section-head" data-toggle aria-expanded="true">CO₂-Steuer · Klimageld <span class="ctrl-chevron" aria-hidden="true">▾</span></button>
     <div class="ctrl-section-body">
       <div class="slider-row">
-        <label>CO₂-Preis <span class="value" id="v_co2"></span></label>
+        <label for="co2">CO₂-Preis <span class="value" id="v_co2"></span></label>
         <div class="slider-track" data-accent="#166534"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="co2" min="0" max="300" step="5" value="55"></div>
       </div>
       <div class="toggle-row">
-        <span>Klimageld pro Kopf zurück</span>
+        <label for="klimageld">Klimageld pro Kopf zurück</label>
         <input type="checkbox" id="klimageld" checked>
       </div>
     </div>
@@ -310,26 +305,26 @@
     <!-- Vermögen & Erbschaft -->
     <div class="mod-section ctrl-box" data-mod="verm" data-mod-type="control" style="display:none;--box-accent:#B45309">
     <div class="ctrl-section">
-    <div class="ctrl-section-head" data-toggle>Vermögen · Erbschaft <span class="ctrl-chevron">▾</span></div>
+    <button type="button" class="ctrl-section-head" data-toggle aria-expanded="true">Vermögen · Erbschaft <span class="ctrl-chevron" aria-hidden="true">▾</span></button>
     <div class="ctrl-section-body">
       <div class="slider-row">
-        <label>Erbschaftsteuer (Spitzensatz) <span class="value" id="v_erb"></span></label>
+        <label for="erb">Erbschaftsteuer (Spitzensatz) <span class="value" id="v_erb"></span></label>
         <div class="slider-track" data-accent="#B45309"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="erb" min="0" max="70" step="1" value="20"></div>
       </div>
       <div class="toggle-row">
-        <span>Betriebsvermögen-Ausnahme</span>
+        <label for="betriebs">Betriebsvermögen-Ausnahme</label>
         <input type="checkbox" id="betriebs" checked>
       </div>
       <div class="slider-row">
-        <label>Bodenwertsteuer <span class="value" id="v_boden"></span></label>
+        <label for="boden">Bodenwertsteuer <span class="value" id="v_boden"></span></label>
         <div class="slider-track" data-accent="#B45309"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="boden" min="0" max="3" step="0.1" value="0.4"></div>
       </div>
       <div class="slider-row">
-        <label>Vermögensteuer (ab 2 Mio) <span class="value" id="v_verm"></span></label>
+        <label for="verm">Vermögensteuer (ab 2 Mio) <span class="value" id="v_verm"></span></label>
         <div class="slider-track" data-accent="#B45309"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="verm" min="0" max="3" step="0.1" value="0"></div>
       </div>
       <div class="slider-row">
-        <label>Zucman-Mindeststeuer (Mrd.) <span class="value" id="v_zucman"></span></label>
+        <label for="zucman">Zucman-Mindeststeuer (Mrd.) <span class="value" id="v_zucman"></span></label>
         <div class="slider-track" data-accent="#B45309"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="zucman" min="0" max="3" step="0.1" value="0"></div>
       </div>
     </div>
@@ -339,26 +334,26 @@
     <!-- Sozialversicherung -->
     <div class="mod-section ctrl-box" data-mod="sv" data-mod-type="control" style="display:none;--box-accent:#0F766E">
     <div class="ctrl-section">
-    <div class="ctrl-section-head" data-toggle>Sozialversicherung <span class="ctrl-chevron">▾</span></div>
+    <button type="button" class="ctrl-section-head" data-toggle aria-expanded="true">Sozialversicherung <span class="ctrl-chevron" aria-hidden="true">▾</span></button>
     <div class="ctrl-section-body">
       <div class="slider-row">
-        <label>Rente (AN+AG) <span class="value" id="v_rv"></span></label>
+        <label for="rv">Rente (AN+AG) <span class="value" id="v_rv"></span></label>
         <div class="slider-track" data-accent="#0F766E"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="rv" min="10" max="30" step="0.1" value="18.6"></div>
       </div>
       <div class="slider-row">
-        <label>Krankenversicherung <span class="value" id="v_kv"></span></label>
+        <label for="kv">Krankenversicherung <span class="value" id="v_kv"></span></label>
         <div class="slider-track" data-accent="#0F766E"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="kv" min="8" max="25" step="0.1" value="16.3"></div>
       </div>
       <div class="slider-row">
-        <label>Arbeitslosen+Pflege <span class="value" id="v_alpf"></span></label>
+        <label for="alpf">Arbeitslosen+Pflege <span class="value" id="v_alpf"></span></label>
         <div class="slider-track" data-accent="#0F766E"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="alpf" min="2" max="10" step="0.1" value="6.2"></div>
       </div>
       <div class="slider-row">
-        <label>Beitr.-Bemessungsgrenze <span class="value" id="v_bbg"></span></label>
+        <label for="bbg">Beitr.-Bemessungsgrenze <span class="value" id="v_bbg"></span></label>
         <div class="slider-track" data-accent="#0F766E"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="bbg" min="40000" max="160000" step="5000" value="90000"></div>
       </div>
       <div class="toggle-row">
-        <span>Bürgerversicherung (alle zahlen)</span>
+        <label for="buergerv">Bürgerversicherung (alle zahlen)</label>
         <input type="checkbox" id="buergerv">
       </div>
     </div>
@@ -368,19 +363,19 @@
     <!-- BGE -->
     <div class="mod-section ctrl-box" data-mod="bge" data-mod-type="control" style="display:none;--box-accent:#6D28D9">
     <div class="ctrl-section">
-    <div class="ctrl-section-head bge-section collapsed" id="bge-section-title" data-toggle>BGE · Grundeinkommen <span class="ctrl-chevron">▾</span></div>
+    <button type="button" class="ctrl-section-head bge-section collapsed" id="bge-section-title" data-toggle aria-expanded="false">BGE · Grundeinkommen <span class="ctrl-chevron" aria-hidden="true">▾</span></button>
     <div class="ctrl-section-body">
       <div class="bge-slider-wrap">
-        <label class="slider-row" style="margin-bottom:4px;">
+        <label class="slider-row" for="bge" style="margin-bottom:4px;">
           <span>Monatsbetrag <span class="value" id="v_bge" style="color:var(--accent);font-weight:600;">aus</span></span>
         </label>
         <div class="slider-track" data-accent="#6D28D9"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="bge" min="0" max="2000" step="50" value="0"></div>
-        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:var(--fs-micro);color:var(--muted);">
           <span>0 €</span><span>1.000 €</span><span>2.000 €</span>
         </div>
       </div>
       <!-- Warnung: BGE > Grundfreibetrag/12 → Staat besteuert eigene Ausgaben -->
-      <div id="bge-freibetrag-warning" style="display:none;margin-top:10px;background:rgba(200,64,31,0.1);border-left:3px solid var(--accent);padding:8px 10px;font-family:'DM Mono',monospace;font-size:10px;line-height:1.6;color:var(--ink);">
+      <div id="bge-freibetrag-warning" style="display:none;margin-top:10px;background:rgba(200,64,31,0.1);border-left:3px solid var(--accent);padding:8px 10px;font-family:'DM Mono',monospace;font-size:var(--fs-micro);line-height:1.6;color:var(--ink);">
         <span style="font-weight:600;color:var(--accent);">⚠ Konsistenz-Problem</span><br>
         BGE (<span id="bge-warn-val">—</span> €/M) übersteigt den steuerfreien Grundfreibetrag (<span id="bge-warn-fb">—</span> €/M). Der Staat würde seine eigenen Transferzahlungen mit Einkommensteuer belasten — eine fiskalische Kreisrechnung. Lösung: BGE steuerfrei stellen (§ 3 EStG) oder Freibetrag entsprechend anheben.
       </div>
@@ -394,27 +389,27 @@
 
       <!-- Rentensystem bei BGE — nur sichtbar wenn BGE > 0 -->
       <div id="bge-rente-box" style="display:none;margin-top:14px;border-top:1px dashed var(--accent);padding-top:12px;">
-        <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:10px;font-weight:600;">
+        <div style="font-family:'DM Mono',monospace;font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:10px;font-weight:600;">
           Aufstockungs-Rente bei BGE
         </div>
         <div class="slider-row">
-          <label>Rentenniveau Geringverdiener <span class="value" id="v_rente_niveau_gering"></span></label>
+          <label for="rente_niveau_gering">Rentenniveau Geringverdiener <span class="value" id="v_rente_niveau_gering"></span></label>
           <div class="slider-track" data-accent="#6D28D9"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="rente_niveau_gering" min="60" max="100" step="5" value="80"></div>
         </div>
         <div class="slider-row">
-          <label>Rentenniveau Gutverdiener <span class="value" id="v_rente_niveau_hoch"></span></label>
+          <label for="rente_niveau_hoch">Rentenniveau Gutverdiener <span class="value" id="v_rente_niveau_hoch"></span></label>
           <div class="slider-track" data-accent="#6D28D9"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="rente_niveau_hoch" min="30" max="70" step="5" value="50"></div>
         </div>
         <div class="slider-row">
-          <label>Einkommensgrenze <span class="value" id="v_rente_grenze"></span></label>
+          <label for="rente_grenze">Einkommensgrenze <span class="value" id="v_rente_grenze"></span></label>
           <div class="slider-track" data-accent="#6D28D9"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="rente_grenze" min="20000" max="60000" step="5000" value="35000"></div>
         </div>
-        <p style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px;line-height:1.5;">
+        <p style="font-family:'DM Mono',monospace;font-size:var(--fs-micro);color:var(--muted);margin-top:4px;line-height:1.5;">
           BGE = Sockel · Rente = Aufstockung<br>auf % des früheren Nettoeinkommens
         </p>
       </div>
 
-      <p style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:8px;line-height:1.5;">
+      <p style="font-family:'DM Mono',monospace;font-size:var(--fs-micro);color:var(--muted);margin-top:8px;line-height:1.5;">
         Quellen: DIW Pilot 2024 · RWI 2024<br>ifo Mikrosimulation 2021 (Blömer/Peichl)
       </p>
     </div>
@@ -424,18 +419,18 @@
     <!-- Transfers -->
     <div class="mod-section ctrl-box" data-mod="transfers" data-mod-type="control" style="display:none;--box-accent:#BE185D">
     <div class="ctrl-section">
-    <div class="ctrl-section-head" data-toggle>Transfers · Sozialstaat <span class="ctrl-chevron">▾</span></div>
+    <button type="button" class="ctrl-section-head" data-toggle aria-expanded="true">Transfers · Sozialstaat <span class="ctrl-chevron" aria-hidden="true">▾</span></button>
     <div class="ctrl-section-body">
       <div class="slider-row">
-        <label>Bürgergeld-Regelsatz <span class="value" id="v_bg"></span></label>
+        <label for="bg">Bürgergeld-Regelsatz <span class="value" id="v_bg"></span></label>
         <div class="slider-track" data-accent="#BE185D"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="bg" min="0" max="1500" step="10" value="563"></div>
       </div>
       <div class="slider-row">
-        <label>Kindergeld <span class="value" id="v_kg"></span></label>
+        <label for="kg">Kindergeld <span class="value" id="v_kg"></span></label>
         <div class="slider-track" data-accent="#BE185D"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="kg" min="0" max="500" step="5" value="255"></div>
       </div>
       <div class="toggle-row">
-        <span>Negative Einkommensteuer</span>
+        <label for="neg_est">Negative Einkommensteuer</label>
         <input type="checkbox" id="neg_est">
       </div>
     </div>
@@ -445,10 +440,10 @@
     <!-- Staat / Sonstiges -->
     <div class="mod-section ctrl-box" data-mod="kleine" data-mod-type="control" style="display:none;--box-accent:#64748B">
     <div class="ctrl-section">
-    <div class="ctrl-section-head" data-toggle>Kleine Verbrauchsteuern <span class="ctrl-chevron">▾</span></div>
+    <button type="button" class="ctrl-section-head" data-toggle aria-expanded="true">Kleine Verbrauchsteuern <span class="ctrl-chevron" aria-hidden="true">▾</span></button>
     <div class="ctrl-section-body">
       <div class="toggle-row">
-        <span>Energie, Tabak, Kfz etc. behalten</span>
+        <label for="kleine_st">Energie, Tabak, Kfz etc. behalten</label>
         <input type="checkbox" id="kleine_st" checked>
       </div>
     </div>
@@ -458,18 +453,18 @@
     <!-- Rentenreform -->
     <div class="mod-section ctrl-box" data-mod="renten_ctrl" data-mod-type="control" style="display:none;--box-accent:#EA580C">
     <div class="ctrl-section">
-    <div class="ctrl-section-head collapsed" data-toggle>Rentenreform · Generationenkapital <span class="ctrl-chevron">▾</span></div>
+    <button type="button" class="ctrl-section-head collapsed" data-toggle aria-expanded="false">Rentenreform · Generationenkapital <span class="ctrl-chevron" aria-hidden="true">▾</span></button>
     <div class="ctrl-section-body">
       <div class="slider-row">
-        <label>Fondsquote (% des RV-Aufkommens) <span class="value" id="v_kapitalquote"></span></label>
+        <label for="kapitalquote">Fondsquote (% des RV-Aufkommens) <span class="value" id="v_kapitalquote"></span></label>
         <div class="slider-track" data-accent="#EA580C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="kapitalquote" min="0" max="30" step="1" value="0"></div>
       </div>
       <div class="slider-row">
-        <label>Erwartete Jahresrendite <span class="value" id="v_rendite_fonds"></span></label>
+        <label for="rendite_fonds">Erwartete Jahresrendite <span class="value" id="v_rendite_fonds"></span></label>
         <div class="slider-track" data-accent="#EA580C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="rendite_fonds" min="2" max="10" step="0.5" value="7"></div>
       </div>
       <div class="slider-row">
-        <label>Investition ab Jahr <span class="value" id="v_startjahr"></span></label>
+        <label for="startjahr">Investition ab Jahr <span class="value" id="v_startjahr"></span></label>
         <div class="slider-track" data-accent="#EA580C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="startjahr" min="2000" max="2025" step="1" value="2020"></div>
       </div>
     </div>
@@ -479,40 +474,40 @@
     <!-- GKV Reform -->
     <div class="mod-section ctrl-box" data-mod="gkv_ctrl" data-mod-type="control" style="display:none;--box-accent:#0369A1">
     <div class="ctrl-section">
-    <div class="ctrl-section-head collapsed" data-toggle>Gesundheitsreform · GKV <span class="ctrl-chevron">▾</span></div>
+    <button type="button" class="ctrl-section-head collapsed" data-toggle aria-expanded="false">Gesundheitsreform · GKV <span class="ctrl-chevron" aria-hidden="true">▾</span></button>
     <div class="ctrl-section-body">
       <div class="toggle-row">
-        <span>PKV abschaffen (alle in GKV)</span>
+        <label for="pkv_abschaffen">PKV abschaffen (alle in GKV)</label>
         <input type="checkbox" id="pkv_abschaffen">
       </div>
       <div class="toggle-row">
-        <span>Kapitalerträge KV-pflichtig</span>
+        <label for="kv_kapital">Kapitalerträge KV-pflichtig</label>
         <input type="checkbox" id="kv_kapital">
       </div>
       <div class="toggle-row">
-        <span>KV-Beitragsbemessungsgrenze abschaffen</span>
+        <label for="kv_bbg_frei">KV-Beitragsbemessungsgrenze abschaffen</label>
         <input type="checkbox" id="kv_bbg_frei">
       </div>
       <div class="slider-row">
-        <label>Anzahl Krankenkassen <span class="value" id="v_anzahl_kv"></span></label>
+        <label for="anzahl_kv">Anzahl Krankenkassen <span class="value" id="v_anzahl_kv"></span></label>
         <div class="slider-track" data-accent="#0369A1"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="anzahl_kv" min="5" max="105" step="5" value="95"></div>
       </div>
       <div class="slider-row">
-        <label>Prävention-Invest. (Mrd. €) <span class="value" id="v_praevention"></span></label>
+        <label for="praevention">Prävention-Invest. (Mrd. €) <span class="value" id="v_praevention"></span></label>
         <div class="slider-track" data-accent="#0369A1"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="praevention" min="0" max="20" step="1" value="0"></div>
       </div>
     </div>
     </div>
     </div>
 
-    <div class="mod-add-btn" id="mod-add-control-btn">
-      <span>+</span> Regler-Modul hinzufügen
-    </div>
+    <button type="button" class="mod-add-btn" id="mod-add-control-btn" aria-haspopup="dialog">
+      <span aria-hidden="true">+</span> Regler-Modul hinzufügen
+    </button>
 
   </aside>
 
   <!-- ============ DASHBOARD ============ -->
-  <main class="dashboard">
+  <main class="dashboard" id="main-content">
 
     <!-- REFORM TOUR BAR -->
     <div class="reform-tour-bar" id="reform-tour-bar">
@@ -549,6 +544,19 @@
     </details>
 
     <!-- KPI TOP ROW -->
+    <!-- KONTEXT — welcher Modus und welche Periode diese Zahlen erzeugt hat.
+         Lag vorher in der Sidebar bzw. 2500px weiter unten. -->
+    <div class="kpi-context">
+      <div class="scenario-mode-bar" id="scenario-mode-bar">
+        <span class="scenario-mode-bar-dot" aria-hidden="true"></span>
+        <span id="scenario-mode-label">Szenario A aktiv</span>
+        <button class="scenario-mode-bar-exit" type="button" aria-label="Szenario-Modus verlassen" onclick="exitScenarioMode()">✕</button>
+      </div>
+      <div class="periode-bar" id="periode-bar" hidden>
+        <span class="periode-bar-label">Aktive Periode</span>
+        <strong id="periode-bar-value">—</strong>
+      </div>
+    </div>
     <div class="kpi-grid" id="kpi-grid">
       <!-- 4 primäre KPIs — immer sichtbar -->
       <div class="kpi" id="kpi_card_saldo">
@@ -575,43 +583,43 @@
         <div class="kpi-delta neutral">Mrd. € / Jahr</div>
         <div class="kpi-bench" id="kpi_einn_bench"></div>
       </div>
-      <div class="kpi" id="kpi_card_admin">
+      <div class="kpi kpi-secondary" id="kpi_card_admin">
         <div class="kpi-label">Verwaltungskosten</div>
         <div class="kpi-value" id="kpi_admin">—</div>
         <div class="kpi-delta" id="kpi_admin_d">—</div>
         <div class="kpi-bench" id="kpi_admin_bench"></div>
       </div>
-      <div class="kpi" id="kpi_card_nst">
+      <div class="kpi kpi-secondary" id="kpi_card_nst">
         <div class="kpi-label">Aktive Steuerarten</div>
         <div class="kpi-value" id="kpi_nst">—</div>
         <div class="kpi-delta neutral">Anzahl</div>
         <div class="kpi-bench" id="kpi_nst_bench"></div>
       </div>
-      <div class="kpi" id="kpi_card_arb">
+      <div class="kpi kpi-secondary" id="kpi_card_arb">
         <div class="kpi-label">Arbeitsangebot</div>
         <div class="kpi-value" id="kpi_arb">—</div>
         <div class="kpi-delta" id="kpi_arb_d">vs. Basis</div>
         <div class="kpi-bench" id="kpi_arb_bench"></div>
       </div>
-      <div class="kpi" id="kpi_card_armut">
+      <div class="kpi kpi-secondary" id="kpi_card_armut">
         <div class="kpi-label">Armutsrisikoquote</div>
         <div class="kpi-value" id="kpi_armut">—</div>
         <div class="kpi-delta" id="kpi_armut_d">—</div>
         <div class="kpi-bench" id="kpi_armut_bench"></div>
       </div>
-      <div class="kpi" id="kpi_card_schuld">
+      <div class="kpi kpi-secondary" id="kpi_card_schuld">
         <div class="kpi-label">Schuldenquote Δ/Jahr</div>
         <div class="kpi-value" id="kpi_schuld">—</div>
         <div class="kpi-delta" id="kpi_schuld_d">% des BIP</div>
         <div class="kpi-bench" id="kpi_schuld_bench"></div>
       </div>
-      <div class="kpi" id="kpi_card_dwl">
+      <div class="kpi kpi-secondary" id="kpi_card_dwl">
         <div class="kpi-label">Wohlfahrtsverlust</div>
         <div class="kpi-value" id="kpi_dwl">—</div>
         <div class="kpi-delta" id="kpi_dwl_d">Mrd. € / Jahr</div>
         <div class="kpi-bench" id="kpi_dwl_bench"></div>
       </div>
-      <div class="kpi" id="kpi_card_zins">
+      <div class="kpi kpi-secondary" id="kpi_card_zins">
         <div class="kpi-label">Zinslastquote</div>
         <div class="kpi-value" id="kpi_zins">—</div>
         <div class="kpi-delta" id="kpi_zins_d">Cent je Steuer-€</div>
@@ -619,8 +627,11 @@
       </div>
     </div>
 
+    <button class="kpi-more-btn" id="kpi-more-toggle" type="button"
+            aria-expanded="false" aria-controls="kpi-grid" onclick="toggleKPIMore()">7 weitere Kennzahlen <span id="kpi-more-chevron" aria-hidden="true">▾</span></button>
+
     <!-- GESAMTNOTE / SCORE PANEL -->
-    <div class="score-panel" id="score-panel" style="display:none">
+    <div class="score-panel" id="score-panel">
       <div class="score-left">
         <div class="score-label-tag">Gesamtnote</div>
         <div class="score-grade" id="score-grade">—</div>
@@ -636,7 +647,7 @@
           <h2>Grundeinkommen — Wirkungsanalyse</h2>
           <div class="panel-sub">Fiskalische und soziale Effekte · basierend auf Mikrosimulation</div>
         </div>
-        <span id="bge-panel-badge" style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;padding:4px 10px;background:var(--accent);color:var(--paper);">— €/Monat</span>
+        <span id="bge-panel-badge" style="font-family:'DM Mono',monospace;font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.12em;padding:4px 10px;background:var(--accent);color:var(--paper);">— €/Monat</span>
       </div>
       <div class="bge-kpi-row" id="bge-kpi-row"></div>
       <div class="bge-financing-bar">
@@ -775,11 +786,11 @@
       <div id="renten_kpis" class="kpi-grid" style="margin-bottom:16px;border:none;background:transparent;gap:8px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))"></div>
       <div class="two-col" style="margin-top:8px;">
         <div>
-          <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">Kapitalstockaufbau (Mrd. €)</div>
+          <div style="font-family:'DM Mono',monospace;font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">Kapitalstockaufbau (Mrd. €)</div>
           <div id="kapitalstock_chart"></div>
         </div>
         <div>
-          <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">RV-Beitragssatz Projektion 2025–2045 (%)</div>
+          <div style="font-family:'DM Mono',monospace;font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">RV-Beitragssatz Projektion 2025–2045 (%)</div>
           <div id="beitrag_proj_chart"></div>
         </div>
       </div>
@@ -793,9 +804,9 @@
       <div id="schulden_pfad_chart"></div>
     </div>
 
-    <div class="mod-add-btn mod-add-result" id="mod-add-result-btn">
-      <span>+</span> Darstellung hinzufügen
-    </div>
+    <button type="button" class="mod-add-btn mod-add-result" id="mod-add-result-btn" aria-haspopup="dialog">
+      <span aria-hidden="true">+</span> Darstellung hinzufügen
+    </button>
 
 
     <!-- ZUKUNFTSSIMULATION -->
@@ -808,23 +819,23 @@
 
       <!-- Perioden-Timeline -->
       <div class="perioden-timeline" id="perioden-timeline">
-        <button class="perioden-tab active" data-periode="0">2025–28</button>
-        <button class="perioden-tab" data-periode="1">2029–32</button>
-        <button class="perioden-tab" data-periode="2">2033–36</button>
-        <button class="perioden-tab" data-periode="3">2037–40</button>
-        <button class="perioden-tab" data-periode="4">2041–44</button>
+        <button class="perioden-tab active" data-periode="0">2026–2029</button>
+        <button class="perioden-tab" data-periode="1">2030–2033</button>
+        <button class="perioden-tab" data-periode="2">2034–2037</button>
+        <button class="perioden-tab" data-periode="3">2038–2041</button>
+        <button class="perioden-tab" data-periode="4">2042–2045</button>
       </div>
       <div class="perioden-hint" id="perioden-hint">Passe die Regler für die aktive Periode an — Änderungen propagieren automatisch in die Folgeperioden.</div>
 
       <!-- KPI-Zeitreihen -->
       <div style="margin-top:16px;">
-        <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">Entwicklung über alle Perioden</div>
+        <div style="font-family:'DM Mono',monospace;font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">Entwicklung über alle Perioden</div>
         <div id="zeitreihe_chart"></div>
       </div>
 
       <!-- Staatsausgaben je Periode -->
       <details class="zukunft-ausgaben-details" style="margin-top:16px;">
-        <summary style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;">
+        <summary style="font-family:'DM Mono',monospace;font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;">
           <span id="ausgaben-chevron" style="transition:transform .2s;">▸</span> Staatsausgaben aktive Periode
         </summary>
         <div style="margin-top:10px;"><div id="staatsausgaben_chart"></div></div>
@@ -903,10 +914,11 @@
 </div>
 
 <!-- ONBOARDING OVERLAY -->
-<div class="onboarding-overlay" id="onboarding-overlay" style="display:none">
-  <div class="onboarding-card">
+<div class="onboarding-overlay" id="onboarding-overlay" style="display:none"
+     role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+  <div class="onboarding-card" tabindex="-1">
     <div class="onboarding-eyebrow">Kassensturz · Haushaltsspiel Deutschland</div>
-    <div class="onboarding-title">Du bist Finanzminister.<br>Das Defizit: 85 Mrd. €.</div>
+    <div class="onboarding-title" id="onboarding-title">Du bist Finanzminister.<br><span id="onboarding-lage">—</span></div>
     <div class="onboarding-sub">Was ist dein erster Zug? Wähle einen Ausgangspunkt — du kannst danach jeden Regler frei anpassen.</div>
     <div class="onboarding-choices">
       <button class="onboarding-choice" onclick="startWith('radikal')">
@@ -927,6 +939,7 @@
       </button>
     </div>
     <button class="onboarding-skip" onclick="closeOnboarding()">Lieber selbst erkunden →</button>
+    <p class="onboarding-independence">Privates Bildungsprojekt von Florian Aram Feuerriegel · parteiunabhängig, kein Verband, keine Förderung · Daten: Bundeshaushalt 2026, SOEP v40, Destatis · <a href="quellen.html">alle Quellen</a></p>
   </div>
 </div>
 

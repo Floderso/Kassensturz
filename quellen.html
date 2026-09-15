@@ -16,41 +16,19 @@
 <title>Quellenverzeichnis – Daten & Quellen | Kassensturz</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
 <style>
+  /* Palette, Typo, Fokus und Nav: css/tokens.css.
+     Hier nur die Datenreihen-Akzente dieser Seite. */
   :root {
-    --bg:      #F5F2EB;
-    --paper:   #FEFCF8;
-    --ink:     #1C1917;
-    --border:  #E5E1D8;
-    --rule:    #E5E1D8;
-    --muted:   #78716C;
-    --accent:  #2563EB;
     --accent2: #1e5f3a;
     --accent3: #2a4d7a;
-    --good:    #059669;
-    --bad:     #DC2626;
-    --warn:    #D97706;
-    --r:       8px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    background: var(--bg);
-    color: var(--ink);
-    font-family: 'Inter', sans-serif;
-    font-size: 15px;
-    line-height: 1.6;
   }
   body { padding: 0 16px 80px; }
   .wrap { max-width: 1080px; margin: 0 auto; }
 
   /* NAV */
-  .site-nav-bar { background: var(--ink); margin: 0 -16px 48px; padding: 0 24px; height: 40px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; }
-  .site-nav-bar-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; width: 100%; }
-  .nav-logo { font-family: 'Fraunces', serif; font-weight: 800; font-size: 17px; color: #fff; letter-spacing: -0.02em; margin-right: 28px; text-decoration: none; }
-  .nav-link { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); padding: 0 12px; height: 40px; display: flex; align-items: center; text-decoration: none; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
-  .nav-link:hover { color: rgba(255,255,255,0.85); }
-  .nav-link.active { color: #fff; border-bottom-color: var(--accent); }
 
   /* HEADER */
   h1 {
@@ -61,7 +39,7 @@
   }
   h1 em { font-style: italic; color: var(--accent); }
   .eyebrow {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-family: var(--ff-mono); font-size: var(--fs-micro);
     text-transform: uppercase; letter-spacing: 0.14em;
     color: var(--muted); margin-bottom: 24px; margin-top: 8px;
   }
@@ -77,14 +55,16 @@
     border: 1px solid rgba(42,39,32,0.15);
     border-left: 3px solid var(--accent);
   }
-  .stat-item { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+  .stat-item { font-family: var(--ff-mono); font-size: 11px; }
   .stat-num { font-size: 20px; font-family: 'Fraunces', Georgia, serif;
     font-weight: 800; margin-right: 4px; }
   .stat-num.a { color: var(--accent); }
   .stat-num.b { color: var(--accent3); }
   .stat-num.c { color: var(--accent2); }
   .stat-num.d { color: var(--muted); }
-  .stat-sep { color: rgba(42,39,32,0.2); margin: 0 6px; }
+  /* Reine Dekoration: per aria-hidden aus dem A11y-Baum, deshalb ohne
+     Kontrastanforderung — trotzdem sichtbar genug zum Trennen. */
+  .stat-sep { color: var(--border); margin: 0 6px; }
 
   /* TOOLBAR */
   .toolbar {
@@ -97,7 +77,7 @@
   }
   .search-wrap input {
     width: 100%;
-    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    font-family: var(--ff-mono); font-size: 12px;
     padding: 9px 12px 9px 32px;
     border: 1px solid var(--rule);
     background: var(--paper); color: var(--ink);
@@ -110,7 +90,7 @@
   }
   .filter-chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-family: var(--ff-mono); font-size: var(--fs-micro);
     text-transform: uppercase; letter-spacing: 0.1em;
     padding: 5px 10px; border: 1px solid var(--rule);
     background: transparent; color: var(--muted);
@@ -125,14 +105,14 @@
 
   /* SECTION HEADERS */
   .section-head {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-family: var(--ff-mono); font-size: var(--fs-micro);
     text-transform: uppercase; letter-spacing: 0.16em; font-weight: 600;
     color: var(--muted); margin: 36px 0 14px;
     padding-bottom: 6px; border-bottom: 1px solid var(--rule);
     display: flex; justify-content: space-between; align-items: baseline;
   }
   .section-count {
-    font-size: 10px; color: var(--muted); font-weight: 400;
+    font-size: var(--fs-micro); color: var(--muted); font-weight: 400;
   }
 
   /* SOURCE CARDS */
@@ -156,17 +136,17 @@
     flex-wrap: wrap;
   }
   .src-id {
-    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    font-family: var(--ff-mono); font-size: var(--fs-micro);
     color: var(--muted); letter-spacing: 0.08em;
   }
   .src-badge {
-    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    font-family: var(--ff-mono); font-size: var(--fs-micro);
     text-transform: uppercase; letter-spacing: 0.1em;
     background: var(--badge-bg); color: var(--badge-col);
     padding: 2px 6px;
   }
   .src-year {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-family: var(--ff-mono); font-size: var(--fs-micro);
     color: var(--muted); margin-left: auto;
   }
   .src-author {
@@ -177,16 +157,16 @@
     margin-bottom: 2px;
   }
   .src-journal {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-family: var(--ff-mono); font-size: var(--fs-micro);
     color: var(--muted); margin-bottom: 6px;
   }
   .src-doi {
-    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    font-family: var(--ff-mono); font-size: var(--fs-micro);
     color: var(--accent); text-decoration: none;
   }
   .src-doi:hover { text-decoration: underline; }
   .src-used {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-family: var(--ff-mono); font-size: var(--fs-micro);
     color: var(--ink); background: rgba(42,39,32,0.05);
     border-left: 2px solid var(--badge-bg);
     padding: 5px 8px; margin-top: 6px;
@@ -198,15 +178,15 @@
 
   /* NO RESULTS */
   .no-results {
-    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    font-family: var(--ff-mono); font-size: 12px;
     color: var(--muted); padding: 32px 0; text-align: center;
     display: none;
   }
 
   /* FOOTER */
   .foot-note {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
-    color: rgba(107,99,89,0.6); margin-top: 40px;
+    font-family: var(--ff-mono); font-size: var(--fs-micro);
+    color: var(--muted-strong); margin-top: 40px;
     border-top: 1px solid rgba(42,39,32,0.1); padding-top: 16px;
   }
 
@@ -217,6 +197,7 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main-content">Zum Inhalt springen</a>
 <nav class="site-nav-bar">
   <div class="site-nav-bar-inner">
     <a href="index.html" class="nav-logo">Kassensturz</a>
@@ -228,7 +209,7 @@
   </div>
 </nav>
 
-<div class="wrap">
+<div class="wrap" id="main-content">
   <h1>Quellen&shy;<em>verzeichnis</em></h1>
   <div class="eyebrow">Literatur, Datenbasis und Rechtsquellen des Kassensturz-Modells</div>
   <p class="intro">
@@ -238,11 +219,11 @@
 
   <div class="stats-bar" id="stats-bar">
     <div class="stat-item"><span class="stat-num a" id="cnt-a">—</span> Akademische Studien</div>
-    <span class="stat-sep">|</span>
+    <span class="stat-sep" aria-hidden="true">|</span>
     <div class="stat-item"><span class="stat-num b" id="cnt-b">—</span> Berichte &amp; Gutachten</div>
-    <span class="stat-sep">|</span>
+    <span class="stat-sep" aria-hidden="true">|</span>
     <div class="stat-item"><span class="stat-num c" id="cnt-c">—</span> Statistiken &amp; Daten</div>
-    <span class="stat-sep">|</span>
+    <span class="stat-sep" aria-hidden="true">|</span>
     <div class="stat-item"><span class="stat-num d" id="cnt-d">—</span> Rechtliche Quellen</div>
   </div>
 

@@ -22,3 +22,6 @@ marketing/
 # Generierte Screenshots / Assets
 docs/*.png
 docs/*.jpg
+
+# Impeccable-Arbeitsartefakte (Kritik-Snapshots)
+.impeccable/

@@ -79,7 +79,7 @@ function _renderLafferNow(p) {
     <circle cx="${cx}" cy="${cy}" r="5" fill="var(--accent)"/>
     <text x="${curNearRight ? cx-8 : cx+8}" y="${cy-6}" text-anchor="${curNearRight ? 'end' : 'start'}" font-size="11" font-family="DM Mono,monospace" fill="var(--accent)">${p.spitze}%</text>`;
 
-  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible" role="img"><title>Laffer-Kurve: Steueraufkommen in Abhängigkeit vom Steuersatz</title>
     ${yVals}${xVals}
     <line x1="${pl}" y1="${pt2}" x2="${pl}" y2="${pt2+iH}" stroke="var(--rule)" stroke-width="1.5"/>
     <line x1="${pl}" y1="${pt2+iH}" x2="${pl+iW}" y2="${pt2+iH}" stroke="var(--rule)" stroke-width="1.5"/>

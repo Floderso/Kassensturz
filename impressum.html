@@ -8,38 +8,12 @@
 <title>Impressum | Kassensturz</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
 <style>
-  :root {
-    --bg:      #F5F2EB;
-    --paper:   #FEFCF8;
-    --ink:     #1C1917;
-    --border:  #E5E1D8;
-    --rule:    #E5E1D8;
-    --muted:   #78716C;
-    --accent:  #2563EB;
-    --good:    #059669;
-    --bad:     #DC2626;
-    --warn:    #D97706;
-    --r:       8px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    background: var(--bg);
-    color: var(--ink);
-    font-family: 'Inter', sans-serif;
-    font-size: 15px;
-    line-height: 1.6;
-  }
+  /* Palette, Typo, Fokus und Nav: css/tokens.css. */
   body { padding: 0 16px 80px; }
   .wrap { max-width: 720px; margin: 0 auto; }
-
-  .site-nav-bar { background: var(--ink); margin: 0 -16px 48px; padding: 0 24px; height: 40px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; }
-  .site-nav-bar-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; width: 100%; }
-  .nav-logo { font-family: 'Fraunces', serif; font-weight: 800; font-size: 17px; color: #fff; letter-spacing: -0.02em; margin-right: 28px; text-decoration: none; }
-  .nav-link { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); padding: 0 12px; height: 40px; display: flex; align-items: center; text-decoration: none; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
-  .nav-link:hover { color: rgba(255,255,255,0.85); }
-  .nav-link.active { color: #fff; border-bottom-color: var(--accent); }
 
   h1 {
     font-size: 36px;
@@ -50,8 +24,8 @@
     padding-bottom: 16px;
   }
   .eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
+    font-family: var(--ff-mono);
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.14em;
     color: var(--muted);
@@ -59,7 +33,7 @@
     margin-top: 8px;
   }
   h2 {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--ff-mono);
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.13em;
@@ -70,16 +44,16 @@
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
   .placeholder {
-    background: rgba(37,99,235,0.08);
-    border: 1px dashed rgba(37,99,235,0.4);
+    background: rgba(194,65,12,0.08);
+    border: 1px dashed rgba(194,65,12,0.4);
     padding: 2px 6px;
     font-style: italic;
     color: var(--accent);
     font-size: 13px;
   }
   .hint {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
+    font-family: var(--ff-mono);
+    font-size: var(--fs-micro);
     color: var(--muted);
     background: rgba(42,39,32,0.05);
     border-left: 2px solid var(--accent);
@@ -90,6 +64,7 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main-content">Zum Inhalt springen</a>
 <nav class="site-nav-bar">
   <div class="site-nav-bar-inner">
     <a href="index.html" class="nav-logo">Kassensturz</a>
@@ -101,7 +76,7 @@
   </div>
 </nav>
 
-<div class="wrap">
+<div class="wrap" id="main-content">
   <h1>Impressum</h1>
   <div class="eyebrow">Angaben gemäß § 5 TMG</div>
 

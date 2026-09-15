@@ -62,16 +62,16 @@ function renderRenten(p, r) {
 
   const maxAbs = Math.max(1, ...gkvItems.map(x => Math.abs(x.v)));
   document.getElementById('gkv_panel').innerHTML = `
-    <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px;">GKV-Struktureffekte (Mrd. € / Jahr)</div>
+    <div style="font-family:var(--ff-mono);font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px;">GKV-Struktureffekte (Mrd. € / Jahr)</div>
     <div style="display:flex;flex-direction:column;gap:14px;">
     ${gkvItems.map(item => {
       const pct = Math.max(2, Math.abs(item.v) / maxAbs * 100);
       const cls = item.v >= 0 ? 'pos' : 'neg';
       return `<div>
         <div style="display:grid;grid-template-columns:180px 1fr 72px;align-items:center;gap:10px;margin-bottom:4px;">
-          <div style="font-family:'DM Mono',monospace;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${item.label}">${item.label}</div>
+          <div style="font-family:var(--ff-mono);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${item.label}">${item.label}</div>
           <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;text-align:right;white-space:nowrap;">${item.v >= 0 ? '+' : ''}${f1(item.v)} Mrd.</div>
+          <div style="font-family:var(--ff-mono);font-size:11px;text-align:right;white-space:nowrap;">${item.v >= 0 ? '+' : ''}${f1(item.v)} Mrd.</div>
         </div>
         <div style="font-size:11px;color:var(--muted);font-style:italic;padding-left:4px;">${item.note}</div>
       </div>`;
@@ -111,7 +111,7 @@ function renderKapitalstockSVG(rente, p) {
     xLabels.push(`<text x="${xOf(j)}" y="${pt+iH+16}" text-anchor="middle" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">${j}</text>`);
   }
 
-  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible" role="img"><title>Kapitalstock der Rentenversicherung im Zeitverlauf</title>
     ${yVals}${xLabels.join('')}
     <line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
     <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
@@ -152,7 +152,7 @@ function renderBeitragProjSVG(rente, p) {
        <text x="${pl+152}" y="${pt+12}" font-size="10" font-family="DM Mono,monospace" fill="var(--good)">mit Reform</text>`
     : `<text x="${pl+8}" y="${pt+14}" font-size="11" font-family="DM Mono,monospace" fill="var(--muted)" font-style="italic">Fondsquote = 0 — kein Unterschied sichtbar</text>`;
 
-  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible" role="img"><title>Projektion des Rentenbeitragssatzes bis 2045</title>
     ${yVals}${xLabels}
     <line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
     <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>

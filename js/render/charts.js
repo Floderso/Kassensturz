@@ -48,7 +48,7 @@ function renderEstKurve(p) {
             <text x="${x}" y="${pt+iH+28}" text-anchor="middle" font-size="9" font-family="DM Mono,monospace" fill="var(--muted)">${d.label}</text>`;
   }).join('');
 
-  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+10}" style="width:100%;overflow:visible">
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+10}" style="width:100%;overflow:visible" role="img"><title>Einkommensteuertarif: Grenz- und Effektivsteuersatz über dem Einkommen</title>
     ${yGrid}${xGrid}
     <line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
     <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
@@ -100,7 +100,7 @@ function renderIncomeDist(r, p) {
             <text x="${pl-5}" y="${y+4}" text-anchor="end" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">${v}k</text>`;
   }).join('');
 
-  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+10}" style="width:100%;overflow:visible">
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+10}" style="width:100%;overflow:visible" role="img"><title>Wer gewinnt, wer verliert: Nettoveränderung je Einkommensdezil</title>
     ${yLabels}
     <line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
     <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
@@ -227,7 +227,7 @@ function renderSchuldenpfad(r, ref) {
   const endSQ  = pfad[pfad.length-1].sq.toFixed(1).replace('.',',');
   const sameScenario = Math.abs(r.saldo - ref.saldo) < 0.5;
 
-  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible">
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;overflow:visible" role="img"><title>Schuldenquotenpfad bis 2045 — gewähltes Szenario gegen Status quo</title>
     ${yVals}${xLabels}
     <line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
     <line x1="${pl}" y1="${pt+iH}" x2="${pl+iW}" y2="${pt+iH}" stroke="var(--rule)" stroke-width="1.5"/>
@@ -320,7 +320,7 @@ function renderZeitreihe(pfad) {
       font-weight="600" fill="var(--ink)" text-transform="uppercase" letter-spacing=".08em">${label}</text>`;
   }
 
-  const svg = `<svg viewBox="0 0 ${W} ${H + 8}" style="width:100%;overflow:visible">
+  const svg = `<svg viewBox="0 0 ${W} ${H + 8}" style="width:100%;overflow:visible" role="img"><title>Zukunftssimulation: Kennzahlenverlauf über die fünf Perioden</title>
     ${kpiTitle('Haushaltssaldo (Mrd. €)', cols[0], rows[0])}
     ${sparkline(saldos, cols[0], rows[0], rowH, 'var(--accent)', [saldoMin, saldoMax], 0,
         v => (v >= 0 ? '+' : '') + v.toFixed(0))}
@@ -385,7 +385,7 @@ function renderStaatsausgaben(r) {
     <rect x="${padL + 90}" y="${H - 18}" width="12" height="8" fill="var(--accent)" opacity=".75" rx="1"/>
     <text x="${padL + 106}" y="${H - 11}" font-size="9" font-family="DM Mono,monospace" fill="var(--muted)">Aktuelle Periode</text>`;
 
-  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;overflow:visible">
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;overflow:visible" role="img"><title>Staatsausgaben nach Aufgabenbereich</title>
     ${bars}
     ${legende}
   </svg>`;

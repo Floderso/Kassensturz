@@ -1,31 +1,10 @@
-  :root {
-    --bg:      #F6F3EC;
-    --paper:   #FDFBF7;
-    --ink:     #1A1814;
-    --border:  #E4DFD4;
-    --rule:    #E4DFD4;
-    --muted:   #7A746E;
-    --accent:  #C2410C;
-    --good:    #166534;
-    --bad:     #991B1B;
-    --warn:    #92400E;
-    --goodbg:  #DCFCE7;
-    --badbg:   #FEE2E2;
-    --warnbg:  #FEF3C7;
-    --neutbg:  #F0EDE7;
-    --r:       10px;
-    --ff-body:    'DM Sans', sans-serif;
-    --ff-display: 'Fraunces', serif;
-    --ff-mono:    'DM Mono', monospace;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    background: var(--bg);
-    color: var(--ink);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 16px;
-    line-height: 1.5;
-  }
+/* ══════════════════════════════════════════════════════════════════
+   Haushaltsspiel — Styles des Simulators.
+   Palette, Typo-Skala, Fokus, Bewegung und Navigation stehen in
+   css/tokens.css und werden VOR dieser Datei geladen. Hier steht nur,
+   was allein der Simulator braucht.
+   ══════════════════════════════════════════════════════════════════ */
+
   body {
     min-height: 100vh;
     padding: 0 16px 80px;
@@ -50,7 +29,7 @@
   h1 em { font-style: normal; color: var(--accent); }
   .subtitle {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--muted);
@@ -61,6 +40,9 @@
     grid-template-columns: minmax(320px, 380px) 1fr;
     gap: 32px;
   }
+  /* Ohne min-width:0 trägt jedes Grid-Item seine min-content-Breite in den
+     Track — das waren die 12px Dokument-Overflow auf 375px. */
+  .layout > * { min-width: 0; }
 
   /* CONTROLS */
   .controls {
@@ -88,7 +70,7 @@
     .kpi-value { font-size: 20px !important; }
     .panel { padding: 14px 16px; }
     svg { touch-action: none; }
-    .bar-label { font-size: 10px; }
+    .bar-label { font-size: var(--fs-micro); }
   }
 
   /* ── TABLET (601px – 1024px) ── */
@@ -147,7 +129,7 @@
   }
   .sidebar-collapsible-summary {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--muted);
@@ -178,7 +160,7 @@
   }
   .preset-label {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--muted);
@@ -191,7 +173,7 @@
   }
   .preset-buttons button {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     background: transparent;
     border: 1px solid var(--border);
@@ -246,7 +228,7 @@
     border-left: 2px solid var(--accent);
     padding: 8px 12px;
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     line-height: 1.7;
     color: var(--ink);
   }
@@ -271,7 +253,7 @@
   .bge-kpi { border: 1px solid rgba(42,39,32,0.12); border-radius: 6px; padding: 12px 14px; }
   .bge-kpi-label {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--muted);
@@ -289,15 +271,15 @@
   .bge-kpi-val.neutral { color: var(--ink); }
   .bge-kpi-note {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     color: var(--muted);
     line-height: 1.4;
   }
   .bge-source-note {
     margin-top: 14px;
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: rgba(107,99,89,0.6);
+    font-size: var(--fs-micro);
+    color: var(--muted-strong);
     border-top: 1px solid rgba(42,39,32,0.08);
     padding-top: 10px;
   }
@@ -310,7 +292,7 @@
   }
   .bge-financing-label {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--muted);
@@ -325,7 +307,7 @@
   .bge-financing-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; }
   .bge-financing-pct {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     font-weight: 600;
     color: var(--bad);
     white-space: nowrap;
@@ -341,7 +323,7 @@
     border-radius: 6px;
     border-left: 3px solid transparent;
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -354,7 +336,7 @@
   }
   .scenario-mode-bar.mode-b {
     display: flex;
-    background: rgba(5,150,105,0.09);
+    background: rgba(22,101,52,0.09);
     border-left-color: var(--good);
     color: var(--good);
   }
@@ -363,11 +345,6 @@
     border-radius: 50%;
     background: currentColor;
     flex-shrink: 0;
-    animation: pulse-dot 1.5s ease-in-out infinite;
-  }
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
   }
   .scenario-mode-bar-exit {
     margin-left: auto;
@@ -385,7 +362,7 @@
   /* ── SCENARIO ACTION BUTTONS ── */
   .scenario-btn {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 6px 13px;
@@ -524,11 +501,16 @@
     margin-bottom: 4px;
   }
   .ctrl-section-head {
+    /* Ist jetzt ein <button> — Browser-Defaults zurücknehmen, Optik bleibt. */
+    width: 100%;
+    background: none;
+    border: 0;
+    text-align: left;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-family: var(--ff-mono);
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.13em;
     font-weight: 500;
@@ -540,7 +522,7 @@
     transition: color 0.15s;
   }
   .ctrl-section-head:hover { color: var(--ink); }
-  .ctrl-chevron { font-size: 9px; transition: transform 0.2s; }
+  .ctrl-chevron { font-size: var(--fs-micro); transition: transform 0.2s; }
   .ctrl-section-head.collapsed .ctrl-chevron { transform: rotate(-90deg); }
   .ctrl-section-body { padding-bottom: 4px; }
   .ctrl-section-head.collapsed + .ctrl-section-body { display: none; }
@@ -553,7 +535,7 @@
   }
   .sidebar-eyebrow {
     font-family: 'DM Mono', monospace;
-    font-size: 9px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.15em;
     color: var(--accent);
@@ -655,12 +637,61 @@
     transition: background 0.3s, box-shadow 0.2s;
   }
   .kpi:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+
+  /* ── KENNZAHLEN-KONTEXT ─────────────────────────────────────────
+     Modus und Periode stehen jetzt bei den Zahlen, die sie erzeugen. */
+  .kpi-context { display: flex; flex-wrap: wrap; gap: 8px; }
+  .kpi-context:empty { display: none; }
+  .periode-bar {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 9px 12px;
+    margin-bottom: 16px;
+    border-radius: var(--r-sm);
+    background: var(--neutbg);
+    border-left: 3px solid var(--muted);
+    font-family: var(--ff-mono);
+    font-size: var(--fs-micro);
+  }
+  .periode-bar[hidden] { display: none; }
+  .periode-bar-label {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+  .periode-bar strong { font-weight: 600; color: var(--ink); }
+
+  /* ── SEKUNDÄRE KENNZAHLEN ───────────────────────────────────────
+     Vier primäre Kacheln sind immer sichtbar — so wollte es der
+     Markup-Kommentar von Anfang an. Die anderen sieben liegen hinter
+     einem Trigger, statt elf Zahlen gleichzeitig anzubieten. */
+  .kpi-secondary { display: none; }
+  .kpi-secondary.kpi-shown { display: block; }
+
+  .kpi-more-btn {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-top: 10px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    color: var(--muted);
+    font-family: var(--ff-mono);
+    font-size: var(--fs-micro);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 9px 14px;
+    cursor: pointer;
+    transition: color var(--dur), border-color var(--dur);
+  }
+  .kpi-more-btn:hover { color: var(--ink); border-color: var(--muted); }
   .kpi.tone-bad  .kpi-value { color: var(--bad) !important; }
   .kpi.tone-good .kpi-value { color: var(--good) !important; }
   .kpi.tone-warn .kpi-value { color: var(--warn) !important; }
   .kpi-label {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--muted);
@@ -699,7 +730,7 @@
   }
   .panel .panel-sub {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--muted);
@@ -719,11 +750,10 @@
     font-size: 12px;
   }
   .bar-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-family: var(--ff-mono);
+    font-size: var(--fs-micro);
+    line-height: 1.25;
+    overflow-wrap: anywhere;
   }
   .bar-track {
     height: 8px;
@@ -790,7 +820,7 @@
   }
   .div-center {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-align: center;
     color: var(--muted);
   }
@@ -812,12 +842,13 @@
   }
   .warning-box strong {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.15em;
     display: block;
     margin-bottom: 6px;
-    color: var(--accent);
+    /* Warnkasten steht auf --ink: der normale Akzent trägt dort 3,42:1. */
+    color: var(--accent-on-ink);
   }
 
   .footer-note {
@@ -854,7 +885,7 @@
   @keyframes obSlideUp { from { transform:translateY(16px); opacity:0; } to { transform:none; opacity:1; } }
   .onboarding-eyebrow {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.15em;
     color: var(--accent);
@@ -893,16 +924,27 @@
   .onboarding-choice:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .onboarding-choice-tag {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     opacity: 0.5;
     white-space: nowrap;
     flex-shrink: 0;
   }
+  .onboarding-independence {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-family: var(--ff-mono);
+    font-size: var(--fs-micro);
+    line-height: 1.6;
+    color: var(--muted);
+  }
+  .onboarding-independence a { color: var(--accent); }
+
   .onboarding-skip {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--muted);
@@ -943,7 +985,7 @@
   }
   .csp-title {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.15em;
     color: var(--muted);
@@ -986,7 +1028,7 @@
   .csp-story     { width: 36px; height: 64px; }
   .csp-fmt-name {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--ink);
@@ -995,7 +1037,7 @@
   }
   .csp-fmt-plat {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     color: var(--muted);
     text-align: center;
     line-height: 1.4;
@@ -1013,7 +1055,7 @@
   }
   .csp-theme-label {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--muted);
@@ -1021,7 +1063,7 @@
   }
   .csp-theme-btn {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 5px 14px;
@@ -1040,8 +1082,8 @@
   /* ── KPI BENCHMARK LINE ── */
   .kpi-bench {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: rgba(107,99,89,0.65);
+    font-size: var(--fs-micro);
+    color: var(--muted-strong);
     margin-top: 5px;
     line-height: 1.4;
     letter-spacing: 0.02em;
@@ -1053,7 +1095,7 @@
   /* ── CHALLENGE CONTEXT ── */
   .challenge-context {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     color: var(--muted);
     margin-top: 3px;
     opacity: 0.75;
@@ -1092,17 +1134,17 @@
   }
   .score-label-tag {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: rgba(107,99,89,0.65);
+    color: var(--muted-strong);
     margin-bottom: 12px;
   }
   .score-dims { display: flex; gap: 18px; flex-wrap: wrap; flex: 1; }
   .score-dim { flex: 1; min-width: 100px; }
   .score-dim-label {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--muted);
@@ -1135,7 +1177,7 @@
   /* ── ACTION TOOLBAR BUTTONS ── */
   .toolbar-btn {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     background: transparent;
@@ -1149,7 +1191,7 @@
   .toolbar-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .toolbar-btn-primary {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     background: var(--accent);
@@ -1177,25 +1219,25 @@
   .reform-tour-info { flex: 1; min-width: 200px; }
   .reform-tour-eyebrow {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: rgba(251,249,244,0.65);
+    color: var(--on-accent);
     margin-bottom: 3px;
   }
   .reform-tour-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
-  .reform-tour-desc { font-size: 12px; font-style: italic; color: rgba(251,249,244,0.78); }
+  .reform-tour-desc { font-size: 12px; font-style: italic; color: var(--on-accent); }
   .reform-tour-step {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: rgba(251,249,244,0.55);
+    font-size: var(--fs-micro);
+    color: var(--on-accent);
     white-space: nowrap;
     flex-shrink: 0;
   }
   .reform-tour-nav { display: flex; gap: 6px; flex-shrink: 0; }
   .reform-tour-btn {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 6px 14px;
@@ -1214,7 +1256,7 @@
     font-size: 12px;
     background: none;
     border: none;
-    color: rgba(251,249,244,0.65);
+    color: var(--on-accent);
     cursor: pointer;
     padding: 0 2px;
     flex-shrink: 0;
@@ -1225,7 +1267,7 @@
   .tour-group { margin-top: 12px; }
   .tour-group-label {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.13em;
     color: var(--muted);
@@ -1234,7 +1276,7 @@
   .tour-buttons { display: flex; flex-direction: column; gap: 4px; }
   .tour-btn {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 7px 10px;
@@ -1262,7 +1304,7 @@
   }
   .ft-link-eyebrow {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.13em;
     color: var(--accent);
@@ -1271,7 +1313,7 @@
   .ft-link-text { font-size: 14px; font-style: italic; }
   .ft-link-btn {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     padding: 9px 20px;
@@ -1285,13 +1327,9 @@
   }
   .ft-link-btn:hover { background: var(--ink); }
 
-  /* ── SITE NAV ── */
-  .site-nav-bar { background: var(--ink); padding: 0 24px; height: 48px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; margin: 0 -16px 28px; }
-  .site-nav-bar-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; width: 100%; }
-  .nav-logo { font-family: 'Fraunces', serif; font-weight: 800; font-size: 17px; color: #fff; letter-spacing: -0.02em; margin-right: 28px; text-decoration: none; }
-  .nav-link { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); padding: 0 12px; height: 48px; display: flex; align-items: center; text-decoration: none; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
-  .nav-link:hover { color: rgba(255,255,255,0.85); }
-  .nav-link.active { color: #fff; border-bottom-color: var(--accent); }
+  /* ── SITE NAV ── Regeln stehen in css/tokens.css. Die Nav liegt im
+     Markup vor .wrap, braucht also keine Negativ-Margins mehr. */
+  .site-nav-bar { margin-bottom: 28px; }
 
   details.about {
     background: var(--paper);
@@ -1338,7 +1376,7 @@
   }
   details.panel-collapsible > summary .panel-sub {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--muted);
@@ -1360,7 +1398,7 @@
   .badge {
     display: inline-block;
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 2px 6px;
@@ -1389,7 +1427,7 @@
   .challenge-card.done { opacity: 0.75; }
   .challenge-period {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--muted);
@@ -1413,7 +1451,7 @@
     display: flex;
     justify-content: space-between;
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     color: var(--muted);
     margin-bottom: 3px;
   }
@@ -1428,7 +1466,7 @@
   .challenge-done-badge {
     display: inline-block;
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 2px 8px;
@@ -1452,7 +1490,7 @@
     background: none;
     border: 1px solid var(--muted);
     color: var(--muted);
-    font-size: 10px;
+    font-size: var(--fs-micro);
     cursor: pointer;
     padding: 0;
     margin: 0 4px;
@@ -1473,25 +1511,27 @@
     font-size: 12px;
     line-height: 1.55;
     border-left: 3px solid var(--accent);
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.30);
   }
   .tt-popup[hidden] { display: none; }
+  /* Auf dunklem Grund trägt der normale Akzent nur 3,42:1. */
+  .tt-popup .tt-title,
+  .tt-popup strong { color: var(--accent-on-ink); }
   .tt-popup .tt-title {
     display: block;
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-bottom: 6px;
-    color: var(--accent);
     font-weight: 600;
   }
   .tt-popup .tt-quelle {
     display: block;
     margin-top: 8px;
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: rgba(251,249,244,0.45);
+    font-size: var(--fs-micro);
+    color: var(--on-accent);
     border-top: 1px solid rgba(255,255,255,0.1);
     padding-top: 6px;
   }
@@ -1506,7 +1546,7 @@
   details.dezil-legend > summary {
     cursor: pointer;
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     font-weight: 600;
@@ -1519,14 +1559,14 @@
   }
   details.dezil-legend > summary::-webkit-details-marker { display: none; }
   details.dezil-legend[open] > summary { color: var(--ink); }
-  .dezil-legend-hint { font-weight: 400; opacity: 0.5; font-size: 9px; }
+  .dezil-legend-hint { font-weight: 400; opacity: 0.5; font-size: var(--fs-micro); }
   details.dezil-legend[open] .dezil-legend-hint { display: none; }
   .dezil-legend-body { margin-top: 10px; }
   .dezil-legend-grid {
     display: grid;
     grid-template-columns: 2.8rem 6rem 1fr;
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
   }
   .dezil-legend-grid > span {
     padding: 3px 0;
@@ -1541,7 +1581,7 @@
   }
   .dezil-legend-note {
     font-family: 'DM Mono', monospace;
-    font-size: 9px;
+    font-size: var(--fs-micro);
     color: var(--muted);
     margin-top: 8px;
     line-height: 1.5;
@@ -1565,13 +1605,13 @@
   details.rw-details > summary .rw-hint {
     font-weight: 400;
     opacity: 0.45;
-    font-size: 10px;
+    font-size: var(--fs-micro);
   }
   .rw-body { margin-top: 20px; }
   .rw-section { margin-bottom: 20px; }
   .rw-section-title {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--muted);
@@ -1599,7 +1639,7 @@
   .rw-good { color: var(--good); font-weight: 600; }
   .rw-bad { color: var(--bad); font-weight: 600; }
   .rw-zone-table { width: 100%; border-collapse: collapse; font-family: 'DM Mono', monospace; font-size: 11px; margin-bottom: 8px; }
-  .rw-zone-table th { text-align: left; border-bottom: 1px solid var(--rule); padding: 3px 8px; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .rw-zone-table th { text-align: left; border-bottom: 1px solid var(--rule); padding: 3px 8px; font-weight: 600; font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
   .rw-zone-table td { padding: 3px 8px; border-bottom: 1px dashed rgba(42,39,32,0.15); }
   .rw-zone-table tr.active-zone td { background: rgba(194,65,12,0.08); color: var(--accent); font-weight: 600; }
 
@@ -1620,7 +1660,7 @@
   border-radius: 6px;
   color: var(--accent);
   font-family: 'DM Mono', monospace;
-  font-size: 10px;
+  font-size: var(--fs-micro);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   cursor: pointer;
@@ -1686,7 +1726,7 @@
 }
 .mod-drawer-sub {
   font-family: 'DM Mono', monospace;
-  font-size: 10px;
+  font-size: var(--fs-micro);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--muted);
@@ -1755,16 +1795,16 @@
 }
 .mod-card-level {
   font-family: 'DM Mono', monospace;
-  font-size: 10px;
+  font-size: var(--fs-micro);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 2px 7px;
   border-radius: 3px;
   display: inline-block;
 }
-.mod-card-level.ein  { background: rgba(5,150,105,0.08); color: var(--good); }
-.mod-card-level.fort { background: rgba(217,119,6,0.08);  color: var(--warn); }
-.mod-card-level.exp  { background: rgba(220,38,38,0.08);  color: var(--bad); }
+.mod-card-level.ein  { background: rgba(22,101,52,0.08); color: var(--good); }
+.mod-card-level.fort { background: rgba(146,64,14,0.08);  color: var(--warn); }
+.mod-card-level.exp  { background: rgba(153,27,27,0.08);  color: var(--bad); }
 
 /* ── ZUKUNFTSSIMULATION ─────────────────────────────────────── */
 
@@ -1794,7 +1834,7 @@
 .zukunft-sz-btn.active { border-color: var(--accent); background: var(--warnbg); }
 .zukunft-sz-icon { font-size: 18px; line-height: 1; }
 .zukunft-sz-name {
-  font-size: 9px;
+  font-size: var(--fs-micro);
   text-transform: uppercase;
   letter-spacing: .08em;
   text-align: center;
@@ -1833,7 +1873,7 @@
 
 .perioden-hint {
   font-family: 'DM Mono', monospace;
-  font-size: 10px;
+  font-size: var(--fs-micro);
   color: var(--muted);
   margin-bottom: 4px;
   min-height: 14px;
@@ -1848,11 +1888,8 @@
    ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 600px) {
 
-  /* ── Navigation: horizontal scrollbar statt quetschen ── */
-  .site-nav-bar { padding: 0 10px; margin: 0 -10px 20px; }
-  .site-nav-bar-inner { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
-  .nav-logo { margin-right: 14px; flex-shrink: 0; }
-  .nav-link { padding: 0 8px; flex-shrink: 0; }
+  /* ── Navigation: bricht um statt seitwärts aus dem Bild zu laufen ── */
+  .site-nav-bar { margin-bottom: 20px; }
 
   /* ── Slider Thumb: größeres Touch-Target ── */
   input[type="range"]::-webkit-slider-thumb { width: 28px; height: 28px; }
@@ -1880,7 +1917,7 @@
 
   /* ── Bar-Row Labels: mehr Platz ── */
   .bar-row   { grid-template-columns: 80px 1fr 65px; }
-  .bar-label { font-size: 10px; }
+  .bar-label { font-size: var(--fs-micro); }
 
   /* ── KPI Grid: kleinere Mindestbreite für 360px ── */
   .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important; }
@@ -1888,9 +1925,9 @@
 
   /* ── Divergent Chart (Wer gewinnt/verliert): kompaktes Layout ── */
   .divergent-row { grid-template-columns: 45px 1fr 8px 1fr 54px; gap: 4px; }
-  .div-label     { font-size: 10px; }
-  .div-center    { font-size: 9px; }
-  .div-value     { font-size: 10px; }
+  .div-label     { font-size: var(--fs-micro); }
+  .div-center    { font-size: var(--fs-micro); }
+  .div-value     { font-size: var(--fs-micro); }
 
   /* ── Onboarding-Card: weniger Padding ── */
   .onboarding-card { padding: 22px 20px; }

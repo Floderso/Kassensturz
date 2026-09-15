@@ -21,53 +21,31 @@
 <title>Mikrolabor – Interaktive Mikroökonomie-Modelle | Kassensturz</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
 <style>
+  /* Palette, Typo, Fokus und Nav: css/tokens.css.
+     Hier nur die Datenreihen-Akzente dieser Seite. */
   :root {
-    --bg:      #F5F2EB;
-    --paper:   #FEFCF8;
-    --ink:     #1C1917;
-    --border:  #E5E1D8;
-    --rule:    #E5E1D8;
-    --muted:   #78716C;
-    --accent:  #2563EB;
     --accent2: #1e5f3a;
     --accent3: #2a4d7a;
-    --good:    #059669;
-    --bad:     #DC2626;
-    --warn:    #D97706;
-    --r:       8px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    background: var(--bg);
-    color: var(--ink);
-    font-family: 'Inter', sans-serif;
-    font-size: 16px;
-    line-height: 1.5;
   }
   body {
     background-image:
-      radial-gradient(circle at 15% 30%, rgba(37,99,235,0.025) 0%, transparent 40%),
-      radial-gradient(circle at 85% 70%, rgba(5,150,105,0.025) 0%, transparent 40%);
+      radial-gradient(circle at 15% 30%, rgba(194,65,12,0.025) 0%, transparent 40%),
+      radial-gradient(circle at 85% 70%, rgba(22,101,52,0.025) 0%, transparent 40%);
     min-height: 100vh;
     padding: 0 0 80px;
   }
   .wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
 
   /* NAV */
-  .site-nav-bar { background: var(--ink); padding: 0 24px; height: 40px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; }
-  .site-nav-bar-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; width: 100%; }
-  .nav-logo { font-family: 'Fraunces', serif; font-weight: 800; font-size: 17px; color: #fff; letter-spacing: -0.02em; margin-right: 28px; text-decoration: none; }
-  .nav-link { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); padding: 0 12px; height: 40px; display: flex; align-items: center; text-decoration: none; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
-  .nav-link:hover { color: rgba(255,255,255,0.85); }
-  .nav-link.active { color: #fff; border-bottom-color: var(--accent); }
 
   /* HEADER */
   header { border-bottom: 2px solid var(--rule); padding: 24px 0; margin-bottom: 32px; }
   .masthead {
     display: flex; justify-content: space-between;
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-family: var(--ff-mono); font-size: var(--fs-micro);
     text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted);
     border-bottom: 1px solid var(--rule); padding-bottom: 8px; margin-bottom: 16px;
   }
@@ -81,7 +59,7 @@
     margin-bottom: 28px; overflow-x: auto;
   }
   .model-tab {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-family: var(--ff-mono); font-size: var(--fs-micro);
     text-transform: uppercase; letter-spacing: 0.1em;
     padding: 10px 14px; background: none; border: none;
     border-bottom: 3px solid transparent; cursor: pointer;
@@ -103,7 +81,7 @@
   /* CONTROLS BOX */
   .ctrl-box { background: var(--paper); border: 1px solid var(--rule); padding: 18px; }
   .ctrl-title {
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    font-family: var(--ff-mono); font-size: 11px;
     text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
     margin-bottom: 14px; padding-bottom: 7px; border-bottom: 1px solid var(--rule);
     color: var(--accent);
@@ -114,7 +92,7 @@
     font-size: 12px; margin-bottom: 4px;
   }
   .ctrl-val {
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    font-family: var(--ff-mono); font-size: 11px;
     color: var(--accent); font-weight: 600;
   }
   .ctrl-slider {
@@ -125,11 +103,11 @@
     -webkit-appearance: none; width: 20px; height: 20px;
     background: var(--accent); cursor: pointer;
     border: 2px solid var(--paper); border-radius: 50%;
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    box-shadow: 0 0 0 3px rgba(194,65,12,0.15);
     transition: box-shadow 0.2s, transform 0.15s;
   }
   .ctrl-slider::-webkit-slider-thumb:hover {
-    box-shadow: 0 0 0 6px rgba(37,99,235,0.2);
+    box-shadow: 0 0 0 6px rgba(194,65,12,0.2);
     transform: scale(1.1);
   }
   .ctrl-slider::-moz-range-thumb {
@@ -139,9 +117,9 @@
 
   /* RESULT DISPLAY */
   .result-box {
-    background: rgba(37,99,235,0.06); border-left: 3px solid var(--accent);
+    background: rgba(194,65,12,0.06); border-left: 3px solid var(--accent);
     padding: 10px 13px; margin-top: 14px;
-    font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.9;
+    font-family: var(--ff-mono); font-size: 11px; line-height: 1.9;
   }
   .result-box strong { color: var(--accent); }
   .col-good { color: var(--good); font-weight: 600; }
@@ -151,7 +129,7 @@
   /* GRAPH BOX */
   .graph-box { background: var(--paper); border: 1px solid var(--rule); padding: 14px; }
   .graph-title {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-family: var(--ff-mono); font-size: var(--fs-micro);
     text-transform: uppercase; letter-spacing: 0.12em;
     color: var(--muted); margin-bottom: 10px;
   }
@@ -163,18 +141,19 @@
     background: var(--paper); padding: 16px 20px;
   }
   .insight-label {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-family: var(--ff-mono); font-size: var(--fs-micro);
     text-transform: uppercase; letter-spacing: 0.12em;
     color: var(--accent); margin-bottom: 8px; font-weight: 600;
   }
   .insight-text { font-size: 13px; line-height: 1.7; }
   .insight-quelle {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-family: var(--ff-mono); font-size: var(--fs-micro);
     color: var(--muted); margin-top: 8px;
   }
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main-content">Zum Inhalt springen</a>
 
 <nav class="site-nav-bar">
   <div class="site-nav-bar-inner">
@@ -187,7 +166,7 @@
   </div>
 </nav>
 
-<div class="wrap">
+<div class="wrap" id="main-content">
 <header>
   <div class="masthead">
     <span>Mikrolabor · Interaktive Modelle</span>
@@ -281,7 +260,7 @@
         <div>Typ: <strong id="el_typ">—</strong></div>
       </div>
 
-      <div style="margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);line-height:1.6;">
+      <div style="margin-top:14px;font-family:var(--ff-mono);font-size:var(--fs-micro);color:var(--muted);line-height:1.6;">
         Empirische Richtwerte:<br>
         Benzin: −0,25 · Lebensmittel: −0,27<br>
         Restaurants: −2,3 · Zigaretten: −0,4<br>
@@ -374,7 +353,7 @@
         <div>Lohnmasse nachher: <strong id="ml_wb1">—</strong></div>
       </div>
 
-      <div style="margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);line-height:1.6;">
+      <div style="margin-top:14px;font-family:var(--ff-mono);font-size:var(--fs-micro);color:var(--muted);line-height:1.6;">
         Emp. εL-Richtwerte (Dube 2019):<br>
         Moderate Erhöhung: −0,1 bis −0,3<br>
         Sehr hoher Mindestlohn: bis −0,8<br>
@@ -462,7 +441,7 @@ function svgEl(tag, attrs) {
   return e;
 }
 function svgTxt(x, y, text, attrs = {}) {
-  const e = svgEl('text', { x, y, 'font-family': 'JetBrains Mono,monospace', 'font-size': '10', fill: '#1a1814', ...attrs });
+  const e = svgEl('text', { x, y, 'font-family': 'DM Mono,monospace', 'font-size': '10', fill: '#1a1814', ...attrs });
   e.textContent = text;
   return e;
 }

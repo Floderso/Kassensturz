@@ -1,0 +1,251 @@
+/* ══════════════════════════════════════════════════════════════════
+   Kassensturz — Design-Tokens und geteilte Primitive
+   Einzige Quelle für Palette, Typo-Skala, Radien, Fokus und Nav.
+   Wird von index.html (Haushaltsspiel), finanz.html, mikro.html,
+   quellen.html und impressum.html geladen — vor dem jeweils
+   seitenspezifischen <style>-Block.
+
+   Kontrastwerte sind gemessen (WCAG 2.1, sRGB) und im Kommentar
+   hinterlegt. Wer einen Farbwert ändert, rechnet ihn neu nach.
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Flächen ─────────────────────────────────────────────────── */
+  --bg:      #F6F3EC;   /* Seitengrund */
+  --paper:   #FDFBF7;   /* erhobene Flächen, Karten, Panels */
+  --ink:     #1A1814;   /* Text auf hellem Grund, dunkle Flächen */
+  --border:  #E4DFD4;
+  --rule:    #E4DFD4;
+
+  /* ── Text ────────────────────────────────────────────────────── */
+  /* --muted trägt praktisch jeden Sekundärtext im Projekt.
+     Alt: #7A746E = 4,16:1 auf --bg → AA-Verstoß an ~200 Stellen.
+     Neu: 5,19:1 auf --bg, 5,56:1 auf --paper. */
+  --muted:        #6B655F;
+  /* Für 10–11px-Belegschicht (Quellen, Benchmarks, Fußnoten):
+     6,24:1 auf --bg, 6,69:1 auf --paper. */
+  --muted-strong: #5F5952;
+  /* Text auf --ink-Flächen. Alt: rgba(255,255,255,.4) = 3,81:1.
+     Neu: 7,01:1 auf --ink. */
+  --on-ink:       #FFFFFF;
+  --on-ink-muted: #A8A29A;
+
+  /* ── Akzent ──────────────────────────────────────────────────── */
+  /* 4,67:1 auf --bg, 5,01:1 auf --paper; Weiß darauf 5,18:1.
+     Als Textfarbe immer --accent, nie das hellere #EA580C (3,21:1). */
+  --accent:      #C2410C;
+  --accent-soft: rgba(194, 65, 12, 0.10);
+  /* Text auf --accent-Flächen: 4,92:1. Hierarchie dort über Gewicht
+     und Größe, nicht über Deckkraft — jede Alpha-Stufe fiel durch. */
+  --on-accent:   #FBF9F4;
+  /* Akzent als TEXT auf --ink-Flächen (Tooltip, dunkle Panels): der
+     normale Akzent erreicht dort nur 3,42:1, dieser 4,98:1. */
+  --accent-on-ink: #EA580C;
+
+  /* ── Semantik ────────────────────────────────────────────────── */
+  --good:   #166534;
+  --bad:    #991B1B;
+  --warn:   #92400E;
+  --goodbg: #DCFCE7;
+  --badbg:  #FEE2E2;
+  --warnbg: #FEF3C7;
+  --neutbg: #F0EDE7;
+
+  /* ── Form ────────────────────────────────────────────────────── */
+  --r:      10px;
+  --r-sm:   6px;
+
+  /* ── Schrift ─────────────────────────────────────────────────── */
+  --ff-body:    'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ff-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --ff-mono:    'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* ── Typo-Skala ──────────────────────────────────────────────────
+     Untergrenze ist --fs-micro (11px). Darunter gibt es nichts:
+     9px- und 10px-Labels waren der häufigste Befund der Kritik. */
+  --fs-micro: 11px;
+  --fs-xs:    12px;
+  --fs-sm:    13px;
+  --fs-base:  15px;
+  --fs-md:    17px;
+  --fs-lg:    21px;
+  --fs-xl:    28px;
+  --fs-2xl:   38px;
+
+  /* ── Bewegung ────────────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur:      160ms;
+}
+
+/* ══ Reset und Basis ═══════════════════════════════════════════════ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  color-scheme: light;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--ff-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+img, svg { max-width: 100%; }
+
+/* Zahlen in Tabellen und KPI-Flächen laufen nicht mehr auseinander. */
+.kpi-value, .kpi-val, .value, table, .num, [data-num] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ══ Browser-Oberflächen ═══════════════════════════════════════════
+   Die Teile, die niemand zeichnet und die trotzdem mitgeliefert
+   werden: Auswahl, Caret, Scrollbar, Unterstreichung. */
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+input, textarea, select { caret-color: var(--accent); }
+
+a { text-underline-offset: 0.18em; }
+
+* { scrollbar-color: var(--border) transparent; scrollbar-width: thin; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border: 2px solid var(--bg);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ══ Fokus ═════════════════════════════════════════════════════════
+   Vorher: eine einzige :focus-Regel im ganzen Projekt, und die war
+   identisch zum Hover-Zustand. Ein Tastaturnutzer konnte nicht
+   erkennen, wo er steht. */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* Auf dunklen Flächen braucht der Ring einen hellen Träger. */
+.hero :focus-visible,
+.site-nav-bar :focus-visible,
+[data-surface="ink"] :focus-visible {
+  outline-color: var(--on-ink);
+}
+
+/* Reine Mausklicks sollen keinen Ring hinterlassen — :focus-visible
+   erledigt das; diese Regel fängt Altlasten mit outline:none ab. */
+a:focus-visible, button:focus-visible,
+input:focus-visible, select:focus-visible,
+textarea:focus-visible, summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ══ Bewegung respektiert die Systemeinstellung ═══════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ══ Skip-Link ═════════════════════════════════════════════════════ */
+
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  z-index: 1000;
+  background: var(--ink);
+  color: var(--on-ink);
+  font-family: var(--ff-mono);
+  font-size: var(--fs-xs);
+  padding: 10px 16px;
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  transition: top var(--dur) var(--ease-out);
+}
+.skip-link:focus { top: 8px; }
+
+/* ══ Navigation ════════════════════════════════════════════════════
+   Ein Markup, eine Regel. Lag vorher in fünf Dateien parallel. */
+
+.site-nav-bar {
+  background: var(--ink);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.site-nav-bar-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: wrap;
+  min-height: 44px;
+}
+
+.nav-logo {
+  font-family: var(--ff-display);
+  font-weight: 800;
+  font-size: var(--fs-md);
+  color: var(--on-ink);
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  margin-right: 20px;
+  padding: 6px 0;
+}
+
+.nav-link {
+  font-family: var(--ff-mono);
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--on-ink-muted);
+  padding: 12px 10px;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color var(--dur), border-color var(--dur);
+}
+
+.nav-link:hover { color: var(--on-ink); }
+
+.nav-link.active {
+  color: var(--on-ink);
+  border-bottom-color: var(--accent);
+}
+
+/* Unter 600px bricht die Nav um, statt seitwärts aus dem Bild zu
+   laufen — vorher lagen 251px hinter einem Scroll ohne Affordanz. */
+@media (max-width: 600px) {
+  .site-nav-bar-inner {
+    padding: 4px 12px 6px;
+    gap: 0 2px;
+  }
+  .nav-logo {
+    font-size: var(--fs-base);
+    margin-right: auto;
+    flex: 0 0 auto;
+  }
+  .nav-link { padding: 8px 8px; }
+}
