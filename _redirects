@@ -1,0 +1,3 @@
+# Die frühere Unterseite des Haushaltsspiels ist jetzt die Wurzel.
+# 301 erhält den Query-String, damit geteilte ?preset=-Links weiter funktionieren.
+/haushaltsspiel.html  /  301

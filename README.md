@@ -20,7 +20,7 @@ Kassensturz ist ein interaktives Bildungsprojekt, mit dem du Steuern und Sozialr
 
 | Seite | Inhalt |
 |---|---|
-| **Haushaltsspiel** | Steuer-Simulator mit Reglern für Einkommensteuer, MwSt, CO₂-Steuer, Sozialabgaben u.v.m. Echtzeit-KPIs für Staatshaushalt, Gini-Koeffizient, Armutsrisiko und Verwaltungskosten. Enthält eine Zukunftssimulation (2026–2045), die die gewählte Politik über mehrere Perioden fortschreibt, sowie tägliche/wöchentliche/monatliche Challenges. |
+| **Haushaltsspiel** (Startseite) | Steuer-Simulator mit Reglern für Einkommensteuer, MwSt, CO₂-Steuer, Sozialabgaben u.v.m. Echtzeit-KPIs für Staatshaushalt, Gini-Koeffizient, Armutsrisiko und Verwaltungskosten. Enthält eine Zukunftssimulation (2026–2045), die die gewählte Politik über mehrere Perioden fortschreibt, sowie tägliche/wöchentliche/monatliche Challenges. |
 | **Finanztools** | Einzelne Finanzrechner und Visualisierungen rund um persönliche Finanzen und Steuern. |
 | **Mikrolabor** | Interaktive mikroökonomische Modelle: Angebot & Nachfrage, Preiselastizität, Steuerinzidenz, Mindestlohn, Monopol. |
 | **Quellen** | Vollständige Quellenangaben zu allen verwendeten Daten und Elastizitäten. |
@@ -76,14 +76,13 @@ Das Modell ist ein **Lernwerkzeug**, kein Prognosemodell. Es kann Größenordnun
 
 ```
 kassensturz/
-├── index.html                  # Startseite
-├── haushaltsspiel.html         # Steuer-Simulator + Zukunftssimulation + Challenges
+├── index.html                  # Startseite = Steuer-Simulator + Zukunftssimulation + Challenges
 ├── finanz.html                 # Finanztools
 ├── mikro.html                  # Mikrolabor
 ├── quellen.html                # Quellenangaben
 ├── impressum.html              # Impressum
 ├── css/
-│   └── haushaltsspiel.css      # Styles für den Simulator
+│   └── haushaltsspiel.css      # Styles für den Simulator (Startseite)
 ├── js/
 │   ├── data.js                 # Datenkonstanten (Dezile, Staatsausgaben, Aufkommen, Challenges)
 │   ├── haushaltsspiel.js       # UI-Logik & State-Management

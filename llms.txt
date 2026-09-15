@@ -8,8 +8,7 @@ Kassensturz macht komplexe Finanz- und Steuerpolitik für alle verständlich —
 
 ## Hauptseiten
 
-- [Startseite](https://kassensturz.org/): Übersicht aller Tools und Themen
-- [Das große Haushaltsspiel](https://kassensturz.org/haushaltsspiel.html): Interaktive Simulation des deutschen Steuersystems. Regler für Einkommensteuer, Mehrwertsteuer, CO₂-Steuer, Körperschaftsteuer, Sozialabgaben u.v.m. Zeigt Auswirkungen auf Staatshaushalt, Gini-Koeffizient und alle Einkommensdezile.
+- [Das große Haushaltsspiel](https://kassensturz.org/): Startseite und Hauptwerkzeug. Interaktive Simulation des deutschen Steuersystems. Regler für Einkommensteuer, Mehrwertsteuer, CO₂-Steuer, Körperschaftsteuer, Sozialabgaben u.v.m. Zeigt Auswirkungen auf Staatshaushalt, Gini-Koeffizient und alle Einkommensdezile.
 - [Finanztools](https://kassensturz.org/finanz.html): Kredit-, Renten- und Inflationsrechner für Deutschland
 - [Mikrolabor](https://kassensturz.org/mikro.html): Interaktive Mikroökonomie-Modelle (Angebot & Nachfrage, Steuerinzidenz, Mindestlohn, Monopol)
 - [Quellenverzeichnis](https://kassensturz.org/quellen.html): Alle verwendeten Datenquellen mit direkten Links
