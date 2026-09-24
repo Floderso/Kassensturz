@@ -604,3 +604,23 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - RV-BBG 101.400 €, KV-BBG 69.750 €
   - RV 18,6 %, allgemeiner KV-Satz 14,6 % + Ø-Zusatzbeitrag 2,9 %
   - Regelsatz 563 €, Kindergeld 259 €, Mindestlohn 13,90 €
+
+---
+
+## Nachträge aus der Umsetzung (Phase 4)
+
+### F-068 · schwer · W · Kinder je Haushalt ergeben das Doppelte der Kindergeldkinder
+- **Fundstelle:** `js/rechner/verteilung.js` (vor Block 4b), `kg_quote`; `js/rechner/berechne.js`, `kg_auszahlung`
+- **Beleg:** `const kg_quote = [0.80, 1.10, 1.20, 1.15, 1.05, 0.95, 0.85, 0.75, 0.65, 0.50, 0.35, 0.20];` · `const kg_auszahlung = 17 * params.kg * 12 / 1000;`
+- **Begründung:**
+  - Hochgerechnet mit den Haushaltszahlen ergibt `kg_quote` 36,5 Mio. Kinder. Die Staatsausgaben für Kindergeld werden mit 17 Mio. Kindern gerechnet.
+  - Das Kindergeld in den Haushaltsnettos war dadurch um den Faktor 2,1 überhöht. Betroffen sind das Netto der unteren und mittleren Gruppen sowie Gini und Armutsquote.
+- **Status:** In Block 4b behoben. Die Kinderzahlen je Gruppe sind auf 17 Mio. skaliert (`HH_STRUKTUR`).
+
+### F-069 · schwer · T · D10b und D10c erhalten in der MwSt-Rechnung die Einkommensteuer von D10a
+- **Fundstelle:** `js/rechner/berechne.js` (vor Block 4b), Abschnitt 4 (MwSt)
+- **Beleg:** `const est_d = est_pro_dezil.find(x => x.d === d.d).est;`
+- **Begründung:**
+  - D10a, D10b und D10c haben dasselbe Feld `d: 10`. `find` liefert für alle drei den Eintrag von D10a.
+  - Für D10b und D10c wurde die Einkommensteuer deshalb viel zu niedrig angesetzt, und Nettoeinkommen, Konsum und MwSt fielen zu hoch aus.
+- **Status:** In Block 4b behoben. Die Zuordnung erfolgt jetzt über den Index.

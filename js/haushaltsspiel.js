@@ -5,7 +5,7 @@
 // ═══════════════════════════════════════════════════════
 
 import { DEZILE, ELAST, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, ZUKUNFTS_SZENARIEN } from './data.js';
-import { estTarif, grenzsteuersatz, effSteuersatz, tarifAusParams } from './rechner/einkommensteuer.js';
+import { grenzsteuersatz, tarifAusParams } from './rechner/einkommensteuer.js';
 import { berechne } from './rechner/berechne.js';
 import { simulierePfad } from './rechner/transition.js';
 import { renderEstKurve, renderIncomeDist, exportCSV, renderSchuldenpfad, renderZeitreihe, renderStaatsausgaben } from './render/charts.js';
@@ -334,21 +334,7 @@ function render() {
     { label: 'Gini (neu)', value: r.gini, ref: REF.gini, max: 0.5, fmt: v => v.toFixed(3).replace('.',',') },
     { label: 'Gini (Basis)', value: REF.gini, ref: REF.gini, max: 0.5, fmt: v => v.toFixed(3).replace('.',','), muted: true },
     { label: 'Palma', value: r.palma, ref: REF.palma, max: 10, fmt: v => v.toFixed(2).replace('.',',') },
-    { label: 'S80/S20',
-      value: (() => {
-        // Korrektes S80/S20: gewichteter Durchschnitt nach Haushaltszahl.
-        // Unterste 20 %: D1+D2 (je 4,1 Mio. = 8,2 Mio. ≈ 20 % der 41,1 Mio. Haushalte)
-        // Oberste 20 %:  D9+D10a+D10b+D10c (4,1+2,05+1,64+0,41 = 8,2 Mio.)
-        const n = r.hh_delta.netto;
-        const botSum = n[0]*DEZILE[0].anzahl + n[1]*DEZILE[1].anzahl;
-        const botN   = DEZILE[0].anzahl + DEZILE[1].anzahl;
-        const topSum = n[8]*DEZILE[8].anzahl + n[9]*DEZILE[9].anzahl + n[10]*DEZILE[10].anzahl + n[11]*DEZILE[11].anzahl;
-        const topN   = DEZILE[8].anzahl + DEZILE[9].anzahl + DEZILE[10].anzahl + DEZILE[11].anzahl;
-        const avgBot = botSum / botN;
-        const avgTop = topSum / topN;
-        return avgBot > 0 ? avgTop / avgBot : 0;
-      })(),
-      ref: 0, max: 15, fmt: v => v.toFixed(1).replace('.',',') }
+    { label: 'S80/S20', value: r.s80s20, ref: REF.s80s20, max: 15, fmt: v => v.toFixed(1).replace('.',',') }
   ];
   const dHtml = dBars.map(b => {
     const pct = (b.value / b.max) * 100;
@@ -888,14 +874,12 @@ function renderRechenweg(r, p) {
   const z2_end = tz.e2, z3_end = tz.e3, z4_end = tz.e4;
   const pct = r => (r * 100).toFixed(2).replace(/\.?0+$/, '').replace('.', ',');
 
-  // Beispiel-Dezil (D5 = 40.000 € Brutto)
-  const d5_brutto = 40000;
-  const d5_est = estTarif(d5_brutto, p);
-  const d5_gs = (grenzsteuersatz(d5_brutto, p) * 100).toFixed(1);
-  const d5_eff = (effSteuersatz(d5_brutto, p) * 100).toFixed(1);
-
-  // D5-Zone bestimmen
-  const d5_zone = d5_brutto <= tz.gfb ? 1 : d5_brutto <= tz.e2 ? 2 : d5_brutto <= tz.e3 ? 3 : d5_brutto <= tz.e4 ? 4 : 5;
+  // Beispiel-Gruppe D5: Weg vom Haushaltsbrutto zum zvE und zur Steuer (Werte aus berechne)
+  const d5 = DEZILE[4], e5 = r.est_pro_dezil[4];
+  const d5_paar = d5.paar_anteil >= 0.5;
+  const d5_zve_veranl = d5_paar ? e5.zve / 2 : e5.zve;   // zvE je Veranlagten (Splitting: halbiert)
+  const d5_gs = (grenzsteuersatz(d5_zve_veranl, p) * 100).toFixed(1);
+  const d5_zone = d5_zve_veranl <= tz.gfb ? 1 : d5_zve_veranl <= tz.e2 ? 2 : d5_zve_veranl <= tz.e3 ? 3 : d5_zve_veranl <= tz.e4 ? 4 : 5;
 
   panel.innerHTML = `
     <div class="rw-section">
@@ -909,10 +893,12 @@ function renderRechenweg(r, p) {
         <tr class="${d5_zone===4?'active-zone':''}"><td>4</td><td>${fk(z3_end)} – ${fk(z4_end)} €</td><td>${pct(tz.r4)} %</td><td>linear (§ 32a Nr. 4)</td></tr>
         <tr class="${d5_zone===5?'active-zone':''}"><td>5</td><td>ab ${fk(z4_end)} €</td><td>${pct(tz.r5)} %</td><td>Spitzensteuersatz (§ 32a Nr. 5)</td></tr>
       </table>
-      <div class="rw-text"><strong>Beispiel Dezil 5</strong> (Brutto ~40.000 €):
-        Tarif angewandt auf 40.000 € → Zone ${d5_zone}
-        → ESt = <span class="rw-hl">${fk(Math.round(d5_est))} €</span>
-        · Grenzsteuersatz: ${d5_gs} % · Effektivsteuersatz: ${d5_eff} %</div>
+      <div class="rw-text"><strong>Beispiel Dezil 5</strong> (Haushalt, Brutto ${fk(d5.brutto)} €, ${fmtDE(d5.erwachsene, 1)} Erwachsene, ${fmtDE(d5.paar_anteil * 100, 0)} % Paare):
+        Arbeitseinkommen − SV-Arbeitnehmeranteil ${fk(e5.sv_an)} € − Arbeitnehmer-Pauschbetrag ${fk(1230 * d5.erwerbstaetige)} €
+        = zvE <span class="rw-hl">${fk(e5.zve)} €</span> → ${d5_paar ? `Splitting: je Partner ${fk(d5_zve_veranl)} €` : 'Grundtarif'} → Zone ${d5_zone}
+        → ESt + Soli = <span class="rw-hl">${fk(Math.round(e5.est_arbeit))} €</span>
+        · Grenzsteuersatz: ${d5_gs} % · Durchschnittssatz auf das Brutto: ${f(e5.est / d5.brutto * 100)} %
+        <br><em>Haushaltsstruktur (Paaranteil, Erwachsene, Erwerbstätige) ist eine gekennzeichnete Annahme bis zur Übernahme von Destatis-Werten.</em></div>
       <div class="rw-text">Gesamtaufkommen ESt: <span class="rw-hl">${f(r.rev.est)} Mrd. €</span>
         ${p.synthetisch ? '· Kapital synthetisch zusammen besteuert' : `· Kapital dual: Abgeltung ${p.abgeltung}%`}
         · Quelle: BMF Steuerschätzung 2025</div>

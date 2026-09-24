@@ -22,6 +22,36 @@ const DEZILE = [
   { d:10, idx:10, label:'D10b', brutto: 220000, kapital: 0.18, konsum: 0.52, gewicht: 2.0, vermoegen: 1500000, anzahl: 1.64 },
   { d:10, idx:11, label:'D10c', brutto: 700000, kapital: 0.45, konsum: 0.40, gewicht: 2.0, vermoegen: 7000000, anzahl: 0.41 },
 ];
+// Haushaltsstruktur je Gruppe (für zvE, Splitting, Pauschbeträge und Äquivalenzgewichtung, Prüfbericht F-002/F-021).
+// [ANNAHME] Die Werte sind NICHT aus einer Primärtabelle übernommen (Destatis war bei der Umsetzung nicht
+// erreichbar) und müssen durch Destatis EVS 2023 / Mikrozensus 2024 (Haushalte nach Haushaltsnettoeinkommen
+// und Haushaltsgröße, GENESIS 12211) ersetzt werden. Herleitung:
+//   kinder:        Verlauf der bisherigen kg_quote aus verteilung.js, skaliert auf 17 Mio. Kindergeldkinder
+//                  (dieselbe Zahl wie die Kindergeld-Ausgaben in berechne.js; kg_quote ergab 36,5 Mio., F-068)
+//   erwachsene:    steigt mit dem Einkommen (untere Gruppen: viele Alleinlebende, u. a. Rentner:innen);
+//                  so gewählt, dass der Durchschnitt 1,71 Erwachsene/Haushalt trifft (70 Mio. / 41 Mio., bisher
+//                  ERWACHSENE_PRO_HH)
+//   paar_anteil:   Anteil zusammen veranlagter Ehepaare; folgt erwachsene − 1 mit Abschlag für nichteheliche
+//                  Paare und erwachsene Kinder im Haushalt
+//   erwerbstaetige: Personen mit Arbeitnehmereinkünften (für den Arbeitnehmer-Pauschbetrag); unten niedrig
+//                  (Rente, Transfers), in der Mitte am höchsten
+const HH_STRUKTUR = [
+  //  erwachsene, kinder, paar_anteil, erwerbstaetige
+  { erwachsene: 1.20, kinder: 0.37, paar_anteil: 0.15, erwerbstaetige: 0.4 },  // D1
+  { erwachsene: 1.35, kinder: 0.51, paar_anteil: 0.30, erwerbstaetige: 0.6 },  // D2
+  { erwachsene: 1.50, kinder: 0.56, paar_anteil: 0.40, erwerbstaetige: 0.8 },  // D3
+  { erwachsene: 1.60, kinder: 0.54, paar_anteil: 0.50, erwerbstaetige: 1.0 },  // D4
+  { erwachsene: 1.70, kinder: 0.49, paar_anteil: 0.60, erwerbstaetige: 1.2 },  // D5
+  { erwachsene: 1.80, kinder: 0.44, paar_anteil: 0.65, erwerbstaetige: 1.3 },  // D6
+  { erwachsene: 1.90, kinder: 0.40, paar_anteil: 0.75, erwerbstaetige: 1.5 },  // D7
+  { erwachsene: 2.00, kinder: 0.35, paar_anteil: 0.80, erwerbstaetige: 1.6 },  // D8
+  { erwachsene: 2.00, kinder: 0.30, paar_anteil: 0.85, erwerbstaetige: 1.7 },  // D9
+  { erwachsene: 2.00, kinder: 0.23, paar_anteil: 0.85, erwerbstaetige: 1.7 },  // D10a
+  { erwachsene: 2.00, kinder: 0.16, paar_anteil: 0.85, erwerbstaetige: 1.6 },  // D10b
+  { erwachsene: 2.00, kinder: 0.09, paar_anteil: 0.85, erwerbstaetige: 1.5 },  // D10c
+];
+DEZILE.forEach((d, i) => Object.assign(d, HH_STRUKTUR[i]));
+
 // D10c = Top 1% (0,41 Mio. Haushalte). Brutto 700k ist Durchschnitt — echte Spitze deutlich höher.
 // Kapitalanteil D10c: ~45% des Einkommens aus Kapital (DINA-DE, Bach/Buggeln 2024).
 
@@ -634,7 +664,7 @@ const REFORM_TOURS = [
 const KPI_BENCH = {
   saldo:  'DE 2025: −119 Mrd. (VGR/Maastricht, Destatis Feb 2026) · DE 2024: −115 Mrd. · Defizitquote: −2,7 % BIP',
   einn:   'DE 2024: ~1.450 Mrd. · Steuerquote 22 % BIP',
-  gini:   'DE: 0,295 · DK: 0,281 · SE: 0,273 · US: 0,395',
+  gini:   'Modellwert aus 12 Gruppen (ohne Ungleichheit innerhalb der Gruppen) — nur Veränderungen vergleichen. Amtlich DE: 0,295 · DK: 0,281 · SE: 0,273 · US: 0,395',
   admin:  'DE ~2 % Steueraufkommen (OECD-Ø)',
   nst:    'DE aktuell: ~40 Steuerarten',
   arb:    'Elastizitäten: Saez/Chetty/Gruber',
@@ -775,4 +805,4 @@ const ZUKUNFTS_SZENARIEN = [
   },
 ];
 
-export { TARIF_2026, DEZILE, MPC_DEZIL, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };
+export { TARIF_2026, HH_STRUKTUR, DEZILE, MPC_DEZIL, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };

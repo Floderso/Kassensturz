@@ -2,6 +2,8 @@
 // Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
 import { grenzsteuersatz, effSteuersatz } from '../rechner/einkommensteuer.js';
 import { DEZILE } from '../data.js';
+import { zvE } from '../rechner/haushalt.js';
+import { svArbeitnehmer } from '../rechner/verteilung.js';
 
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Diagramme — ESt-Kurve, Einkommensverteilung, Schuldenquotenpfad
@@ -39,10 +41,12 @@ function renderEstKurve(p) {
             <text x="${x}" y="${pt+iH+18}" text-anchor="middle" font-size="10" font-family="DM Mono,monospace" fill="var(--muted)">${v}k</text>`;
   }).join('');
 
-  // Dezil-Markierungen
+  // Dezil-Markierungen: Position = zvE je Veranlagtem (bei überwiegend Paaren Splitting: zvE/2)
   const dezilMarks = DEZILE.map(d => {
-    const x = pl + (Math.min(d.brutto, maxInc) / maxInc) * iW;
-    const gs = grenzsteuersatz(d.brutto*(1-d.kapital), p)*100;
+    const arbeit = d.brutto * (1 - d.kapital);
+    const zve = zvE(arbeit, svArbeitnehmer(arbeit, p), d.erwerbstaetige) / (d.paar_anteil >= 0.5 ? 2 : 1);
+    const x = pl + (Math.min(zve, maxInc) / maxInc) * iW;
+    const gs = grenzsteuersatz(zve, p)*100;
     const y = pt + iH - Math.min(iH, (gs / maxRate) * iH);
     return `<circle cx="${x}" cy="${y}" r="3" fill="var(--accent)" opacity="0.7"/>
             <text x="${x}" y="${pt+iH+28}" text-anchor="middle" font-size="9" font-family="DM Mono,monospace" fill="var(--muted)">${d.label}</text>`;

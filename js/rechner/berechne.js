@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: CC-BY-4.0
 // Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
 import { DEZILE, ELAST, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, BASIS_AUFKOMMEN, ADMIN_QUOTE, AUSGABEN_TOTAL, BGE_LABOR_EFF, PERIOD_STATE_0 } from '../data.js';
-import { estTarif, grenzsteuersatz } from './einkommensteuer.js';
-import { berechneGini, berechneMedianGewichtet, berechnePalma, berechneDezilDelta, svArbeitnehmer, bbgRV, bbgKV } from './verteilung.js';
+import { zvE, estHaushalt, grenzsatzHaushalt, abgeltungHaushalt, SPARER_PAUSCHBETRAG } from './haushalt.js';
+import { berechneGini, berechneMedianGewichtet, berechnePalma, berechneS80S20, berechneDezilDelta, svArbeitnehmer, svGrenzsatz, bbgRV } from './verteilung.js';
 
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Hauptsimulation
 // Abhängigkeiten (Ladereihenfolge beachten):
 //   data.js               → DEZILE, BASIS_AUFKOMMEN, ADMIN_QUOTE, ELAST, STAATSAUSGABEN
-//   rechner/einkommensteuer.js → estTarif, grenzsteuersatz
+//   rechner/haushalt.js   → zvE, estHaushalt, grenzsatzHaushalt, abgeltungHaushalt
 //   rechner/verteilung.js → berechneDezilDelta, berechneGini, berechnePalma,
-//                           berechneMedianGewichtet, svArbeitnehmer, bbgRV, bbgKV
+//                           berechneMedianGewichtet, berechneS80S20, svArbeitnehmer, svGrenzsatz, bbgRV
 // ═══════════════════════════════════════════════════════
 
 // Quellenmetadaten — zentrale Berechnungsannahmen
@@ -99,8 +99,12 @@ function berechne(params, zustand = null, _istReferenz = false) {
     : STAATSAUSGABEN.zinsen;
 
   // ---------- 1. ARBEITSANGEBOT-REAKTION pro Dezil ----------
-  // Basisgrenzsteuersatz-Vergleich zum Status Quo
-  const sqGrenze = dez => grenzsteuersatz(dez.brutto*(1-dez.kapital), SQ);
+  // Grenzbelastung je zusätzlichem Brutto-Euro Arbeit: Grenzsteuersatz auf das zvE der Gruppe
+  // (Splitting-Mischung), gemindert um die abzugsfähigen SV-Beiträge (F-002). Ohne Soli.
+  const grenzbelastung = (arbeit, d, p) => {
+    const zve = zvE(arbeit, svArbeitnehmer(arbeit, p), d.erwerbstaetige);
+    return grenzsatzHaushalt(zve, d.paar_anteil, p) * (1 - svGrenzsatz(arbeit, p));
+  };
 
   // BGE-Arbeitsangebotseffekt (Substitutionseffekt: höherer Reservationslohn)
   // Quellen: RWI 2024 (bis −30 % bei 1.500 €), DIW Pilot 2024 (−2 % kurzfristig, n=107),
@@ -109,8 +113,9 @@ function berechne(params, zustand = null, _istReferenz = false) {
   const bge_labor_scale = Math.min(1.67, (params.bge || 0) / 1200);
 
   const dezile = DEZILE.map((d, idx) => {
-    const gs_neu = grenzsteuersatz(d.brutto * (1-d.kapital), params);
-    const gs_sq = sqGrenze(d);
+    const arbeit0 = d.brutto * (1 - d.kapital);
+    const gs_neu = grenzbelastung(arbeit0, d, params);
+    const gs_sq = grenzbelastung(arbeit0, d, SQ);
     const delta_nettolohn = (1 - gs_neu) - (1 - gs_sq);
 
     let elas = ELAST.labor_supply;
@@ -133,28 +138,32 @@ function berechne(params, zustand = null, _istReferenz = false) {
     const lf_tax = Math.max(0.55, Math.min(1.25, labor_factor_raw)) * avoidance;
     // BGE: Substitutionseffekt — skaliert mit BGE/1200 und Dezil (RWI/ZEW)
     const lf = Math.max(0.55, lf_tax * (1 - BGE_LABOR_EFF[idx] * bge_labor_scale));
-    return { ...d, labor_factor: lf, brutto_adj: d.brutto * lf, gs_neu, avoidance };
+    // Verhaltensreaktion nur auf das Arbeitseinkommen (F-034); Kapitaleinkommen bleibt unverändert
+    const arbeit_adj = arbeit0 * lf, kapital_adj = d.brutto * d.kapital;
+    return { ...d, labor_factor: lf, arbeit_adj, kapital_adj, brutto_adj: arbeit_adj + kapital_adj, gs_neu, avoidance };
   });
 
-  // ---------- 2. EINKOMMENSTEUER ----------
+  // ---------- 2. EINKOMMENSTEUER (inkl. Solidaritätszuschlag) ----------
+  // Tarif auf das zvE der Gruppe mit Splitting-Anteil; Kapital dual (Abgeltung nach Sparerpauschbetrag,
+  // Soli ohne Freigrenze) oder synthetisch (gemeinsam mit dem Arbeits-zvE).
   let est_aufkommen = 0;
   let est_pro_dezil = [];
   for (const d of dezile) {
-    const arbeit = d.brutto_adj * (1 - d.kapital);
-    const kapital = d.brutto_adj * d.kapital;
-    const est_arbeit = estTarif(arbeit, params);
+    const sv_an = svArbeitnehmer(d.arbeit_adj, params);
+    const zve_arbeit = zvE(d.arbeit_adj, sv_an, d.erwerbstaetige);
+    const arb = estHaushalt(zve_arbeit, d.paar_anteil, params);
+    const est_arbeit = arb.est + arb.soli;
     let est_kap;
     if (params.synthetisch) {
-      // Alle Einkünfte zusammen besteuern
-      const total = estTarif(d.brutto_adj, params);
-      const est_kap_sy = total - est_arbeit;
-      est_kap = Math.max(0, est_kap_sy);
+      const kap_stpfl = Math.max(0, d.kapital_adj - SPARER_PAUSCHBETRAG * d.erwachsene);
+      const ges = estHaushalt(zve_arbeit + kap_stpfl, d.paar_anteil, params);
+      est_kap = Math.max(0, ges.est + ges.soli - est_arbeit);
     } else {
-      est_kap = kapital * params.abgeltung / 100;
+      est_kap = abgeltungHaushalt(d.kapital_adj, d.erwachsene, params.abgeltung);
     }
     const tot = est_arbeit + est_kap;
     est_aufkommen += tot * d.anzahl / 1000;   // Mrd.
-    est_pro_dezil.push({ d: d.d, est: tot, est_arbeit, est_kap });
+    est_pro_dezil.push({ d: d.d, idx: d.idx, est: tot, est_arbeit, est_kap, soli: arb.soli, zve: zve_arbeit, sv_an });
   }
 
   // ---------- 3. KÖRPERSCHAFTSTEUER + GEWERBE ----------
@@ -171,9 +180,9 @@ function berechne(params, zustand = null, _istReferenz = false) {
   let mwst_auf = 0;
   for (const d of dezile) {
     // Netto nach ESt und SV (SV-Basis = Arbeitseinkommen, K3-Vorkorrektur hier vereinfacht)
-    const est_d = est_pro_dezil.find(x => x.d === d.d).est;
-    const arbeit_mwst = d.brutto_adj * (1 - d.kapital);
-    const sv_d = svArbeitnehmer(arbeit_mwst, params);
+    // Zuordnung über den Index: D10a/b/c teilen sich d = 10 (F-069)
+    const est_d = est_pro_dezil[d.idx].est;
+    const sv_d = est_pro_dezil[d.idx].sv_an;
     const netto = d.brutto_adj - est_d - sv_d;
     const konsum = netto * d.konsum;
     // 70% Regelsatz, 30% ermäßigt (grob aus VGR); je Kategorie eigene Verhaltensreaktion
@@ -335,7 +344,8 @@ function berechne(params, zustand = null, _istReferenz = false) {
 
   // ---------- 16. GINI ----------
   const gini = berechneGini(hh_delta.netto, dezile);
-  const palma = berechnePalma(hh_delta.netto);
+  const palma = berechnePalma(hh_delta.netto, dezile);
+  const s80s20 = berechneS80S20(hh_delta.netto, dezile);
 
   // ---------- 17. VERHALTENSINDIZES ----------
   const avg_labor = dezile.reduce((a,d) => a + d.labor_factor * d.anzahl, 0) / dezile.reduce((a,d) => a + d.anzahl, 0);
@@ -372,19 +382,11 @@ function berechne(params, zustand = null, _istReferenz = false) {
   const schuldenquote_delta = -(saldo / bip_aktuell) * 100;
 
   // ---------- 20. METR (Marginal Effective Tax Rate) je Dezil ----------
-  // METR = ESt-Grenzsteuersatz + SV-Grenzbelastung (AN-Anteil) + Transfer-Entzug
+  // METR = SV-Grenzbelastung (AN-Anteil) + ESt-Grenzsatz auf das zvE × (1 − SV-Grenzbelastung) + Transfer-Entzug
+  // (SV-Beiträge sind als Vorsorgeaufwendungen abzugsfähig; RV/AL- und KV/PV-BBG getrennt, svGrenzsatz)
   const metr = dezile.map((d, i) => {
-    const brutto = d.brutto_adj;
-    const arbeit = brutto * (1 - d.kapital);
-    const gs_est = grenzsteuersatz(arbeit, params);
-    // K3: Separate BBG für KV/PV (62.100 €) und RV/AL (params.bbg).
-    // RV+AL Grenzbelastung fällt weg sobald Arbeitseinkommen ≥ RV-BBG
-    const bbg_rv_m = bbgRV(params);
-    const bbg_kv_m = bbgKV(params);
-    const sv_grenz_rv = arbeit < bbg_rv_m ? (params.rv + params.alpf * 0.42) / 100 * 0.5 : 0;
-    // kv_bbg_frei: kein Deckel → Grenzbelastung gilt bei jedem Einkommensniveau
-    const sv_grenz_kv = (params.kv_bbg_frei || arbeit < bbg_kv_m) ? (params.kv + params.alpf * 0.58) / 100 * 0.5 : 0;
-    const sv_grenz = sv_grenz_rv + sv_grenz_kv;
+    const sv_grenz = svGrenzsatz(d.arbeit_adj, params);
+    const gs_est = grenzbelastung(d.arbeit_adj, d, params);
     // Transfer-Entzug: Bürgergeld-Empfänger verlieren 80% des Zusatzeinkommens (§ 11b SGB II)
     // Bei BGE >= Bürgergeld: kein Entzug mehr (BGE ist bedingungslos, kein Anrechnungsprinzip)
     const bg_entzug_arr = [0.80, 0.70, 0.20, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -397,9 +399,8 @@ function berechne(params, zustand = null, _istReferenz = false) {
   // E[gs²] ≥ E[gs]², daher unterschätzt avg_gs²-Ansatz den DWL systematisch.
   // Korrekt: ∑ 0.5 × ε × gs_i² / (1−gs_i) × Lohnsumme_i  (Harberger-Dreieck je Dezil)
   const dwl = dezile.reduce((a, d) => {
-    const arbeit_dwl = d.brutto_adj * (1 - d.kapital);
-    const gs = grenzsteuersatz(arbeit_dwl, params);
-    const lohnsumme_d = arbeit_dwl * d.anzahl / 1000; // Mrd.
+    const gs = grenzbelastung(d.arbeit_adj, d, params);
+    const lohnsumme_d = d.arbeit_adj * d.anzahl / 1000; // Mrd.
     return a + 0.5 * ELAST.labor_supply * (gs * gs) / Math.max(0.01, 1 - gs) * lohnsumme_d;
   }, 0);
 
@@ -418,7 +419,7 @@ function berechne(params, zustand = null, _istReferenz = false) {
 
   return {
     rev, einnahmen_total, ausgaben_total, saldo, admin_kosten, nst,
-    hh_delta, gini, palma, behavior, klimageld_auszahlung,
+    hh_delta, est_pro_dezil, gini, palma, s80s20, behavior, klimageld_auszahlung,
     bg_auszahlung, kg_auszahlung, neg_est_auszahlung,
     armutsrisiko, schuldenquote_delta, metr, dwl, poverty_line,
     rv_einsparung, bge_brutto,
