@@ -2,20 +2,24 @@
 // Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Einkommensteuer-Tariffunktionen
-// Rechtsgrundlage: § 32a EStG 2025 (Formeltarif, 5 Zonen)
+// Rechtsgrundlage: § 32a Abs. 1 EStG, VZ 2026, i.d.F. des Steuerfortentwicklungsgesetzes
+// (BGBl. 2024 I Nr. 449) — Formeltarif mit 5 Zonen, Eckwerte in TARIF_2026 (data.js)
 // ═══════════════════════════════════════════════════════
+import { TARIF_2026 } from '../data.js';
 
 // Quellenmetadaten — parallel zu den Berechnungsfunktionen
 const FORMEL_QUELLEN_EST = {
   estTarif: {
-    formel: '∫₀ˣ r(z) dz  (stückweise lineare Grenzsteuerrate, 5 Zonen)',
-    ref:    '§ 32a Abs. 1 EStG 2025 · Formeltarif (kontinuierlich, keine Sprünge)',
-    note:   'Zonen werden proportional zur grenze-Parameter skaliert; Referenz: SQ-Grenzwerte 2025'
+    formel: '∫ r(z) dz  (Grenzsteuersatz stückweise linear in Zone 2 und 3, konstant in Zone 4 und 5)',
+    ref:    '§ 32a Abs. 1 EStG i.d.F. Steuerfortentwicklungsgesetz · VZ 2026',
+    note:   'Im Status quo exakt der gesetzliche Tarif (Abweichung ≤ 1 € durch Rundung, § 32a Abs. 1 Satz 6). Bei Reformen werden Zone 2 und 3 proportional zwischen Grundfreibetrag und Spitzensatz-Grenze gestreckt.',
+    refs:   ['G01', 'G17']
   },
   grenzsteuersatz: {
-    formel: 'r(z) = r₀ + (rₘ − r₀) × z/g₂  [Zone 2], linear interpoliert je Zone',
-    ref:    '§ 32a Abs. 1 Nr. 2–5 EStG · BMF Steuerschätzung 2025',
-    note:   'Kontinuierlicher Übergang an Zonengrenzen — DE-spezifische Eigenschaft des Formeltarifs'
+    formel: 'r(z): r₀ → rₘ (Zone 2), rₘ → r₄ (Zone 3), r₄ (Zone 4), r₅ (Zone 5); rₘ im gesetzlichen Verhältnis (23,97 − 14)/(42 − 14)',
+    ref:    '§ 32a Abs. 1 Nr. 2–5 EStG',
+    note:   'Kontinuierlicher Übergang an allen Zonengrenzen; Status quo: 14 % → 23,97 % → 42 % → 45 %',
+    refs:   ['G01']
   },
   effSteuersatz: {
     formel: 'T(z) / z',
@@ -24,85 +28,55 @@ const FORMEL_QUELLEN_EST = {
   }
 };
 
-
-// Basis-Grenzwerte 2025; werden beim Ändern von Freibetrag/Spitze/Grenze skaliert.
-// Für Status Quo: exakt gesetzliche Werte.
-// Bei Parameteränderung: Zonen werden proportional skaliert.
-
-function estTarif(einkommen, freibetrag, eingang, spitze, grenze) {
-  if (einkommen <= freibetrag) return 0;
-  const zve = einkommen - freibetrag;
-
-  // Status-Quo-Grenzwerte (relativ zum Freibetrag)
-  // Zone 2: 12.085–17.005 (4.921 € breit), Zone 3: 17.006–66.760 (49.755 € breit)
-  // Zone 4: 66.761–277.825 (211.065 € breit), Zone 5: ab 277.826
-  // Wir skalieren Zone 4/5-Grenze auf 'grenze' und Zone 2/3-Grenzwerte proportional.
-  const sq_z2 = 4921;   // Breite Zone 2 (SQ)
-  const sq_z3 = 49755;  // Breite Zone 3 (SQ)
-  const sq_z4 = 211065; // Breite Zone 4 (SQ)
-  const sq_total = sq_z2 + sq_z3 + sq_z4; // = 265741 ≈ 277826 - 12084 - 1
-  const scale = (grenze - freibetrag) / sq_total;
-  const g2 = sq_z2 * scale; // Breite Zone 2 skaliert
-  const g3 = sq_z3 * scale; // Breite Zone 3 skaliert
-
-  // Eingangssatz beeinflusst Zone 2 (Progressionszone)
-  // Spitzensatz gilt ab Zone 5 (=grenze)
-  // Zone 4 (42%-Äquivalent) interpolieren wir als (eingang*0.1 + spitze*0.9) - typisch DE
-  const satz4 = Math.min(spitze, eingang * 0.05 + spitze * 0.95) / 100;
-
-  // Marginalsteuersatz-Grenzen (keine Sprünge an Zonengrenzen):
-  // Zone 2: r0 → rm  (Eingangssatz → Zwischensatz)
-  // Zone 3: rm → r4  (Zwischensatz → Zone-4-Satz, kontinuierlich)
-  // Zone 4: r4 (konstant)  Zone 5: r5 = spitze/100
-  // rm = r0 + (r4 - r0) * 0.344  — entspricht § 32a-Verhältnis (SQ: ~23,6 %)
-  const r0 = eingang / 100;
-  const r4 = satz4;
-  const r5 = spitze / 100;
-  const rm = r0 + (r4 - r0) * 0.344;
-  const g4 = sq_z4 * scale;
-
-  // Integral der stückweise linearen Grenzsteuerrate: ∫₀ˣ [a + (b−a)·t/w] dt
-  const T = (a, b, w, x) => a * x + (b - a) * x * x / (2 * w);
-
-  const T2 = T(r0, rm, g2, g2);
-  const T3 = T(rm, r4, g3, g3);
-  const T4 = r4 * g4;
-
-  if (zve <= g2) {
-    return T(r0, rm, g2, zve);
-  } else if (zve <= g2 + g3) {
-    return T2 + T(rm, r4, g3, zve - g2);
-  } else if (zve <= g2 + g3 + g4) {
-    // Zone 4: linear mit satz4
-    const zv4 = zve - g2 - g3;
-    return T2 + T3 + r4 * zv4;
-  } else {
-    const zv5 = zve - g2 - g3 - g4;
-    return T2 + T3 + T4 + r5 * zv5;
-  }
+// Zonengrenzen und Grenzsteuersätze aus den Reglerwerten.
+// p.freibetrag → Ende Zone 1, p.grenze → Beginn Zone 5, p.eingang → Satz am Beginn Zone 2,
+// p.satz_z4 → Satz der Proportionalzone (Zone 4), p.spitze → Satz Zone 5.
+// Zone 2 und 3 werden proportional zwischen Freibetrag und Grenze gestreckt; der Satz am Übergang
+// Zone 2/3 steht zu Eingangs- und Proportionalsatz im gesetzlichen Verhältnis.
+function tarifAusParams(p) {
+  const T = TARIF_2026;
+  const skala = (p.grenze - p.freibetrag) / (T.e4 - T.gfb);
+  const r0 = p.eingang / 100;
+  const r4 = (p.satz_z4 ?? T.r4 * 100) / 100;
+  const r5 = p.spitze / 100;
+  const rm = r0 + (r4 - r0) * (T.rm - T.r0) / (T.r4 - T.r0);
+  return {
+    gfb: p.freibetrag,
+    e2:  p.freibetrag + (T.e2 - T.gfb) * skala,
+    e3:  p.freibetrag + (T.e3 - T.gfb) * skala,
+    e4:  p.grenze,
+    r0, rm, r4, r5,
+  };
 }
 
-function grenzsteuersatz(einkommen, freibetrag, eingang, spitze, grenze) {
-  if (einkommen <= freibetrag) return 0;
-  const zve = einkommen - freibetrag;
-  const scale = (grenze - freibetrag) / 265741;
-  const g2 = 4921 * scale;
-  const g3 = 49755 * scale;
-  const g4 = 211065 * scale;
-  const r0 = eingang / 100;
-  const r4 = Math.min(spitze, eingang * 0.05 + spitze * 0.95) / 100;
-  const rm = r0 + (r4 - r0) * 0.344; // kontinuierlich: Zone-2-Ende = Zone-3-Start
+// Integral eines linear von a nach b (über Breite w) steigenden Grenzsteuersatzes bis u
+const integral = (a, b, w, u) => a * u + (b - a) * u * u / (2 * w);
 
-  if (zve <= g2)           return r0 + (rm - r0) * zve / g2;
-  if (zve <= g2 + g3)      return rm + (r4 - rm) * (zve - g2) / g3;
-  if (zve <= g2 + g3 + g4) return r4;
-  return spitze / 100;
+function estTarif(einkommen, p) {
+  const t = tarifAusParams(p);
+  if (einkommen <= t.gfb) return 0;
+  const w2 = t.e2 - t.gfb, w3 = t.e3 - t.e2;
+  const T2 = integral(t.r0, t.rm, w2, w2);
+  const T3 = integral(t.rm, t.r4, w3, w3);
+  if (einkommen <= t.e2) return integral(t.r0, t.rm, w2, einkommen - t.gfb);
+  if (einkommen <= t.e3) return T2 + integral(t.rm, t.r4, w3, einkommen - t.e2);
+  if (einkommen <= t.e4) return T2 + T3 + t.r4 * (einkommen - t.e3);
+  return T2 + T3 + t.r4 * (t.e4 - t.e3) + t.r5 * (einkommen - t.e4);
+}
+
+function grenzsteuersatz(einkommen, p) {
+  const t = tarifAusParams(p);
+  if (einkommen <= t.gfb) return 0;
+  if (einkommen <= t.e2) return t.r0 + (t.rm - t.r0) * (einkommen - t.gfb) / (t.e2 - t.gfb);
+  if (einkommen <= t.e3) return t.rm + (t.r4 - t.rm) * (einkommen - t.e2) / (t.e3 - t.e2);
+  if (einkommen <= t.e4) return t.r4;
+  return t.r5;
 }
 
 // Effektiver Durchschnittssteuersatz
-function effSteuersatz(einkommen, freibetrag, eingang, spitze, grenze) {
-  if (einkommen <= freibetrag) return 0;
-  return estTarif(einkommen, freibetrag, eingang, spitze, grenze) / einkommen;
+function effSteuersatz(einkommen, p) {
+  if (einkommen <= 0) return 0;
+  return estTarif(einkommen, p) / einkommen;
 }
 
-export { estTarif, grenzsteuersatz, effSteuersatz, FORMEL_QUELLEN_EST };
+export { estTarif, grenzsteuersatz, effSteuersatz, tarifAusParams, FORMEL_QUELLEN_EST };

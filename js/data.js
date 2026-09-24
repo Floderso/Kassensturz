@@ -137,11 +137,22 @@ const ELAST_QUELLEN = {
 };
 
 
+// ── EINKOMMENSTEUERTARIF ──
+
+// § 32a Abs. 1 EStG, VZ 2026, i.d.F. Steuerfortentwicklungsgesetz v. 23.12.2024 (BGBl. 2024 I Nr. 449).
+// Zonengrenzen (zvE in €) und Grenzsteuersätze an den Zonengrenzen; Zone 5 (Spitzensatz) ab 277.826 €.
+// Aus der Tarifformel: Zone 2 (914,51·y + 1.400)·y → Grenzsatz 14 % bis 23,97 %;
+// Zone 3 (173,10·z + 2.397)·z + 1.034,87 → 23,97 % bis 42 %; Zone 4: 42 %; Zone 5: 45 %.
+const TARIF_2026 = {
+  gfb: 12348, e2: 17799, e3: 69878, e4: 277826,
+  r0: 0.14, rm: 0.2397, r4: 0.42, r5: 0.45,
+};
+
 // ── PRESETS ──
 
 const PRESETS = {
   status_quo: {
-    freibetrag: 12348, eingang: 14, spitze: 45, grenze: 277826,
+    freibetrag: 12348, eingang: 14, spitze: 45, grenze: 277826, satz_z4: 42,
     synthetisch: false, abgeltung: 25,
     kst: 15, gewst: 14, gewst_aus: false,
     mwst: 19, mwst_erm: 7,
@@ -153,7 +164,7 @@ const PRESETS = {
     pkv_abschaffen: false, kv_kapital: false, kv_bbg_frei: false, anzahl_kv: 95, praevention: 0, bge: 0
   },
   synthetisch: {
-    freibetrag: 15000, eingang: 14, spitze: 50, grenze: 300000,
+    freibetrag: 15000, eingang: 14, spitze: 50, grenze: 300000, satz_z4: 48.2,
     synthetisch: true, abgeltung: 25,
     kst: 25, gewst: 0, gewst_aus: true,
     mwst: 19, mwst_erm: 7,
@@ -165,7 +176,7 @@ const PRESETS = {
     pkv_abschaffen: false, kv_kapital: true, kv_bbg_frei: false, anzahl_kv: 95, praevention: 3, bge: 0
   },
   kirchhof: {
-    freibetrag: 10000, eingang: 25, spitze: 25, grenze: 60000,
+    freibetrag: 10000, eingang: 25, spitze: 25, grenze: 60000, satz_z4: 25,
     synthetisch: true, abgeltung: 25,
     kst: 25, gewst: 0, gewst_aus: true,
     mwst: 19, mwst_erm: 7,
@@ -177,7 +188,7 @@ const PRESETS = {
     pkv_abschaffen: false, kv_kapital: false, kv_bbg_frei: false, anzahl_kv: 95, praevention: 0, bge: 0
   },
   radikal: {
-    freibetrag: 18000, eingang: 20, spitze: 60, grenze: 200000,
+    freibetrag: 18000, eingang: 20, spitze: 60, grenze: 200000, satz_z4: 58,
     synthetisch: true, abgeltung: 25,
     kst: 30, gewst: 0, gewst_aus: true,
     mwst: 19, mwst_erm: 5,
@@ -189,7 +200,7 @@ const PRESETS = {
     pkv_abschaffen: true, kv_kapital: true, kv_bbg_frei: true, anzahl_kv: 20, praevention: 10, bge: 0
   },
   simpel: {
-    freibetrag: 15000, eingang: 20, spitze: 50, grenze: 250000,
+    freibetrag: 15000, eingang: 20, spitze: 50, grenze: 250000, satz_z4: 48.5,
     synthetisch: true, abgeltung: 25,
     kst: 20, gewst: 0, gewst_aus: true,
     mwst: 19, mwst_erm: 7,
@@ -201,7 +212,7 @@ const PRESETS = {
     pkv_abschaffen: false, kv_kapital: false, kv_bbg_frei: false, anzahl_kv: 95, praevention: 0, bge: 0
   },
   nordisch: {
-    freibetrag: 14000, eingang: 20, spitze: 52, grenze: 120000,
+    freibetrag: 14000, eingang: 20, spitze: 52, grenze: 120000, satz_z4: 50.4,
     synthetisch: false, abgeltung: 30,
     kst: 22, gewst: 0, gewst_aus: true,
     mwst: 25, mwst_erm: 12,
@@ -220,7 +231,7 @@ const PRESETS = {
     // reine Top-Bracket-Näherung modelliert) — hier als grenze:280000/spitze:47 angenähert; die separate
     // 45%-Zwischenstufe (250–280 Tsd. €) und die Minijob-Pauschalsteuer-Anhebung (2→5 %) sind NICHT abgebildet.
     // KSt-Senkung (15→10 % ab 2028, 1 PP/Jahr bis 2032) hat 2027 noch nicht begonnen → kst/gewst wie status_quo.
-    freibetrag: 12900, eingang: 12, spitze: 47, grenze: 280000,
+    freibetrag: 12900, eingang: 12, spitze: 47, grenze: 280000, satz_z4: 42,
     synthetisch: false, abgeltung: 25,
     kst: 15, gewst: 14, gewst_aus: false,
     mwst: 19, mwst_erm: 7,
@@ -237,7 +248,7 @@ const PRESETS = {
     // Freibetrag 0: BGE dient als effektiver Grundfreibetrag (14.400 €/Jahr)
     // Spitzensteuersatz 60% nötig laut ifo; synthetische ESt auf Kapital
     // Bürgergeld abgeschafft (BGE > 563 €); MwSt leicht erhöht
-    freibetrag: 0, eingang: 30, spitze: 60, grenze: 277826,
+    freibetrag: 0, eingang: 30, spitze: 60, grenze: 277826, satz_z4: 58.5,
     synthetisch: true, abgeltung: 30,
     kst: 25, gewst: 14, gewst_aus: false,
     mwst: 22, mwst_erm: 7,
@@ -401,9 +412,15 @@ const TOOLTIPS = {
     text: "Grenzsteuersatz auf den ersten Euro über dem Freibetrag. Im § 32a-Formeltarif quadratisch steigend — kein harter Knick. ifo (Blömer/Fuest/Peichl 2025): 'Mittelstandsbauch' entsteht, wenn Eingangssatz zu nah am Spitzensatz liegt.",
     quelle: "§ 32a Abs. 1 Nr. 2 EStG · 2026: 14% · ifo Schnelldienst 01/2025"
   },
+  satz_z4: {
+    title: "Satz der Proportionalzone",
+    text: "Grenzsteuersatz der vierten Tarifzone: 2026 gelten 42 % für zu versteuernde Einkommen von 69.879 € bis 277.825 €. Zwischen Eingangssatz und diesem Satz steigt der Grenzsteuersatz in Zone 2 und 3 linear an (2026: 14 % → 23,97 % → 42 %). Oft ebenfalls „Spitzensteuersatz“ genannt; der Regler darunter betrifft nur die oberste Zone (Reichensteuer).",
+    quelle: "§ 32a Abs. 1 Nr. 4 EStG · Steuerfortentwicklungsgesetz (BGBl. 2024 I Nr. 449)",
+    refs: ['G01', 'G17']
+  },
   spitze: {
     title: "Spitzensteuersatz",
-    text: "42% ab 69.879 € (Eckwert 2026), 45% ab 277.826 € (Reichensteuer). Koalitionsausschuss 01.07.2026: 42%-Zone soll bis 70.600 € abgeflacht werden, ab 2027 zusätzlich 45% ab 250.000 € und 47% ab 280.000 € (im Modell nicht als eigene Zwischenstufe abbildbar, s. Preset „Koalition 2027\"). DIW/Bach: Erhöhung auf 49–52% kaum Aufkommensverlust, hoher Verteilungseffekt. ifo/Fuest: ab ~55% sinkt Aufkommen durch Verhaltensreaktion (Laffer-Kurve sichtbar im Modell).",
+    text: "Satz der obersten Tarifzone („Reichensteuer“): 2026 45 % ab 277.826 €. Die 42-%-Zone ab 69.879 € hat einen eigenen Regler (Satz Proportionalzone). Koalitionsausschuss 01.07.2026: 42%-Zone soll bis 70.600 € abgeflacht werden, ab 2027 zusätzlich 45% ab 250.000 € und 47% ab 280.000 € (im Modell nicht als eigene Zwischenstufe abbildbar, s. Preset „Koalition 2027\"). DIW/Bach: Erhöhung auf 49–52% kaum Aufkommensverlust, hoher Verteilungseffekt. ifo/Fuest: ab ~55% sinkt Aufkommen durch Verhaltensreaktion (Laffer-Kurve sichtbar im Modell).",
     quelle: "§ 32a Nr. 4+5 EStG · 2026: 69.879 € · Koalitionsausschuss 01.07.2026 · Piketty/Saez/Stantcheva (2014) AER"
   },
   grenze: {
@@ -582,7 +599,7 @@ const REFORM_TOURS = [
     id: 'kirchhof',
     name: 'Kirchhof-Reform',
     steps: [
-      { title: 'Flat Tax einführen',           desc: 'Einheitlicher Steuersatz von 25 % für alle Einkommen.',        params: { eingang: 25, spitze: 25 } },
+      { title: 'Flat Tax einführen',           desc: 'Einheitlicher Steuersatz von 25 % für alle Einkommen.',        params: { eingang: 25, satz_z4: 25, spitze: 25 } },
       { title: 'Grundfreibetrag erhöhen',      desc: 'Schutz für niedrige Einkommen: Freibetrag auf 18.000 €.',      params: { freibetrag: 18000 } },
       { title: 'Gewerbesteuer abschaffen',     desc: 'Vereinfachung: Gewerbesteuer auf 0 — nur Körperschaftsteuer.', params: { gewst: 0 } },
       { title: 'Auf 4 Steuern reduzieren',     desc: 'Erbschaft-, Boden-, Vermögenssteuer abschaffen.',              params: { erb: 0, boden: 0.0, verm: 0.0, zucman: 0.0 } },
@@ -602,7 +619,7 @@ const REFORM_TOURS = [
     id: 'umverteilung',
     name: 'Starke Umverteilung',
     steps: [
-      { title: 'Spitzensteuer erhöhen',         desc: 'Spitzensteuersatz von 42 % auf 58 % für Top-Einkommen.',      params: { spitze: 58 } },
+      { title: 'Spitzensteuer erhöhen',         desc: 'Grenzsteuersatz ab 69.879 € von 42 % auf 55,8 %, Reichensteuer ab 277.826 € von 45 % auf 58 %.', params: { satz_z4: 55.8, spitze: 58 } },
       { title: 'Kapital wie Arbeit besteuern',  desc: 'Abgeltungsteuer abschaffen — synthetisches System.',           params: { synthetisch: true } },
       { title: 'Erbschaftsteuer stärken',       desc: 'Erbschaftsteuersatz auf 35 % — weniger Ausnahmen.',            params: { erb: 35 } },
       { title: 'Vermögensteuer einführen',      desc: 'Zucman-Modell: 1,5 % Steuer auf sehr hohe Vermögen.',         params: { verm: 1.5, zucman: 1.5 } },
@@ -758,4 +775,4 @@ const ZUKUNFTS_SZENARIEN = [
   },
 ];
 
-export { DEZILE, MPC_DEZIL, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };
+export { TARIF_2026, DEZILE, MPC_DEZIL, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };

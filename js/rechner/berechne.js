@@ -100,7 +100,7 @@ function berechne(params, zustand = null, _istReferenz = false) {
 
   // ---------- 1. ARBEITSANGEBOT-REAKTION pro Dezil ----------
   // Basisgrenzsteuersatz-Vergleich zum Status Quo
-  const sqGrenze = dez => grenzsteuersatz(dez.brutto*(1-dez.kapital), SQ.freibetrag, SQ.eingang, SQ.spitze, SQ.grenze);
+  const sqGrenze = dez => grenzsteuersatz(dez.brutto*(1-dez.kapital), SQ);
 
   // BGE-Arbeitsangebotseffekt (Substitutionseffekt: höherer Reservationslohn)
   // Quellen: RWI 2024 (bis −30 % bei 1.500 €), DIW Pilot 2024 (−2 % kurzfristig, n=107),
@@ -109,7 +109,7 @@ function berechne(params, zustand = null, _istReferenz = false) {
   const bge_labor_scale = Math.min(1.67, (params.bge || 0) / 1200);
 
   const dezile = DEZILE.map((d, idx) => {
-    const gs_neu = grenzsteuersatz(d.brutto * (1-d.kapital), params.freibetrag, params.eingang, params.spitze, params.grenze);
+    const gs_neu = grenzsteuersatz(d.brutto * (1-d.kapital), params);
     const gs_sq = sqGrenze(d);
     const delta_nettolohn = (1 - gs_neu) - (1 - gs_sq);
 
@@ -142,11 +142,11 @@ function berechne(params, zustand = null, _istReferenz = false) {
   for (const d of dezile) {
     const arbeit = d.brutto_adj * (1 - d.kapital);
     const kapital = d.brutto_adj * d.kapital;
-    const est_arbeit = estTarif(arbeit, params.freibetrag, params.eingang, params.spitze, params.grenze);
+    const est_arbeit = estTarif(arbeit, params);
     let est_kap;
     if (params.synthetisch) {
       // Alle Einkünfte zusammen besteuern
-      const total = estTarif(d.brutto_adj, params.freibetrag, params.eingang, params.spitze, params.grenze);
+      const total = estTarif(d.brutto_adj, params);
       const est_kap_sy = total - est_arbeit;
       est_kap = Math.max(0, est_kap_sy);
     } else {
@@ -376,7 +376,7 @@ function berechne(params, zustand = null, _istReferenz = false) {
   const metr = dezile.map((d, i) => {
     const brutto = d.brutto_adj;
     const arbeit = brutto * (1 - d.kapital);
-    const gs_est = grenzsteuersatz(arbeit, params.freibetrag, params.eingang, params.spitze, params.grenze);
+    const gs_est = grenzsteuersatz(arbeit, params);
     // K3: Separate BBG für KV/PV (62.100 €) und RV/AL (params.bbg).
     // RV+AL Grenzbelastung fällt weg sobald Arbeitseinkommen ≥ RV-BBG
     const bbg_rv_m = bbgRV(params);
@@ -398,7 +398,7 @@ function berechne(params, zustand = null, _istReferenz = false) {
   // Korrekt: ∑ 0.5 × ε × gs_i² / (1−gs_i) × Lohnsumme_i  (Harberger-Dreieck je Dezil)
   const dwl = dezile.reduce((a, d) => {
     const arbeit_dwl = d.brutto_adj * (1 - d.kapital);
-    const gs = grenzsteuersatz(arbeit_dwl, params.freibetrag, params.eingang, params.spitze, params.grenze);
+    const gs = grenzsteuersatz(arbeit_dwl, params);
     const lohnsumme_d = arbeit_dwl * d.anzahl / 1000; // Mrd.
     return a + 0.5 * ELAST.labor_supply * (gs * gs) / Math.max(0.01, 1 - gs) * lohnsumme_d;
   }, 0);

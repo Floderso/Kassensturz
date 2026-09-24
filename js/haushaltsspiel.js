@@ -5,7 +5,7 @@
 // ═══════════════════════════════════════════════════════
 
 import { DEZILE, ELAST, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, ZUKUNFTS_SZENARIEN } from './data.js';
-import { estTarif, grenzsteuersatz, effSteuersatz } from './rechner/einkommensteuer.js';
+import { estTarif, grenzsteuersatz, effSteuersatz, tarifAusParams } from './rechner/einkommensteuer.js';
 import { berechne } from './rechner/berechne.js';
 import { simulierePfad } from './rechner/transition.js';
 import { renderEstKurve, renderIncomeDist, exportCSV, renderSchuldenpfad, renderZeitreihe, renderStaatsausgaben } from './render/charts.js';
@@ -30,6 +30,7 @@ function getParams() {
   return {
     freibetrag: +document.getElementById('freibetrag').value,
     eingang:    +document.getElementById('eingang').value,
+    satz_z4:    +document.getElementById('satz_z4').value,
     spitze:     +document.getElementById('spitze').value,
     grenze:     +document.getElementById('grenze').value,
     synthetisch: document.getElementById('synthetisch').checked,
@@ -75,6 +76,7 @@ function setParams(teilweise) {
   const p = { ...PRESETS.status_quo, ...teilweise };
   document.getElementById('freibetrag').value = p.freibetrag;
   document.getElementById('eingang').value = p.eingang;
+  document.getElementById('satz_z4').value = p.satz_z4;
   document.getElementById('spitze').value = p.spitze;
   document.getElementById('grenze').value = p.grenze;
   document.getElementById('synthetisch').checked = p.synthetisch;
@@ -197,6 +199,7 @@ function render() {
   // Labels
   document.getElementById('v_freibetrag').textContent = p.freibetrag.toLocaleString('de-DE') + ' €';
   document.getElementById('v_eingang').textContent = p.eingang + ' %';
+  document.getElementById('v_satz_z4').textContent = fmtDE(p.satz_z4, 1) + ' %';
   document.getElementById('v_spitze').textContent = p.spitze + ' %';
   document.getElementById('v_grenze').textContent = p.grenze.toLocaleString('de-DE') + ' €';
   document.getElementById('v_abgeltung').textContent = p.abgeltung + ' %';
@@ -282,7 +285,7 @@ function render() {
   if (p.gewst > 0 && p.gewst_aus === false && p.kst > 25) warnings.push('Körperschaft- + Gewerbesteuer zusammen > 30 % — international unwettbewerbsfähig.');
   if (p.mwst > 25) warnings.push('MwSt sehr hoch — trifft untere Dezile überproportional (regressiv).');
   if (r.gini > REF.gini + 0.02) warnings.push('Ungleichheit nimmt spürbar zu.');
-  if (p.eingang > p.spitze) warnings.push('Eingangssteuersatz (' + p.eingang + ' %) liegt über dem Spitzensteuersatz (' + p.spitze + ' %) — der Tarif ist regressiv (Höhere Einkommen zahlen weniger).');
+  if (p.eingang > p.satz_z4 || p.satz_z4 > p.spitze) warnings.push('Die Grenzsteuersätze fallen mit dem Einkommen (Eingang ' + p.eingang + ' %, Proportionalzone ' + fmtDE(p.satz_z4, 1) + ' %, Spitze ' + p.spitze + ' %) — der Tarif ist in diesem Bereich regressiv.');
 
   if (warnings.length > 0) {
     warnbox.style.display = 'block';
@@ -880,40 +883,34 @@ function renderRechenweg(r, p) {
   const f = (n, d=1) => n.toFixed(d).replace('.', ',');
   const fk = n => Math.round(n).toLocaleString('de-DE');
 
-  // Zonen-Grenzen berechnen (für Tabelle)
-  const sq_total = 265741;
-  const scale = (p.grenze - p.freibetrag) / sq_total;
-  const z2_end = p.freibetrag + Math.round(4921 * scale);
-  const z3_end = p.freibetrag + Math.round((4921 + 49755) * scale);
-  const z4_end = p.grenze;
-  const satz4 = Math.min(p.spitze, p.eingang * 0.05 + p.spitze * 0.95);
+  // Zonen-Grenzen und Sätze aus dem Tarifmodul (einzige Quelle, § 32a EStG 2026)
+  const tz = tarifAusParams(p);
+  const z2_end = tz.e2, z3_end = tz.e3, z4_end = tz.e4;
+  const pct = r => (r * 100).toFixed(2).replace(/\.?0+$/, '').replace('.', ',');
 
   // Beispiel-Dezil (D5 = 40.000 € Brutto)
   const d5_brutto = 40000;
-  const d5_est = estTarif(d5_brutto, p.freibetrag, p.eingang, p.spitze, p.grenze);
-  const d5_gs = (grenzsteuersatz(d5_brutto, p.freibetrag, p.eingang, p.spitze, p.grenze) * 100).toFixed(1);
-  const d5_eff = (effSteuersatz(d5_brutto, p.freibetrag, p.eingang, p.spitze, p.grenze) * 100).toFixed(1);
+  const d5_est = estTarif(d5_brutto, p);
+  const d5_gs = (grenzsteuersatz(d5_brutto, p) * 100).toFixed(1);
+  const d5_eff = (effSteuersatz(d5_brutto, p) * 100).toFixed(1);
 
   // D5-Zone bestimmen
-  const d5_zve = d5_brutto - p.freibetrag;
-  const z2w = 4921 * scale;
-  const z3w = 49755 * scale;
-  const d5_zone = d5_zve <= 0 ? 1 : d5_zve <= z2w ? 2 : d5_zve <= z2w + z3w ? 3 : d5_zve <= z2w + z3w + 211065 * scale ? 4 : 5;
+  const d5_zone = d5_brutto <= tz.gfb ? 1 : d5_brutto <= tz.e2 ? 2 : d5_brutto <= tz.e3 ? 3 : d5_brutto <= tz.e4 ? 4 : 5;
 
   panel.innerHTML = `
     <div class="rw-section">
       <div class="rw-section-title">1 · Einkommensteuer — § 32a EStG Formeltarif</div>
-      <div class="rw-text">Das Modell verwendet einen parametrischen Formeltarif mit 5 Zonen analog § 32a EStG. In Zonen 2 und 3 steigt der Grenzsteuersatz <em>linear</em> an (Integral der Grenzrate = exakte Steuer). Die Zonengrenzen skalieren proportional zu den Slider-Werten. Kein Sprung an Zonengrenzen.</div>
+      <div class="rw-text">Das Modell verwendet den Formeltarif des § 32a EStG (VZ 2026) mit 5 Zonen. In Zonen 2 und 3 steigt der Grenzsteuersatz <em>linear</em> an (Integral der Grenzrate = exakte Steuer). Mit den Status-quo-Reglern ergibt sich der gesetzliche Tarif; bei Änderungen werden Zone 2 und 3 proportional zwischen Grundfreibetrag und Spitzensatz-Grenze gestreckt. Kein Sprung an Zonengrenzen.</div>
       <table class="rw-zone-table">
         <tr><th>Zone</th><th>ZVE-Bereich</th><th>Grenzsteuersatz</th><th>Formeltyp</th></tr>
         <tr class="${d5_zone===1?'active-zone':''}"><td>1</td><td>0 – ${fk(p.freibetrag)} €</td><td>0 %</td><td>Grundfreibetrag</td></tr>
-        <tr class="${d5_zone===2?'active-zone':''}"><td>2</td><td>${fk(p.freibetrag)} – ${fk(z2_end)} €</td><td>${p.eingang} → ${(p.eingang + (satz4*100 - p.eingang)*0.344).toFixed(1)} %</td><td>linear ansteigend (§ 32a Nr. 2)</td></tr>
-        <tr class="${d5_zone===3?'active-zone':''}"><td>3</td><td>${fk(z2_end)} – ${fk(z3_end)} €</td><td>${(p.eingang + (satz4*100 - p.eingang)*0.344).toFixed(1)} → ${(satz4*100).toFixed(1)} %</td><td>linear ansteigend (§ 32a Nr. 3)</td></tr>
-        <tr class="${d5_zone===4?'active-zone':''}"><td>4</td><td>${fk(z3_end)} – ${fk(z4_end)} €</td><td>${Math.round(satz4)} %</td><td>linear (§ 32a Nr. 4)</td></tr>
-        <tr class="${d5_zone===5?'active-zone':''}"><td>5</td><td>ab ${fk(z4_end)} €</td><td>${p.spitze} %</td><td>Spitzensteuersatz (§ 32a Nr. 5)</td></tr>
+        <tr class="${d5_zone===2?'active-zone':''}"><td>2</td><td>${fk(p.freibetrag)} – ${fk(z2_end)} €</td><td>${pct(tz.r0)} → ${pct(tz.rm)} %</td><td>linear ansteigend (§ 32a Nr. 2)</td></tr>
+        <tr class="${d5_zone===3?'active-zone':''}"><td>3</td><td>${fk(z2_end)} – ${fk(z3_end)} €</td><td>${pct(tz.rm)} → ${pct(tz.r4)} %</td><td>linear ansteigend (§ 32a Nr. 3)</td></tr>
+        <tr class="${d5_zone===4?'active-zone':''}"><td>4</td><td>${fk(z3_end)} – ${fk(z4_end)} €</td><td>${pct(tz.r4)} %</td><td>linear (§ 32a Nr. 4)</td></tr>
+        <tr class="${d5_zone===5?'active-zone':''}"><td>5</td><td>ab ${fk(z4_end)} €</td><td>${pct(tz.r5)} %</td><td>Spitzensteuersatz (§ 32a Nr. 5)</td></tr>
       </table>
       <div class="rw-text"><strong>Beispiel Dezil 5</strong> (Brutto ~40.000 €):
-        ZVE = 40.000 − ${fk(p.freibetrag)} = ${fk(d5_brutto - p.freibetrag)} € → Zone ${d5_zone}
+        Tarif angewandt auf 40.000 € → Zone ${d5_zone}
         → ESt = <span class="rw-hl">${fk(Math.round(d5_est))} €</span>
         · Grenzsteuersatz: ${d5_gs} % · Effektivsteuersatz: ${d5_eff} %</div>
       <div class="rw-text">Gesamtaufkommen ESt: <span class="rw-hl">${f(r.rev.est)} Mrd. €</span>
@@ -1867,6 +1864,7 @@ document.getElementById('card-btn').addEventListener('click', openCardModal);
   const TIPS = {
     freibetrag: "Bis zu diesem Betrag bleibt Einkommen steuerfrei. Ein höherer Freibetrag entlastet alle Steuerpflichtigen – relativ am meisten profitieren Geringverdiener.",
     eingang:    "Der erste Steuersatz auf Einkommen über dem Freibetrag. Laut IZA-Studien dämpfen hohe Eingangssätze besonders die Arbeitsbereitschaft bei Geringverdienern.",
+    satz_z4:    "Grenzsteuersatz der breiten mittleren-oberen Zone (2026: 42 % ab 69.879 €). Betrifft deutlich mehr Steuerpflichtige als der Spitzensatz darunter.",
     spitze:     "Höchster Steuersatz für Topverdiener. OECD-Analysen zeigen: Sätze bis ~60 % beeinflussen das Wirtschaftswachstum kaum, erhöhen aber die Staatseinnahmen spürbar.",
     grenze:     "Ab diesem Einkommen gilt der Spitzensteuersatz. Eine niedrigere Grenze erfasst mehr Menschen – sie liegt derzeit bei ca. dem 4-fachen Medianeinkommen.",
     abgeltung:  "Pauschalsteuer auf Kapitalerträge statt des persönlichen Steuersatzes. Ökonomen kritisieren: das begünstigt Kapitaleinkommen strukturell gegenüber Arbeitseinkommen.",

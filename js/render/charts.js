@@ -19,8 +19,8 @@ function renderEstKurve(p) {
   const pts_grenz = [], pts_eff = [];
   for (let i = 0; i <= 280; i++) {
     const inc = (i / 280) * maxInc;
-    const gs = grenzsteuersatz(inc, p.freibetrag, p.eingang, p.spitze, p.grenze) * 100;
-    const es = effSteuersatz(inc, p.freibetrag, p.eingang, p.spitze, p.grenze) * 100;
+    const gs = grenzsteuersatz(inc, p) * 100;
+    const es = effSteuersatz(inc, p) * 100;
     const x = pl + (inc / maxInc) * iW;
     const yg = pt + iH - Math.min(iH, (gs / maxRate) * iH);
     const ye = pt + iH - Math.min(iH, (es / maxRate) * iH);
@@ -42,7 +42,7 @@ function renderEstKurve(p) {
   // Dezil-Markierungen
   const dezilMarks = DEZILE.map(d => {
     const x = pl + (Math.min(d.brutto, maxInc) / maxInc) * iW;
-    const gs = grenzsteuersatz(d.brutto*(1-d.kapital), p.freibetrag, p.eingang, p.spitze, p.grenze)*100;
+    const gs = grenzsteuersatz(d.brutto*(1-d.kapital), p)*100;
     const y = pt + iH - Math.min(iH, (gs / maxRate) * iH);
     return `<circle cx="${x}" cy="${y}" r="3" fill="var(--accent)" opacity="0.7"/>
             <text x="${x}" y="${pt+iH+28}" text-anchor="middle" font-size="9" font-family="DM Mono,monospace" fill="var(--muted)">${d.label}</text>`;
@@ -118,6 +118,7 @@ function exportCSV(p, r, ref) {
   rows.push(['=== PARAMETER ===']);
   rows.push(['Grundfreibetrag', p.freibetrag + ' €']);
   rows.push(['Eingangssteuersatz', p.eingang + ' %']);
+  rows.push(['Satz Proportionalzone', p.satz_z4 + ' %']);
   rows.push(['Spitzensteuersatz', p.spitze + ' %']);
   rows.push(['Einkommen ab Spitzensatz', p.grenze + ' €']);
   rows.push(['Kapital synthetisch', p.synthetisch ? 'Ja' : 'Nein']);
