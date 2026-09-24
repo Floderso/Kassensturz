@@ -431,6 +431,7 @@ Kennzeichnung: **[QUELLE PRÜFEN]** markiert Parameter, deren Wert in Phase 4 vo
 Bereits in Block A enthalten: F-008 (V-06), F-010/F-011/F-012 (V-03), F-021 (V-02), F-027 (V-05).
 
 ### V-08 · Tarif exakt nach § 32a EStG 2026; Proportionalzone als eigener Parameter
+- **Entscheidung (Rücksprache):** Der Regler „Satz Proportionalzone“ kommt wie vorgeschlagen. Die Presets behalten ihre bisherigen impliziten Werte, Status quo und Koalition 2027 bekommen 42 %.
 - **Betroffene Befunde:** F-009, F-022 (Teil: Regler „Spitze“ verschiebt die 42-%-Zone)
 - **Ursache:**
   - Die Zonenbreiten sind als Zahlenkonstanten aus 2024 fest eingetragen.
@@ -783,3 +784,223 @@ Bereits in Block A enthalten: F-008 (V-06), F-010/F-011/F-012 (V-03), F-021 (V-0
 
   „Meta/Google ≈ 0,5–0,6“ streichen oder mit Quelle belegen.
 - **Warum Ursachenbehebung:** Die Kennzahl wird aus der zitierten Größe hergeleitet statt übernommen, deshalb kann sie nicht mehr falsch beschriftet werden.
+
+---
+
+## Block C – Vorschläge zu den leichten Befunden
+
+Bereits in Block A/B enthalten: F-034, F-036 (V-02) · F-038, F-039 (V-12) · F-043 (V-11) · F-049 (V-04) · F-053 (V-07) · F-063 Teil „Meta/Google“ (V-20).
+
+### V-21 · Armutsrisiko aus einer Verteilung innerhalb der Gruppen statt aus fester Elastizität
+- **Betroffene Befunde:** F-035, F-040
+- **Ursache:**
+  - Innerhalb der Gruppen gibt es keine Einkommensverteilung.
+  - Deshalb wird die Armutsquote über feste Anteile und eine fremde Elastizität (−1,5, Entwicklungsländer, absolute Armut) fortgeschrieben.
+  - Die festen Anteile treffen den genannten Kalibrierwert nicht.
+- **Änderung:**
+  - Nach V-02 (Äquivalenzeinkommen je Person) wird je Gruppe eine Lognormalverteilung mit Median gleich Gruppen-Äquivalenzeinkommen und Streuung σᵢ angenommen. Die Streuung wird aus SOEP v40 geschätzt oder so kalibriert, dass die Armutsquote im Status quo dem amtlichen Wert entspricht **[QUELLE PRÜFEN: Destatis, Armutsgefährdungsquote EU-SILC bzw. Mikrozensus, Jahr]**.
+  - Die Armutsquote ist dann Σᵢ pᵢ·Φ((ln z − ln mᵢ)/σᵢ), mit z = 60 % des gesamten Medians. Den Median liefert dieselbe Mischverteilung.
+
+  ```js
+  const Phi = x => 0.5 * (1 + erf(x / Math.SQRT2));           // erf per Abramowitz-Stegun 7.1.26
+  const anteilUnter = (z, m, s) => Phi((Math.log(z) - Math.log(m)) / s);
+  // Median der Mischverteilung per Bisektion über F(x) = Σ p_i·anteilUnter(x, m_i, σ_i) = 0,5
+  ```
+
+  - Die Quelle „Bourguignon (2003) JPubEc“ entfällt, weil die Elastizität nicht mehr verwendet wird. Als Kalibrierquelle wird die amtliche Statistik genannt.
+- **Warum Ursachenbehebung:** Die Quote ergibt sich aus Einkommen und Armutsgrenze nach der amtlichen Definition. Übertragene Elastizitäten und feste Anteile, die nur für den Status quo gelten, entfallen.
+
+---
+
+### V-22 · Restliche Zitate korrigieren (über die Quellendatei aus V-15)
+- **Betroffene Befunde:** F-041, F-042, F-044, F-045, F-046, F-047, F-051, F-052, F-063 (Restaurants)
+- **Ursache:** wie V-15, ungeprüfte und redundant gepflegte Angaben.
+- **Änderung:**
+
+  | Befund | alt | neu |
+  |---|---|---|
+  | F-041 | „WHO (2017) Return on Investment…“; „Reinhardt et al. Health Affairs 2004“; Kommentar „EU-Studie 1€→3€“ | Masters, R., Anwar, E., Collins, B., Cookson, R. & Capewell, S. (2017), J Epidemiol Community Health 71(8), 827–834; der Fusionsparameter 0,45 braucht eine Primärquelle zu Verwaltungskosten nach Kassengröße (z. B. GKV-Finanzstatistik KJ1) **[QUELLE PRÜFEN]**, sonst als Annahme kennzeichnen; widersprüchlichen Kommentar streichen |
+  | F-042 | „Destatis 14. Bev.-Vorausberechnung 2021“ | „Destatis, 15. koordinierte Bevölkerungsvorausberechnung (2022), Variante G2-L2-W2“; Ankerwerte `renten_faktor` aus der zugehörigen Tabelle (Altenquotient) neu ableiten und die Tabelle nennen **[QUELLE PRÜFEN]** |
+  | F-044 | „+0,3 PP/Jahr … konservativer SVR-Wert“ | Beitragssatzpfad aus dem Rentenversicherungsbericht 2024 bzw. 2025 (Vorausberechnung bis 2038, danach Begründung Rentenpaket II bis 2045) als Datenreihe statt linearer Annahme **[QUELLE PRÜFEN]** |
+  | F-045 | „Kleven/Schultz (2014) JPubEc“, „Lewbel/Pendakur (2009) JPubEc“ | AEJ:EP 6(4), 271–301 bzw. AER 99(3), 827–863; Verwendung präzisieren: Kleven/Schultz = ETI; die MwSt-Konsumelastizität braucht eine eigene Quelle (z. B. Benzarti et al. 2020, JPE, zu asymmetrischer Überwälzung **[QUELLE PRÜFEN]**) oder Kennzeichnung als Annahme |
+  | F-046 | „Saez/Chetty Konsens“ / „Gruber/Saez 2002“ für ε = 0,20 | eine Quelle, sachlich passend: Chetty, R. (2012), Econometrica 80(3), 969–1018 (Intensivmarge, Makro-/Mikro-Konsens) **[QUELLE PRÜFEN: Wert]**; Gruber/Saez nur als ETI-Referenz |
+  | F-047 | „Kleven, H. & Landais, C. … Tax Migration and the Limits of Tax Policy“ | Kleven, H., Landais, C., Muñoz, M. & Stantcheva, S. (2020), „Taxation and Migration: Evidence and Policy Implications“, JEP 34(2), 119–142, doi 10.1257/jep.34.2.119 |
+  | F-051 | „KV-BBG 66.150 €“, „16,3 %“ | Werte aus `PRESETS.status_quo`/`BASIS_MAKRO` einsetzen (Template statt fester Zahl im Text): 69.750 €, 17,5 % |
+  | F-052 | „bei Freibetrag 10–20 Mio. immer noch 110–125 Mrd.“ | Satz gegen die DIW-Originalstudie prüfen; bei Bestätigung den Unterschied erläutern (andere Sätze/Bewertung), sonst streichen **[QUELLE PRÜFEN]** |
+  | F-063 | „Restaurants ε ≈ −2,3“ | Wert aus A01 übernehmen („Essen außer Haus ≈ −0,81“) |
+- **Warum Ursachenbehebung:** Die Angaben werden gegen das Original gebracht. Durch die Quellendatei aus V-15 existieren sie danach nur einmal.
+
+---
+
+### V-23 · „Zucman-Mindeststeuer“ auf die tatsächliche Zielgruppe beziehen
+- **Betroffene Befunde:** F-037
+- **Ursache:** Die Bemessungsgrundlage wird aus der Modellgruppe D10c (Top 1 %) abgeleitet, weil es keine eigene Gruppe für Hochvermögende gibt.
+- **Änderung:**
+
+  ```js
+  // data.js
+  const ZUCMAN = {
+    basis_mrd: …,       // Nettovermögen der Milliardär:innen mit Wohnsitz DE [QUELLE PRÜFEN: z. B. EU Tax Observatory 2024, Tabelle Länder]
+    bestehende_steuer_quote: …, // bereits gezahlte ESt in % des Vermögens (Anrechnung, Zucman 2024 Kap. 3) [QUELLE PRÜFEN]
+  };
+  // Aufkommen = max(0, basis × satz − bestehende Steuer) × (1 − Vermeidung)
+  ```
+
+  - Das Etikett „Median-Vermögen“ wird korrigiert.
+  - Wird das Instrument bewusst auf die Top 1 % angewendet, heißt der Regler „Mindeststeuer Top 1 %“, und der Zucman-Bezug entfällt.
+- **Warum Ursachenbehebung:** Die Bemessungsgrundlage entspricht dem Instrument, das der Name verspricht, einschließlich der im Vorschlag vorgesehenen Anrechnung bestehender Steuern.
+
+---
+
+### V-24 · `data.json` korrekt bezeichnen und plausibilisieren
+- **Betroffene Befunde:** F-050
+- **Ursache:** Die Datei wird von Hand gepflegt, und Bezeichner wurden ohne Abgleich mit `data.js` vergeben.
+- **Änderung:**
+  - Erzeugung per `tools/export.mjs` aus `data.js` (siehe V-15).
+  - Umbenennung `grunderwerbsteuer` → `grundsteuer`.
+  - `vermoegen_median_eur` → `vermoegen_mittel_eur`, sofern Durchschnitt; die Herkunft wird im Feld `meta.hinweis` genannt.
+  - Die Vermögenswerte D9/D10a werden gegen DIW Vermögensbericht bzw. SOEP geprüft **[QUELLE PRÜFEN]**.
+  - Ein Test prüft, dass Einkommen über die Gruppen monoton steigen und dass Abweichungen in der Monotonie des Vermögens begründet sind.
+- **Warum Ursachenbehebung:** Die veröffentlichte Datei kann nicht mehr vom Rechenmodell abweichen.
+
+---
+
+### V-25 · Eingaben aus URL und localStorage validieren
+- **Betroffene Befunde:** F-054, F-060
+- **Ursache:** Externe Eingaben (Query, Hash, localStorage) werden ungeprüft als Objekt übernommen bzw. ohne Fehlerbehandlung geparst.
+- **Änderung:**
+
+  ```js
+  // haushaltsspiel.js
+  const _urlPreset = new URLSearchParams(location.search).get('preset');
+  if (_urlPreset && Object.hasOwn(PRESETS, _urlPreset)) { … }
+
+  function sanitizeParams(obj) {                      // nur bekannte Schlüssel, richtige Typen
+    const sq = PRESETS.status_quo, out = { ...sq };
+    if (!obj || typeof obj !== 'object') return out;
+    for (const k of Object.keys(sq)) {
+      const v = obj[k];
+      if (typeof sq[k] === 'number' && Number.isFinite(v)) out[k] = v;
+      if (typeof sq[k] === 'boolean' && typeof v === 'boolean') out[k] = v;
+    }
+    return out;
+  }
+  // Hash und localStorage laufen beide durch sanitizeParams, bevor setParams aufgerufen wird
+  ```
+
+  ```js
+  // finanz.html — gemeinsame Hilfsfunktion statt nackter JSON.parse/localStorage-Aufrufe
+  function lsGetJSON(key) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; } }
+  function lsSet(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+  ```
+- **Warum Ursachenbehebung:** Es gibt genau einen Eingangspunkt für externe Daten, und der akzeptiert nur das erwartete Schema.
+
+---
+
+### V-26 · UI-Kennzahlen: konsistente Benchmarks, Challenges und Referenzen
+- **Betroffene Befunde:** F-055, F-056, F-057, F-058
+- **Ursache:** Benchmarks, Challenge-Schwellen und Balkenreferenzen sind freie Texte bzw. Zahlen ohne Bezug zum Modell.
+- **Änderung:**
+  - **F-055:** Der Benchmark „Einnahmen“ wird mit derselben Abgrenzung wie das Modell angegeben (Steuern und Sozialbeiträge, Gesamtstaat, VGR) **[QUELLE PRÜFEN]**. „Steuerquote 22 %“ entfällt oder wird mit eigener Definition angegeben.
+  - **F-056:** Challenge-IDs werden aus Kennzahl und Schwelle erzeugt (`id: \`armut_lt_${tgt}\``), statt von Hand vergeben zu werden. Die Schwellen werden nach V-02 und V-21 neu gesetzt. Ein Test prüft, dass jede Tages-Challenge von mindestens einem Preset oder einer dokumentierten Beispielkonfiguration erreichbar ist.
+  - **F-057:** Der S80/S20-Balken bekommt `ref: REF.s80s20` mit einer Funktion aus `verteilung.js` (siehe V-02).
+  - **F-058:** Der Balken „Auto-Stabilisatoren“ wird umbenannt in „Ø Grenzbelastung D1–D4 (METR)“, und der Dolls-Benchmark entfällt. Alternativ wird ein echter Einkommensstabilisierungskoeffizient berechnet: 1 − ΔNetto/ΔBrutto bei einem proportionalen Bruttoschock von −5 %. Quelle: Dolls, M., Fuest, C. & Peichl, A. (2012), J Public Econ 96(3–4), 279–294.
+- **Warum Ursachenbehebung:** Anzeigen und Ziele werden aus denselben Funktionen und Daten erzeugt wie die Modellwerte, damit fallen Texte und Werte nicht mehr auseinander.
+
+---
+
+### V-27 · Finanztools und Mikrolabor: Konventionen offenlegen, Grenzfälle abfangen
+- **Betroffene Befunde:** F-059, F-061, F-062
+- **Ursache:** Implizite Rechenkonventionen, keine Prüfung der Definitionsbereiche, und angezeigte Parameter weichen von den tatsächlich verwendeten ab.
+- **Änderung:**
+  - **F-059:**
+    - Effektiver Monatszins `Math.pow(1 + p.rendite/100, 1/12) - 1` in `calcInvest` und `calcKredit` (Portfolio).
+    - Einzahlung nachschüssig, oder Hinweis „Einzahlung zu Monatsbeginn“.
+    - Steuer: `max(0, Gewinn − Sparerpauschbetrag) × 0,7 (Teilfreistellung Aktien-ETF, § 20 Abs. 1 InvStG) × 26,375 %` als Option; sonst Hinweis „vereinfachte Pauschalbesteuerung“.
+    - Die Renditeannahmen in `computeProfile` werden als Parameter mit Quelle oder als Annahme gekennzeichnet.
+  - **F-061:** Guard in `drawMonopol`:
+
+    ```js
+    if (MC >= Pd0) { /* Anzeige: „Grenzkosten ≥ Prohibitivpreis: kein Marktangebot“ */ clearSvg('svg-monopol'); return; }
+    ```
+
+  - **F-062:** Die Steigungen werden aus den gewünschten Punktelastizitäten im Gleichgewicht bestimmt, damit die angezeigten Werte stimmen. Bei linearen Kurven durch (Q₀, P₀) gilt sd = P₀/(Q₀·ε_D) und ss = P₀/(Q₀·ε_S). Die Achsenabschnitte werden daraus abgeleitet (Pd0 = P₀ + sd·Q₀, Ps0 = P₀ − ss·Q₀).
+- **Warum Ursachenbehebung:** Die Rechnung macht, was die Oberfläche anzeigt, und unzulässige Parameterkombinationen erzeugen keine sinnlosen Zahlen mehr.
+
+---
+
+### V-28 · Workflow robust: Fork-PRs überspringen, Fehler sauber behandeln, Actions pinnen
+- **Betroffene Befunde:** F-064, F-065, F-066
+- **Ursache:** Das Skript setzt voraus, dass Secret und Netzwerk immer verfügbar sind, und die Action-Version kann sich ändern.
+- **Änderung:**
+
+  ```yaml
+  - uses: actions/checkout@<vollständiger Commit-SHA von v4>   # v4.x.y  [SHA beim Einbau ermitteln]
+  ```
+
+  ```python
+  if not ANTHROPIC_API_KEY:
+      print("Kein API-Key verfügbar (z. B. Fork-PR) – Gutachten übersprungen.")
+      sys.exit(0)
+  ...
+  except (urllib.error.URLError, TimeoutError, KeyError, IndexError, json.JSONDecodeError) as e:
+      print(f"Claude-Aufruf fehlgeschlagen: {e}", file=sys.stderr)
+      return None          # Aufrufer postet dann keinen Kommentar
+  ...
+  if not ok: sys.exit(1)   # post_comment gibt Erfolg zurück; Fehler macht den Job rot
+  ```
+- **Warum Ursachenbehebung:** Die erwartbaren Zustände (kein Secret, Netzwerkfehler) werden explizit behandelt, statt den Job undefiniert abbrechen zu lassen. Die Action ist unveränderlich festgelegt.
+
+---
+
+### V-29 · Security-Header für Cloudflare Pages
+- **Betroffene Befunde:** F-067
+- **Ursache:** Es fehlt eine Header-Konfiguration.
+- **Änderung:** neue Datei `_headers` im Wurzelverzeichnis (nach V-01 sind keine Drittanbieter mehr nötig).
+
+  ```
+  /*
+    Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
+    X-Content-Type-Options: nosniff
+    Referrer-Policy: strict-origin-when-cross-origin
+    Permissions-Policy: camera=(), microphone=(), geolocation=()
+  ```
+
+  Hinweis: `'unsafe-inline'` ist vorerst nötig, weil `finanz.html` (40) und `index.html` (20) Inline-Eventhandler (`onclick=`) sowie Inline-Skripte nutzen. Eine spätere Verschärfung auf `script-src 'self'` setzt voraus, dass diese Handler auf `addEventListener` umgestellt werden.
+- **Warum Ursachenbehebung:** Die Seite erhält eine zweite Verteidigungslinie gegen eingeschleuste Inhalte und Einbettung in fremde Seiten. Die Grenzen der ersten Stufe sind offengelegt.
+
+---
+
+## Übersicht: Befund → Vorschlag
+
+| Vorschlag | Befunde |
+|---|---|
+| V-01 | F-001 |
+| V-02 | F-002, F-021, F-034, F-036 |
+| V-03 | F-003, F-010, F-011, F-012 |
+| V-04 | F-004, F-049 |
+| V-05 | F-005, F-027 |
+| V-06 | F-006, F-008 |
+| V-07 | F-007, F-053 |
+| V-08 | F-009, F-022 (Teil) |
+| V-09 | F-013, F-014, F-015 |
+| V-10 | F-016 |
+| V-11 | F-017, F-043 |
+| V-12 | F-018, F-019, F-038, F-039 |
+| V-13 | F-020 |
+| V-14 | F-022, F-048 |
+| V-15 | F-023, F-024, F-025, F-026 |
+| V-16 | F-028 |
+| V-17 | F-029 |
+| V-18 | F-030, F-031 |
+| V-19 | F-032 |
+| V-20 | F-033, F-063 (Teil) |
+| V-21 | F-035, F-040 |
+| V-22 | F-041, F-042, F-044, F-045, F-046, F-047, F-051, F-052, F-063 (Teil) |
+| V-23 | F-037 |
+| V-24 | F-050 |
+| V-25 | F-054, F-060 |
+| V-26 | F-055, F-056, F-057, F-058 |
+| V-27 | F-059, F-061, F-062 |
+| V-28 | F-064, F-065, F-066 |
+| V-29 | F-067 |
