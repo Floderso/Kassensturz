@@ -2,7 +2,7 @@
 // Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
 import { DEZILE, ELAST, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, BASIS_AUFKOMMEN, ADMIN_QUOTE, AUSGABEN_TOTAL, BGE_LABOR_EFF, PERIOD_STATE_0 } from '../data.js';
 import { estTarif, grenzsteuersatz } from './einkommensteuer.js';
-import { berechneGini, berechneMedianGewichtet, berechnePalma, berechneDezilDelta, berechneNettoSQ } from './verteilung.js';
+import { berechneGini, berechneMedianGewichtet, berechnePalma, berechneDezilDelta, svArbeitnehmer, bbgRV, bbgKV } from './verteilung.js';
 
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Hauptsimulation
@@ -10,7 +10,7 @@ import { berechneGini, berechneMedianGewichtet, berechnePalma, berechneDezilDelt
 //   data.js               → DEZILE, BASIS_AUFKOMMEN, ADMIN_QUOTE, ELAST, STAATSAUSGABEN
 //   rechner/einkommensteuer.js → estTarif, grenzsteuersatz
 //   rechner/verteilung.js → berechneDezilDelta, berechneGini, berechnePalma,
-//                           berechneMedianGewichtet, berechneNettoSQ
+//                           berechneMedianGewichtet, svArbeitnehmer, bbgRV, bbgKV
 // ═══════════════════════════════════════════════════════
 
 // Quellenmetadaten — zentrale Berechnungsannahmen
@@ -68,7 +68,20 @@ const FORMEL_QUELLEN_BERECHNE = {
 };
 
 
-function berechne(params, zustand = null) {
+// Status quo: einzige Quelle für alle Referenzwerte (F-010, F-011, F-012)
+const SQ = PRESETS.status_quo;
+
+// Unternehmenssteuerbelastung: KSt inkl. Solidaritätszuschlag (§ 4 SolZG) + GewSt
+const belastungUnternehmen = p => (p.kst * 1.055 + (p.gewst_aus ? 0 : p.gewst)) / 100;
+
+// Netto je Gruppe im Status quo — einmalig mit derselben Rechnung erzeugt wie jede Reform
+let _nettoSQ = null;
+function nettoSQ() {
+  if (!_nettoSQ) _nettoSQ = berechne(SQ, null, true).hh_delta.netto;
+  return _nettoSQ;
+}
+
+function berechne(params, zustand = null, _istReferenz = false) {
   // Periodenübergreifender Zustand für Multi-Perioden-Simulation
   const bip_faktor       = zustand ? zustand.bip / BASIS_MAKRO.bip : 1.0;
   const renten_faktor    = zustand ? (zustand.renten_faktor    ?? 1.0) : 1.0;
@@ -78,13 +91,15 @@ function berechne(params, zustand = null) {
   // Effektivzins SQ: 30 Mrd. / (64 % × 4.200 Mrd.) ≈ 1,12 % (Altschulden nahe 0 %, Rollover ~2,5 %)
   const schuld_sq_mrd = PERIOD_STATE_0.schuldenquote / 100 * PERIOD_STATE_0.bip; // 2.688 Mrd.
   const zins_effektivrate = STAATSAUSGABEN.zinsen / schuld_sq_mrd;               // ≈ 0.01116
+  // Einzige Zinsbuchung (F-006): Die Transition verzinst den Schuldenstand nicht noch einmal.
+  // Zinsschock (applySchock → _zins_bonus) erhöht den Effektivzins der Periode.
   const zinsen_dyn = zustand
-    ? (zustand.schuldenquote / 100 * zustand.bip) * zins_effektivrate
+    ? (zustand.schuldenquote / 100 * zustand.bip) * (zins_effektivrate + (zustand._zins_bonus || 0))
     : STAATSAUSGABEN.zinsen;
 
   // ---------- 1. ARBEITSANGEBOT-REAKTION pro Dezil ----------
   // Basisgrenzsteuersatz-Vergleich zum Status Quo
-  const sqGrenze = dez => grenzsteuersatz(dez.brutto*(1-dez.kapital), 12084, 14, 45, 277826);
+  const sqGrenze = dez => grenzsteuersatz(dez.brutto*(1-dez.kapital), SQ.freibetrag, SQ.eingang, SQ.spitze, SQ.grenze);
 
   // BGE-Arbeitsangebotseffekt (Substitutionseffekt: höherer Reservationslohn)
   // Quellen: RWI 2024 (bis −30 % bei 1.500 €), DIW Pilot 2024 (−2 % kurzfristig, n=107),
@@ -142,7 +157,7 @@ function berechne(params, zustand = null) {
   }
 
   // ---------- 3. KÖRPERSCHAFTSTEUER + GEWERBE ----------
-  const investment_factor = 1 + ELAST.investment * ((params.kst + (params.gewst_aus ? 0 : params.gewst))/100 - 0.30);
+  const investment_factor = 1 + ELAST.investment * (belastungUnternehmen(params) - belastungUnternehmen(SQ));
   const gewinn = BASIS_MAKRO.gewinn * bip_faktor * Math.max(0.7, Math.min(1.2, investment_factor));
   const kst_auf = gewinn * params.kst / 100;
   const gewst_auf = params.gewst_aus ? 0 : gewinn * params.gewst / 100;
@@ -157,9 +172,7 @@ function berechne(params, zustand = null) {
     // Netto nach ESt und SV (SV-Basis = Arbeitseinkommen, K3-Vorkorrektur hier vereinfacht)
     const est_d = est_pro_dezil.find(x => x.d === d.d).est;
     const arbeit_mwst = d.brutto_adj * (1 - d.kapital);
-    const bbg_kv_mwst = params.kv_bbg_frei ? Infinity : Math.round((params.bbg ?? 101400) * (BASIS_MAKRO.kv_bbg_kv_sq / 101400));
-    const sv_d = Math.min(arbeit_mwst, params.bbg ?? 101400) * (params.rv + params.alpf * 0.42) / 100 * 0.5
-               + Math.min(arbeit_mwst, bbg_kv_mwst) * (params.kv + params.alpf * 0.58) / 100 * 0.5;
+    const sv_d = svArbeitnehmer(arbeit_mwst, params);
     const netto = d.brutto_adj - est_d - sv_d;
     const konsum = netto * d.konsum;
     // 70% Regelsatz, 30% ermäßigt (grob aus VGR); je Kategorie eigene Verhaltensreaktion
@@ -184,15 +197,15 @@ function berechne(params, zustand = null) {
   const verm_auf  = BASIS_MAKRO.verm_basis  * params.verm  / 100;
 
   // ---------- 7. SV-BEITRÄGE ----------
-  const bbg = params.bbg ?? 101400;
+  const bbg = bbgRV(params);
   // BBG-Erhöhung: ~12% der sozialversicherungspflichtigen Löhne liegt zwischen 101,4k und 170k
-  const bbg_lohnsumme_factor = 1 + Math.max(0, (bbg - 101400) / 101400) * 0.12;
+  const bbg_lohnsumme_factor = 1 + Math.max(0, (bbg - SQ.bbg) / SQ.bbg) * 0.12;
   const lohnsumme_sv = BASIS_MAKRO.lohnsumme_sv * lohnbasis_faktor * bbg_lohnsumme_factor;
   const buerger_boost = params.buergerv ? 1.15 : 1.0;
   const rv_auf = lohnsumme_sv * params.rv / 100;
   // kv_bbg_frei/kv_kapital: Aufkommensschätzung skaliert mit aktuellem KV-Satz (ifo 159/2025, DIW)
-  const kv_bbg_frei_bonus = params.kv_bbg_frei ? BASIS_MAKRO.kv_bbg_frei_bonus * (params.kv / 17.5) : 0;
-  const kv_kapital_bonus  = params.kv_kapital  ? BASIS_MAKRO.kv_kapital_bonus  * (params.kv / 17.5) : 0;
+  const kv_bbg_frei_bonus = params.kv_bbg_frei ? BASIS_MAKRO.kv_bbg_frei_bonus * (params.kv / SQ.kv) : 0;
+  const kv_kapital_bonus  = params.kv_kapital  ? BASIS_MAKRO.kv_kapital_bonus  * (params.kv / SQ.kv) : 0;
   const kv_auf = lohnsumme_sv * params.kv / 100 * buerger_boost + kv_bbg_frei_bonus + kv_kapital_bonus;
   const al_auf = lohnsumme_sv * params.alpf / 100;
 
@@ -217,7 +230,7 @@ function berechne(params, zustand = null) {
   // Damit wird verhindert, dass rv_einsparung gegen eine feste Basis gerechnet wird, die der rv-Slider
   // schon implizit abgesenkt hat (Doppelkorrektur-Vermeidung).
   // renten_faktor: demografisch bedingte Mehrkosten (Baby-Boomer-Rentenwelle, Destatis 2021)
-  const rv_ausgaben_basis = BASIS_MAKRO.rv_ausgaben_sq * (params.rv / 18.6) * renten_faktor;
+  const rv_ausgaben_basis = BASIS_MAKRO.rv_ausgaben_sq * (params.rv / SQ.rv) * renten_faktor;
   let rv_einsparung = 0;
   if (bge > 0) {
     const rl = params.rente_grenze || 35000;              // €/Jahr Einkommensgrenze
@@ -287,9 +300,9 @@ function berechne(params, zustand = null) {
   // Bürgergeld wird separat über bg_auszahlung geführt; die SV-Anteile skalieren mit den Reglern.
   const SV_AUSG = { rv: 390, kv: 290, alpf: 90 };
   const sv_ausgaben_delta =
-    SV_AUSG.rv   * (params.rv   / 18.6 - 1) +
-    SV_AUSG.kv   * (params.kv   / 16.3 - 1) +
-    SV_AUSG.alpf * (params.alpf /  6.2 - 1);
+    SV_AUSG.rv   * (params.rv   / SQ.rv   - 1) +
+    SV_AUSG.kv   * (params.kv   / SQ.kv   - 1) +
+    SV_AUSG.alpf * (params.alpf / SQ.alpf - 1);
   // Demografieaufschlag: steigende RV-Ausgaben durch Alterung (RV-Anteil ~390 Mrd.)
   const demografie_aufschlag = 390 * (renten_faktor - 1.0);
   // invest_impuls: zusätzliche öffentliche Investitionen (Mrd./Jahr, reduziert Saldo)
@@ -316,7 +329,8 @@ function berechne(params, zustand = null) {
   if (klein_auf > 0) nst += 7;
 
   // ---------- 15. HAUSHALTSBELASTUNG pro Dezil (vs. Status Quo) ----------
-  const hh_delta = berechneDezilDelta(dezile, params, est_pro_dezil, klimageld_auszahlung, bg_auszahlung, kg_auszahlung);
+  const netto_sq = _istReferenz ? null : nettoSQ();
+  const hh_delta = berechneDezilDelta(dezile, params, est_pro_dezil, klimageld_auszahlung, bg_auszahlung, kg_auszahlung, netto_sq);
 
   // ---------- 16. GINI ----------
   const gini = berechneGini(hh_delta.netto, dezile);
@@ -337,7 +351,7 @@ function berechne(params, zustand = null) {
   // Dezil-Durchschnitte überschätzen Nettoeinkommen des untersten Quintils → binärer Schwellen-
   // ansatz würde armutsrisiko ≈ 0 % ergeben. Power-Law-Approximation bildet Streuung ab.
   const POV_SQ = [0.90, 0.62, 0.05, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  const netto_sq_all = dezile.map(d => berechneNettoSQ(d));
+  const netto_sq_all = netto_sq ?? hh_delta.netto;
   const median_netto = berechneMedianGewichtet(hh_delta.netto, dezile);
   const poverty_line = median_netto * 0.60;
   const poverty_line_sq = berechneMedianGewichtet(netto_sq_all, dezile) * 0.60;
@@ -364,8 +378,8 @@ function berechne(params, zustand = null) {
     const gs_est = grenzsteuersatz(arbeit, params.freibetrag, params.eingang, params.spitze, params.grenze);
     // K3: Separate BBG für KV/PV (62.100 €) und RV/AL (params.bbg).
     // RV+AL Grenzbelastung fällt weg sobald Arbeitseinkommen ≥ RV-BBG
-    const bbg_rv_m = params.bbg ?? 101400;
-    const bbg_kv_m = Math.round(bbg_rv_m * (BASIS_MAKRO.kv_bbg_kv_sq / 101400));
+    const bbg_rv_m = bbgRV(params);
+    const bbg_kv_m = bbgKV(params);
     const sv_grenz_rv = arbeit < bbg_rv_m ? (params.rv + params.alpf * 0.42) / 100 * 0.5 : 0;
     // kv_bbg_frei: kein Deckel → Grenzbelastung gilt bei jedem Einkommensniveau
     const sv_grenz_kv = (params.kv_bbg_frei || arbeit < bbg_kv_m) ? (params.kv + params.alpf * 0.58) / 100 * 0.5 : 0;

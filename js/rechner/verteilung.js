@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: CC-BY-4.0
 // Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
 import { DEZILE, PRESETS, ELAST, BASIS_MAKRO } from '../data.js';
-import { estTarif } from './einkommensteuer.js';
 
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Verteilungsmetriken & Dezilberechnung
@@ -31,9 +30,9 @@ const FORMEL_QUELLEN_VERT = {
     note:   'Elastizität −1,5: +1 % Einkommen → −1,5 % Armutsanteil. Intra-Dezil: D1 90 %, D2 62 %, D3 5 % (SOEP)'
   },
   berechneNettoSQ: {
-    formel: 'Netto_SQ = Brutto − ESt(SQ) − SV(SQ) − MwSt(SQ) − CO₂(SQ) + Klimageld(SQ) + Transfers(SQ)',
+    formel: 'Netto_SQ = Netto_neu(PRESETS.status_quo) — dieselbe Rechnung wie für jede Reform',
     ref:    'PRESETS.status_quo (data.js) · § 32a EStG 2026 · § 158 SGB VI · § 241 SGB V',
-    note:   'Referenzpunkt für alle Δ-Berechnungen; Parameter: freibetrag 12.348, eingang 14 %, spitze 45 %'
+    note:   'Referenzpunkt für alle Δ-Berechnungen; wird einmalig mit berechne(PRESETS.status_quo) erzeugt, daher Δ = 0 im Status quo'
   },
   berechneDezilDelta: {
     formel: 'Δ_i = Netto_neu_i − Netto_SQ_i',
@@ -83,7 +82,20 @@ function berechnePalma(werte) {
   return (bot_n>0&&top_n>0) ? (top_sum/top_n)/(bot_sum/bot_n) : 0;
 }
 
-function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg) {
+// Sozialversicherung (Arbeitnehmeranteil) — einzige Stelle für BBG und Beitragssätze.
+// RV/AL bis RV-BBG, KV/PV bis KV-BBG; die KV-BBG wird im Verhältnis des Status quo mitgeführt.
+// alpf = AL + PV; Aufteilung 2,6 : 3,6 (≈ 0,42 : 0,58), § 341 SGB III · § 55 SGB XI.
+function bbgRV(params) { return params.bbg ?? PRESETS.status_quo.bbg; }
+function bbgKV(params) {
+  if (params.kv_bbg_frei) return Infinity;
+  return Math.round(bbgRV(params) * (BASIS_MAKRO.kv_bbg_kv_sq / PRESETS.status_quo.bbg));
+}
+function svArbeitnehmer(arbeit, params) {
+  return Math.min(arbeit, bbgRV(params)) * (params.rv + params.alpf * 0.42) / 100 * 0.5
+       + Math.min(arbeit, bbgKV(params)) * (params.kv + params.alpf * 0.58) / 100 * 0.5;
+}
+
+function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg, netto_sq) {
   // Netto-Einkommen pro Dezil NEU
   const netto = [];
   const delta = [];
@@ -92,13 +104,9 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg) {
     const d = dezile[i];
     const est = est_dez[i].est;
     const brutto = d.brutto_adj;
-    // K3: SV nur auf Arbeitseinkommen (nicht Kapital); KV-BBG (62.100 €) < RV/AL-BBG
+    // K3: SV nur auf Arbeitseinkommen (nicht Kapital)
     const arbeit_dez = brutto * (1 - d.kapital);
-    const bbg_rv_dez = params.bbg ?? 101400;
-    // kv_bbg_frei: kein KV-Beitragsdeckel → gesamtes Arbeitseinkommen KV-pflichtig
-    const bbg_kv_dez = params.kv_bbg_frei ? Infinity : Math.round(bbg_rv_dez * (BASIS_MAKRO.kv_bbg_kv_sq / 101400));
-    const sv_lohn = Math.min(arbeit_dez, bbg_rv_dez) * (params.rv + params.alpf * 0.42) / 100 * 0.5
-                  + Math.min(arbeit_dez, bbg_kv_dez) * (params.kv + params.alpf * 0.58) / 100 * 0.5;
+    const sv_lohn = svArbeitnehmer(arbeit_dez, params);
     // kv_kapital: Kapitalerträge von GKV-Mitgliedern werden KV-pflichtig (Mieteinnahmen, Zinsen, Dividenden)
     // GKV-Quote sinkt in den oberen Dezilen (mehr PKV)
     const GKV_QUOTE = [0.95, 0.95, 0.95, 0.93, 0.90, 0.85, 0.80, 0.75, 0.70, 0.55, 0.30, 0.08];
@@ -134,38 +142,13 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg) {
 
     const netto_final = brutto - est - sv - mwst - co2_last + klimageld_per_hh + transfers;
 
-    // STATUS-QUO-Vergleich (hart codiert auf Basisparameter gerechnet)
-    const netto_sq = berechneNettoSQ(d);
+    // Status-quo-Vergleich: netto_sq stammt aus derselben Rechnung mit PRESETS.status_quo
+    // (fehlt nur beim Erzeugen der Referenz selbst → Δ = 0)
     netto.push(netto_final);
-    delta.push(netto_final - netto_sq);
+    delta.push(netto_sq ? netto_final - netto_sq[i] : 0);
     belastung_pct.push(100 * (est + sv + mwst + co2_last - transfers) / brutto);
   }
   return { netto, delta, belastung_pct };
 }
 
-function berechneNettoSQ(d) {
-  const sq = PRESETS.status_quo;
-  const brutto = d.brutto;
-  const arbeit_sq = brutto * (1 - d.kapital);
-  const kapital_sq = brutto * d.kapital;
-  const est = estTarif(arbeit_sq, sq.freibetrag, sq.eingang, sq.spitze, sq.grenze)
-            + kapital_sq * sq.abgeltung / 100;
-  const sv = Math.min(arbeit_sq, 101400) * (18.6 + 2.6) / 100 * 0.5   // RV-BBG 2026: 101.400 €
-           + Math.min(arbeit_sq, 69750) * (17.5 + 3.6) / 100 * 0.5;   // KV-BBG 2026: 69.750 €; KV 17.5% = 14,6% allgemein + Ø 2,9% Zusatzbeitrag
-  const vornetto = brutto - est - sv;
-  const konsum = vornetto * d.konsum;
-  const mwst = konsum * (0.7 * sq.mwst / (100 + sq.mwst) + 0.3 * sq.mwst_erm / (100 + sq.mwst_erm));
-  const co2_share = [0.040, 0.038, 0.036, 0.034, 0.032, 0.030, 0.028, 0.025, 0.022, 0.018, 0.015, 0.010];
-  const co2_last = brutto * co2_share[d.idx];
-  const sq_co2_auf = BASIS_MAKRO.emissions * sq.co2 / 1000;
-  const total_hh_sq = DEZILE.reduce((a,x)=>a+x.anzahl,0);
-  const klimageld_per_hh = sq_co2_auf * 0.7 * 1000 / total_hh_sq;
-  let transfers = 0;
-  const bg_quote_sq = [0.60, 0.25, 0.08, 0.02, 0, 0, 0, 0, 0, 0, 0, 0];
-  const kg_quote_sq = [0.80, 1.10, 1.20, 1.15, 1.05, 0.95, 0.85, 0.75, 0.65, 0.50, 0.35, 0.20];
-  transfers += sq.bg * 12 * bg_quote_sq[d.idx];
-  transfers += sq.kg * 12 * kg_quote_sq[d.idx];
-  return brutto - est - sv - mwst - co2_last + klimageld_per_hh + transfers;
-}
-
-export { FORMEL_QUELLEN_VERT, berechneGini, berechneMedianGewichtet, berechnePalma, berechneDezilDelta, berechneNettoSQ };
+export { FORMEL_QUELLEN_VERT, berechneGini, berechneMedianGewichtet, berechnePalma, berechneDezilDelta, svArbeitnehmer, bbgRV, bbgKV };

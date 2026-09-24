@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: CC-BY-4.0
 // Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
-import { BASIS_MAKRO } from '../data.js';
+import { BASIS_MAKRO, PRESETS } from '../data.js';
 
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Rentenreform & GKV-Strukturreformen
@@ -56,7 +56,7 @@ function berechneRente(params, rv_aufkommen_aktuell) {
   // --- Beitragssatz-Projektion 2025–2045 ---
   // Demografiedruck: ohne Reform +0,3 PP/Jahr (SVR-Schätzung)
   const demo_anstieg = 0.30;
-  const sq_beitrag = 18.6;
+  const sq_beitrag = PRESETS.status_quo.rv;
   const proj_ohne = [];
   const proj_mit = [];
   let ks_proj = kapitalstock;

@@ -70,7 +70,9 @@ function getParams() {
   };
 }
 
-function setParams(p) {
+function setParams(teilweise) {
+  // Fehlende Felder fallen auf den Status quo zurück — nie auf Reglermitte oder veraltete Werte (F-053)
+  const p = { ...PRESETS.status_quo, ...teilweise };
   document.getElementById('freibetrag').value = p.freibetrag;
   document.getElementById('eingang').value = p.eingang;
   document.getElementById('spitze').value = p.spitze;
@@ -104,12 +106,20 @@ function setParams(p) {
   document.getElementById('kv_bbg_frei').checked   = p.kv_bbg_frei   ?? false;
   document.getElementById('anzahl_kv').value = p.anzahl_kv ?? 95;
   document.getElementById('praevention').value = p.praevention ?? 0;
-  document.getElementById('bbg').value = p.bbg ?? 90000;
+  document.getElementById('bbg').value = p.bbg;
   document.getElementById('zucman').value = p.zucman ?? 0;
   document.getElementById('bge').value = p.bge ?? 0;
   document.getElementById('rente_niveau_gering').value = p.rente_niveau_gering ?? 80;
   document.getElementById('rente_niveau_hoch').value   = p.rente_niveau_hoch   ?? 50;
   document.getElementById('rente_grenze').value        = p.rente_grenze        ?? 35000;
+
+  // Entwicklungsschutz: Regler runden stillschweigend auf ihr Raster (F-007) — Abweichung melden.
+  const ist = getParams();
+  for (const [k, v] of Object.entries(teilweise || {})) {
+    if (typeof v === 'number' && k in ist && Math.abs(ist[k] - v) > 1e-9) {
+      console.warn(`setParams: ${k} = ${v} ist im Regler nicht darstellbar (angezeigt: ${ist[k]})`);
+    }
+  }
 }
 
 // Deutsches Zahlenformat für alles, was der Nutzer als Zahl liest:
@@ -533,7 +543,7 @@ function render() {
     // BGE vs. Grundfreibetrag Warnung
     const bgeWarnBox = document.getElementById('bge-freibetrag-warning');
     if (bgeWarnBox) {
-      const fb_monat = (p.freibetrag || 12084) / 12;
+      const fb_monat = (p.freibetrag || PRESETS.status_quo.freibetrag) / 12;
       if (bge_p > fb_monat) {
         bgeWarnBox.style.display = 'block';
         document.getElementById('bge-warn-val').textContent = bge_p;
@@ -724,7 +734,7 @@ function berechneWissenschaftsScore(p) {
     15 * (!p.betriebs ? 1 : 0) +
     20 * Math.min(1, ((p.verm ?? 0) + (p.zucman ?? 0) * 0.5) / 1.5) +
     10 * Math.max(0, (p.erb - 20) / 30) +
-    10 * Math.min(1, Math.max(0, ((p.bbg ?? 90000) - 90000) / 70000))
+    10 * Math.min(1, Math.max(0, (p.bbg - PRESETS.status_quo.bbg) / 70000))   // BBG-Anhebung ggü. Status quo
   ));
 
   // Zucman-Linie: internationale Koordination, Milliardärssteuer, CO₂, Steuertransparenz
@@ -1505,6 +1515,20 @@ function offenesOverlay() {
   if (mod && mod.classList.contains('open')) return { el: mod, close: closePicker };
   return null;
 }
+
+// Regler mit feinem Raster (damit gesetzliche Werte wie 12.348 € exakt einstellbar sind, F-007):
+// Pfeiltasten springen um data-tastenschritt, Shift+Pfeil um den feinen step.
+document.addEventListener('keydown', e => {
+  const el = e.target;
+  if (!(el instanceof HTMLInputElement) || el.type !== 'range' || !el.dataset.tastenschritt || e.shiftKey) return;
+  const dir = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[e.key];
+  if (!dir) return;
+  e.preventDefault();
+  const t = +el.dataset.tastenschritt, min = +el.min, max = +el.max, pos = (+el.value - min) / t;
+  const n = dir > 0 ? Math.floor(pos + 1e-9) + 1 : Math.ceil(pos - 1e-9) - 1;
+  el.value = Math.min(max, Math.max(min, min + n * t));
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+});
 
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;

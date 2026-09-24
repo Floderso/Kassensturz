@@ -210,7 +210,7 @@
     <div class="ctrl-section-body">
       <div class="slider-row">
         <label for="freibetrag">Grundfreibetrag <span class="value" id="v_freibetrag"></span></label>
-        <div class="slider-track" data-accent="#C2410C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="freibetrag" min="0" max="30000" step="500" value="12084"></div>
+        <div class="slider-track" data-accent="#C2410C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="freibetrag" min="0" max="30000" step="4" data-tastenschritt="500" value="12348"></div>
       </div>
       <div class="slider-row">
         <label for="eingang">Eingangssteuersatz <span class="value" id="v_eingang"></span></label>
@@ -222,7 +222,7 @@
       </div>
       <div class="slider-row">
         <label for="grenze">Einkommen ab Spitzensatz <span class="value" id="v_grenze"></span></label>
-        <div class="slider-track" data-accent="#C2410C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="grenze" min="50000" max="500000" step="10000" value="277826"></div>
+        <div class="slider-track" data-accent="#C2410C"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="grenze" min="50000" max="500000" step="1" data-tastenschritt="10000" value="277826"></div>
       </div>
       <div class="toggle-row">
         <label for="synthetisch">Kapital wie Arbeit besteuern</label>
@@ -281,11 +281,11 @@
     <div class="ctrl-section-body">
       <div class="slider-row">
         <label for="co2">CO₂-Preis <span class="value" id="v_co2"></span></label>
-        <div class="slider-track" data-accent="#166534"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="co2" min="0" max="300" step="5" value="55"></div>
+        <div class="slider-track" data-accent="#166534"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="co2" min="0" max="300" step="5" value="65"></div>
       </div>
       <div class="toggle-row">
         <label for="klimageld">Klimageld pro Kopf zurück</label>
-        <input type="checkbox" id="klimageld" checked>
+        <input type="checkbox" id="klimageld">
       </div>
     </div>
     </div>
@@ -331,7 +331,7 @@
       </div>
       <div class="slider-row">
         <label for="kv">Krankenversicherung <span class="value" id="v_kv"></span></label>
-        <div class="slider-track" data-accent="#0F766E"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="kv" min="8" max="25" step="0.1" value="16.3"></div>
+        <div class="slider-track" data-accent="#0F766E"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="kv" min="8" max="25" step="0.1" value="17.5"></div>
       </div>
       <div class="slider-row">
         <label for="alpf">Arbeitslosen+Pflege <span class="value" id="v_alpf"></span></label>
@@ -339,7 +339,7 @@
       </div>
       <div class="slider-row">
         <label for="bbg">Beitr.-Bemessungsgrenze <span class="value" id="v_bbg"></span></label>
-        <div class="slider-track" data-accent="#0F766E"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="bbg" min="40000" max="160000" step="5000" value="90000"></div>
+        <div class="slider-track" data-accent="#0F766E"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="bbg" min="40000" max="160000" step="50" data-tastenschritt="5000" value="101400"></div>
       </div>
       <div class="toggle-row">
         <label for="buergerv">Bürgerversicherung (alle zahlen)</label>
@@ -412,11 +412,11 @@
     <div class="ctrl-section-body">
       <div class="slider-row">
         <label for="bg">Bürgergeld-Regelsatz <span class="value" id="v_bg"></span></label>
-        <div class="slider-track" data-accent="#BE185D"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="bg" min="0" max="1500" step="10" value="563"></div>
+        <div class="slider-track" data-accent="#BE185D"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="bg" min="0" max="1500" step="1" data-tastenschritt="10" value="563"></div>
       </div>
       <div class="slider-row">
         <label for="kg">Kindergeld <span class="value" id="v_kg"></span></label>
-        <div class="slider-track" data-accent="#BE185D"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="kg" min="0" max="500" step="5" value="255"></div>
+        <div class="slider-track" data-accent="#BE185D"><div class="slider-fill"></div><div class="slider-thumb"></div><input type="range" class="styled-slider" id="kg" min="0" max="500" step="1" data-tastenschritt="5" value="259"></div>
       </div>
       <div class="toggle-row">
         <label for="neg_est">Negative Einkommensteuer</label>
@@ -820,6 +820,7 @@
       <div style="margin-top:16px;">
         <div style="font-family:'DM Mono',monospace;font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;">Entwicklung über alle Perioden</div>
         <div id="zeitreihe_chart"></div>
+        <p class="perioden-hint" id="klima-hinweis">Klimaschäden: Das Modell rechnet nur die Temperaturwirkung zusätzlicher bzw. vermiedener deutscher Emissionen (IPCC-TCRE, DICE-2023-Schadensfunktion). Sie ist so klein, dass sie das BIP praktisch nicht verändert — Klimaschäden hängen von den globalen Emissionen ab. Der Nutzen nationaler Klimapolitik als Beitrag zu globalen Minderungspfaden wird hier nicht abgebildet.</p>
       </div>
 
       <!-- Staatsausgaben je Periode -->

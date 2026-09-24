@@ -145,7 +145,7 @@ const PRESETS = {
     synthetisch: false, abgeltung: 25,
     kst: 15, gewst: 14, gewst_aus: false,
     mwst: 19, mwst_erm: 7,
-    co2: 65, klimageld: true,
+    co2: 65, klimageld: false,   // 2026 kein Klimageld im geltenden Recht (F-004)
     erb: 20, betriebs: true, boden: 0.4, verm: 0, zucman: 0,
     rv: 18.6, kv: 17.5, alpf: 6.2, buergerv: false, bbg: 101400,
     bg: 563, kg: 259, neg_est: false, kleine_st: true,
@@ -224,7 +224,7 @@ const PRESETS = {
     synthetisch: false, abgeltung: 25,
     kst: 15, gewst: 14, gewst_aus: false,
     mwst: 19, mwst_erm: 7,
-    co2: 65, klimageld: true,
+    co2: 65, klimageld: false,   // Koalitionsvertrag 2025: kein Klimageld beschlossen
     erb: 20, betriebs: true, boden: 0.4, verm: 0, zucman: 0,
     rv: 18.6, kv: 17.5, alpf: 6.2, buergerv: false, bbg: 101400,
     bg: 563, kg: 259, neg_est: false, kleine_st: true,
@@ -452,8 +452,8 @@ const TOOLTIPS = {
   },
   klimageld: {
     title: "Klimageld (Pro-Kopf-Rückzahlung)",
-    text: "70% der CO₂-Einnahmen pro Kopf zurück. Macht CO₂-Steuer insgesamt progressiv: Arme emittieren weniger, bekommen gleich viel. Ökonomen-Konsens (ifo, DIW, PIK): CO₂-Preis + Klimageld ist effizient UND gerecht. Im Modell: 70% gleichverteilt.",
-    quelle: "PIK Potsdam · Edenhofer/Franks/Kalkuhl (2021) Nature Climate Change · Koalitionsvertrag 2025"
+    text: "Reformoption, 2026 nicht eingeführt: Die BEHG-Einnahmen fließen derzeit in den Klima- und Transformationsfonds. Im Modell gehen bei Aktivierung 70% der CO₂-Einnahmen gleichverteilt pro Haushalt zurück. Macht die CO₂-Bepreisung insgesamt progressiv: Haushalte mit niedrigem Einkommen emittieren weniger, bekommen aber gleich viel zurück.",
+    quelle: "Reformvorschlag u. a. PIK/MCC · Edenhofer/Franks/Kalkuhl (2021) Nature Climate Change · Status 2026: nicht eingeführt"
   },
   erb: {
     title: "Erbschaftsteuer",

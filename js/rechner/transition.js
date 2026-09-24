@@ -6,7 +6,7 @@
 //
 // berechneTransition(prevState, prevResult, nextStartJahr, n) → PeriodState
 //   Leitet den Anfangszustand der nächsten Periode (n Jahre) ab.
-//   Enthält DICE-Klimaschaden (Nordhaus 2023) und HANK-Multiplikator
+//   Enthält DICE-Klimaschaden (DICE-2023, Barrage & Nordhaus 2024) und HANK-Multiplikator
 //   (Kaplan/Moll/Violante 2018).
 //
 // simulierePfad(perioden_params, kursKonfig?) → ErgebnisPfad[]
@@ -18,22 +18,23 @@
 //   BIP-Wachstum:       Bundesbank Winterprognose 2024 (1,5 % nominal)
 //   Fiskalmultiplikator: Gechert/Heimberger (2022) NIER · ECB WP 1267
 //   HANK-Multiplikator: Kaplan/Moll/Violante (2018) AER · McKay/Nakamura/Steinsson (2016)
-//   DICE-Klimaschaden:  Nordhaus (2023) PNAS · d₂ = 0,00267 (kalibriert IPCC AR6)
-//   Zinssatz:           Bundesbank DP 28/2018 · BMF Finanzplan 2025–2029
+//   DICE-Klimaschaden:  Barrage & Nordhaus (2024) PNAS · γ = 0,003467 (DICE-2023) · TCRE: IPCC AR6 WG1 SPM D.1.1
+//   Zinsen:             Effektivzins aus STAATSAUSGABEN.zinsen / Schuldenstand (berechne.js), einzige Zinsbuchung
 //   Demografie:         Destatis 14. Bev.-Vorausberechnung 2021 · DEMOGRAFIE_KURVE in data.js
 
-import { DEZILE, MPC_DEZIL, DEMOGRAFIE_KURVE, PERIOD_STATE_0 } from '../data.js';
+import { DEZILE, MPC_DEZIL, DEMOGRAFIE_KURVE, PERIOD_STATE_0, BASIS_MAKRO } from '../data.js';
 
 // Minimales Default — nur für backward-compat von simulierePfad(perioden_params)
 const KURS_KONFIG_DEFAULT = { perioden_anzahl: 5, perioden_laenge_jahre: 4, schocks: [] };
 import { berechne } from './berechne.js';
 
 const BIP_WACHSTUM_NOMINAL = 0.015;  // Ø nominales BIP-Wachstum je Jahr (Bundesbank)
-const ZINS_SCHULDEN        = 0.025;  // Ø Effektivzins auf Bestandsschulden (Rollover-Effekt)
 const INVEST_MULTIPLIKATOR = 1.2;    // Fiskalmultiplikator öffentl. Investitionen (Gechert/Heimberger)
-const DICE_D2              = 0.00267; // DICE-Schadensparameter d₂ (Nordhaus 2023; kalibriert AR6)
+// DICE-2023: Schadensfunktion Ω = γ·T², γ = 0,003467 (Barrage & Nordhaus 2024, PNAS 121(13), e2312030121)
+const DICE_D2              = 0.003467;
 const T_BASELINE           = 1.2;   // Globale Erwärmung 2025 vs. vorindustriell (IPCC AR6 SPM)
-const KLIMA_SENS_PER_MT    = 5e-4;  // °C je Mt kumulierter CO₂-Zusatz-Emissionen (vereinfacht)
+// TCRE: 0,45 °C je 1.000 Gt CO₂ (IPCC AR6 WG1 SPM D.1.1) = 0,45 / 1.000.000 °C je Mt (F-005)
+const TCRE_GRAD_PRO_MT     = 0.45 / 1e6;
 
 // Bevölkerungsgewichteter Referenz-MPC (Nenner des HANK-Multiplikators).
 // Ist die durchschnittliche MPC, wenn ein Impuls proportional zur Bevölkerung verteilt würde —
@@ -67,11 +68,13 @@ function hankMultiplikator(hh_delta) {
   return INVEST_MULTIPLIKATOR * (mpc_eff / HANK_MPC_BENCHMARK);
 }
 
-// DICE-Klimaschaden (Nordhaus 2023, d₂ = 0,00267)
-// Gibt den relativen BIP-Faktor zurück (<1 wenn Erwärmung über Baseline).
-// Ref: Nordhaus (2023) PNAS "An Optimal Transition Path" · IPCC AR6 WG3 Ch.3
+// DICE-Klimaschaden (DICE-2023, γ = 0,003467)
+// Gibt den relativen BIP-Faktor zurück (<1 bei Mehremissionen, >1 bei Minderemissionen ggü. Status quo).
+// co2_kumulat = kumulierte Abweichung der deutschen Emissionen vom Status-quo-Pfad (Mt CO₂).
+// Größenordnung: 1.000 Mt Mehremissionen ≈ +0,00045 °C → BIP-Effekt im Bereich 10⁻⁶. Klimaschäden
+// hängen von globalen Emissionen ab; der Nutzen nationaler Klimapolitik wird hier nicht abgebildet.
 function diceKlimaMalus(co2_kumulat) {
-  const delta_T  = co2_kumulat * KLIMA_SENS_PER_MT;
+  const delta_T  = co2_kumulat * TCRE_GRAD_PRO_MT;
   const T_total  = T_BASELINE + delta_T;
   const damage_now  = DICE_D2 * T_total ** 2;
   const damage_base = DICE_D2 * T_BASELINE ** 2;
@@ -108,13 +111,14 @@ function berechneTransition(prevState, prevResult, nextStartJahr, n) {
                    * labor_bonus * invest_impuls_bonus * klima_malus;
 
   // ── SCHULDENQUOTE ─────────────────────────────────────────────────────
-  const zins = ZINS_SCHULDEN + (prevState._zins_bonus || 0);
+  // Budgetidentität: ΔSchuld = −Saldo. Die Zinsen sind bereits als zinsen_dyn im Saldo enthalten (F-006).
   const schuld_curr = prevState.schuldenquote / 100 * prevState.bip;
-  const schuld_next = schuld_curr * Math.pow(1 + zins, n) - prevResult.saldo * n;
+  const schuld_next = schuld_curr - prevResult.saldo * n;
   const schuldenquote_next = Math.max(0, schuld_next / bip_next * 100);
 
   // ── CO₂-KUMULAT ──────────────────────────────────────────────────────
-  const co2_kumulat_next = prevState.co2_kumulat + prevResult.emissionen * n;
+  // Nur die Abweichung vom Status-quo-Emissionspfad (Mehr- bzw. Minderemissionen der gewählten Politik)
+  const co2_kumulat_next = prevState.co2_kumulat + (prevResult.emissionen - BASIS_MAKRO.emissions) * n;
 
   // ── ARBEITSMARKT-ZUSTANDSINDEX ────────────────────────────────────────
   // Mean-Reversion-Speed α skaliert mit Periodenlänge: länger → stärker
@@ -163,4 +167,4 @@ function simulierePfad(perioden_params, kursKonfig = KURS_KONFIG_DEFAULT) {
   return ergebnisse;
 }
 
-export { berechneTransition, simulierePfad, getDemoForYear, diceKlimaMalus, hankMultiplikator, ZINS_SCHULDEN, BIP_WACHSTUM_NOMINAL };
+export { berechneTransition, simulierePfad, getDemoForYear, diceKlimaMalus, hankMultiplikator, BIP_WACHSTUM_NOMINAL };
