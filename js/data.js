@@ -98,7 +98,7 @@ const BASIS_AUFKOMMEN = {
   co2:             21,   // BEHG + EU-ETS (nationaler Anteil); neu kalibriert auf 65 €/t (327×65/1000≈21)
   tabak:           15,
   grundst:         16,
-  erbschaft:        8,
+  erbschaft:       13.3, // festgesetzte Erbschaft- und Schenkungsteuer 2024 (Destatis, PM 320 vom 28.08.2025); vorher 8 ohne Quelle
   kfz:             10,
   sonstige:        35,   // Versicherung, Stromsteuer, Luftverkehr, etc.
   rv_beitrag:     310,
@@ -108,11 +108,27 @@ const BASIS_AUFKOMMEN = {
 
 // Makroökonomische Basiszahlen (Deutschland 2026)
 // Quellen: Destatis VGR, BMF Finanzplan 2026–2030, Deutsche Rentenversicherung, GKV-Spitzenverband
+// Kalibrierziele und Strukturannahmen für Block 4c (Prüfbericht F-003, F-035, F-070)
+const KALIBRIERUNG_ZIELE = {
+  sparquote:      0.112,  // Sparquote private Haushalte 2024: 11,2 % (Destatis, PM Okt. 2025)
+  armutsquote:    16.1,   // Armutsgefährdungsquote 2025, Erstergebnis (Destatis, PM 039 vom Feb. 2026)
+  // Einkommensteuer-Ziel: Lohnsteuer + veranlagte ESt/KapESt + Soli/Abgeltung (BASIS_AUFKOMMEN)
+  est:            BASIS_AUFKOMMEN.lohnsteuer + BASIS_AUFKOMMEN.estveranlagt + BASIS_AUFKOMMEN.solz_abgelt,
+  // [ANNAHME] steuerfreier Anteil am Konsum der Haushalte (§ 4 UStG: v. a. Wohnungsmieten, Finanz- und
+  // Versicherungsleistungen, Gesundheit) — durch EVS/VGR-Konsumstruktur zu ersetzen
+  mwst_steuerfrei_anteil: 0.20,
+};
+
+// Erbschaft- und Schenkungsteuer 2024 (Destatis, PM 320 vom 28.08.2025): steuerpflichtiger Erwerb und
+// festgesetzte Steuer — Niveau des Modells; die Reaktion auf Satz und Betriebsvermögens-Verschonung
+// folgt der bisherigen Modellstruktur ([ANNAHME]).
+const ERBST_2024 = { steuerpflichtiger_erwerb: 113.2, festgesetzt: 13.3 };
+
 const BASIS_MAKRO = {
   bip:               4622,  // BIP Deutschland 2026, Mrd. € (geschätzt: 4470 (2025) × 1,034; Bundesbank Juni 2026: +0,5 % real + ~2,9 % Inflation ≈ +3,4 % nominal — keine offizielle Jahres-Nominalzahl für 2026 verfügbar)
-  gewinn:             400,  // Unternehmensgewinne vor Steuern, Mrd. €
+  gewinn:             400,  // (nicht mehr in der Rechnung; KSt/GewSt-Basis aus Ist-Aufkommen, s. berechne.js)
   emissions:          327,  // CO₂-bepreiste Emissionen (aufkommensrelevanter Scope: BEHG + DE-ETS-Anteil); kalibriert auf BASIS_AUFKOMMEN.co2=21 Mrd. bei 65 €/t (327×65/1000≈21)
-  erb_masse:          400,  // Erbschaftsmasse pro Jahr, Mrd. €
+  erb_masse:          400,  // Erbschaftsmasse pro Jahr, Mrd. € (nur Tooltip-Kontext; Rechnung: ERBST_2024)
   boden_wert:        5000,  // Bodenwert Deutschland gesamt, Mrd. €
   verm_basis:        3500,  // Steuerpflichtiges Vermögen > 2 Mio €, Mrd. €
   lohnsumme_sv:      1750,  // Sozialversicherungspflichtige Lohnsumme, Mrd. €
@@ -604,9 +620,9 @@ const TOOLTIPS = {
     quelle: "§ 6 SGB IV · RV-BBG 2026: 101.400 € · KV-BBG: 69.750 € · DIW Wochenbericht 2025"
   },
   zucman: {
-    title: "Zucman-Mindeststeuer (Milliardäre)",
-    text: "2%-Mindeststeuer auf Nettovermögen ultra-Reicher — Vorschlag von Gabriel Zucman im Auftrag der G20-Präsidentschaft (Brasilien 2024). Weltweites Aufkommen: 200–250 Mrd. $. Deutschland war 2024 Hauptblockierer (zusammen mit USA). Im Modell: Basis ~2.870 Mrd. € (D10c-Vermögen); Avoidance-Abschlag ~15% bei 2% Satz.",
-    quelle: "Zucman G20 Report 2024 · EU Tax Observatory 2024 · Jakobsen/Jakobsen/Kleven/Zucman (2020) QJE (Einordnung; Vermeidungsabschlag 15 % ist Modellannahme)",
+    title: "Mindeststeuer Top 1 % (Vermögen)",
+    text: "Jährliche Mindeststeuer auf das Nettovermögen der obersten 1 % der Haushalte (Modellgruppe D10c, Ø 7 Mio. € Vermögen, Bemessungsgrundlage ~2.870 Mrd. €). Einordnung: Gabriel Zucman schlug 2024 im Auftrag der brasilianischen G20-Präsidentschaft eine 2%-Mindeststeuer vor — dieser Vorschlag zielt jedoch nur auf Milliardär:innen (weltweit rund 3.000 Personen) und rechnet bereits gezahlte Einkommensteuer an; beides bildet dieser Regler nicht ab. Vermeidungsabschlag: 15 % bei 2 % Satz (Modellannahme).",
+    quelle: "Einordnung: Zucman G20 Report 2024 · EU Tax Observatory 2024 · Jakobsen/Jakobsen/Kleven/Zucman (2020) QJE · Vermeidungsabschlag: Modellannahme",
     refs: ['A32', 'B09', 'A22']
   },
   kv_kapital: {
@@ -668,7 +684,7 @@ const KPI_BENCH = {
   admin:  'DE ~2 % Steueraufkommen (OECD-Ø)',
   nst:    'DE aktuell: ~40 Steuerarten',
   arb:    'Elastizitäten: Saez/Chetty/Gruber',
-  armut:  'DE 2023: 14,8 % (EU-SILC) · EU-Ø: 16,5 %',
+  armut:  'Im Status quo kalibriert auf DE 2025: 16,1 % (Destatis, Erstergebnis) · 2024: 15,5 %',
   schuld: 'DE Schuldenquote 2025: 63,5 % BIP · Schuldenstand: 2.838 Mrd. € (Bundesbank Feb 2026) · Maastricht-Grenze: 60 %',
   dwl:    'Schätzung: 5–15 % des Steueraufkommens',
   zins:   'Bund 2025: 7,7 Ct/€ (30,2 Mrd.) · Projektion 2029: 17,2 Ct/€ (66,5 Mrd.) · Tief 2021: 4,6 Ct · Quelle: IW Köln (Hentze 2025) · BMF Finanzplan 2025–2029 (Abbildung 4)',
@@ -676,7 +692,7 @@ const KPI_BENCH = {
 const CHALLENGE_CTX = {
   'Saldo':            'DE 2025: −119 Mrd. € (VGR/Maastricht, Destatis Feb 2026) · Defizitquote −2,7 % BIP',
   'Gini':             'DE heute: 0,295 · Dänemark: 0,281',
-  'Armutsrisiko':     'DE 2023: 14,8 % (EU-SILC)',
+  'Armutsrisiko':     'DE 2025: 16,1 % (Destatis, Erstergebnis)',
   'Verwaltung':       'DE ~2 % Steueraufkommen (OECD)',
   'Arbeit-Index':     'Indexbasis = 100 (Status quo)',
   'Steuerarten':      'Kirchhof-Ideal: 4–5 Steuerarten',
@@ -805,4 +821,4 @@ const ZUKUNFTS_SZENARIEN = [
   },
 ];
 
-export { TARIF_2026, HH_STRUKTUR, DEZILE, MPC_DEZIL, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };
+export { TARIF_2026, HH_STRUKTUR, KALIBRIERUNG_ZIELE, ERBST_2024, DEZILE, MPC_DEZIL, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };

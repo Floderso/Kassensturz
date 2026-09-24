@@ -624,3 +624,16 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - D10a, D10b und D10c haben dasselbe Feld `d: 10`. `find` liefert für alle drei den Eintrag von D10a.
   - Für D10b und D10c wurde die Einkommensteuer deshalb viel zu niedrig angesetzt, und Nettoeinkommen, Konsum und MwSt fielen zu hoch aus.
 - **Status:** In Block 4b behoben. Die Zuordnung erfolgt jetzt über den Index.
+
+### F-070 · schwer · W · Einkommen und Konsum der Modellgruppen liegen deutlich unter der VGR
+- **Fundstelle:** `js/data.js`, `DEZILE` (Brutto je Gruppe, Konsumquoten `konsum`)
+- **Beleg:** `{ d:1, idx:0, label:'D1', brutto: 14000, kapital: 0.01, konsum: 1.00, … }` (analog für alle Gruppen)
+- **Begründung:**
+  - Hochgerechnet ergeben die Gruppen rund 1.650 Mrd. € verfügbares Einkommen und rund 1.200 Mrd. € Konsum. Laut VGR sind es etwa 2,4 Bio. € verfügbares Einkommen und etwa 2,2 Bio. € privater Konsum.
+  - Die Konsumquoten entsprachen zusammen einer Sparquote von 27 %; amtlich sind es 11,2 % (2024).
+  - Die MwSt aus dem modellierten Haushaltskonsum erklärt dadurch auch nach Anpassung an die Sparquote nur gut die Hälfte des Ist-Aufkommens.
+- **Status:** Teilweise behoben in Block 4c.
+  - Die Konsumquoten sind auf die amtliche Sparquote skaliert.
+  - Die übrige MwSt wird als offen ausgewiesene Restgröße geführt: 44 % im Status quo, skaliert nur mit den Sätzen.
+  - Sie umfasst MwSt aus Staatskonsum, steuerbefreiten Branchen und Wohnungsbau sowie die Einkommenslücke; beides lässt sich ohne Destatis-Daten nicht trennen.
+  - Offen: Einkommen der Gruppen auf VGR-Niveau bringen (VGR-/EVS-Daten).

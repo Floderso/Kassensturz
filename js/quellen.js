@@ -186,7 +186,7 @@ const QUELLEN = [
     titel:'Wealth Taxation and Wealth Accumulation: Theory and Evidence from Denmark',
     quelle:'Quarterly Journal of Economics, 135(1), 329–388',
     doi:'10.1093/qje/qjz032',
-    verwendet:'Einordnung Vermögensteuer-Reaktionen · Zucman-Mindeststeuer: Vermeidungsabschlag 15 % bei 2 % Satz ist Modellannahme, kein Wert aus der Studie' },
+    verwendet:'Einordnung Vermögensteuer-Reaktionen · Regler Mindeststeuer Top 1 %: Vermeidungsabschlag 15 % bei 2 % Satz ist Modellannahme, kein Wert aus der Studie' },
 
   { id:'A23', typ:'akademisch',
     autor:'Kleven, H. & Schultz, E.A.',
@@ -266,7 +266,7 @@ const QUELLEN = [
     titel:'A Blueprint for a Coordinated Minimum Effective Taxation Standard for Ultra-High-Net-Worth Individuals',
     quelle:'EU Tax Observatory / G20 Presidency Report, Brasília',
     doi:'',
-    verwendet:'Zucman-Mindeststeuer-Regler · globales Aufkommen 200–250 Mrd. $; Modellbasis 2 % auf Nettovermögen; Sidebar-Tooltip' },
+    verwendet:'Einordnung des Reglers Mindeststeuer Top 1 % · Originalvorschlag: 2 % auf Milliardärsvermögen mit Anrechnung der ESt, globales Aufkommen 200–250 Mrd. $' },
 
 
   /* ─────────────────────────────────────────────────────────────
@@ -343,7 +343,7 @@ const QUELLEN = [
     titel:'Global Tax Evasion Report 2024',
     quelle:'EU Tax Observatory, Paris School of Economics',
     doi:'',
-    verwendet:'Zucman-Mindeststeuer Tooltip · internationaler Kontext; Deutschland als Hauptblockierer 2024' },
+    verwendet:'Tooltip Mindeststeuer Top 1 % · internationaler Kontext' },
 
   { id:'B10', typ:'bericht',
     autor:'Edenhofer, O. et al. (Potsdam-Institut für Klimafolgenforschung, PIK)',

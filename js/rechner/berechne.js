@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: CC-BY-4.0
 // Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
-import { DEZILE, ELAST, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, BASIS_AUFKOMMEN, ADMIN_QUOTE, AUSGABEN_TOTAL, BGE_LABOR_EFF, PERIOD_STATE_0 } from '../data.js';
+import { DEZILE, ELAST, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, BASIS_AUFKOMMEN, ADMIN_QUOTE, AUSGABEN_TOTAL, BGE_LABOR_EFF, PERIOD_STATE_0, KALIBRIERUNG_ZIELE, ERBST_2024 } from '../data.js';
 import { zvE, estHaushalt, grenzsatzHaushalt, abgeltungHaushalt, SPARER_PAUSCHBETRAG } from './haushalt.js';
-import { berechneGini, berechneMedianGewichtet, berechnePalma, berechneS80S20, berechneDezilDelta, svArbeitnehmer, svGrenzsatz, bbgRV } from './verteilung.js';
+import { berechneGini, berechneMedianGewichtet, berechnePalma, berechneS80S20, berechneArmutsquote, mwstSatzfaktor, berechneDezilDelta, svArbeitnehmer, svGrenzsatz, bbgRV } from './verteilung.js';
 
 // ═══════════════════════════════════════════════════════
 // KASSENSTURZ · Hauptsimulation
@@ -44,7 +44,7 @@ const FORMEL_QUELLEN_BERECHNE = {
     formel: 'Zucman_auf = 2.870 × Satz% × (1 − 0,15 × min(1; Satz/2))',
     ref:    'Zucman G20 Report 2024 · EU Tax Observatory 2024 · Jakobsen/Jakobsen/Kleven/Zucman (2020) QJE',
     refs:   ['A32', 'B09', 'A22'],
-    note:   'Basis D10c: 0,41 Mio. HH × 7 Mio. € Median-Vermögen = ~2.870 Mrd. €; Avoidance 15 % bei 2 %'
+    note:   'Basis D10c: 0,41 Mio. HH × Ø 7 Mio. € Vermögen (Top 1 %; kein Milliardärs-Instrument, F-037) = ~2.870 Mrd. €; Avoidance 15 % bei 2 %'
   },
   sv_beitraege: {
     formel: 'SV = Lohnsumme_sv × Satz%  (nur bis BBG)',
@@ -75,14 +75,62 @@ const SQ = PRESETS.status_quo;
 // Unternehmenssteuerbelastung: KSt inkl. Solidaritätszuschlag (§ 4 SolZG) + GewSt
 const belastungUnternehmen = p => (p.kst * 1.055 + (p.gewst_aus ? 0 : p.gewst)) / 100;
 
+// Bemessungsgrundlagen der Unternehmensteuern aus Ist-Aufkommen und Status-quo-Satz (F-003):
+// KSt und GewSt haben unterschiedliche Grundlagen (Hinzurechnungen, Personengesellschaften).
+const BEMESSUNG = {
+  kst:   BASIS_AUFKOMMEN.kst   / (SQ.kst   / 100),
+  gewst: BASIS_AUFKOMMEN.gewst / (SQ.gewst / 100),
+};
+
+// Erbschaftsteuer: Niveau aus der Destatis-Statistik, Reaktion auf Satz und Verschonung wie bisher ([ANNAHME])
+const erbStruktur = p => 0.6 * p.erb * (p.betriebs ? 0.3 : 0.9) + 0.4 * Math.min(p.erb, 15) * 0.5;
+
+const VAT_GAP = 0.963;   // EU-Kommission VAT Gap Report 2024: DE ~3,7 % des theoretischen Aufkommens ungehoben
+
+// ── Kalibrierung im Status quo (F-003, F-035, F-070) — einmalig, offen ausgewiesen ──
+// konsum_k:    skaliert die Sparanteile der Gruppen auf die amtliche Sparquote (11,2 %)
+// est:         Restfaktor ESt+Soli gegenüber der Kassenstatistik (Akzeptanz 0,85–1,15)
+// mwst_rest:   MwSt, die nicht aus dem modellierten Haushaltskonsum stammt (Staat, steuerbefreite Branchen,
+//              Wohnungsbau) plus Einkommenslücke der Gruppen ggü. VGR — als eigene Größe geführt (F-070)
+// armut_sigma: Streuung innerhalb der Gruppen, sodass die Armutsquote der amtlichen entspricht
+let _kal = null;
+function kalibrierung() {
+  if (_kal) return _kal;
+  const Z = KALIBRIERUNG_ZIELE;
+  let kal = { konsum_k: 1, est: 1, mwst_rest: 0, armut_sigma: null, steuerfrei: Z.mwst_steuerfrei_anteil };
+  for (let i = 0; i < 6; i++) {
+    const r = berechne(SQ, null, { kal, referenz: true });
+    let vn = 0, vns = 0;
+    DEZILE.forEach((d, j) => {
+      const v = Math.max(0, r.hh_delta.verfuegbar[j]);
+      vn += v * d.anzahl; vns += v * d.anzahl * (1 - d.konsum);
+    });
+    kal = { ...kal, konsum_k: Z.sparquote * vn / vns, est: kal.est * Z.est / r.rev.est };
+  }
+  const r = berechne(SQ, null, { kal, referenz: true });
+  kal.mwst_rest = BASIS_AUFKOMMEN.mwst / VAT_GAP - r.mwst_haushalte;
+  let lo = 0.05, hi = 2.5;
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    if (berechneArmutsquote(r.hh_delta.netto, DEZILE, mid).quote < Z.armutsquote) lo = mid; else hi = mid;
+  }
+  kal.armut_sigma = (lo + hi) / 2;
+  kal.mwst_rest_anteil = kal.mwst_rest / (kal.mwst_rest + r.mwst_haushalte);
+  _kal = kal;
+  return kal;
+}
+
 // Netto je Gruppe im Status quo — einmalig mit derselben Rechnung erzeugt wie jede Reform
 let _nettoSQ = null;
 function nettoSQ() {
-  if (!_nettoSQ) _nettoSQ = berechne(SQ, null, true).hh_delta.netto;
+  if (!_nettoSQ) _nettoSQ = berechne(SQ, null, { kal: kalibrierung(), referenz: true }).hh_delta.netto;
   return _nettoSQ;
 }
 
-function berechne(params, zustand = null, _istReferenz = false) {
+// _intern (nur modulintern): { kal, referenz } für Kalibrierung und Status-quo-Referenz
+function berechne(params, zustand = null, _intern = null) {
+  const kal = _intern?.kal ?? kalibrierung();
+  const _istReferenz = !!_intern?.referenz;
   // Periodenübergreifender Zustand für Multi-Perioden-Simulation
   const bip_faktor       = zustand ? zustand.bip / BASIS_MAKRO.bip : 1.0;
   const renten_faktor    = zustand ? (zustand.renten_faktor    ?? 1.0) : 1.0;
@@ -161,37 +209,25 @@ function berechne(params, zustand = null, _istReferenz = false) {
     } else {
       est_kap = abgeltungHaushalt(d.kapital_adj, d.erwachsene, params.abgeltung);
     }
-    const tot = est_arbeit + est_kap;
+    // Restfaktor gegenüber der Kassenstatistik gilt für Haushalt und Staat gleichermaßen
+    const tot = (est_arbeit + est_kap) * kal.est;
     est_aufkommen += tot * d.anzahl / 1000;   // Mrd.
-    est_pro_dezil.push({ d: d.d, idx: d.idx, est: tot, est_arbeit, est_kap, soli: arb.soli, zve: zve_arbeit, sv_an });
+    est_pro_dezil.push({ d: d.d, idx: d.idx, est: tot, est_arbeit: est_arbeit * kal.est, est_kap: est_kap * kal.est, soli: arb.soli * kal.est, zve: zve_arbeit, sv_an });
   }
 
   // ---------- 3. KÖRPERSCHAFTSTEUER + GEWERBE ----------
   const investment_factor = 1 + ELAST.investment * (belastungUnternehmen(params) - belastungUnternehmen(SQ));
-  const gewinn = BASIS_MAKRO.gewinn * bip_faktor * Math.max(0.7, Math.min(1.2, investment_factor));
-  const kst_auf = gewinn * params.kst / 100;
-  const gewst_auf = params.gewst_aus ? 0 : gewinn * params.gewst / 100;
+  const gewinn_faktor = bip_faktor * Math.max(0.7, Math.min(1.2, investment_factor));
+  const kst_auf = BEMESSUNG.kst * gewinn_faktor * params.kst / 100;
+  const gewst_auf = params.gewst_aus ? 0 : BEMESSUNG.gewst * gewinn_faktor * params.gewst / 100;
 
   // ---------- 4. MWST ----------
   // F3: Verhaltensreaktion Konsum auf BEIDE MwSt-Sätze getrennt (Lewbel/Pendakur 2009).
   // Vorher reagierte cons_factor nur auf den Regelsatz — Senkung des ermäßigten Satzes hatte keinen Effekt.
   const cf_reg = Math.max(0.85, Math.min(1.1, 1 + ELAST.consumption * (params.mwst     - 19) / 100));
   const cf_erm = Math.max(0.85, Math.min(1.1, 1 + ELAST.consumption * (params.mwst_erm -  7) / 100));
-  let mwst_auf = 0;
-  for (const d of dezile) {
-    // Netto nach ESt und SV (SV-Basis = Arbeitseinkommen, K3-Vorkorrektur hier vereinfacht)
-    // Zuordnung über den Index: D10a/b/c teilen sich d = 10 (F-069)
-    const est_d = est_pro_dezil[d.idx].est;
-    const sv_d = est_pro_dezil[d.idx].sv_an;
-    const netto = d.brutto_adj - est_d - sv_d;
-    const konsum = netto * d.konsum;
-    // 70% Regelsatz, 30% ermäßigt (grob aus VGR); je Kategorie eigene Verhaltensreaktion
-    const mwst_d = konsum * (0.7 * params.mwst     / (100 + params.mwst)     * cf_reg
-                           + 0.3 * params.mwst_erm / (100 + params.mwst_erm) * cf_erm);
-    mwst_auf += mwst_d * d.anzahl / 1000;
-  }
-  // R08: VAT-Gap-Korrekturfaktor (EU-Kommission / CASE VAT Gap 2024: DE ~3,7 % des theoretischen Aufkommens ungehoben)
-  mwst_auf *= 0.963;
+  // Die MwSt aus Haushaltskonsum wird mit den Haushaltsnettos in Abschnitt 9b berechnet (eine Rechnung
+  // für Staat und Haushalte); hier nur die Satzfaktoren.
 
   // ---------- 5. CO2 ----------
   const co2_factor = 1 + ELAST.co2 * ((params.co2 - 65) / 100);
@@ -200,9 +236,7 @@ function berechne(params, zustand = null, _istReferenz = false) {
   const klimageld_auszahlung = params.klimageld ? co2_auf * 0.7 : 0; // 70% zurück als Klimageld
 
   // ---------- 6. VERMÖGEN / ERBSCHAFT / BODEN ----------
-  const erb_satz_eff = params.erb * (params.betriebs ? 0.3 : 0.9) / 100;
-  const erb_auf = BASIS_MAKRO.erb_masse * 0.6 * erb_satz_eff
-                + BASIS_MAKRO.erb_masse * 0.4 * Math.min(params.erb, 15) / 100 * 0.5;
+  const erb_auf = ERBST_2024.festgesetzt * erbStruktur(params) / erbStruktur(SQ) * bip_faktor;
   const boden_auf = BASIS_MAKRO.boden_wert * params.boden / 100;
   const verm_auf  = BASIS_MAKRO.verm_basis  * params.verm  / 100;
 
@@ -219,9 +253,9 @@ function berechne(params, zustand = null, _istReferenz = false) {
   const kv_auf = lohnsumme_sv * params.kv / 100 * buerger_boost + kv_bbg_frei_bonus + kv_kapital_bonus;
   const al_auf = lohnsumme_sv * params.alpf / 100;
 
-  // ---------- 7b. ZUCMAN-MINDESTSTEUER ----------
-  // 2%-Mindeststeuer auf Nettovermögen ultra-Reicher (Zucman G20 2024)
-  // Basis D10c: 0,41 Mio. HH × 7 Mio. € Median-Vermögen = ~2.870 Mrd. €
+  // ---------- 7b. MINDESTSTEUER TOP 1 % (Parameter „zucman“, F-037) ----------
+  // Bemessungsgrundlage: Modellgruppe D10c, 0,41 Mio. HH × Ø 7 Mio. € Vermögen ≈ 2.870 Mrd. €.
+  // Kein Zucman-Instrument im engeren Sinn (das zielt nur auf Milliardär:innen, mit Anrechnung der ESt).
   // Avoidance: ~15% bei 2% Satz — Modellannahme (Einordnung: Jakobsen/Jakobsen/Kleven/Zucman 2020, QJE)
   const zucman_basis = 2870;
   const zucman_avoidance = 1 - 0.15 * Math.min(1, (params.zucman ?? 0) / 2);
@@ -229,7 +263,7 @@ function berechne(params, zustand = null, _istReferenz = false) {
 
   // ---------- 8. KLEINE VERBRAUCHSTEUERN ----------
   const klein_auf = params.kleine_st ?
-    (BASIS_AUFKOMMEN.energie + BASIS_AUFKOMMEN.tabak + BASIS_AUFKOMMEN.kfz + BASIS_AUFKOMMEN.sonstige + BASIS_AUFKOMMEN.solz_abgelt) : 0;
+    (BASIS_AUFKOMMEN.energie + BASIS_AUFKOMMEN.tabak + BASIS_AUFKOMMEN.kfz + BASIS_AUFKOMMEN.sonstige) : 0;   // Soli/Abgeltung jetzt in der ESt
 
   // ---------- 9. TRANSFERS ----------
   const bge = params.bge || 0;
@@ -268,6 +302,15 @@ function berechne(params, zustand = null, _istReferenz = false) {
   // BGE Bruttokosten: ~70 Mio. Erwachsene (Destatis Mikrozensus 2024)
   // Quelle: RWI 2024, ifo Mikrosimulation 2021 (Blömer/Peichl)
   const bge_brutto = bge * 12 * 70 / 1000; // Mrd. — bei 1.200 € = ~1.008 Mrd./Jahr
+
+  // ---------- 9b. HAUSHALTSNETTO UND MWST ----------
+  const netto_sq = _istReferenz ? null : nettoSQ();
+  const hh_delta = berechneDezilDelta(dezile, params, est_pro_dezil, klimageld_auszahlung, bg_auszahlung, kg_auszahlung, netto_sq,
+                                      { cf_reg, cf_erm, konsum_k: kal.konsum_k, steuerfrei: kal.steuerfrei });
+  const mwst_haushalte = dezile.reduce((a, d, i) => a + hh_delta.mwst[i] * d.anzahl / 1000, 0);
+  // Restgröße (F-070): skaliert mit den Sätzen und dem BIP, nicht mit dem Haushaltskonsum
+  const mwst_rest = kal.mwst_rest * mwstSatzfaktor(params, cf_reg, cf_erm) / mwstSatzfaktor(SQ) * bip_faktor;
+  const mwst_auf = (mwst_haushalte + mwst_rest) * VAT_GAP;
 
   // ---------- 10. GESAMTEINNAHMEN ----------
   const rev = {
@@ -338,9 +381,7 @@ function berechne(params, zustand = null, _istReferenz = false) {
   if (al_auf > 0) nst += 2;
   if (klein_auf > 0) nst += 7;
 
-  // ---------- 15. HAUSHALTSBELASTUNG pro Dezil (vs. Status Quo) ----------
-  const netto_sq = _istReferenz ? null : nettoSQ();
-  const hh_delta = berechneDezilDelta(dezile, params, est_pro_dezil, klimageld_auszahlung, bg_auszahlung, kg_auszahlung, netto_sq);
+  // ---------- 15. HAUSHALTSBELASTUNG pro Dezil: siehe 9b ----------
 
   // ---------- 16. GINI ----------
   const gini = berechneGini(hh_delta.netto, dezile);
@@ -356,26 +397,12 @@ function berechne(params, zustand = null, _istReferenz = false) {
     co2: co2_factor * 100
   };
 
-  // ---------- 18. ARMUTSRISIKOQUOTE ----------
-  // Kontinuierliches Intra-Dezil-Modell — kalibriert auf EU-SILC DE 2023 (14,8 %)
-  // Intra-Dezil-Armutsanteile SQ: D1 90 %, D2 62 %, D3 5 % (SOEP v40, IAB Kurzbericht 2024)
-  // Dezil-Durchschnitte überschätzen Nettoeinkommen des untersten Quintils → binärer Schwellen-
-  // ansatz würde armutsrisiko ≈ 0 % ergeben. Power-Law-Approximation bildet Streuung ab.
-  const POV_SQ = [0.90, 0.62, 0.05, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  const netto_sq_all = netto_sq ?? hh_delta.netto;
-  const median_netto = berechneMedianGewichtet(hh_delta.netto, dezile);
-  const poverty_line = median_netto * 0.60;
-  const poverty_line_sq = berechneMedianGewichtet(netto_sq_all, dezile) * 0.60;
-  const total_hh_all = dezile.reduce((a,d)=>a+d.anzahl,0);
-  const armutsrisiko = dezile.reduce((acc, d, i) => {
-    const pov_sq_i = POV_SQ[i];
-    if (pov_sq_i === 0) return acc;
-    // Relative Einkommensveränderung, bereinigt um Verschiebung der relativen Armutsgrenze
-    const rel = (hh_delta.netto[i] / netto_sq_all[i]) / (poverty_line / poverty_line_sq);
-    // Elastizität −1,5: Einkommensstieg +1 % → Armutsanteil −1,5 % (Bourguignon 2003, DE-kalibriert)
-    const pov_i = Math.max(0, Math.min(1, pov_sq_i * Math.pow(rel, -1.5)));
-    return acc + pov_i * d.anzahl;
-  }, 0) / total_hh_all * 100;
+  // ---------- 18. ARMUTSGEFÄHRDUNGSQUOTE (F-035, F-040) ----------
+  // Log-Normalverteilung innerhalb der Gruppen, σ im Status quo auf die amtliche Quote kalibriert;
+  // Armutsgrenze = 60 % des Medians der Äquivalenzeinkommen (Personen) — reagiert mit der Politik mit.
+  const armut = kal.armut_sigma ? berechneArmutsquote(hh_delta.netto, dezile, kal.armut_sigma) : null;
+  const armutsrisiko = armut ? armut.quote : null;
+  const poverty_line = armut ? armut.armutsgrenze : berechneMedianGewichtet(hh_delta.netto, dezile) * 0.6;
 
   // ---------- 19. SCHULDENQUOTE Δ ----------
   const bip_aktuell = BASIS_MAKRO.bip * bip_faktor;
@@ -412,7 +439,7 @@ function berechne(params, zustand = null, _istReferenz = false) {
   // ---------- 19c. DYNAMISCHES SCORING ----------
   // Verhaltensbedingte Aufkommensänderung gegenüber mechanischer (statischer) Wirkung
   // KSt: investment_factor-Abweichung von 1 = Investitionsreaktion auf KSt-Änderung
-  const dynamisch_kst = BASIS_MAKRO.gewinn * bip_faktor * params.kst / 100 * (investment_factor - 1);
+  const dynamisch_kst = BEMESSUNG.kst * bip_faktor * params.kst / 100 * (investment_factor - 1);
   // ESt: labor_factor-Abweichung → Arbeitsangebotsreaktion (Saez/Chetty-Konsens ε = 0,20)
   const dynamisch_est = est_aufkommen * (avg_labor - 1);
   const dynamisch_delta = dynamisch_kst + dynamisch_est;
@@ -423,6 +450,8 @@ function berechne(params, zustand = null, _istReferenz = false) {
     bg_auszahlung, kg_auszahlung, neg_est_auszahlung,
     armutsrisiko, schuldenquote_delta, metr, dwl, poverty_line,
     rv_einsparung, bge_brutto,
+    // Kalibrierung (offen ausgewiesen) und MwSt-Zerlegung
+    kalibrierung: kal, mwst_haushalte, mwst_rest,
     // Research-basierte Erweiterungen (QUELLENRECHERCHE.md)
     saldo_bip_pct, schuldenbremse_ok,
     dynamisch_kst, dynamisch_est, dynamisch_delta,

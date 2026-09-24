@@ -26,9 +26,9 @@ const FORMEL_QUELLEN_VERT = {
     note:   'Basis für Armutsgrenze: 60 % des gewichteten Medians (EU-SILC-Konvention, Art. 7 VO 2019/1700)'
   },
   armutsrisiko: {
-    formel: 'pov_i = pov_sq_i × (y_i/y_sq_i ÷ PL/PL_sq)^(−1,5)',
-    ref:    'Bourguignon (2003) JPubEc · EU-SILC DE 2023 (14,8 % Kalibrierung) · SOEP v40 · IAB Kurzbericht 2024',
-    note:   'Elastizität −1,5: +1 % Einkommen → −1,5 % Armutsanteil. Intra-Dezil: D1 90 %, D2 62 %, D3 5 % (SOEP)'
+    formel: 'Quote = Σ p_i · Φ((ln z − ln y_i) / σ) / Σ p_i,  z = 60 % des Medians der Gesamtverteilung',
+    ref:    'Eurostat EU-SILC-Definition · Destatis Armutsgefährdungsquote 2025 (Erstergebnis 16,1 %)',
+    note:   'Log-Normalverteilung innerhalb der Gruppen (Median = Gruppen-Äquivalenzeinkommen); gemeinsame Streuung σ im Status quo auf die amtliche Quote kalibriert'
   },
   berechneNettoSQ: {
     formel: 'Netto_SQ = Netto_neu(PRESETS.status_quo) — dieselbe Rechnung wie für jede Reform',
@@ -124,11 +124,24 @@ function svGrenzsatz(arbeit, params) {
        + (arbeit < bbgKV(params) ? (params.kv + params.alpf * 0.58) / 100 * 0.5 : 0);
 }
 
-function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg, netto_sq) {
+// MwSt-Satzfaktor: Anteil der MwSt am Brutto-Konsum (70 % Regelsatz, 30 % ermäßigt) inkl. Konsumreaktion
+function mwstSatzfaktor(params, cf_reg = 1, cf_erm = 1) {
+  return 0.7 * params.mwst / (100 + params.mwst) * cf_reg + 0.3 * params.mwst_erm / (100 + params.mwst_erm) * cf_erm;
+}
+
+// Konsumquote der Gruppe: Sparanteil (1 − konsum) wird mit konsum_k skaliert, sodass die aggregierte
+// Sparquote im Status quo der amtlichen Sparquote entspricht (Kalibrierung in berechne.js, F-003)
+const konsumquote = (d, konsum_k) => 1 - (1 - d.konsum) * konsum_k;
+
+// mw = { cf_reg, cf_erm, konsum_k, steuerfrei } — Konsumreaktion und Kalibrierung (aus berechne.js)
+function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg, netto_sq, mw) {
   // Netto-Einkommen pro Dezil NEU
   const netto = [];
   const delta = [];
   const belastung_pct = [];
+  const verfuegbar = [];
+  const mwst_hh = [];
+  const satz = mwstSatzfaktor(params, mw.cf_reg, mw.cf_erm);
   for (let i = 0; i < dezile.length; i++) {
     const d = dezile[i];
     const est = est_dez[i].est;
@@ -140,10 +153,6 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg, netto_sq) {
     const GKV_QUOTE = [0.95, 0.95, 0.95, 0.93, 0.90, 0.85, 0.80, 0.75, 0.70, 0.55, 0.30, 0.08];
     const sv_kapital = params.kv_kapital ? d.kapital_adj * params.kv / 100 * 0.5 * GKV_QUOTE[i] : 0;
     const sv = sv_lohn + sv_kapital;
-    // MwSt auf Konsum
-    const vornetto = brutto - est - sv;
-    const konsum = vornetto * d.konsum;
-    const mwst = konsum * (0.7 * params.mwst / (100 + params.mwst) + 0.3 * params.mwst_erm / (100 + params.mwst_erm));
     // CO2-Last (untere Dezile höherer Anteil am Einkommen)
     // CO₂-Last: Dezil-Anteil am Einkommen × CO₂-Preis × Emissionsreaktion
     // D10a/b/c: sinkender CO2-Anteil am Einkommen, aber absolut höher
@@ -167,7 +176,15 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg, netto_sq) {
     transfers += bge_p * 12 * d.erwachsene;
     if (params.neg_est && i < 3) transfers += 3000;
 
-    const netto_final = brutto - est - sv - mwst - co2_last + klimageld_per_hh + transfers;
+    // Verfügbares Einkommen inkl. Transfers; Konsum daraus (auch aus Bürgergeld, Kindergeld, BGE),
+    // MwSt nur auf den steuerpflichtigen Teil des Konsums
+    const verfuegbar_i = brutto - est - sv + klimageld_per_hh + transfers;
+    const konsum = Math.max(0, verfuegbar_i) * konsumquote(d, mw.konsum_k);
+    const mwst = konsum * (1 - mw.steuerfrei) * satz;
+    verfuegbar.push(verfuegbar_i);
+    mwst_hh.push(mwst);
+
+    const netto_final = verfuegbar_i - mwst - co2_last;
 
     // Status-quo-Vergleich: netto_sq stammt aus derselben Rechnung mit PRESETS.status_quo
     // (fehlt nur beim Erzeugen der Referenz selbst → Δ = 0)
@@ -175,7 +192,28 @@ function berechneDezilDelta(dezile, params, est_dez, klima, bg, kg, netto_sq) {
     delta.push(netto_sq ? netto_final - netto_sq[i] : 0);
     belastung_pct.push(100 * (est + sv + mwst + co2_last - transfers) / brutto);
   }
-  return { netto, delta, belastung_pct };
+  return { netto, delta, belastung_pct, verfuegbar, mwst: mwst_hh };
 }
 
-export { FORMEL_QUELLEN_VERT, berechneGini, berechneMedianGewichtet, berechnePalma, berechneS80S20, berechneDezilDelta, svArbeitnehmer, svGrenzsatz, bbgRV, bbgKV };
+// ── Armutsgefährdungsquote (F-035, F-040) ──
+// Innerhalb jeder Gruppe log-normal verteiltes Äquivalenzeinkommen mit Median = Gruppenwert und
+// gemeinsamer Streuung sigma (kalibriert auf die amtliche Quote im Status quo, berechne.js).
+// Armutsgrenze = 60 % des Medians der Gesamtverteilung (Personen), wie in der EU-SILC-Definition.
+function erf(x) {                       // Abramowitz/Stegun 7.1.26, Fehler < 1,5·10⁻⁷
+  const t = 1 / (1 + 0.3275911 * Math.abs(x));
+  const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+  return x >= 0 ? y : -y;
+}
+const Phi = x => 0.5 * (1 + erf(x / Math.SQRT2));
+
+function berechneArmutsquote(netto, dez, sigma) {
+  const pairs = personenVerteilung(netto, dez).filter(p => p.v > 0);
+  const N = pairs.reduce((a, p) => a + p.n, 0);
+  const F = x => pairs.reduce((a, p) => a + p.n * Phi((Math.log(x) - Math.log(p.v)) / sigma), 0) / N;
+  let lo = pairs[0].v / 100, hi = pairs[pairs.length - 1].v * 100;
+  for (let k = 0; k < 100; k++) { const mid = Math.sqrt(lo * hi); if (F(mid) < 0.5) lo = mid; else hi = mid; }
+  const median = Math.sqrt(lo * hi);
+  return { quote: F(0.6 * median) * 100, armutsgrenze: 0.6 * median, median };
+}
+
+export { FORMEL_QUELLEN_VERT, berechneGini, berechneMedianGewichtet, berechnePalma, berechneS80S20, berechneArmutsquote, mwstSatzfaktor, berechneDezilDelta, svArbeitnehmer, svGrenzsatz, bbgRV, bbgKV };

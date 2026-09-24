@@ -119,7 +119,7 @@
     "co2_steuer": 21,
     "tabaksteuer": 15,
     "grunderwerbsteuer": 16,
-    "erbschaftsteuer": 8,
+    "erbschaftsteuer": 13.3,
     "rentenversicherungsbeitraege": 310,
     "krankenversicherungsbeitraege": 290,
     "arbeitslosenversicherung_pflegeversicherung": 105

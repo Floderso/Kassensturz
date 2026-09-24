@@ -298,7 +298,7 @@ function render() {
   const revLabels = {
     est: 'Einkommensteuer', kst: 'Körperschaftst.', gewst: 'Gewerbest.',
     mwst: 'Mehrwertsteuer', co2: 'CO₂ (netto)', erbschaft: 'Erbschaftst.',
-    boden: 'Bodenwertst.', vermoegen: 'Vermögenst.', zucman: 'Zucman-Mindestst.',
+    boden: 'Bodenwertst.', vermoegen: 'Vermögenst.', zucman: 'Mindestst. Top 1 %',
     rv: 'Rentenvers.', kv: 'Krankenvers.', al: 'AL+Pflege',
     klein: 'Kleine Verbrauchst.'
   };
@@ -751,7 +751,7 @@ function renderWissenschaftsPanel(p) {
   const lager = [
     { key: 'ifo',      label: 'ifo/Fuest · Angebotsorientiert',   score: scores.ifo,      color: 'var(--accent)',  desc: 'Niedrige Unternehmensteuern, keine Vermögensteuer, Entlastung Mitte' },
     { key: 'diw',      label: 'DIW/Bach · Verteilungsorientiert',  score: scores.diw,      color: 'var(--accent)', desc: 'Synthetisch, höhere Spitze, Erbschafts-/Vermögensteuer, hohe BBG' },
-    { key: 'zucman',   label: 'Zucman · Internationalistisch',     score: scores.zucman,   color: 'var(--good)', desc: 'Zucman-Mindeststeuer, CO₂-Preis, internationale Koordination' },
+    { key: 'zucman',   label: 'Zucman · Internationalistisch',     score: scores.zucman,   color: 'var(--good)', desc: 'Vermögens-Mindeststeuer, CO₂-Preis, internationale Koordination' },
     { key: 'kirchhof', label: 'Kirchhof · Vereinfachung',          score: scores.kirchhof, color: 'var(--warn)',    desc: 'Flat Tax, wenige Steuerarten, GewSt abschaffen' }
   ];
 
@@ -920,11 +920,12 @@ Begrenzung: 0,55 – 1,25 (D10c: 0,40 Minimum)</div>
 
     <div class="rw-section">
       <div class="rw-section-title">3 · Mehrwertsteuer</div>
-      <div class="rw-formula">MwSt_Dezil = Netto × Konsumquote × (0,70 × ${p.mwst}/(100+${p.mwst}) + 0,30 × ${p.mwst_erm}/(100+${p.mwst_erm}))
-Konsumquoten: D1=100% … D10=55% (aus EU-SILC, Destatis)
-Verhaltensreakt.: Konsum × (1 + ε × Δ_MwSt), ε = ${ELAST.consumption}</div>
+      <div class="rw-formula">MwSt_Haushalt = verfügbares Einkommen × Konsumquote × ${f(100 - r.kalibrierung.steuerfrei * 100, 0)} % steuerpflichtig × (0,70 × ${p.mwst}/(100+${p.mwst}) + 0,30 × ${p.mwst_erm}/(100+${p.mwst_erm}))
+Konsumquoten so skaliert, dass die Sparquote im Status quo 11,2 % beträgt (Destatis 2024)
+Verhaltensreakt.: Konsum × (1 + ε × Δ_MwSt), ε = ${ELAST.consumption} · VAT-Gap 3,7 %</div>
       <div class="rw-text">MwSt-Aufkommen: <span class="rw-hl">${f(r.rev.mwst)} Mrd. €</span>
-        · Basis 2025: 303 Mrd. · 70% Regelgut, 30% ermäßigt</div>
+        = Haushaltskonsum ${f(r.mwst_haushalte * 0.963)} Mrd. + Restgröße ${f(r.mwst_rest * 0.963)} Mrd.
+        · Die Restgröße (${f(r.kalibrierung.mwst_rest_anteil * 100, 0)} % im Status quo) umfasst MwSt aus Staatskonsum, steuerbefreiten Branchen und Wohnungsbau sowie die Lücke zwischen den Modelleinkommen und der VGR; sie skaliert nur mit den Sätzen (Prüfbericht F-070).</div>
     </div>
 
     <div class="rw-section">
@@ -963,12 +964,24 @@ Saldo:      ${r.saldo >= 0 ? '+' : ''}${f(r.saldo)} Mrd. €</div>
 
     <div class="rw-section">
       <div class="rw-section-title">7 · Gini-Koeffizient</div>
-      <div class="rw-formula">Gini = (2 × Σ(rank_i × Netto_i)) / (n × Σ Netto_i) − (n+1)/n
-Basis: Nettoeinkommen nach ESt, SV, MwSt, CO₂-Last und Transfers pro Dezil
-n = 12 (D1–D9 + D10a/b/c-Split)</div>
+      <div class="rw-formula">Gini = 1 − Σ (x_k − x_(k−1)) · (L_k + L_(k−1))   (Lorenzkurve, Trapezregel)
+Basis: Äquivalenzeinkommen je Person (neue OECD-Skala), gewichtet mit der Personenzahl der 12 Gruppen
+Nettoeinkommen nach ESt, SV, MwSt, CO₂-Last und Transfers</div>
       <div class="rw-text">Gini aktuell: <span class="${r.gini < REF.gini - 0.005 ? 'rw-good' : r.gini > REF.gini + 0.005 ? 'rw-bad' : 'rw-hl'}">${r.gini.toFixed(3).replace('.',',')}</span>
-        · Basis (Status Quo 2025): ${REF.gini.toFixed(3).replace('.',',')}
-        · SOEP-Basis Deutschland 2023: ~0,295 (nach Steuern) · Quelle: SOEP v40, DIW</div>
+        · Status quo 2026: ${REF.gini.toFixed(3).replace('.',',')}
+        · Amtlich (EU-SILC) ~0,295 — nicht direkt vergleichbar, weil die Ungleichheit innerhalb der Gruppen fehlt</div>
+      <div class="rw-text">Armutsgefährdungsquote: <span class="rw-hl">${f(r.armutsrisiko)} %</span>
+        · Log-Normalverteilung innerhalb der Gruppen (σ = ${f(r.kalibrierung.armut_sigma, 2)}), im Status quo auf 16,1 % kalibriert (Destatis, Erstergebnis 2025)</div>
+    </div>
+
+    <div class="rw-section">
+      <div class="rw-section-title">Kalibrierung im Status quo</div>
+      <div class="rw-text">Das Modell wird einmalig an amtliche Werte angepasst; Reformwirkungen bleiben relativ dazu erhalten.
+        · ESt+Soli: Restfaktor ${f(r.kalibrierung.est, 3)} auf 357 Mrd. € (Kassenstatistik)
+        · Konsumquoten: Sparanteile × ${f(r.kalibrierung.konsum_k, 2)} (Sparquote 11,2 %)
+        · KSt/GewSt: Bemessungsgrundlage aus Ist-Aufkommen (45 / 75 Mrd. €)
+        · Erbschaft- und Schenkungsteuer: 13,3 Mrd. € (Destatis 2024)
+        · Haushaltsstruktur je Gruppe ist eine gekennzeichnete Annahme (Prüfbericht F-002)</div>
     </div>
 
     <div class="rw-section">
@@ -1862,7 +1875,7 @@ document.getElementById('card-btn').addEventListener('click', openCardModal);
     erb:        "Steuer auf geerbtes Vermögen. Studien zeigen: Erbschaften sind heute die größte Quelle von Vermögensungleichheit – höhere Sätze könnten das bremsen.",
     boden:      "Jahressteuer auf den reinen Grundstückswert ohne Bebauung. Gilt als besonders effizient, da Boden nicht vermehrt werden kann – fördert Nutzung statt Spekulation.",
     verm:       "Jährliche Steuer auf Gesamtvermögen ab 2 Mio. €. Kann Vermögensungleichheit bremsen, erfordert aber aufwändige Bewertung von Immobilien und Betriebsvermögen.",
-    zucman:     "Globale Mindeststeuer auf Milliardärsvermögen nach Gabriel Zucman. Würde Kapitalflucht erschweren – setzt jedoch internationale Kooperation voraus.",
+    zucman:     "Mindeststeuer auf das Vermögen der obersten 1 % der Haushalte. Angelehnt an Gabriel Zucmans G20-Vorschlag, der allerdings nur Milliardär:innen erfasst und internationale Kooperation voraussetzt.",
     rv:         "Gesamter Rentenbeitrag von Arbeitnehmer und Arbeitgeber zusammen. Höhere Beiträge sichern Renten, erhöhen aber die Lohnnebenkosten und senken den Nettolohn.",
     kv:         "Beitragssatz zur gesetzlichen Krankenversicherung. Steigende Kosten durch Alterung und medizinischen Fortschritt treiben diesen Satz langfristig nach oben.",
     alpf:       "Kombinierter Beitrag für Arbeitslosen- und Pflegeversicherung. Der Pflegeanteil wächst demografisch besonders stark – Experten erwarten bis 2035 deutliche Anstiege.",
