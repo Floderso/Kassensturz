@@ -11,7 +11,8 @@ import { BASIS_MAKRO, PRESETS } from '../data.js';
 const FORMEL_QUELLEN_RENTE = {
   generationenkapital: {
     formel: 'Kapitalstock_t = (Kapitalstock_{t−1} + Jahresinvestition) × (1 + r)',
-    ref:    'Norges Bank NBIM Annual Report 2024 · Rentenpaket II BT-Drs. 20/10749 · KfW-Research 2025',
+    ref:    'Norges Bank NBIM Annual Report 2024 · Rentenpaket II: BT-Drs. 20/11898 (Entwurf, nicht verabschiedet) · KfW-Research 2025',
+    refs:   ['B32'],
     note:   'r = nominelle Rendite; Inflationsabzug für Realrendite nötig. MSCI World historisch ~7 % nominal, ~5 % real'
   },
   beitragspfad: {

@@ -42,7 +42,8 @@ const FORMEL_QUELLEN_BERECHNE = {
   },
   zucman: {
     formel: 'Zucman_auf = 2.870 × Satz% × (1 − 0,15 × min(1; Satz/2))',
-    ref:    'Zucman G20 Report 2024 · EU Tax Observatory 2024 · Jakobsen/Kleven/Kolsrud NBER 2024',
+    ref:    'Zucman G20 Report 2024 · EU Tax Observatory 2024 · Jakobsen/Jakobsen/Kleven/Zucman (2020) QJE',
+    refs:   ['A32', 'B09', 'A22'],
     note:   'Basis D10c: 0,41 Mio. HH × 7 Mio. € Median-Vermögen = ~2.870 Mrd. €; Avoidance 15 % bei 2 %'
   },
   sv_beitraege: {
@@ -212,7 +213,7 @@ function berechne(params, zustand = null, _istReferenz = false) {
   // ---------- 7b. ZUCMAN-MINDESTSTEUER ----------
   // 2%-Mindeststeuer auf Nettovermögen ultra-Reicher (Zucman G20 2024)
   // Basis D10c: 0,41 Mio. HH × 7 Mio. € Median-Vermögen = ~2.870 Mrd. €
-  // Avoidance: ~15% bei 2% Satz (Jakobsen/Kleven/Kolsrud 2024)
+  // Avoidance: ~15% bei 2% Satz — Modellannahme (Einordnung: Jakobsen/Jakobsen/Kleven/Zucman 2020, QJE)
   const zucman_basis = 2870;
   const zucman_avoidance = 1 - 0.15 * Math.min(1, (params.zucman ?? 0) / 2);
   const zucman_auf = zucman_basis * (params.zucman ?? 0) / 100 * zucman_avoidance;

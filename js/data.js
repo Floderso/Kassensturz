@@ -120,20 +120,20 @@ const ELAST = {
   // D10c (Top 1%): höhere Elastizitäten wegen Steuervermeidung, Einkommensverschiebung, Wegzug
   d10c_labor: 0.40,        // Piketty/Saez/Stantcheva (2014): extensive margin höher
   d10c_avoidance: 0.50,    // Einkommensverschiebung/Avoidance ab GS > 45% (Kleven/Schultz DK)
-  d10c_wegzug: 0.10        // Steuerbedingte Emigration bei GS > 60% (Brülhart et al. 2019)
+  d10c_wegzug: 0.10        // Steuerbedingte Emigration bei GS > 60% — Modellannahme; Größenordnung: Kleven et al. (2020) JEP
 };
 
 // Strukturierte Quellenmetadaten zu ELAST — Werte bleiben oben kompatibel
 const ELAST_QUELLEN = {
-  labor_supply:   { ref: 'Saez/Chetty/Gruber Konsens · ifo Schnelldienst 01/2025',         range: '0,1–0,3', note: 'intensive margin, konservativ; extensive margin untere Dezile 0,2–0,5 (Meghir/Phillips)' },
-  capital_supply: { ref: 'Kleven/Schultz (2014) JPubEc',                                    range: '0,4–0,8', note: 'dänische Daten, auf DE übertragbar; hohe Elastizität wegen Ausweichoptionen' },
-  consumption:    { ref: 'Lewbel/Pendakur (2009) JPubEc · Metaanalyse Havranek et al. 2018',range: '−0,2 bis −0,5', note: 'MwSt-Pass-Through auf Konsum; getrennt für Regel- und Ermäßigungssatz' },
+  labor_supply:   { ref: 'Saez/Chetty/Gruber Konsens · ifo Schnelldienst 01/2025',         range: '0,1–0,3', note: 'intensive margin, konservativ; extensive margin untere Dezile 0,2–0,5 (Meghir/Phillips)', refs: ['A21'] },
+  capital_supply: { ref: 'Kleven/Schultz (2014) JPubEc',                                    range: '0,4–0,8', note: 'dänische Daten, auf DE übertragbar; hohe Elastizität wegen Ausweichoptionen', refs: ['A23'] },
+  consumption:    { ref: 'Lewbel/Pendakur (2009) JPubEc · Metaanalyse Havranek et al. 2018',range: '−0,2 bis −0,5', note: 'MwSt-Pass-Through auf Konsum; getrennt für Regel- und Ermäßigungssatz', refs: ['A25'] },
   co2:            { ref: 'EWI/DIW BEHG-Evaluation 2023 · Edenhofer/PIK 2024',               range: '−0,2 bis −0,4', note: 'kurzfristig konservativ; langfristig höher durch Infrastruktur-/Verhaltensanpassung' },
   evasion:        { ref: 'Schneider (2023) Shadow Economy DE · IfW Kiel 2024',              range: '0,1–0,3', note: 'Schwarzarbeit/Schattenwirtschaft-Reaktion auf Gesamtsteuerlast' },
-  investment:     { ref: 'Gechert/Heimberger (2022) NIER · Neumeier SVR Arbeitspapier 03/2025', range: '−0,3 bis −0,5', note: 'KSt-Investitionselastizität; Effekte kleiner als oft behauptet (Meta-Analyse)' },
-  d10c_labor:     { ref: 'Piketty/Saez/Stantcheva (2014) AER',                              range: '0,3–0,5', note: 'extensive margin Top 1%: Stunden, Ruhestandsentscheidung, Einkommensverschiebung' },
-  d10c_avoidance: { ref: 'Kleven/Schultz (2014) JPubEc · Chetty/Friedman/Saez (2013)',      range: '0,3–0,7', note: 'Einkommensverschiebung/Avoidance ab Grenzsteuersatz > 45 %' },
-  d10c_wegzug:    { ref: 'Brülhart/Gruber/Krapf/Schmidheiny (2019) JPubEc',                 range: '0,05–0,15', note: 'steuerbedingte Emigration ab Grenzsteuersatz > 60 %; DE-Effekt kleiner als CH-Schätzung' }
+  investment:     { ref: 'Gechert/Heimberger (2022) NIER · Neumeier SVR Arbeitspapier 03/2025', range: '−0,3 bis −0,5', note: 'KSt-Investitionselastizität; Effekte kleiner als oft behauptet (Meta-Analyse)', refs: ['A20'] },
+  d10c_labor:     { ref: 'Piketty/Saez/Stantcheva (2014) AER',                              range: '0,3–0,5', note: 'extensive margin Top 1%: Stunden, Ruhestandsentscheidung, Einkommensverschiebung', refs: ['A28'] },
+  d10c_avoidance: { ref: 'Kleven/Schultz (2014) JPubEc · Chetty/Friedman/Saez (2013)',      range: '0,3–0,7', note: 'Einkommensverschiebung/Avoidance ab Grenzsteuersatz > 45 %', refs: ['A23'] },
+  d10c_wegzug:    { ref: 'Kleven/Landais/Muñoz/Stantcheva (2020) JEP 34(2)',               range: '0,05–0,15', note: 'steuerbedingte Emigration ab Grenzsteuersatz > 60 %; Wert ist Modellannahme (Übersichtsarbeit, keine DE-Punktschätzung)', refs: ['A24'] }
 };
 
 
@@ -392,8 +392,9 @@ const CHALLENGES = [
 const TOOLTIPS = {
   freibetrag: {
     title: "Grundfreibetrag",
-    text: "Bis zu diesem Betrag bleibt Einkommen vollständig steuerfrei. BVerfG: sächliches Existenzminimum darf nicht besteuert werden. 2026 auf 12.348 € angehoben (Steueränderungsgesetz 2025). Alle Lager fordern Erhöhung — Einigkeit ist selten.",
-    quelle: "§ 32a Abs. 1 EStG · 2026: 12.348 € · Steueränderungsgesetz Okt. 2025 · BMF"
+    text: "Bis zu diesem Betrag bleibt Einkommen vollständig steuerfrei. BVerfG: sächliches Existenzminimum darf nicht besteuert werden. 2026: 12.348 € (2025: 12.096 €), festgelegt durch das Steuerfortentwicklungsgesetz vom 23.12.2024. Alle Lager fordern Erhöhung — Einigkeit ist selten.",
+    quelle: "§ 32a Abs. 1 EStG · 2026: 12.348 € · Steuerfortentwicklungsgesetz (BGBl. 2024 I Nr. 449) · BMF",
+    refs: ['G01', 'G17']
   },
   eingang: {
     title: "Eingangssteuersatz",
@@ -472,13 +473,15 @@ const TOOLTIPS = {
   },
   verm: {
     title: "Vermögensteuer",
-    text: "Jährliche Steuer auf Nettovermögen. In DE seit 1997 ausgesetzt. Bach/Wichers/Mudrack (DIW 2026): Linke-Modell erzielt ~100 Mrd./Jahr; bei Freibetrag 10–20 Mio. immer noch 110–125 Mrd. Nur ~1,9% der Bevölkerung betroffen. Migrationseffekte kleiner als oft behauptet (Kleven/Landais 2024).",
-    quelle: "BVerfGE 93, 121 · Bach/Wichers/Mudrack DIW 2026 · Jakobsen/Kleven/Kolsrud NBER 2024"
+    text: "Jährliche Steuer auf Nettovermögen. In DE seit 1997 ausgesetzt. Bach/Wichers/Mudrack (DIW 2026): Linke-Modell erzielt ~100 Mrd./Jahr; bei Freibetrag 10–20 Mio. immer noch 110–125 Mrd. Nur ~1,9% der Bevölkerung betroffen. Migrationseffekte kleiner als oft behauptet (Kleven et al. 2020).",
+    quelle: "BVerfGE 93, 121 · Bach/Wichers/Mudrack DIW 2026 · Jakobsen/Jakobsen/Kleven/Zucman (2020) QJE · Kleven et al. (2020) JEP",
+    refs: ['G09', 'A06', 'A22', 'A24']
   },
   rv: {
     title: "Rentenversicherungsbeitrag",
-    text: "AN+AG je hälftig. Nur bis BBG (101.400 € 2026) fällig — wirkt regressiv. SVR-Projektion: ohne Reform steigt Beitragssatz bis 2045 auf ~25%. Generationenkapital (Rentenpaket II 2024): 12 Mrd./Jahr in Staatsfonds ab 2024.",
-    quelle: "§ 158 SGB VI · 2026: 18,6% · BBG 101.400 € · Rentenpaket II BT-Drs. 20/10749 · DRV"
+    text: "AN+AG je hälftig. Nur bis BBG (101.400 € 2026) fällig — wirkt regressiv. SVR-Projektion: ohne Reform steigt Beitragssatz bis 2045 auf ~25%. Ein Generationenkapital war im Rentenpaket II vorgesehen, der Gesetzentwurf wurde 2024 aber nicht verabschiedet.",
+    quelle: "§ 158 SGB VI · 2026: 18,6% · BBG 101.400 € · Rentenpaket II: BT-Drs. 20/11898 (nicht verabschiedet) · DRV",
+    refs: ['B32']
   },
   kv: {
     title: "Krankenversicherungsbeitrag",
@@ -502,8 +505,9 @@ const TOOLTIPS = {
   },
   kg: {
     title: "Kindergeld",
-    text: "Vorauszahlung auf Kinderfreibetrag (§ 31 EStG) — bei hohen Einkommen wird steuerlich günstigere Variante verrechnet. Ab 2025: 259 € (Steueränderungsgesetz Okt. 2025). ~17 Mio. Kinder. Alle Parteien einig: Kindergeld gehört erhöht.",
-    quelle: "§ 66 EStG · 259 €/Monat ab 2025 · Steueränderungsgesetz 2025 · Familienkasse"
+    text: "Vorauszahlung auf Kinderfreibetrag (§ 31 EStG) — bei hohen Einkommen wird steuerlich günstigere Variante verrechnet. 2025: 255 €, ab 2026: 259 € (Steuerfortentwicklungsgesetz vom 23.12.2024). ~17 Mio. Kinder. Alle Parteien einig: Kindergeld gehört erhöht.",
+    quelle: "§ 66 EStG · 259 €/Monat ab 2026 · Steuerfortentwicklungsgesetz (BGBl. 2024 I Nr. 449) · Familienkasse",
+    refs: ['G17']
   },
   neg_est: {
     title: "Negative Einkommensteuer",
@@ -517,8 +521,9 @@ const TOOLTIPS = {
   },
   kapitalquote: {
     title: "Fondsquote Rentenversicherung",
-    text: "Anteil RV-Aufkommen in Staatsfonds (Generationenkapital). Rentenpaket II 2024: 12 Mrd./Jahr ab 2024 beschlossen (~4% des RV-Aufkommens). Modell zeigt: früherer Start hätte durch Zinseszins erheblich mehr Puffer erzeugt.",
-    quelle: "Rentenpaket II · BT-Drs. 20/10749 · Norges Bank NBIM 2024 · DRV Rentenversicherungsbericht"
+    text: "Hypothetischer Anteil des RV-Aufkommens, der in einen Staatsfonds (Generationenkapital) fließt. Das Rentenpaket II (Gesetzentwurf 2024, BT-Drs. 20/11898) sah einen aus Bundesdarlehen finanzierten Fonds mit 12 Mrd. € im ersten Jahr vor, wurde aber nicht verabschiedet — ein Generationenkapital existiert derzeit nicht. Das Modell zeigt, was ein früherer Start durch Zinseszins bewirkt hätte.",
+    quelle: "Rentenpaket II: BT-Drs. 20/11898 (nicht verabschiedet) · Norges Bank NBIM 2024 · DRV Rentenversicherungsbericht",
+    refs: ['B32']
   },
   rendite_fonds: {
     title: "Erwartete Jahresrendite",
@@ -527,8 +532,9 @@ const TOOLTIPS = {
   },
   startjahr: {
     title: "Startjahr der Fondsinvestition",
-    text: "Je früher, desto mehr Zinseszins-Effekt. Rürup-Kommission (2003) empfahl bereits Kapitaldeckungs-Element — nicht umgesetzt. Schweden: Premiumpension seit 1994 (2,5% der Löhne). Deutschland hat erst 2024 begonnen.",
-    quelle: "Rürup-Kommission 2003 · SVR Jahresgutachten 2004 · Rentenpaket II 2024 · OECD Pensions 2024"
+    text: "Je früher, desto mehr Zinseszins-Effekt. Rürup-Kommission (2003) empfahl bereits Kapitaldeckungs-Element — nicht umgesetzt. Schweden: Premiumpension seit 1994 (2,5% der Löhne). Deutschland hat bislang kein staatliches Kapitaldeckungselement in der gesetzlichen Rente; der Anlauf mit dem Rentenpaket II scheiterte 2024.",
+    quelle: "Rürup-Kommission 2003 · SVR Jahresgutachten 2004 · Rentenpaket II (Entwurf 2024, nicht verabschiedet) · OECD Pensions 2024",
+    refs: ['B26', 'B32', 'B23']
   },
   pkv_abschaffen: {
     title: "PKV abschaffen",
@@ -553,7 +559,8 @@ const TOOLTIPS = {
   zucman: {
     title: "Zucman-Mindeststeuer (Milliardäre)",
     text: "2%-Mindeststeuer auf Nettovermögen ultra-Reicher — Vorschlag von Gabriel Zucman im Auftrag der G20-Präsidentschaft (Brasilien 2024). Weltweites Aufkommen: 200–250 Mrd. $. Deutschland war 2024 Hauptblockierer (zusammen mit USA). Im Modell: Basis ~2.870 Mrd. € (D10c-Vermögen); Avoidance-Abschlag ~15% bei 2% Satz.",
-    quelle: "Zucman G20 Report 2024 · EU Tax Observatory 2024 · Jakobsen/Kleven/Kolsrud NBER 2024"
+    quelle: "Zucman G20 Report 2024 · EU Tax Observatory 2024 · Jakobsen/Jakobsen/Kleven/Zucman (2020) QJE (Einordnung; Vermeidungsabschlag 15 % ist Modellannahme)",
+    refs: ['A32', 'B09', 'A22']
   },
   kv_kapital: {
     title: "Kapitalerträge KV-pflichtig",
