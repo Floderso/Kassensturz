@@ -6,8 +6,8 @@
 //
 // berechneTransition(prevState, prevResult, nextStartJahr, n) → PeriodState
 //   Leitet den Anfangszustand der nächsten Periode (n Jahre) ab.
-//   Enthält DICE-Klimaschaden (DICE-2023, Barrage & Nordhaus 2024) und HANK-Multiplikator
-//   (Kaplan/Moll/Violante 2018).
+//   Enthält DICE-Klimaschaden (DICE-2023, Barrage & Nordhaus 2024) und die Angebotswirkung
+//   öffentlicher Investitionen über den Kapitalstock (Bom & Ligthart 2014).
 //
 // simulierePfad(perioden_params, kursKonfig?) → ErgebnisPfad[]
 //   Iteriert alle Perioden, gibt Zeitreihe zurück.
@@ -15,33 +15,25 @@
 //   Backward-kompatibel: simulierePfad(perioden_params) funktioniert unverändert.
 //
 // Quellen:
-//   BIP-Wachstum:       Bundesbank Winterprognose 2024 (1,5 % nominal)
-//   Fiskalmultiplikator: Gechert/Heimberger (2022) NIER · ECB WP 1267
-//   HANK-Multiplikator: Kaplan/Moll/Violante (2018) AER · McKay/Nakamura/Steinsson (2016)
+//   BIP-Wachstum:       3 % nominal (Frühjahrsprojektion 2026, s. FISKAL in data.js)
+//   Multiplikatoren:    Gechert (2015) Oxford Economic Papers 67(3)
+//   Öffentl. Kapital:   Bom & Ligthart (2014) J. Econ. Surveys 28(5)
 //   DICE-Klimaschaden:  Barrage & Nordhaus (2024) PNAS · γ = 0,003467 (DICE-2023) · TCRE: IPCC AR6 WG1 SPM D.1.1
 //   Zinsen:             Effektivzins aus STAATSAUSGABEN.zinsen / Schuldenstand (berechne.js), einzige Zinsbuchung
 //   Demografie:         Destatis 14. Bev.-Vorausberechnung 2021 · DEMOGRAFIE_KURVE in data.js
 
-import { DEZILE, MPC_DEZIL, DEMOGRAFIE_KURVE, PERIOD_STATE_0, BASIS_MAKRO } from '../data.js';
+import { DEMOGRAFIE_KURVE, PERIOD_STATE_0, BASIS_MAKRO, FISKAL } from '../data.js';
 
 // Minimales Default — nur für backward-compat von simulierePfad(perioden_params)
 const KURS_KONFIG_DEFAULT = { perioden_anzahl: 5, perioden_laenge_jahre: 4, schocks: [] };
 import { berechne } from './berechne.js';
 
-const BIP_WACHSTUM_NOMINAL = 0.015;  // Ø nominales BIP-Wachstum je Jahr (Bundesbank)
-const INVEST_MULTIPLIKATOR = 1.2;    // Fiskalmultiplikator öffentl. Investitionen (Gechert/Heimberger)
+const BIP_WACHSTUM_NOMINAL = FISKAL.wachstum_nominal;  // 3 % nominal (Frühjahrsprojektion 2026, s. data.js)
 // DICE-2023: Schadensfunktion Ω = γ·T², γ = 0,003467 (Barrage & Nordhaus 2024, PNAS 121(13), e2312030121)
 const DICE_D2              = 0.003467;
 const T_BASELINE           = 1.2;   // Globale Erwärmung 2025 vs. vorindustriell (IPCC AR6 SPM)
 // TCRE: 0,45 °C je 1.000 Gt CO₂ (IPCC AR6 WG1 SPM D.1.1) = 0,45 / 1.000.000 °C je Mt (F-005)
 const TCRE_GRAD_PRO_MT     = 0.45 / 1e6;
-
-// Bevölkerungsgewichteter Referenz-MPC (Nenner des HANK-Multiplikators).
-// Ist die durchschnittliche MPC, wenn ein Impuls proportional zur Bevölkerung verteilt würde —
-// dadurch ergibt sich mu_eff/HANK_MPC_BENCHMARK = 1 im neutralen (nicht-progressiven/regressiven) Fall.
-// Wird aus MPC_DEZIL berechnet statt hartkodiert, um Inkonsistenzen bei Änderungen an MPC_DEZIL auszuschließen.
-const HANK_MPC_BENCHMARK = DEZILE.reduce((a, d, i) => a + d.anzahl * MPC_DEZIL[i], 0)
-                          / DEZILE.reduce((a, d) => a + d.anzahl, 0);
 
 // Lookup DEMOGRAFIE_KURVE nach Startjahr — clamped an Randbereichen
 function getDemoForYear(jahr) {
@@ -49,23 +41,12 @@ function getDemoForYear(jahr) {
   return DEMOGRAFIE_KURVE[idx];
 }
 
-// HANK-Multiplikator: MPC-gewichteter Fiskalmultiplikator (Kaplan/Moll/Violante 2018)
-// hh_delta.delta ist die Netto-Einkommensabweichung je Dezil ggü. einer fixen Status-Quo-Baseline
-// (nicht die Änderung ggü. der Vorperiode) — hier verwendet als Proxy dafür, wie progressiv/regressiv
-// die aktuell gewählte Politik gegenüber einer neutralen Referenz ausfällt. Positive Deltas je Dezil
-// werden mit MPC_DEZIL (dezil-spezifische marginale Konsumneigung, s. data.js) gewichtet.
-// Effekt: Ein Impuls, der stärker bei unteren Dezilen (hohe MPC) ankommt, erzeugt einen größeren
-// Multiplikator als einer, der bei oberen Dezilen (niedrige MPC) ankommt.
-function hankMultiplikator(hh_delta) {
-  if (!hh_delta?.delta) return INVEST_MULTIPLIKATOR;
-  const positiv = hh_delta.delta.map((d, i) => ({
-    dv:  Math.max(0, d * DEZILE[i].anzahl),
-    mpc: MPC_DEZIL[i],
-  }));
-  const total = positiv.reduce((a, p) => a + p.dv, 0);
-  if (total < 1e-6) return INVEST_MULTIPLIKATOR;
-  const mpc_eff = positiv.reduce((a, p) => a + (p.dv / total) * p.mpc, 0);
-  return INVEST_MULTIPLIKATOR * (mpc_eff / HANK_MPC_BENCHMARK);
+// Angebotswirkung öffentlicher Investitionen (F-018): Niveau des BIP relativ zum Trend über den
+// zusätzlichen öffentlichen Kapitalstock, Y ∝ K^θ (Bom & Ligthart 2014). Der Kapitalzuwachs schreibt ab,
+// die Wirkung klingt nach Ende der Investitionen also wieder ab. Die kurzfristige Nachfragewirkung
+// (Multiplikator) ist ein Flusseffekt der Ausgabeperiode und wird nur ausgewiesen, nicht kumuliert.
+function kapitalNiveau(zusatz_kapital) {
+  return Math.pow(1 + zusatz_kapital / FISKAL.kapitalstock_oeff, FISKAL.elast_oeff_kapital);
 }
 
 // DICE-Klimaschaden (DICE-2023, γ = 0,003467)
@@ -95,20 +76,21 @@ function applySchock(zustand, schock) {
 function berechneTransition(prevState, prevResult, nextStartJahr, n) {
   const demo = getDemoForYear(nextStartJahr);
 
-  // ── HANK-Multiplikator ────────────────────────────────────────────────
-  const mu_g = hankMultiplikator(prevResult.hh_delta);
-
   // ── DICE-Klimaschaden ─────────────────────────────────────────────────
   const klima_malus = diceKlimaMalus(prevState.co2_kumulat);
 
   // ── BIP ──────────────────────────────────────────────────────────────
-  const wachstum_basis      = Math.pow(1 + BIP_WACHSTUM_NOMINAL, n);
-  const invest_privat_bonus = 1 + (prevResult.investment_factor - 1) * 0.15;
-  const labor_bonus         = 1 + (prevResult.avg_labor - 1) * 0.10;
+  // BIP = Trend × Niveaueffekte der aktuellen Politik. Die Niveaueffekte (private Investitionen,
+  // Arbeitsangebot, öffentlicher Kapitalstock, Klima) werden nicht von Periode zu Periode aufmultipliziert.
+  const bip_trend_next      = (prevState.bip_trend ?? prevState.bip) * Math.pow(1 + BIP_WACHSTUM_NOMINAL, n);
+  const invest_privat_level = 1 + (prevResult.investment_factor - 1) * 0.15;
+  const labor_level         = 1 + (prevResult.avg_labor - 1) * 0.10;
   const invest_impuls       = prevResult.invest_impuls ?? 0;
-  const invest_impuls_bonus = 1 + (invest_impuls * n * mu_g) / prevState.bip;
-  const bip_next = prevState.bip * wachstum_basis * invest_privat_bonus
-                   * labor_bonus * invest_impuls_bonus * klima_malus;
+  // zusätzlicher öffentlicher Kapitalstock: Bestand schreibt ab, neue Investitionen der Periode kommen hinzu
+  const zusatz_kapital_next = (prevState.zusatz_kapital ?? 0) * Math.pow(1 - FISKAL.abschreibung_oeff, n)
+                            + invest_impuls * n;
+  const bip_next = bip_trend_next * invest_privat_level * labor_level
+                   * kapitalNiveau(zusatz_kapital_next) * klima_malus;
 
   // ── SCHULDENQUOTE ─────────────────────────────────────────────────────
   // Budgetidentität: ΔSchuld = −Saldo. Die Zinsen sind bereits als zinsen_dyn im Saldo enthalten (F-006).
@@ -131,6 +113,8 @@ function berechneTransition(prevState, prevResult, nextStartJahr, n) {
     co2_kumulat:      co2_kumulat_next,
     lohnbasis_faktor: Math.max(0.70, Math.min(1.30, lohnbasis_next)),
     renten_faktor:    demo.renten_faktor,
+    bip_trend:        bip_trend_next,
+    zusatz_kapital:   zusatz_kapital_next,
   };
 }
 
@@ -167,4 +151,4 @@ function simulierePfad(perioden_params, kursKonfig = KURS_KONFIG_DEFAULT) {
   return ergebnisse;
 }
 
-export { berechneTransition, simulierePfad, getDemoForYear, diceKlimaMalus, hankMultiplikator, BIP_WACHSTUM_NOMINAL };
+export { berechneTransition, simulierePfad, getDemoForYear, diceKlimaMalus, kapitalNiveau, BIP_WACHSTUM_NOMINAL };

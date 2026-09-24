@@ -268,6 +268,30 @@ const QUELLEN = [
     doi:'',
     verwendet:'Einordnung des Reglers Mindeststeuer Top 1 % · Originalvorschlag: 2 % auf Milliardärsvermögen mit Anrechnung der ESt, globales Aufkommen 200–250 Mrd. $' },
 
+  { id:'A33', typ:'akademisch',
+    autor:'Bom, P. R. D. & Ligthart, J. E.',
+    jahr:'2014',
+    titel:'What Have We Learned from Three Decades of Research on the Productivity of Public Capital?',
+    quelle:'Journal of Economic Surveys, 28(5), 889–916',
+    doi:'10.1111/joes.12037',
+    verwendet:'FISKAL.elast_oeff_kapital = 0,083 (kurzfristig; langfristig 0,122) · Angebotswirkung öffentlicher Investitionen in der Zukunftssimulation' },
+
+  { id:'A34', typ:'akademisch',
+    autor:'Gechert, S.',
+    jahr:'2015',
+    titel:'What fiscal policy is most effective? A meta-regression analysis',
+    quelle:'Oxford Economic Papers, 67(3), 553–580',
+    doi:'',
+    verwendet:'FISKAL.multiplikator_steuern_transfers = 0,65 und multiplikator_invest = 1,5 (Ausgaben ≈ 1; Steuern/Transfers 0,3–0,4 niedriger; Investitionen ≈ 0,5 höher)' },
+
+  { id:'A35', typ:'akademisch',
+    autor:'Barrage, L. & Nordhaus, W.',
+    jahr:'2024',
+    titel:'Policies, projections, and the social cost of carbon: Results from the DICE-2023 model',
+    quelle:'Proceedings of the National Academy of Sciences, 121(13), e2312030121',
+    doi:'10.1073/pnas.2312030121',
+    verwendet:'DICE-Schadensparameter γ = 0,003467 in der Zukunftssimulation' },
+
 
   /* ─────────────────────────────────────────────────────────────
      BERICHTE, GUTACHTEN & INSTITUTIONELLE PUBLIKATIONEN
@@ -529,6 +553,30 @@ const QUELLEN = [
     doi:'',
     verwendet:'Renten-Regler Generationenkapital: hypothetisches Szenario (geplant waren 12 Mrd. € Darlehen 2024, danach steigend); kein geltendes Recht' },
 
+  { id:'B33', typ:'bericht',
+    autor:'Ochmann, R., Albrecht, M. & Schiffhorst, G. (IGES Institut) für die Bertelsmann Stiftung',
+    jahr:'2020',
+    titel:'Finanzielle Folgen des dualen Systems der Krankenversicherung (Studie im Auftrag der Bertelsmann Stiftung, Februar 2020)',
+    quelle:'IGES Institut, Berlin / Bertelsmann Stiftung, Gütersloh',
+    doi:'',
+    verwendet:'PKV-Abschaffung: Nettoeffekt für die GKV 2,4–4,3 Mrd. €/Jahr (unveränderte Arzthonorare), Modellwert = Mittelwert' },
+
+  { id:'B34', typ:'bericht',
+    autor:'Bundesministerium für Wirtschaft und Energie',
+    jahr:'2026',
+    titel:'Frühjahrsprojektion 2026 der Bundesregierung',
+    quelle:'BMWE, Berlin',
+    doi:'',
+    verwendet:'FISKAL.wachstum_nominal: real +0,5 % (2026), +0,9 % (2027), Inflation 2,7 % / 2,8 % → 3 % nominal' },
+
+  { id:'B35', typ:'bericht',
+    autor:'Biaj – Bremer Institut für Arbeitsmarktforschung und Jugendberufshilfe',
+    jahr:'2025',
+    titel:'Arbeitslosengeld-II-, Sozialgeld- und Bürgergeld-Ausgaben von 2010 bis September 2025',
+    quelle:'BIAJ-Kurzmitteilung auf Basis BA-Statistik und Bundeshaushalt',
+    doi:'',
+    verwendet:'BUERGERGELD_2025: Regelleistungen 29,0 Mrd. €, KdU-Bundesanteil 12,5 Mrd. €, 5,378 Mio. Regelleistungsberechtigte' },
+
 
   /* ─────────────────────────────────────────────────────────────
      AMTLICHE STATISTIKEN & DATENSÄTZE
@@ -581,6 +629,46 @@ const QUELLEN = [
     quelle:'DIW Berlin, DOI: 10.5684/soep.core.v40eu',
     doi:'10.5684/soep.core.v40eu',
     verwendet:'DEZILE · Einkommensdezile D1–D9 (Bruttoeinkommen, Haushaltsgrößen, Kapitalanteile); Hauptdatenbasis' },
+
+  { id:'C07', typ:'statistik',
+    autor:'Destatis – Statistisches Bundesamt',
+    jahr:'2026',
+    titel:'Staatsdefizit erhöht sich im Jahr 2025 leicht auf 119,1 Milliarden Euro (Pressemitteilung 060)',
+    quelle:'Statistisches Bundesamt, Februar 2026 (VGR, ESVG 2010)',
+    doi:'',
+    verwendet:'VGR_2025: Einnahmen 2.140,2, Ausgaben 2.259,3, Saldo −119,1 Mrd. € — Status quo des Ausgabenrahmens' },
+
+  { id:'C08', typ:'statistik',
+    autor:'Destatis – Statistisches Bundesamt',
+    jahr:'2025',
+    titel:'Sparquote in Deutschland mit 10,3 % im 1. Halbjahr 2025 leicht unter Vorjahresniveau',
+    quelle:'Statistisches Bundesamt, Pressemitteilung Oktober 2025',
+    doi:'',
+    verwendet:'Kalibrierung der Konsumquoten auf die Sparquote 2024 (11,2 %)' },
+
+  { id:'C09', typ:'statistik',
+    autor:'Destatis – Statistisches Bundesamt',
+    jahr:'2025',
+    titel:'Festgesetzte Erbschaft- und Schenkungsteuer 2024 um 12,3 % auf 13,3 Milliarden Euro gestiegen (Pressemitteilung 320)',
+    quelle:'Statistisches Bundesamt, August 2025',
+    doi:'',
+    verwendet:'ERBST_2024: 13,3 Mrd. € festgesetzte Steuer, 113,2 Mrd. € steuerpflichtiger Erwerb' },
+
+  { id:'C10', typ:'statistik',
+    autor:'Destatis – Statistisches Bundesamt',
+    jahr:'2026',
+    titel:'16,1 % der Bevölkerung in Deutschland sind armutsgefährdet (Pressemitteilung 039, Erstergebnis 2025)',
+    quelle:'Statistisches Bundesamt, Februar 2026 (EU-SILC im Mikrozensus)',
+    doi:'',
+    verwendet:'Kalibrierung der Armutsgefährdungsquote im Status quo' },
+
+  { id:'C11', typ:'statistik',
+    autor:'PKV-Verband',
+    jahr:'2025',
+    titel:'Private Krankenversicherung auch 2024 mit stabilem Wachstum',
+    quelle:'PKV-Verband, Pressemitteilung Februar 2025',
+    doi:'',
+    verwendet:'8,74 Mio. PKV-Vollversicherte 2024 (Tooltip und GKV-Panel)' },
 
 
   /* ─────────────────────────────────────────────────────────────

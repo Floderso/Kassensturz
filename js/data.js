@@ -791,6 +791,24 @@ const DEMOGRAFIE_KURVE = (() => {
   return result;
 })();
 
+// ── FISKALISCHE WIRKUNGSKANÄLE (Block 6, F-018, F-019, F-038, F-039) — eine Stelle für alle Parameter ──
+const FISKAL = {
+  // Nominales Trendwachstum: real ~0,5–1 % (Frühjahrsprojektion 2026 der Bundesregierung: 2026 +0,5 %,
+  // 2027 +0,9 %) + Preisanstieg ~2–2,8 % → 3,0 % nominal. Für die Jahre ab 2028 [ANNAHME].
+  wachstum_nominal: 0.03,
+  // Kurzfristige Multiplikatoren nach Gechert (2015), Oxford Economic Papers 67(3): Ausgaben ≈ 1;
+  // Steuern/Transfers 0,3–0,4 niedriger (→ 0,65); öffentliche Investitionen ≈ 0,5 höher (→ 1,5).
+  multiplikator_steuern_transfers: 0.65,
+  multiplikator_invest: 1.5,
+  // Langfristige Angebotswirkung über den öffentlichen Kapitalstock: Output-Elastizität 0,083 kurzfristig
+  // (0,122 langfristig), Bom & Ligthart (2014), J. Econ. Surveys 28(5). Konservativ: 0,083.
+  elast_oeff_kapital: 0.083,
+  // [ANNAHME] öffentliches Nettoanlagevermögen ~1.500 Mrd. €; Abschreibungsrate aus Bruttoinvestitionen
+  // = Abschreibungen = 101 Mrd. € (2022) → 101 / 1.500 ≈ 6,7 % p. a. — durch Destatis-Vermögensrechnung zu ersetzen
+  kapitalstock_oeff: 1500,
+  abschreibung_oeff: 101 / 1500,
+};
+
 // Anfangszustand der Multi-Perioden-Simulation (Periode 0, Jahr 2026)
 const PERIOD_STATE_0 = {
   bip:              4622,   // Mrd. €  (BIP 2026, geschätzt — s. BASIS_MAKRO.bip)
@@ -798,6 +816,8 @@ const PERIOD_STATE_0 = {
   co2_kumulat:      0,      // Mio. t CO₂e kumuliert seit Periode 0
   lohnbasis_faktor: 1.0,    // Arbeitsmarkt-Zustandsindex (1,0 = Status quo 2026)
   renten_faktor:    1.0,    // wird per Periode aus DEMOGRAFIE_KURVE gesetzt
+  bip_trend:        4622,   // BIP-Pfad ohne Politik-Niveaueffekte (wächst mit FISKAL.wachstum_nominal)
+  zusatz_kapital:   0,      // öffentlicher Kapitalstock über dem Status-quo-Pfad (Mrd. €, aus invest_impuls)
 };
 // Wissenschaftliche Zukunftsszenarien — vordefinierte Parameter-Trajektorien für alle 5 Perioden
 const ZUKUNFTS_SZENARIEN = [
@@ -829,10 +849,10 @@ const ZUKUNFTS_SZENARIEN = [
     id: 'investitionsschub',
     name: 'Investitionsschub (SVR)',
     icon: '🏗️',
-    beschreibung: 'Frontgeladene öffentliche Investitionen — kurzfristig höheres Defizit, langfristig BIP-Wachstumsbonus durch Fiskalmultiplikator.',
-    quelle: 'SVR Jahresgutachten 2024/25 "Wirtschaftliche Wende" · KfW Research 2024 · Gechert/Heimberger (2022)',
+    beschreibung: 'Frontgeladene öffentliche Investitionen — höheres Defizit, dafür ein höheres BIP-Niveau über den wachsenden öffentlichen Kapitalstock; die Wirkung klingt nach Ende der Investitionen mit der Abschreibung ab.',
+    quelle: 'SVR Jahresgutachten 2024/25 "Wirtschaftliche Wende" · Bom & Ligthart (2014) J. Econ. Surveys · Gechert (2015) Oxford Economic Papers',
     perioden_params: [60, 60, 30, 0, 0].map(invest_impuls => ({ ...PRESETS.status_quo, invest_impuls })),
   },
 ];
 
-export { TARIF_2026, HH_STRUKTUR, KALIBRIERUNG_ZIELE, ERBST_2024, DEZILE, MPC_DEZIL, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, VGR_2025, BUERGERGELD_2025, PRESETS, MOD_DEFS, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };
+export { FISKAL, TARIF_2026, HH_STRUKTUR, KALIBRIERUNG_ZIELE, ERBST_2024, DEZILE, MPC_DEZIL, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, VGR_2025, BUERGERGELD_2025, PRESETS, MOD_DEFS, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };

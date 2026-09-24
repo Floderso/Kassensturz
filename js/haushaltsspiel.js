@@ -4,7 +4,7 @@
 // KASSENSTURZ · Haushaltsspiel — UI & Render
 // ═══════════════════════════════════════════════════════
 
-import { DEZILE, ELAST, PRESETS, MOD_DEFS, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, ZUKUNFTS_SZENARIEN } from './data.js';
+import { DEZILE, ELAST, PRESETS, FISKAL, MOD_DEFS, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, ZUKUNFTS_SZENARIEN } from './data.js';
 import { grenzsteuersatz, tarifAusParams } from './rechner/einkommensteuer.js';
 import { berechne } from './rechner/berechne.js';
 import { simulierePfad } from './rechner/transition.js';
@@ -379,16 +379,17 @@ function render() {
   document.getElementById('behavior_bars').innerHTML = bhvHtml;
 
   // WIRTSCHAFTLICHE WIRKUNGSANALYSE (R01, R10, R12)
-  const bip_impuls = -(r.saldo - REF.saldo) * 0.65; // Fiskalmultiplikator 0,65 (ECB/Bundesbank-Konsens DE)
+  // Kurzfristiger Nachfrageimpuls einer Saldoänderung (überwiegend Steuern/Transfers): Multiplikator aus FISKAL
+  const bip_impuls = -(r.saldo - REF.saldo) * FISKAL.multiplikator_steuern_transfers;
   const stab_index = r.metr.slice(0, 4).reduce((a, m) => a + m, 0) / 4 * 100; // Ø METR D1–D4 als Stabilisierungsgrad
   const wirkBars = [
     {
-      label: 'BIP-Impuls (Multiplikator 0,65)',
+      label: `BIP-Impuls (Multiplikator ${fmtDE(FISKAL.multiplikator_steuern_transfers, 2)})`,
       value: bip_impuls,
       fmt: v => (v >= 0 ? '+' : '') + v.toFixed(1) + ' Mrd. €',
       cls: bip_impuls > 5 ? 'pos' : bip_impuls < -5 ? 'neg' : 'neu',
       pct: Math.min(100, Math.abs(bip_impuls) / 50 * 100),
-      hint: 'Fiskalimpuls × 0,65 (ECB WP 1267 · Bundesbank DP 28/2018)'
+      hint: 'Saldoänderung × Steuer-/Transfermultiplikator (Gechert 2015, Oxford Economic Papers 67(3))'
     },
     {
       label: 'Auto-Stabilisatoren (Ø METR D1–D4)',

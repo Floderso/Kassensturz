@@ -140,6 +140,10 @@ function berechne(params, zustand = null, _intern = null) {
   const kal = _intern?.kal ?? kalibrierung();
   const _istReferenz = !!_intern?.referenz;
   // Periodenübergreifender Zustand für Multi-Perioden-Simulation
+  // Nominaler Faktor der Periode (F-008): Alle Einnahmen und Ausgaben außer den Zinsen werden in Werten
+  // von 2026 gerechnet und am Ende einheitlich mit dem nominalen BIP-Pfad skaliert. Das entspricht einer
+  // vollen Indexierung von Tarif, Transfers und Ausgaben an die nominale Entwicklung (offengelegte Annahme:
+  // keine kalte Progression). Zinsen: nominal auf den nominalen Schuldenstand.
   const bip_faktor       = zustand ? zustand.bip / BASIS_MAKRO.bip : 1.0;
   const renten_faktor    = zustand ? (zustand.renten_faktor    ?? 1.0) : 1.0;
   const lohnbasis_faktor = zustand ? (zustand.lohnbasis_faktor ?? 1.0) : 1.0;
@@ -225,7 +229,7 @@ function berechne(params, zustand = null, _intern = null) {
 
   // ---------- 3. KÖRPERSCHAFTSTEUER + GEWERBE ----------
   const investment_factor = 1 + ELAST.investment * (belastungUnternehmen(params) - belastungUnternehmen(SQ));
-  const gewinn_faktor = bip_faktor * Math.max(0.7, Math.min(1.2, investment_factor));
+  const gewinn_faktor = Math.max(0.7, Math.min(1.2, investment_factor));
   const kst_auf = BEMESSUNG.kst * gewinn_faktor * params.kst / 100;
   const gewst_auf = params.gewst_aus ? 0 : BEMESSUNG.gewst * gewinn_faktor * params.gewst / 100;
 
@@ -244,7 +248,7 @@ function berechne(params, zustand = null, _intern = null) {
   const klimageld_auszahlung = params.klimageld ? co2_auf * 0.7 : 0; // 70% zurück als Klimageld
 
   // ---------- 6. VERMÖGEN / ERBSCHAFT / BODEN ----------
-  const erb_auf = ERBST_2024.festgesetzt * erbStruktur(params) / erbStruktur(SQ) * bip_faktor;
+  const erb_auf = ERBST_2024.festgesetzt * erbStruktur(params) / erbStruktur(SQ);
   const boden_auf = BASIS_MAKRO.boden_wert * params.boden / 100;
   const verm_auf  = BASIS_MAKRO.verm_basis  * params.verm  / 100;
 
@@ -321,7 +325,7 @@ function berechne(params, zustand = null, _intern = null) {
                                       { cf_reg, cf_erm, konsum_k: kal.konsum_k, steuerfrei: kal.steuerfrei });
   const mwst_haushalte = dezile.reduce((a, d, i) => a + hh_delta.mwst[i] * d.anzahl / 1000, 0);
   // Restgröße (F-070): skaliert mit den Sätzen und dem BIP, nicht mit dem Haushaltskonsum
-  const mwst_rest = kal.mwst_rest * mwstSatzfaktor(params, cf_reg, cf_erm) / mwstSatzfaktor(SQ) * bip_faktor;
+  const mwst_rest = kal.mwst_rest * mwstSatzfaktor(params, cf_reg, cf_erm) / mwstSatzfaktor(SQ);
   const mwst_auf = (mwst_haushalte + mwst_rest) * VAT_GAP;
 
   // ---------- 10. GESAMTEINNAHMEN ----------
@@ -341,9 +345,9 @@ function berechne(params, zustand = null, _intern = null) {
     klein: klein_auf,
     // Nicht einzeln modellierte Einnahmen (Verkäufe, Vermögenseinkommen, übrige Steuern und Beiträge):
     // VGR-Einnahmen 2025 − modellierte Einnahmen im Status quo, offen ausgewiesen
-    uebrige: kal.einnahmen_rest * bip_faktor,
+    uebrige: kal.einnahmen_rest,
   };
-  const einnahmen_total = Object.values(rev).reduce((a,b)=>a+b,0);
+  let einnahmen_total = Object.values(rev).reduce((a,b)=>a+b,0);
 
   // ---------- 11. VERWALTUNGSKOSTEN ----------
   const admin_kosten =
@@ -389,8 +393,14 @@ function berechne(params, zustand = null, _intern = null) {
     infrastruktur: A.infrastruktur + invest_impuls,
     // Erhebungskosten wirken nur als Differenz zum Status quo (F-013)
     verwaltung:   A.verwaltung + (kal.admin_sq == null ? 0 : admin_kosten - kal.admin_sq),
-    uebrige:      kal.ausgaben_rest * bip_faktor,
+    uebrige:      kal.ausgaben_rest,
   };
+  // Nominale Skalierung (s. bip_faktor oben): alle Posten außer Zinsen
+  if (bip_faktor !== 1) {
+    for (const k of Object.keys(rev)) rev[k] *= bip_faktor;
+    for (const k of Object.keys(ausgaben_posten)) if (k !== 'zinsen') ausgaben_posten[k] *= bip_faktor;
+    einnahmen_total = Object.values(rev).reduce((a, b) => a + b, 0);
+  }
   const ausgaben_total = Object.values(ausgaben_posten).reduce((a, b) => a + b, 0);
 
   // ---------- 13. SALDO ----------
@@ -472,9 +482,9 @@ function berechne(params, zustand = null, _intern = null) {
   // ---------- 19c. DYNAMISCHES SCORING ----------
   // Verhaltensbedingte Aufkommensänderung gegenüber mechanischer (statischer) Wirkung
   // KSt: investment_factor-Abweichung von 1 = Investitionsreaktion auf KSt-Änderung
-  const dynamisch_kst = BEMESSUNG.kst * bip_faktor * params.kst / 100 * (investment_factor - 1);
+  const dynamisch_kst = BEMESSUNG.kst * params.kst / 100 * (investment_factor - 1) * bip_faktor;
   // ESt: labor_factor-Abweichung → Arbeitsangebotsreaktion (Saez/Chetty-Konsens ε = 0,20)
-  const dynamisch_est = est_aufkommen * (avg_labor - 1);
+  const dynamisch_est = est_aufkommen * (avg_labor - 1) * bip_faktor;
   const dynamisch_delta = dynamisch_kst + dynamisch_est;
 
   return {
