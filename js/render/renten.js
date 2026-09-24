@@ -23,7 +23,7 @@ function renderRenten(p, r) {
       delta: p.kapitalquote > 0 ? `${p.kapitalquote}% Fondsquote seit ${p.startjahr}` : 'Kein Fonds aktiv', cls: p.kapitalquote > 0 ? 'good' : 'neutral' },
     { label: 'Jahresertrag Fonds', value: rente.jahresertrag.toFixed(1) + ' Mrd. €',
       delta: rente.beitragsentlastung > 0 ? '−' + f1(rente.beitragsentlastung) + ' PP Beitragssatz' : '—', cls: rente.beitragsentlastung > 0 ? 'good' : 'neutral' },
-    { label: 'RV-Entlastung 2045', value: (() => { const ohne = 18.6 + 20*0.3; const mit = document.getElementById('renten-panel') ? rente.proj_mit[20]?.beitrag : ohne; return f1(ohne - (mit||ohne)) + ' PP'; })(),
+    { label: 'RV-Entlastung 2045', value: f1(rente.proj_ohne[20].beitrag - rente.proj_mit[20].beitrag) + ' PP',
       delta: 'gegenüber ohne Reform', cls: rente.beitragsentlastung > 0 ? 'good' : 'neutral' },
     { label: 'GKV-Struktureffekt', value: (rente.gkv_gesamt_effekt >= 0 ? '+' : '') + f1(rente.gkv_gesamt_effekt) + ' Mrd. €',
       delta: rente.kassen_ersparnis > 0 ? `Kassenfusion: +${f1(rente.kassen_ersparnis)} Mrd.` : 'Nur strukturelle Effekte', cls: rente.gkv_gesamt_effekt > 0 ? 'good' : rente.gkv_gesamt_effekt < -1 ? 'bad' : 'neutral' }
@@ -44,7 +44,7 @@ function renderRenten(p, r) {
   // GKV Panel
   const gkvItems = [
     { label: 'PKV-Abschaffung (Netto)', v: rente.pkv_netto_effekt, aktiv: p.pkv_abschaffen,
-      note: p.pkv_abschaffen ? '11 Mio. PKV → GKV; Mehrausgaben überwiegen leicht' : 'inaktiv' },
+      note: p.pkv_abschaffen ? '8,74 Mio. PKV-Vollversicherte → GKV; Mehrertrag lt. IGES (2020) 2,4–4,3 Mrd. €' : 'inaktiv' },
     { label: 'Kassenfusion (Verwalt.)', v: rente.kassen_ersparnis, aktiv: p.anzahl_kv < 95,
       note: p.anzahl_kv < 95 ? `${p.anzahl_kv} statt 95 Kassen; Fixkostenabbau 45%` : 'inaktiv' },
     { label: 'Prävention (Nettonutzen)', v: rente.praevention_ersparnis, aktiv: p.praevention > 0,

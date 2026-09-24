@@ -349,17 +349,22 @@ function renderStaatsausgaben(r) {
   const el = document.getElementById('staatsausgaben_chart');
   if (!el) return;
 
-  // Ausgaben-Kategorien für die aktive Periode
+  // Ausgabenposten der aktiven Periode gegen den Status quo (beide aus berechne, jeder Posten einmal)
+  const p = r.ausgaben_posten, q = r.kalibrierung.ausgaben_posten_sq;
   const kategorien = [
-    { label: 'Sozial / Rente / SV',  wert: 850 + r.demografie_aufschlag + (r.sv_ausgaben_delta ?? 0),    sq: 850,  color: 'var(--accent)' },
-    { label: 'Gesundheit',           wert: 320,                                                            sq: 320,  color: 'var(--muted)' },
-    { label: 'Bildung',              wert: 180,                                                            sq: 180,  color: 'var(--muted)' },
-    { label: 'Transfers (BG/KG)',    wert: 140 + (r.bg_auszahlung ?? 0) + (r.kg_auszahlung ?? 0),         sq: 140,  color: 'var(--warn)' },
-    { label: 'Verteidigung',         wert: 90,                                                             sq: 90,   color: 'var(--muted)' },
-    { label: 'Infrastruktur',        wert: 120 + (r.invest_impuls ?? 0),                                  sq: 120,  color: 'var(--good)' },
-    { label: 'Verwaltung + Admin',   wert: 140 + (r.admin_kosten ?? 0),                                   sq: 140,  color: 'var(--muted)' },
-    { label: 'Zinsen',               wert: 30,                                                             sq: 30,   color: 'var(--bad)' },
+    { label: 'Rente (GRV)',            wert: p.rente,        sq: q.rente,        color: 'var(--accent)' },
+    { label: 'Krankenversicherung',    wert: p.gkv,          sq: q.gkv,          color: 'var(--accent)' },
+    { label: 'AL + Pflege',            wert: p.al_pflege,    sq: q.al_pflege,    color: 'var(--accent)' },
+    { label: 'Bürgergeld / Kindergeld / BGE', wert: p.buergergeld + p.kindergeld + p.bge + p.neg_est,
+                                        sq: q.buergergeld + q.kindergeld + q.bge + q.neg_est, color: 'var(--warn)' },
+    { label: 'Bildung',                wert: p.bildung,      sq: q.bildung,      color: 'var(--muted)' },
+    { label: 'Verteidigung',           wert: p.verteidigung, sq: q.verteidigung, color: 'var(--muted)' },
+    { label: 'Infrastruktur',          wert: p.infrastruktur, sq: q.infrastruktur, color: 'var(--good)' },
+    { label: 'Verwaltung',             wert: p.verwaltung,   sq: q.verwaltung,   color: 'var(--muted)' },
+    { label: 'Zinsen',                 wert: p.zinsen,       sq: q.zinsen,       color: 'var(--bad)' },
+    { label: 'Übrige (nicht modell.)', wert: p.uebrige,      sq: q.uebrige,      color: 'var(--muted)' },
   ];
+
 
   const maxWert = Math.max(...kategorien.map(k => Math.max(k.wert, k.sq))) * 1.08;
   const W = 560, rowH = 22, gap = 4, padL = 156, padR = 56, padT = 6;

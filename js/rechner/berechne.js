@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: CC-BY-4.0
 // Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
-import { DEZILE, ELAST, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, BASIS_AUFKOMMEN, ADMIN_QUOTE, AUSGABEN_TOTAL, BGE_LABOR_EFF, PERIOD_STATE_0, KALIBRIERUNG_ZIELE, ERBST_2024 } from '../data.js';
+import { DEZILE, ELAST, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, BASIS_AUFKOMMEN, ADMIN_QUOTE, BGE_LABOR_EFF, PERIOD_STATE_0, KALIBRIERUNG_ZIELE, ERBST_2024, VGR_2025, BUERGERGELD_2025 } from '../data.js';
 import { zvE, estHaushalt, grenzsatzHaushalt, abgeltungHaushalt, SPARER_PAUSCHBETRAG } from './haushalt.js';
 import { berechneGini, berechneMedianGewichtet, berechnePalma, berechneS80S20, berechneArmutsquote, mwstSatzfaktor, berechneDezilDelta, svArbeitnehmer, svGrenzsatz, bbgRV } from './verteilung.js';
 
@@ -97,7 +97,8 @@ let _kal = null;
 function kalibrierung() {
   if (_kal) return _kal;
   const Z = KALIBRIERUNG_ZIELE;
-  let kal = { konsum_k: 1, est: 1, mwst_rest: 0, armut_sigma: null, steuerfrei: Z.mwst_steuerfrei_anteil };
+  let kal = { konsum_k: 1, est: 1, mwst_rest: 0, armut_sigma: null, steuerfrei: Z.mwst_steuerfrei_anteil,
+              admin_sq: null, einnahmen_rest: 0, ausgaben_rest: 0 };
   for (let i = 0; i < 6; i++) {
     const r = berechne(SQ, null, { kal, referenz: true });
     let vn = 0, vns = 0;
@@ -116,6 +117,13 @@ function kalibrierung() {
   }
   kal.armut_sigma = (lo + hi) / 2;
   kal.mwst_rest_anteil = kal.mwst_rest / (kal.mwst_rest + r.mwst_haushalte);
+  // Ausgabenrahmen (Block 5, F-013–F-015): Status quo = VGR-Summen 2025; Erhebungskosten wirken nur als
+  // Differenz zum Status quo; nicht einzeln modellierte Einnahmen und Ausgaben als offene Restposten
+  const r_mwst = berechne(SQ, null, { kal, referenz: true });
+  kal.admin_sq = r_mwst.admin_kosten;
+  kal.einnahmen_rest = VGR_2025.einnahmen - r_mwst.einnahmen_total;
+  kal.ausgaben_rest  = VGR_2025.ausgaben  - r_mwst.ausgaben_total;
+  kal.ausgaben_posten_sq = berechne(SQ, null, { kal, referenz: true }).ausgaben_posten;
   _kal = kal;
   return kal;
 }
@@ -274,7 +282,8 @@ function berechne(params, zustand = null, _intern = null) {
   // Damit wird verhindert, dass rv_einsparung gegen eine feste Basis gerechnet wird, die der rv-Slider
   // schon implizit abgesenkt hat (Doppelkorrektur-Vermeidung).
   // renten_faktor: demografisch bedingte Mehrkosten (Baby-Boomer-Rentenwelle, Destatis 2021)
-  const rv_ausgaben_basis = BASIS_MAKRO.rv_ausgaben_sq * (params.rv / SQ.rv) * renten_faktor;
+  // Rentenausgaben: Status-quo-Posten × Beitragsfaktor × Demografie (BGE-Anrechnung höchstens bis zu diesem Posten, F-014)
+  const rv_ausgaben_basis = STAATSAUSGABEN.rente * (params.rv / SQ.rv) * renten_faktor;
   let rv_einsparung = 0;
   if (bge > 0) {
     const rl = params.rente_grenze || 35000;              // €/Jahr Einkommensgrenze
@@ -290,11 +299,14 @@ function berechne(params, zustand = null, _intern = null) {
     rv_einsparung = Math.max(0, rv_ausgaben_basis - rv_neu);
   }
 
-  // Bürgergeld: wenn BGE >= BG-Niveau, vollständig durch BGE ersetzt (RWI 2024)
+  // Bürgergeld (F-028): Regelleistungen 2025 skaliert mit dem Regelsatz (alle Regelbedarfsstufen
+  // proportional), dazu Bundesbeteiligung an Kosten der Unterkunft. Wenn BGE >= BG-Niveau: vollständig ersetzt.
   const bg_effektiv = bge >= params.bg ? 0 : params.bg;
-  const bg_auszahlung = 5.5 * bg_effektiv * 12 / 1000; // Mrd.
-  // Kindergeld: ca. 17 Mio Kinder
-  const kg_auszahlung = 17 * params.kg * 12 / 1000;
+  const bg_auszahlung = bg_effektiv > 0
+    ? BUERGERGELD_2025.regelleistungen * bg_effektiv / SQ.bg + BUERGERGELD_2025.kdu_bund
+    : 0;
+  // Kindergeld: Kindergeldkinder aus der Haushaltsstruktur (17 Mio., dieselbe Zahl wie in den Haushaltsnettos)
+  const kg_auszahlung = DEZILE.reduce((a, d) => a + d.anzahl * d.kinder, 0) * params.kg * 12 / 1000;
   // Negative ESt falls aktiviert
   let neg_est_auszahlung = 0;
   if (params.neg_est) neg_est_auszahlung = 30;
@@ -326,7 +338,10 @@ function berechne(params, zustand = null, _intern = null) {
     rv: rv_auf,
     kv: kv_auf,
     al: al_auf,
-    klein: klein_auf
+    klein: klein_auf,
+    // Nicht einzeln modellierte Einnahmen (Verkäufe, Vermögenseinkommen, übrige Steuern und Beiträge):
+    // VGR-Einnahmen 2025 − modellierte Einnahmen im Status quo, offen ausgewiesen
+    uebrige: kal.einnahmen_rest * bip_faktor,
   };
   const einnahmen_total = Object.values(rev).reduce((a,b)=>a+b,0);
 
@@ -348,19 +363,35 @@ function berechne(params, zustand = null, _intern = null) {
     bge_brutto * 0.008; // BGE: 0,8% Verwaltungskosten — kein Bedürftigkeitstest (RWI 2024)
 
   // ---------- 12. AUSGABEN inkl. Transfers ----------
-  // F1: SV-Ausgabenseite koppeln — Umlagesystem: Beitragssatz ↓ → Leistungen ↓ (§ 213 SGB VI).
-  // Sozial=850 enthält grob: RV ~390, GKV ~290, AL+PV ~90, Bürgergeld etc. ~80 Mrd.
-  // Bürgergeld wird separat über bg_auszahlung geführt; die SV-Anteile skalieren mit den Reglern.
-  const SV_AUSG = { rv: 390, kv: 290, alpf: 90 };
+  // SV-Ausgabenseite gekoppelt — Umlagesystem: Beitragssatz ↓ → Leistungen ↓ (§ 213 SGB VI).
+  // Veränderung der SV-Ausgaben ggü. Status quo (Ausweis; die Posten selbst stehen in ausgaben_posten)
   const sv_ausgaben_delta =
-    SV_AUSG.rv   * (params.rv   / SQ.rv   - 1) +
-    SV_AUSG.kv   * (params.kv   / SQ.kv   - 1) +
-    SV_AUSG.alpf * (params.alpf / SQ.alpf - 1);
-  // Demografieaufschlag: steigende RV-Ausgaben durch Alterung (RV-Anteil ~390 Mrd.)
-  const demografie_aufschlag = 390 * (renten_faktor - 1.0);
+    STAATSAUSGABEN.rente     * (params.rv   / SQ.rv   - 1) +
+    STAATSAUSGABEN.gkv       * (params.kv   / SQ.kv   - 1) +
+    STAATSAUSGABEN.al_pflege * (params.alpf / SQ.alpf - 1);
+  // Demografieaufschlag: steigende RV-Ausgaben durch Alterung
+  const demografie_aufschlag = STAATSAUSGABEN.rente * (renten_faktor - 1.0);
   // invest_impuls: zusätzliche öffentliche Investitionen (Mrd./Jahr, reduziert Saldo)
   const invest_impuls = params.invest_impuls || 0;
-  const ausgaben_total = AUSGABEN_TOTAL + bg_auszahlung + kg_auszahlung + neg_est_auszahlung + bge_brutto + admin_kosten - STAATSAUSGABEN.verwaltung - STAATSAUSGABEN.zinsen + zinsen_dyn - rv_einsparung + sv_ausgaben_delta + demografie_aufschlag + invest_impuls;
+  // Jeder Posten genau einmal (F-013, F-015); übrige Ausgaben = VGR-Summe − modellierte/feste Posten im SQ
+  const A = STAATSAUSGABEN;
+  const ausgaben_posten = {
+    rente:        rv_ausgaben_basis - rv_einsparung,
+    gkv:          A.gkv * params.kv / SQ.kv,
+    al_pflege:    A.al_pflege * params.alpf / SQ.alpf,
+    buergergeld:  bg_auszahlung,
+    kindergeld:   kg_auszahlung,
+    neg_est:      neg_est_auszahlung,
+    bge:          bge_brutto,
+    zinsen:       zinsen_dyn,
+    bildung:      A.bildung,
+    verteidigung: A.verteidigung,
+    infrastruktur: A.infrastruktur + invest_impuls,
+    // Erhebungskosten wirken nur als Differenz zum Status quo (F-013)
+    verwaltung:   A.verwaltung + (kal.admin_sq == null ? 0 : admin_kosten - kal.admin_sq),
+    uebrige:      kal.ausgaben_rest * bip_faktor,
+  };
+  const ausgaben_total = Object.values(ausgaben_posten).reduce((a, b) => a + b, 0);
 
   // ---------- 13. SALDO ----------
   const saldo = einnahmen_total - ausgaben_total;
@@ -431,10 +462,12 @@ function berechne(params, zustand = null, _intern = null) {
     return a + 0.5 * ELAST.labor_supply * (gs * gs) / Math.max(0.01, 1 - gs) * lohnsumme_d;
   }, 0);
 
-  // ---------- 19b. SCHULDENBREMSE (Art. 109 GG) ----------
-  // Vereinfacht: struktureller Saldo ≈ Gesamtsaldo / BIP (keine Konjunkturbereinigung im Modell)
+  // ---------- 19b. DEFIZITQUOTE (Maastricht, F-020) ----------
+  // Das Modell rechnet auf Ebene des Gesamtstaats (VGR) → Referenzwert −3 % BIP (Art. 126 AEUV i. V. m.
+  // Protokoll Nr. 12). Die Schuldenbremse (Art. 109, 115 GG) gilt für Bund und Länder strukturell und
+  // lässt sich aus diesem Modell nicht ableiten.
   const saldo_bip_pct = saldo / bip_aktuell * 100;
-  const schuldenbremse_ok = saldo_bip_pct >= -0.35;
+  const maastricht_ok = saldo_bip_pct >= -3.0;
 
   // ---------- 19c. DYNAMISCHES SCORING ----------
   // Verhaltensbedingte Aufkommensänderung gegenüber mechanischer (statischer) Wirkung
@@ -453,7 +486,7 @@ function berechne(params, zustand = null, _intern = null) {
     // Kalibrierung (offen ausgewiesen) und MwSt-Zerlegung
     kalibrierung: kal, mwst_haushalte, mwst_rest,
     // Research-basierte Erweiterungen (QUELLENRECHERCHE.md)
-    saldo_bip_pct, schuldenbremse_ok,
+    saldo_bip_pct, maastricht_ok, ausgaben_posten,
     dynamisch_kst, dynamisch_est, dynamisch_delta,
     investment_factor, avg_labor,
     // GKV-Reform-Boni (für GKV-Panel-Darstellung)

@@ -65,22 +65,36 @@ DEZILE.forEach((d, i) => Object.assign(d, HH_STRUKTUR[i]));
 // Keine exakten Dezil-Punktschätzungen für Deutschland — Größenordnung/Monotonie ist der belastbare Teil.
 const MPC_DEZIL = [0.75, 0.70, 0.65, 0.60, 0.55, 0.50, 0.45, 0.38, 0.30, 0.22, 0.15, 0.08];
 
-// Staatsausgaben 2026 (Gesamtstaat, grob aggregiert)
-// Update Juli 2026: verteidigung auf bestätigten Gesamtstaat-Wert (BMF/Bundeshaushalt 2026) angehoben.
-// sozial/gesundheit/bildung/verwaltung/zinsen/sonstiges: noch 2025er-Schätzung — keine belastbare
-// Gesamtstaat-Aufschlüsselung (alle Ebenen) für 2026 zum Zeitpunkt der Recherche verfügbar, nur
-// Bund-Einzelplan-Zahlen (z.B. BMAS-Etat 197,4 Mrd. €, BMG-Etat 20,1 Mrd. €) — nicht 1:1 vergleichbar.
+// ── STAATSAUSGABEN (Ausgabenrahmen, Prüfbericht F-013–F-015, Block 5) ──
+// Status quo = amtliche VGR-Summen des Gesamtstaats. Jeder Posten steht genau einmal in der Rechnung:
+//   modellierte Posten: werden in berechne() aus den Reglern berechnet (Status-quo-Werte hier)
+//   feste Posten:       einzeln ausgewiesen, reagieren nicht auf Regler
+//   Restposten:         „übrige Ausgaben“ = VGR-Summe − alle anderen Posten (berechne.js, offen ausgewiesen)
+// Die früheren Kategorien „sozial“ (850, enthielt Rente/GKV/Pflege/Bürgergeld) und „gesundheit“ (320,
+// enthielt die GKV ein zweites Mal) sind in diese Posten bzw. den Restposten aufgegangen.
 const STAATSAUSGABEN = {
-  sozial:        850,  // inkl. Rente/GKV/Pflege/Bürgergeld (SV + Bund) — Stand 2025, s.o.
-  gesundheit:    320,  // Stand 2025, s.o.
-  bildung:       180,  // Stand 2025, s.o.
-  verteidigung: 108,   // Gesamtstaat 2026: 108,2 Mrd. € (Bundeshaushalt 2026, Höchststand seit Ende Kalter Krieg)
-  infrastruktur: 120,  // Stand 2025, s.o.
-  verwaltung:    140,  // Stand 2025, s.o.
-  zinsen:         30,  // Bund 2025: 30,2 Mrd. € (Finanzplan des Bundes 2025–2029, Abbildung 4) — 2026 noch nicht bestätigt
-  sonstiges:     140   // Stand 2025, s.o.
+  // modelliert — Anteile der Sozialversicherung wie bisher im Modell ([ANNAHME], ohne Primärquelle)
+  rente:         390,  // Rentenausgaben der GRV (skaliert mit Beitragssatz, Demografie, BGE-Anrechnung)
+  gkv:           290,  // Leistungsausgaben GKV (skaliert mit KV-Beitragssatz)
+  al_pflege:      90,  // Arbeitslosen- und Pflegeversicherung (skaliert mit alpf)
+  zinsen:         30,  // Bund 2025: 30,2 Mrd. € (Finanzplan 2025–2029); Gesamtstaatswert folgt in Block 6
+  // Bürgergeld und Kindergeld: aus BUERGERGELD_2025 bzw. Kindergeldkindern × Satz (berechne.js)
+  // fest — Stand 2025-Schätzung ohne Gesamtstaats-Primärquelle, außer Verteidigung
+  bildung:       180,
+  verteidigung:  108,  // Gesamtstaat 2026: 108,2 Mrd. € (Bundeshaushalt 2026)
+  infrastruktur: 120,
+  verwaltung:    140,
 };
-const AUSGABEN_TOTAL = Object.values(STAATSAUSGABEN).reduce((a,b)=>a+b,0);
+
+// VGR des Gesamtstaats 2025 (Destatis, Pressemitteilung 060 vom Feb. 2026, ESVG 2010):
+// Einnahmen 2.140,2 Mrd. €, Ausgaben 2.259,3 Mrd. €, Finanzierungssaldo −119,1 Mrd. € (−2,7 % BIP)
+const VGR_2025 = { einnahmen: 2140.2, ausgaben: 2259.3, saldo: -119.1, steuern: 1031.5 };
+
+// Bürgergeld 2025 (BIAJ auf Basis BA-Statistik und Bundeshaushalt): Regelleistungen 29,0 Mrd. €,
+// Bundesbeteiligung an Kosten der Unterkunft und Heizung 12,5 Mrd. €; 5,378 Mio. Regelleistungsberechtigte
+// (3,931 Mio. erwerbsfähig, 1,446 Mio. nicht erwerbsfähig). Kommunaler KdU-Anteil und Verwaltungskosten
+// (7,97 Mrd. €) liegen im Restposten.
+const BUERGERGELD_2025 = { regelleistungen: 29.0, kdu_bund: 12.5, leistungsberechtigte_mio: 5.378 };
 
 // Basis-Aufkommen Status Quo 2026 (Mrd. €)
 // Quelle: BMF, Destatis. Update Juli 2026: nur co2 (Preiskorridor-Anhebung 55→65 €/t) direkt neu
@@ -380,9 +394,9 @@ const CHALLENGES = [
   { id:'admin_100', diff:'weekly', title:'Effizienzreform',
     desc:'Verwaltungskosten unter 100 Mrd. €',
     subs:[{ label:'Verwaltung', check:r=>r.admin_kosten<100, cur:r=>r.admin_kosten, tgt:100, refFn:ref=>ref.admin_kosten, dir:'down', fmt:v=>v.toFixed(0)+' Mrd.' }]},
-  { id:'schuldenbremse', diff:'weekly', title:'Schuldenbremse',
-    desc:'Strukturellen Saldo auf ≥ −0,35 % BIP bringen (Art. 109 GG)',
-    subs:[{ label:'Saldo % BIP', check:r=>r.saldo_bip_pct>=-0.35, cur:r=>r.saldo_bip_pct, tgt:-0.35, refFn:ref=>ref.saldo_bip_pct, dir:'up', fmt:v=>(v>=0?'+':'')+v.toFixed(2)+' %' }]},
+  { id:'defizit_1', diff:'weekly', title:'Solide Finanzen',
+    desc:'Defizitquote des Gesamtstaats auf höchstens 1 % BIP senken',
+    subs:[{ label:'Saldo % BIP', check:r=>r.saldo_bip_pct>=-1, cur:r=>r.saldo_bip_pct, tgt:-1, refFn:ref=>ref.saldo_bip_pct, dir:'up', fmt:v=>(v>=0?'+':'')+v.toFixed(2)+' %' }]},
   { id:'metr_d1_70', diff:'weekly', title:'Armutsfalle durchbrechen',
     desc:'Grenzbelastung des untersten Dezils unter 70 % senken',
     subs:[{ label:'METR D1', check:r=>r.metr[0]<0.70, cur:r=>r.metr[0]*100, tgt:70, refFn:()=>99, dir:'down', fmt:v=>v.toFixed(0)+' %' }]},
@@ -548,7 +562,7 @@ const TOOLTIPS = {
   },
   kv: {
     title: "Krankenversicherungsbeitrag",
-    text: "GKV-Beitrag (14,6%) inkl. Ø-Zusatzbeitrag (2,9% 2026). BBG: 69.750 € (2026). Demografiedruck: GKV-Finanzierungslücke ~50 Mrd. bis 2030 (GKV-SV). Bürgerversicherung würde Basis verbreitern. PKV-Abschaffung: per Saldo leicht negativ (Mehrausgaben > Mehreinnahmen).",
+    text: "GKV-Beitrag (14,6%) inkl. Ø-Zusatzbeitrag (2,9% 2026). BBG: 69.750 € (2026). Demografiedruck: GKV-Finanzierungslücke ~50 Mrd. bis 2030 (GKV-SV). Bürgerversicherung würde Basis verbreitern. PKV-Abschaffung: laut IGES (2020) Mehrertrag für die GKV von 2,4–4,3 Mrd. €/Jahr.",
     quelle: "§ 241 SGB V · 2026: 17,5% (14,6% + Ø 2,9%) · GKV-SV Jahresbericht 2026 · BMG Kassenstatistik"
   },
   alpf: {
@@ -601,8 +615,8 @@ const TOOLTIPS = {
   },
   pkv_abschaffen: {
     title: "PKV abschaffen",
-    text: "~11 Mio. PKV-Versicherte in GKV. Pro: breitere Einkommensbasis, Solidarausgleich. Contra: GKV-Ausgaben steigen (PKV-Klientel kostenintensiv), Ärzteabwanderung, Qualitätsrisiken. Im Modell: leicht negativer Nettoeffekt.",
-    quelle: "PKV-Verband 2025 · IGES Institut 2021 · GKV-SV Schätzung · Lauterbach et al. 2005"
+    text: "8,74 Mio. PKV-Vollversicherte (2024) wechseln in die GKV. Pro: breitere Einkommensbasis, Solidarausgleich. Contra: höhere Leistungsausgaben der GKV, Honorarverluste der Ärzteschaft, Übergangsfragen bei Altersrückstellungen (341,7 Mrd. €). Im Modell: Nettoeffekt für die GKV +3,35 Mrd. €/Jahr (Mittelwert der IGES-Spanne 2,4–4,3 Mrd. € bei unveränderten Arzthonoraren).",
+    quelle: "PKV-Verband, Zahlen 2024 · IGES/Bertelsmann Stiftung (2020) Duales System der Krankenversicherung"
   },
   anzahl_kv: {
     title: "Anzahl Krankenkassen",
@@ -699,12 +713,12 @@ const CHALLENGE_CTX = {
   'CO₂-Index':        'DE 2030-Ziel: −65 % ggü. 1990',
   'Schulden-Δ < 0':   'Verfassungsgrenze: 0,35 % BIP/Jahr',
   'Wohlfahrtsverlust':'ca. 5–15 % des Steueraufkommens (Lit.) · Harberger-Dreieck je Dezil · sinkt mit flacherem Tarif',
-  'Saldo % BIP':      'Art. 109 GG: Schuldenbremse greift bei < −0,35 % BIP',
+  'Saldo % BIP':      'Status quo 2025: −2,7 % BIP (Destatis) · Maastricht-Referenzwert: −3 %',
   'METR D1':          'Status quo ~99 % (80 % Bürgergeld-Entzug + ~20 % SV · ifo 2025)',
   'DWL < 45 Mrd.':    'Harberger-Effizienzkosten: sinken mit flacheren Grenzsteuersätzen',
   'CO₂-Index < 80':   'Basis 100 = 500 Mio. t · DE 2030-Ziel: −65 % ggü. 1990',
   'Palma':            'DE heute ~1,9 · Dänemark ~1,4 · USA ~2,3 (Eurostat)',
-  'Schulden-Δ':       'Status quo: +2 % BIP/Jahr · Schuldenbremse: < +0,35 %',
+  'Schulden-Δ':       'Status quo: Defizit 2,7 % BIP/Jahr (VGR 2025)',
 };
 
 
@@ -821,4 +835,4 @@ const ZUKUNFTS_SZENARIEN = [
   },
 ];
 
-export { TARIF_2026, HH_STRUKTUR, KALIBRIERUNG_ZIELE, ERBST_2024, DEZILE, MPC_DEZIL, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };
+export { TARIF_2026, HH_STRUKTUR, KALIBRIERUNG_ZIELE, ERBST_2024, DEZILE, MPC_DEZIL, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, VGR_2025, BUERGERGELD_2025, PRESETS, MOD_DEFS, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };

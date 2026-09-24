@@ -4,7 +4,7 @@
 // KASSENSTURZ · Haushaltsspiel — UI & Render
 // ═══════════════════════════════════════════════════════
 
-import { DEZILE, ELAST, PRESETS, MOD_DEFS, AUSGABEN_TOTAL, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, ZUKUNFTS_SZENARIEN } from './data.js';
+import { DEZILE, ELAST, PRESETS, MOD_DEFS, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, ZUKUNFTS_SZENARIEN } from './data.js';
 import { grenzsteuersatz, tarifAusParams } from './rechner/einkommensteuer.js';
 import { berechne } from './rechner/berechne.js';
 import { simulierePfad } from './rechner/transition.js';
@@ -268,7 +268,7 @@ function render() {
   }
   const saldoTone = r.saldo > 0 ? 'good' : r.saldo > -50 ? 'warn' : 'bad';
   setKpiTone('kpi_card_saldo', saldoTone);
-  setKpiTone('kpi_card_sbremse', r.schuldenbremse_ok ? 'good' : 'bad');
+  setKpiTone('kpi_card_sbremse', r.maastricht_ok ? 'good' : 'bad');
   const giniTone = (r.gini - REF.gini) > 0.005 ? 'bad' : (r.gini - REF.gini) < -0.005 ? 'good' : 'neu';
   setKpiTone('kpi_card_gini', giniTone);
   setKpiTone('kpi_card_einn', 'neu');
@@ -300,7 +300,7 @@ function render() {
     mwst: 'Mehrwertsteuer', co2: 'CO₂ (netto)', erbschaft: 'Erbschaftst.',
     boden: 'Bodenwertst.', vermoegen: 'Vermögenst.', zucman: 'Mindestst. Top 1 %',
     rv: 'Rentenvers.', kv: 'Krankenvers.', al: 'AL+Pflege',
-    klein: 'Kleine Verbrauchst.'
+    klein: 'Kleine Verbrauchst.', uebrige: 'Übrige (nicht modell.)'
   };
   const revMax = Math.max(...Object.values(r.rev));
   const revHtml = Object.entries(r.rev)
@@ -453,13 +453,13 @@ function render() {
   dwlDEl.className = 'kpi-delta ' + (dDwl > 5 ? 'bad' : dDwl < -5 ? 'good' : 'neutral');
   setKpiTone('kpi_card_dwl', dDwl > 5 ? 'bad' : dDwl < -5 ? 'good' : 'neu');
 
-  // SCHULDENBREMSE-KPI (Art. 109 GG) — R05
+  // DEFIZITQUOTE-KPI (Maastricht-Referenzwert −3 % BIP, F-020)
   const sbEl  = document.getElementById('kpi_sbremse');
   const sbDEl = document.getElementById('kpi_sbremse_d');
-  sbEl.textContent = r.schuldenbremse_ok ? '✓ eingehalten' : '✗ verletzt';
+  sbEl.textContent = (r.saldo_bip_pct >= 0 ? '+' : '') + r.saldo_bip_pct.toFixed(2).replace('.', ',') + ' % BIP';
   sbEl.style.color = '';
-  sbDEl.textContent = (r.saldo_bip_pct >= 0 ? '+' : '') + r.saldo_bip_pct.toFixed(2).replace('.', ',') + ' % BIP';
-  sbDEl.className = 'kpi-delta ' + (r.schuldenbremse_ok ? 'good' : 'bad');
+  sbDEl.textContent = r.maastricht_ok ? '✓ innerhalb −3 %' : '✗ über 3 % Defizit';
+  sbDEl.className = 'kpi-delta ' + (r.maastricht_ok ? 'good' : 'bad');
 
   // ZINSLASTQUOTE
   // Bundeshaushalt 2025: 30,2 Mrd. € Zinsen → 7,7 Ct/€ (Finanzplan 2025–2029, Abbildung 4; IW Köln, Hentze 2025)
@@ -951,15 +951,15 @@ AN-Anteil ≈ 50% (je hälftig AN/AG)</div>
     <div class="rw-section">
       <div class="rw-section-title">6 · Staatshaushalt — Saldo</div>
       <div class="rw-formula">Saldo = Einnahmen − Ausgaben
-Einnahmen:  ${f(r.einnahmen_total, 0)} Mrd. €
-Festausgaben: ${Math.round(AUSGABEN_TOTAL)} Mrd. € (Sozial/Gesundheit/Bildung/Verteidigung etc.)
-Variable:     ${f(r.bg_auszahlung + r.kg_auszahlung + r.neg_est_auszahlung, 1)} Mrd. € (Transfers)
-              + ${f(r.admin_kosten, 1)} Mrd. € (Verwaltungskosten)
-              − 140 Mrd. € (Verwaltung Basis ersetzt)
+Einnahmen:  ${f(r.einnahmen_total, 0)} Mrd. €  (davon nicht einzeln modelliert: ${f(r.rev.uebrige, 0)} Mrd. €)
 Ausgaben:   ${f(r.ausgaben_total, 0)} Mrd. €
+  modelliert: Rente ${f(r.ausgaben_posten.rente, 0)} · GKV ${f(r.ausgaben_posten.gkv, 0)} · AL/Pflege ${f(r.ausgaben_posten.al_pflege, 0)}
+              Bürgergeld ${f(r.ausgaben_posten.buergergeld, 1)} · Kindergeld ${f(r.ausgaben_posten.kindergeld, 1)} · Zinsen ${f(r.ausgaben_posten.zinsen, 0)}${r.ausgaben_posten.bge ? ` · BGE ${f(r.ausgaben_posten.bge, 0)}` : ''}${r.ausgaben_posten.neg_est ? ` · Neg. ESt ${f(r.ausgaben_posten.neg_est, 0)}` : ''}
+  fest:       Bildung ${f(r.ausgaben_posten.bildung, 0)} · Verteidigung ${f(r.ausgaben_posten.verteidigung, 0)} · Infrastruktur ${f(r.ausgaben_posten.infrastruktur, 0)} · Verwaltung ${f(r.ausgaben_posten.verwaltung, 0)}
+  übrige (nicht einzeln modelliert): ${f(r.ausgaben_posten.uebrige, 0)} Mrd. €
 ────────────────────────────────
 Saldo:      ${r.saldo >= 0 ? '+' : ''}${f(r.saldo)} Mrd. €</div>
-      <div class="rw-text">Ausgaben-Basis: BMF Bundeshaushalt 2025 (konsolidierter Gesamtstaat inkl. Länderhaushalte, SV)</div>
+      <div class="rw-text">Status quo = VGR des Gesamtstaats 2025 (Destatis, Feb. 2026): Einnahmen 2.140,2 Mrd. €, Ausgaben 2.259,3 Mrd. €, Saldo −119,1 Mrd. €. Die „übrigen“ Posten sind die Differenz zwischen diesen Summen und den einzeln modellierten Posten; sie reagieren nicht auf die Regler (außer mit dem BIP in der Zukunftssimulation).</div>
     </div>
 
     <div class="rw-section">

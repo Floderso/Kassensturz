@@ -8,12 +8,18 @@ import { BASIS_MAKRO, PRESETS } from '../data.js';
 // ═══════════════════════════════════════════════════════
 
 // Quellenmetadaten — parallel zu den Berechnungsfunktionen
+const INFLATION_ANNAHME = 0.02;   // EZB-Inflationsziel, für die reale Fondsrendite
+
+// PKV (F-043): Vollversicherte 2024 laut PKV-Verband; Nettoeffekt einer Einbeziehung in die GKV laut
+// IGES/Bertelsmann Stiftung (2020), Mittelwert der Spanne 2,4–4,3 Mrd. € bei unveränderten Arzthonoraren
+const PKV = { vollversicherte_mio: 8.74, nettoeffekt_gkv_mrd: (2.4 + 4.3) / 2 };
+
 const FORMEL_QUELLEN_RENTE = {
   generationenkapital: {
-    formel: 'Kapitalstock_t = (Kapitalstock_{t−1} + Jahresinvestition) × (1 + r)',
+    formel: 'bis 2025: K_t = (K_{t−1} + Einzahlung) × (1 + r_real); ab 2025: Entlastung_t = K_t × r_real / Lohnsumme, K_{t+1} = K_t + Einzahlung',
     ref:    'Norges Bank NBIM Annual Report 2024 · Rentenpaket II: BT-Drs. 20/11898 (Entwurf, nicht verabschiedet) · KfW-Research 2025',
     refs:   ['B32'],
-    note:   'r = nominelle Rendite; Inflationsabzug für Realrendite nötig. MSCI World historisch ~7 % nominal, ~5 % real'
+    note:   'Real in Preisen von 2025 (r_real = (1 + r)/(1 + 2 %) − 1); ab 2025 wird der reale Ertrag vollständig ausgeschüttet, sodass kein Ertrag doppelt zählt (F-016)'
   },
   beitragspfad: {
     formel: 'Beitrag_t = Beitrag_0 + t × 0,3 PP  (Demografiedruck ohne Reform)',
@@ -21,9 +27,9 @@ const FORMEL_QUELLEN_RENTE = {
     note:   '+0,3 PP/Jahr bis 2045 ohne Reform (konservativer SVR-Wert). Projektion mit Fonds: Beitrag − Entlastung_t'
   },
   pkv_abschaffung: {
-    formel: 'Nettoeffekt = Zusatz_Einnahmen − Zusatz_Ausgaben',
-    ref:    'PKV-Verband 2025 · IGES Institut 2021 · GKV-SV Jahresbericht 2025 · Lauterbach et al. 2005',
-    note:   '11 Mio. PKV → GKV: Einnahmen +~8 Mrd., Ausgaben +~8,5 Mrd. Nettoeffekt leicht negativ'
+    formel: 'Nettoeffekt GKV = Mittelwert der IGES-Spanne (2,4–4,3 Mrd. €/Jahr)',
+    ref:    'IGES/Bertelsmann Stiftung (2020) Duales System der Krankenversicherung · PKV-Verband 2025 (8,74 Mio. Vollversicherte 2024)',
+    note:   'Szenario mit unveränderten Arzthonoraren; bei Angleichung der Honorare bis ~9 Mrd. €. Stand 2020, nicht fortgeschrieben'
   },
   kassenfusion: {
     formel: 'Ersparnis = Admin_SQ × (1 − Kassen/95) × 0,45',
@@ -43,15 +49,18 @@ function berechneRente(params, rv_aufkommen_aktuell) {
 
   // --- Generationenkapital: historisches Was-wäre-wenn ---
   // Jedes Jahr wird Fondsquote % des RV-Aufkommens investiert
+  // Alles in Preisen von 2025 (F-016): reale Rendite = (1 + nominal) / (1 + Inflation) − 1,
+  // Einzahlungen und Lohnsumme real konstant.
+  const r_real = (1 + params.rendite_fonds / 100) / (1 + INFLATION_ANNAHME) - 1;
   const years_history = Math.max(0, 2025 - params.startjahr);
   const annual_inv = rv_aufkommen_aktuell * params.kapitalquote / 100; // Mrd. / Jahr
   let kapitalstock = 0;
   const ks_history = []; // für Chart
   for (let y = 0; y < years_history; y++) {
-    kapitalstock = (kapitalstock + annual_inv) * (1 + params.rendite_fonds / 100);
+    kapitalstock = (kapitalstock + annual_inv) * (1 + r_real);   // bis 2025 thesaurierend
     ks_history.push({ jahr: params.startjahr + y + 1, ks: kapitalstock });
   }
-  const jahresertrag = kapitalstock * params.rendite_fonds / 100; // Mrd. / Jahr
+  const jahresertrag = kapitalstock * r_real; // Mrd. / Jahr, real
   const beitragsentlastung = (jahresertrag / lohnsumme_sv) * 100; // Prozentpunkte
 
   // --- Beitragssatz-Projektion 2025–2045 ---
@@ -63,23 +72,19 @@ function berechneRente(params, rv_aufkommen_aktuell) {
   let ks_proj = kapitalstock;
   for (let y = 0; y <= 20; y++) {
     const beitrag_ohne = sq_beitrag + y * demo_anstieg;
-    // Fonds wächst weiter: jedes Projektionsjahr investiert man weiter + Zinseszins
-    // Kompoundierung immer — auch wenn kapitalquote=0 (Bestand verdient weiter Rendite)
-    ks_proj = (ks_proj + annual_inv) * (1 + params.rendite_fonds / 100);
-    const ertrag_y = ks_proj * params.rendite_fonds / 100;
+    // Ab 2025: realer Ertrag wird vollständig zur Beitragssenkung entnommen (Ausschüttung), der
+    // Kapitalstock wächst nur noch um neue Einzahlungen — jeder Ertrags-Euro wird genau einmal verwendet
+    const ertrag_y = ks_proj * r_real;
     const entlastung_y = (ertrag_y / lohnsumme_sv) * 100;
+    ks_proj = ks_proj + annual_inv;
     proj_ohne.push({ jahr: 2025 + y, beitrag: beitrag_ohne });
     proj_mit.push({ jahr: 2025 + y, beitrag: Math.max(12, beitrag_ohne - entlastung_y) });
   }
 
   // --- GKV Reformen ---
-  // PKV-Abschaffung: ~11 Mio. Privatversicherte; GKV-Kosten höher als PKV-Einsparung
-  const pkv_versicherte = 11; // Mio.
-  // GKV-Beitrag bei aktueller Quote für diese Einkommensgruppe ~600€/M, PKV heute ~450€/M
-  // PKV-Abschaffung: mehr Einnahmen durch breitere Basis, aber auch höhere Leistungsausgaben
-  const pkv_zusatz_einnahmen = params.pkv_abschaffen ? pkv_versicherte * 0.60 * 12 / 1000 : 0; // Mrd.
-  const pkv_zusatz_ausgaben  = params.pkv_abschaffen ? pkv_versicherte * 0.65 * 12 / 1000 : 0; // etwas mehr wegen GKV-Standard
-  const pkv_netto_effekt = pkv_zusatz_einnahmen - pkv_zusatz_ausgaben;
+  // PKV-Abschaffung (F-017, F-043): Nettoeffekt für die GKV laut IGES/Bertelsmann (2020), Szenario mit
+  // unveränderten Arzthonoraren: +2,4 bis +4,3 Mrd. €/Jahr → Mittelwert. Stand 2020, nicht fortgeschrieben.
+  const pkv_netto_effekt = params.pkv_abschaffen ? PKV.nettoeffekt_gkv_mrd : 0;
 
   // Kassenfusion: GKV-Verwaltungskosten ~12 Mrd.; proportionaler Fixkostenabbau
   const kv_admin_sq = 12;
