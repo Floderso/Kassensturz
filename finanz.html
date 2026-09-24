@@ -19,9 +19,7 @@
 <meta name="twitter:description" content="Kostenlose Finanzrechner für Deutschland. Datenbasiert, ohne Anmeldung.">
 <meta name="twitter:image" content="https://kassensturz.org/docs/haushaltsspiel_screenshot.png">
 <title>Finanztools – Kredit, Rente & Inflation berechnen | Kassensturz</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/fonts.css">
 <link rel="stylesheet" href="css/tokens.css">
 <style>
   /* Palette, Typo, Fokus und Nav: css/tokens.css.
@@ -1156,8 +1154,8 @@ function skipQuiz() {
 function finishQuiz() {
   const profile = computeProfile(answers);
   showProfileCard(profile);
-  localStorage.setItem('finanz_profile', JSON.stringify(profile));
-  localStorage.setItem('finanz_answers', JSON.stringify(answers));
+  lsSetJSON('finanz_profile', profile);
+  lsSetJSON('finanz_answers', answers);
 }
 
 function retakeQuiz() {
@@ -1274,9 +1272,8 @@ function showTools() {
   const ts = document.getElementById('tools-section');
   ts.style.display = 'block';
 
-  const saved = localStorage.getItem('finanz_profile');
-  if (saved) {
-    const p = JSON.parse(saved);
+  const p = gueltigesProfil(lsGetJSON('finanz_profile'));
+  if (p) {
     document.getElementById('strip-name').textContent = p.profileType;
     document.getElementById('strip-alloc').textContent =
       ` · Aktien ${p.stockPct}%  Anleihen ${p.bondPct}%  Cash ${p.cashPct}%`;
@@ -1776,13 +1773,28 @@ document.querySelectorAll('.section-title[data-toggle]').forEach(el => {
   el.addEventListener('click', () => el.classList.toggle('collapsed'));
 });
 
+// ── localStorage: kann fehlen, werfen oder fremde Inhalte enthalten (F-060) ──
+function lsGetJSON(key) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; }
+}
+function lsSetJSON(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+}
+function gueltigesProfil(p) {
+  if (!p || typeof p !== 'object') return null;
+  const zahlen = ['risk', 'stockPct', 'bondPct', 'cashPct', 'blendedRendite', 'sparrate', 'nettoeinkommen', 'alter', 'jahre'];
+  if (!zahlen.every(k => typeof p[k] === 'number' && Number.isFinite(p[k]))) return null;
+  return typeof p.profileType === 'string' ? p : null;
+}
+
 // Restore profile from localStorage
 (function init() {
-  const savedProfile  = localStorage.getItem('finanz_profile');
-  const savedAnswers  = localStorage.getItem('finanz_answers');
-  if (savedProfile && savedAnswers) {
-    Object.assign(answers, JSON.parse(savedAnswers));
-    const p = JSON.parse(savedProfile);
+  const p = gueltigesProfil(lsGetJSON('finanz_profile'));
+  const savedAnswers = lsGetJSON('finanz_answers');
+  if (p && savedAnswers && typeof savedAnswers === 'object') {
+    for (const k of ['age', 'income', 'saverate', 'goal', 'horizon', 'crash', 'security', 'knowledge']) {
+      if (Object.hasOwn(savedAnswers, k)) answers[k] = savedAnswers[k];
+    }
     document.getElementById('strip-name').textContent = p.profileType;
     document.getElementById('strip-alloc').textContent =
       ` · Aktien ${p.stockPct}%  Anleihen ${p.bondPct}%  Cash ${p.cashPct}%`;
@@ -1790,11 +1802,10 @@ document.querySelectorAll('.section-title[data-toggle]').forEach(el => {
     // Show quiz with "Sie haben bereits ein Profil" option? For now just show quiz fresh.
   }
   // Load params from Haushaltsspiel if available
-  const hsRaw = localStorage.getItem('haushaltsspiel_params');
-  if (hsRaw) {
+  const hsP = lsGetJSON('haushaltsspiel_params');
+  if (hsP) {
     try {
-      const hsP = JSON.parse(hsRaw);
-      if (typeof hsP.abgeltung === 'number') {
+      if (typeof hsP.abgeltung === 'number' && Number.isFinite(hsP.abgeltung)) {
         const slider = document.getElementById('invest_steuer');
         slider.value = hsP.abgeltung;
         document.getElementById('v_invest_steuer').textContent = hsP.abgeltung + ' %';

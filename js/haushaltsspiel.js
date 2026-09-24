@@ -495,7 +495,7 @@ function render() {
   document.getElementById('kpi_zins_bench').textContent = KPI_BENCH.zins;
 
   // Cross-page param sync
-  localStorage.setItem('haushaltsspiel_params', JSON.stringify(p));
+  lsSet('haushaltsspiel_params', JSON.stringify(p));
 
   // URL-Hash aktualisieren
   window.history.replaceState(null, '', paramsToHash(p));
@@ -664,9 +664,9 @@ function renderChallenges(r) {
   const html = slots.map(slot => {
     const c = pickChallenge(slot.diff);
     const allDone = c.subs.every(s => s.check(r));
-    const wasAlreadyDone = localStorage.getItem(lsKey(slot.diff)) === c.id;
+    const wasAlreadyDone = lsGet(lsKey(slot.diff)) === c.id;
 
-    if (allDone && !wasAlreadyDone) localStorage.setItem(lsKey(slot.diff), c.id);
+    if (allDone && !wasAlreadyDone) lsSet(lsKey(slot.diff), c.id);
 
     const subsHtml = c.subs.map(sub => {
       const pct = challengeProgress(sub, r);
@@ -1082,6 +1082,25 @@ function paramsToHash(p) {
 function hashToParams(hash) {
   try { return JSON.parse(atob(hash.slice(1))); } catch { return null; }
 }
+
+// Externe Eingaben (URL-Hash, localStorage) sind nicht vertrauenswürdig: nur bekannte Schlüssel mit
+// passendem Typ übernehmen, alles andere fällt auf den Status quo zurück (F-054).
+function sanitizeParams(obj) {
+  const schema = getParams();
+  const out = { ...PRESETS.status_quo };
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return out;
+  for (const k of Object.keys(schema)) {
+    if (!Object.hasOwn(obj, k)) continue;
+    const v = obj[k];
+    if (typeof schema[k] === 'number' && typeof v === 'number' && Number.isFinite(v)) out[k] = v;
+    else if (typeof schema[k] === 'boolean' && typeof v === 'boolean') out[k] = v;
+  }
+  return out;
+}
+
+// localStorage kann fehlen oder werfen (gesperrte Websitedaten, Privatmodus) — nie die Seite abbrechen lassen.
+function lsGet(key) { try { return localStorage.getItem(key); } catch { return null; } }
+function lsSet(key, value) { try { localStorage.setItem(key, value); } catch {} }
 function copyShareLink() {
   const p = getParams();
   const url = window.location.origin + window.location.pathname + paramsToHash(p);
@@ -1371,18 +1390,18 @@ computeRef();
 setParams(PRESETS.status_quo);
 // URL-Preset: ?preset=kirchhof etc. (aus Startseiten-Links)
 const _urlPreset = new URLSearchParams(window.location.search).get('preset');
-if (_urlPreset && PRESETS[_urlPreset]) {
+if (_urlPreset && Object.hasOwn(PRESETS, _urlPreset)) {
   setParams(PRESETS[_urlPreset]);
   document.querySelectorAll('#presets button').forEach(b =>
     b.classList.toggle('active', b.dataset.preset === _urlPreset));
 } else if (window.location.hash) {
   const fromHash = hashToParams(window.location.hash);
-  if (fromHash) setParams(fromHash);
+  if (fromHash) setParams(sanitizeParams(fromHash));
 } else {
   // Letzte Session wiederherstellen (kein URL-Override vorhanden)
   try {
-    const saved = localStorage.getItem('haushaltsspiel_params');
-    if (saved) setParams(JSON.parse(saved));
+    const saved = lsGet('haushaltsspiel_params');
+    if (saved) setParams(sanitizeParams(JSON.parse(saved)));
   } catch {}
 }
 render();
@@ -1459,7 +1478,7 @@ function closeOnboarding() {
   const el = document.getElementById('onboarding-overlay');
   if (el) el.style.display = 'none';
   setHintergrundInert(false);
-  localStorage.setItem('kassensturz_visited_v2', '1');
+  lsSet('kassensturz_visited_v2', '1');
 }
 
 // ============================================================
@@ -1514,7 +1533,7 @@ function startWith(preset) {
 
 (function initOnboarding() {
   // Use _hasSharedState (captured before render() adds a hash via replaceState)
-  if (!localStorage.getItem('kassensturz_visited_v2') && !_hasSharedState) {
+  if (!lsGet('kassensturz_visited_v2') && !_hasSharedState) {
     setTimeout(() => {
       const el = document.getElementById('onboarding-overlay');
       if (!el) return;

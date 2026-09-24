@@ -13,9 +13,19 @@ permissions:
 
 jobs:
   gutachten:
+    # Nur für Personen mit Repo-Beziehung: der Lauf verbraucht bezahltes API-Kontingent und postet
+    # unter der Identität des Projekts (F-029). Fremde Issues/PRs erhalten kein automatisches Gutachten.
+    if: >-
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'),
+               github.event_name == 'issues' && github.event.issue.author_association
+               || github.event.pull_request.author_association)
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: gutachter-${{ github.event.issue.number || github.event.pull_request.number }}
+      cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
 

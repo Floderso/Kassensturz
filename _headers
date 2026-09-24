@@ -1,0 +1,9 @@
+# Security-Header für Cloudflare Pages (F-067).
+# 'unsafe-inline' bei script-src ist vorerst nötig: finanz.html, mikro.html und quellen.html enthalten
+# Inline-Skripte, finanz.html und index.html Inline-Eventhandler (onclick=). Verschärfung auf
+# script-src 'self' erst nach Umstellung auf externe Skripte und addEventListener.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
