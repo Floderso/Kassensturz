@@ -25,3 +25,6 @@ docs/*.jpg
 
 # Impeccable-Arbeitsartefakte (Kritik-Snapshots)
 .impeccable/
+
+# Python
+__pycache__/
