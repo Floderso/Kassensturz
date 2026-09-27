@@ -340,6 +340,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Wunschrente und gesetzliche Rente werden in heutiger Kaufkraft eingegeben. Die Lücke wird ohne Inflationierung bis zum Rentenbeginn in einen nominalen Kapitalbedarf umgerechnet, und die Sparrate wird mit nominaler Rendite berechnet.
   - Der Wert „Real (inflat.)“ zinst die Wunschrente ab, statt sie auf den künftigen Nominalwert hochzurechnen.
   - Beispiel 30 Jahre bei 2 % Inflation: Kapitalbedarf und Sparrate sind um den Faktor ~1,8 zu niedrig.
+- **Status:** Behoben in Block 8. Die Lücke wird bis Rentenbeginn inflationiert und über die Rentenphase als real konstante Rente entnommen (Barwert mit realer Rendite). Der Balken heißt „Nominal bei Rentenbeginn“ und rechnet die Wunschrente hoch.
 
 ### F-031 · schwer · T · Regler „Rentenphase“ ohne Wirkung; 4-%-Regel fix und unbelegt
 - **Fundstelle:** `finanz.html:1672`, `:1635`
@@ -347,6 +348,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Begründung:**
   - `p.rentenphase` wird eingelesen und angezeigt, geht aber in keine Berechnung ein. Der Nutzer sieht bei jeder Rentenphase dasselbe Ergebnis.
   - Die feste Entnahmerate von 4 % stammt aus US-Daten für 30-jährige Entnahmezeiträume (Bengen 1994) und ist nicht zitiert.
+- **Status:** Behoben in Block 8. Die Rentenphase bestimmt den Rentenbarwertfaktor. Die 4-%-Regel erscheint nur noch als Vergleichswert mit Quelle (Bengen 1994, A39).
 
 ### F-032 · schwer · W · Kredit-Rechner: Szenarienvergleich asymmetrisch
 - **Fundstelle:** `finanz.html:1470-1488` vs. `:1497-1508`
@@ -355,6 +357,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - In Szenario A (Sondertilgung) entfallen nach vorzeitiger Tilgung Rate und Zusatzbudget ersatzlos und werden nicht investiert.
   - In Szenario B fließt das Budget bis zum Laufzeitende ins Portfolio.
   - Der Vergleich begünstigt damit systematisch „Investieren“, und das Gewinner-Banner ist verzerrt.
+- **Status:** Behoben in Block 8. In Szenario A fließen Rate und Zusatzbudget nach der Tilgung ins Portfolio, beide Szenarien haben denselben Mittelabfluss. Verglichen wird das Vermögen (Immobilie − Restschuld + Portfolio nach Steuer), ohne die Zinsen doppelt abzuziehen.
 
 ### F-033 · schwer · W/Z · Markup als Lerner-Index ausgegeben
 - **Fundstelle:** `mikro.html:974`
@@ -365,6 +368,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - „Meta/Google ≈ 0,5–0,6“ ist unbelegt.
 
 ---
+- **Status:** Behoben in Block 8. Markup und Lerner-Index werden getrennt ausgewiesen; der Lerner-Index der Studie wird aus dem Markup hergeleitet (0,17 → 0,38). „Meta/Google“, „Pharmaindustrie“ und „Airlines“ sind entfernt.
 
 ## Leicht
 
@@ -541,6 +545,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Einzahlungen sind vorschüssig verzinst, ohne Hinweis.
   - Sparerpauschbetrag, Teilfreistellung (§ 20 InvStG) und Soli fehlen.
   - Die Renditeannahmen (Tagesgeld 3 % > Anleihen 2,5 %) sind unbelegt.
+- **Status:** Behoben in Block 8. Effektiver Monatszins, Einzahlung zum Monatsende, Steuer mit Teilfreistellung (abschaltbar), Sparer-Pauschbetrag und Soli; Vereinfachungen offengelegt. Die Renditeannahmen des Profils sind als Annahme gekennzeichnet (Werte unverändert, ohne Quelle).
 
 ### F-060 · leicht · T · `JSON.parse` auf localStorage ohne Fehlerbehandlung
 - **Fundstelle:** `finanz.html:1279`, `:1784-1785`
@@ -555,6 +560,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Begründung:**
   - Der Prohibitivpreis beginnt schon bei 60, die Grenzkosten gehen bis 70.
   - Für MC ≥ Pd0 werden negative Mengen, negative Gewinne und ein negativer Lerner-Index ausgegeben, statt „kein Markt“ anzuzeigen.
+- **Status:** Behoben in Block 8. Bei Grenzkosten ≥ Prohibitivpreis zeigt das Modell „kein Marktangebot“.
 
 ### F-062 · leicht · W · Steuerinzidenz: angezeigte Elastizitäten sind nicht die Modellelastizitäten
 - **Fundstelle:** `mikro.html:671`
@@ -562,11 +568,13 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Begründung:**
   - Nur das Verhältnis ε_D/ε_S wird getroffen. Die Punktelastizitäten im Gleichgewicht weichen von den angezeigten Werten ab (z. B. ε_D = P₀/Q₀ = 1,22 bei gleichen Reglern).
   - Die Lastverteilung selbst ist korrekt.
+- **Status:** Behoben in Block 8. Die Steigungen folgen aus den Punktelastizitäten im Gleichgewicht vor Steuer; die angezeigten Elastizitäten sind die des Modells.
 
 ### F-063 · leicht · Z · Elastizitätsangaben im Mikrolabor unbelegt bzw. widersprechen der eigenen Quelle
 - **Fundstelle:** `mikro.html:652`, `:974`
 - **Beleg:** `Benzin ε ≈ −0,25 · Lebensmittel ε ≈ −0,27 · Restaurants ε ≈ −2,3.`
 - **Begründung:** Die eigene Quelle A01 (Andreyeva et al. 2010) nennt für „food away from home“ 0,81. Für −2,3 fehlt ein Beleg, ebenso für „Meta/Google ≈ 0,5–0,6“.
+- **Status:** Teilweise behoben in Block 8 (Meta/Google entfernt). Die Richtwerte der Elastizitäten folgen in Block 9.
 
 ### F-064 · leicht · T · Workflow scheitert bei jedem Fork-PR
 - **Fundstelle:** `.github/workflows/claude-gutachter.yml:3-5`; `.github/scripts/claude_review.py:188-190`

@@ -411,7 +411,7 @@
   </div>
   <div class="insight-box">
     <div class="insight-label">Monopolmacht in der Realität</div>
-    <div class="insight-text" id="mo_insight">Der Lerner-Index (P−MC)/P misst Marktmacht: 0 = vollkommener Wettbewerb, 1 = maximale Monopolmacht. Der Monopolist produziert weniger und verlangt mehr als im Wettbewerb — das erzeugt Wohlfahrtsverlust. Empirisch: Meta/Google ≈ 0,5–0,6 · Pharmaindustrie ≈ 0,7 · Airlines ≈ 0,3. Der durchschnittliche US-Lerner-Index stieg von 0,21 (1980) auf 0,61 (2016) durch zunehmende Marktkonzentration.</div>
+    <div class="insight-text" id="mo_insight">Der Lerner-Index (P−MC)/P misst Marktmacht: 0 = vollkommener Wettbewerb, 1 = maximale Monopolmacht. Der Monopolist produziert weniger und verlangt mehr als im Wettbewerb — das erzeugt Wohlfahrtsverlust. Empirisch (De Loecker/Eeckhout/Unger 2020, QJE 135(2)): Der durchschnittliche Markup P/GK in den USA stieg von 1,21 (1980) auf 1,61 (2016); das entspricht einem Lerner-Index von 0,17 auf 0,38.</div>
     <div class="insight-quelle">Quellen: De Loecker, Eeckhout & Unger (2020, QJE) · Autor et al. (2020, AER) · Monopolkommission DE Hauptgutachten 2022</div>
   </div>
 </div>
@@ -476,7 +476,7 @@ function dashed(svg, x1, y1, x2, y2, color = 'rgba(42,39,32,0.3)') {
   svg.appendChild(svgEl('line', { x1, y1, x2, y2, stroke: color, 'stroke-width': '1', 'stroke-dasharray': '4,3' }));
 }
 
-function fmt(v, dec = 0) { return isFinite(v) ? v.toFixed(dec) : '—'; }
+function fmt(v, dec = 0) { return isFinite(v) ? v.toFixed(dec).replace('.', ',') : '—'; }
 function fmtRel(v) { return isFinite(v) ? fmt(v, 0) + ' (rel.)' : '—'; }
 function fmtSign(v, dec = 1) { return (v > 0 ? '+' : '') + fmt(v, dec); }
 
@@ -662,14 +662,13 @@ function drawSteuer() {
   document.getElementById('v_st_ed').textContent = '−' + fmt(ed, 1);
   document.getElementById('v_st_es').textContent = '+' + fmt(es, 1);
 
-  // Linear model: Demand P = 100 − sd·Q, Supply P = 10 + ss·Q
-  // Slopes from elasticities at equilibrium (P0=55, Q0=45 approx)
-  const Pd0 = 100, Ps0 = 10;
-  const sd = 1.0;
-  const ss = sd * ed / es;  // supply slope so that elasticity ratio matches
-
-  const Q0 = (Pd0 - Ps0) / (sd + ss);
-  const P0 = Pd0 - sd * Q0;
+  // Lineare Kurven durch das Gleichgewicht (Q0, P0); Steigungen so, dass die angezeigten Werte die
+  // Punktelastizitäten im Gleichgewicht vor Steuer sind (F-062): |εD| = P0/(Q0·sd), εS = P0/(Q0·ss)
+  const P0 = 55, Q0 = 45;
+  const sd = P0 / (Q0 * ed);
+  const ss = P0 / (Q0 * es);
+  const Pd0 = P0 + sd * Q0;   // Prohibitivpreis
+  const Ps0 = P0 - ss * Q0;   // Achsenabschnitt Angebot (bei εS < 1 negativ)
 
   // With tax t on supply: new supply P = Ps0 + ss·Q + t
   const Qt = (Pd0 - Ps0 - t) / (sd + ss);
@@ -689,7 +688,7 @@ function drawSteuer() {
   document.getElementById('st_dwl').textContent = fmtRel(dwl);
 
   const Qmax = Q0 * 2.2;
-  const Pmax = Pd0 * 1.1;
+  const Pmax = Math.max(P0 * 2, Qt > 0 ? Pc * 1.15 : 0);
   const svg = clearSvg('svg-steuer');
   drawAxes(svg, Qmax, Pmax, 'Menge Q', 'Preis P (€)');
 
@@ -708,12 +707,12 @@ function drawSteuer() {
 
   // Supply (no tax, dashed)
   const sNoPts = [];
-  for (let q = 0; q <= Qmax; q += Qmax / 120) { const p = Ps0 + ss * q; if (p <= Pmax) sNoPts.push([q, p]); }
+  for (let q = 0; q <= Qmax; q += Qmax / 120) { const p = Ps0 + ss * q; if (p >= 0 && p <= Pmax) sNoPts.push([q, p]); }
   svg.appendChild(svgEl('polyline', { points: poly(sNoPts, Qmax, Pmax), fill: 'none', stroke: '#2a4d7a', 'stroke-width': '1.5', 'stroke-dasharray': '5,3', opacity: '0.5' }));
 
   // Supply (with tax)
   const sTaxPts = [];
-  for (let q = 0; q <= Qmax; q += Qmax / 120) { const p = Ps0 + ss * q + t; if (p <= Pmax) sTaxPts.push([q, p]); }
+  for (let q = 0; q <= Qmax; q += Qmax / 120) { const p = Ps0 + ss * q + t; if (p >= 0 && p <= Pmax) sTaxPts.push([q, p]); }
   svg.appendChild(svgEl('polyline', { points: poly(sTaxPts, Qmax, Pmax), fill: 'none', stroke: '#2a4d7a', 'stroke-width': '2.5' }));
   if (sTaxPts.length > 0) {
     const st = sTaxPts[sTaxPts.length - 1];
@@ -722,7 +721,7 @@ function drawSteuer() {
 
   // Demand
   const dPts = [];
-  for (let q = 0; q <= Qmax; q += Qmax / 120) { const p = Pd0 - sd * q; if (p >= 0) dPts.push([q, p]); }
+  for (let q = 0; q <= Qmax; q += Qmax / 120) { const p = Pd0 - sd * q; if (p >= 0 && p <= Pmax) dPts.push([q, p]); }
   svg.appendChild(svgEl('polyline', { points: poly(dPts, Qmax, Pmax), fill: 'none', stroke: '#c8401f', 'stroke-width': '2.5' }));
   const dEnd = dPts[dPts.length - 1];
   svg.appendChild(svgTxt(toX(dEnd[0], Qmax) - 14, toY(dEnd[1], Pmax) - 5, 'N', { fill: '#c8401f', 'font-weight': '700', 'font-size': '12' }));
@@ -750,7 +749,7 @@ function drawSteuer() {
   svg.appendChild(svgTxt(PAD.L + GW - 82, PAD.T + 26, 'Wohlfahrtsverlust', { fill: '#c8401f', 'font-size': '9' }));
 
   document.getElementById('st_insight').textContent =
-    `εD = ${fmt(-ed, 1)}, εS = +${fmt(es, 1)}: Konsumenten tragen ${fmt(consumerShare * 100, 0)}% der Steuer. ` +
+    `εD = ${fmt(-ed, 1)}, εS = +${fmt(es, 1)} (Punktelastizitäten im Gleichgewicht vor Steuer): Konsumenten tragen ${fmt(consumerShare * 100, 0)}% der Steuer. ` +
     (consumerShare > 0.6
       ? 'Inelastische Nachfrage → Hauptlast beim Käufer (typisch für Benzin, Tabak, Energie).'
       : consumerShare < 0.4
@@ -883,6 +882,8 @@ function drawMonopol() {
   if (Pd0 <= MC) {
     ['mo_pm','mo_pw','mo_qm','mo_qw','mo_lerner','mo_profit','mo_dwl'].forEach(id => document.getElementById(id).textContent = '—');
     clearSvg('svg-monopol');
+    document.getElementById('mo_insight').textContent =
+      `Grenzkosten (${MC} €) ≥ Prohibitivpreis (${Pd0} €): Niemand kauft zu einem Preis, der die Grenzkosten deckt — kein Marktangebot, weder im Monopol noch im Wettbewerb.`;
     return;
   }
 
@@ -967,9 +968,10 @@ function drawMonopol() {
   svg.appendChild(svgTxt(PAD.L + GW - 76, PAD.T + 26, 'Wohlfahrtsverlust', { fill: '#c8401f', 'font-size': '9' }));
 
   document.getElementById('mo_insight').textContent =
-    `Lerner-Index = ${fmt(lerner, 2)}: Monopolpreis liegt ${fmt(lerner * 100, 0)}% über den Grenzkosten. ` +
-    `Monopol produziert ${fmt((Qw - Qm) / Qw * 100, 0)}% weniger als im Wettbewerb. ` +
-    `Empirisch: Meta/Google ≈ 0,5–0,6 · US-Wirtschaft Ø: 0,21 (1980) → 0,61 (2016).`;
+    `Lerner-Index (P−GK)/P = ${fmt(lerner, 2)}: Der Aufschlag macht ${fmt(lerner * 100, 0)} % des Preises aus; ` +
+    `Markup P/GK = ${fmt(1 / (1 - lerner), 2)}, der Preis liegt ${fmt((1 / (1 - lerner) - 1) * 100, 0)} % über den Grenzkosten. ` +
+    `Monopol produziert ${fmt((Qw - Qm) / Qw * 100, 0)} % weniger als im Wettbewerb. ` +
+    `Empirisch (De Loecker/Eeckhout/Unger 2020): US-Markup Ø 1,21 (1980) → 1,61 (2016), Lerner-Index ${fmt(1 - 1 / 1.21, 2)} → ${fmt(1 - 1 / 1.61, 2)}.`;
 }
 
 // ══════════════════════════════════════════════

@@ -754,6 +754,7 @@
     <div class="profile-type" id="profile-type-name">—</div>
     <div class="profile-desc" id="profile-type-desc">—</div>
     <div class="profile-alloc" id="profile-alloc"></div>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px;font-style:italic;" id="profile-annahmen"></p>
     <div style="display:flex;gap:0;flex-wrap:wrap;">
       <button class="profile-start-btn" onclick="showTools()">Zu den Rechnern →</button>
       <button class="profile-retake" onclick="retakeQuiz()">Quiz wiederholen</button>
@@ -818,6 +819,10 @@
             <div class="slider-row">
               <label>Abgeltungsteuer <span class="value" id="v_invest_steuer"></span></label>
               <input type="range" id="invest_steuer" min="0" max="35" step="1" value="25">
+            </div>
+            <div class="toggle-row">
+              <label for="invest_aktienfonds">Aktienfonds/-ETF (Teilfreistellung 30 %)</label>
+              <input type="checkbox" id="invest_aktienfonds" checked>
             </div>
             <div class="slider-row">
               <label>Inflation (p.a.) <span class="value" id="v_inflation"></span></label>
@@ -933,6 +938,10 @@
               <label>Abgeltungsteuer <span class="value" id="v_kredit_steuer"></span></label>
               <input type="range" id="kredit_steuer" min="0" max="35" step="1" value="25">
             </div>
+            <div class="toggle-row">
+              <label for="kredit_aktienfonds">Aktienfonds/-ETF (Teilfreistellung 30 %)</label>
+              <input type="checkbox" id="kredit_aktienfonds" checked>
+            </div>
           </div>
         </aside>
 
@@ -961,7 +970,7 @@
 
           <div class="panel">
             <h2>Laufzeitentwicklung</h2>
-            <div class="panel-sub">Nettovermögen Jahr für Jahr · blau = Tilgung · grün = Investieren</div>
+            <div class="panel-sub">Vermögen (Immobilie − Restschuld + Portfolio nach Steuer) Jahr für Jahr bei gleichem monatlichem Mittelabfluss · blau = Tilgung · grün = Investieren</div>
             <div id="kredit-chart"></div>
           </div>
 
@@ -1175,6 +1184,8 @@ function retakeQuiz() {
 }
 
 // ── PROFILE COMPUTATION ──
+const RENDITE_ANNAHMEN = { aktien: 7, anleihen: 2.5, tagesgeld: 3 };
+
 function computeProfile(a) {
   let risk = 50;
 
@@ -1199,7 +1210,8 @@ function computeProfile(a) {
   const cashPct  = 100 - stockPct - bondPct;
 
   // Blended expected return
-  const blendedRendite = (stockPct * 7 + bondPct * 2.5 + cashPct * 3) / 100;
+  // [ANNAHME] Nominale Renditeerwartungen p. a. je Anlageklasse — keine Prognose, ohne Quelle (F-059)
+  const blendedRendite = (stockPct * RENDITE_ANNAHMEN.aktien + bondPct * RENDITE_ANNAHMEN.anleihen + cashPct * RENDITE_ANNAHMEN.tagesgeld) / 100;
 
   // Suggested monthly savings from saverate
   const saverateMap = { u100: 50, '100-300': 200, '300-1000': 500, '1000p': 1500 };
@@ -1247,6 +1259,8 @@ function showProfileCard(p) {
       <div class="alloc-pct">${a.pct} %</div>
     </div>`).join('');
 
+  document.getElementById('profile-annahmen').textContent =
+    `Erwartete Rendite ${p.blendedRendite.toFixed(1).replace('.', ',')} % p. a. aus Annahmen je Anlageklasse (Aktien ${RENDITE_ANNAHMEN.aktien} %, Anleihen ${String(RENDITE_ANNAHMEN.anleihen).replace('.', ',')} %, Tagesgeld ${RENDITE_ANNAHMEN.tagesgeld} %) — keine Prognose.`;
   prefillSliders(p);
 }
 
@@ -1314,15 +1328,27 @@ function fmtK(v) {
 // ════════════════════════════════════════════
 // TOOL 1: INVESTIEREN
 // ════════════════════════════════════════════
+// ── Rechenkonventionen der Finanztools (F-059) ──
+// Jahresrendite → effektiver Monatszins; Einzahlungen jeweils am Monatsende (nachschüssig).
+// Steuer beim Verkauf: Abgeltungsteuer + Soli auf den Gewinn nach Teilfreistellung (Aktienfonds 30 %,
+// § 20 Abs. 1 InvStG) und Sparer-Pauschbetrag (§ 20 Abs. 9 EStG). Vereinfachung: keine Vorabpauschale,
+// keine Kirchensteuer, Pauschbetrag nur einmal im Verkaufsjahr.
+const SPARER_PAUSCHBETRAG = 1000, TEILFREISTELLUNG_AKTIEN = 0.30, SOLI_SATZ = 0.055;
+function monatszins(jahresProzent) { return Math.pow(1 + jahresProzent / 100, 1 / 12) - 1; }
+function steuerAufGewinn(gewinn, satzProzent, aktienfonds) {
+  const stpfl = Math.max(0, gewinn * (aktienfonds ? 1 - TEILFREISTELLUNG_AKTIEN : 1) - SPARER_PAUSCHBETRAG);
+  return stpfl * satzProzent / 100 * (1 + SOLI_SATZ);
+}
+
 function calcInvest(p) {
-  const r = p.rendite / 100 / 12;
+  const r = monatszins(p.rendite);
   let depot = p.startkapital;
   let einz  = p.startkapital;
   const years = [{ year: 0, depot, einz, real: depot }];
 
   for (let y = 1; y <= p.horizont; y++) {
     for (let m = 0; m < 12; m++) {
-      depot = (depot + p.sparrate) * (1 + r);
+      depot = depot * (1 + r) + p.sparrate;
       einz += p.sparrate;
     }
     const real = depot / Math.pow(1 + p.inflation / 100, y);
@@ -1330,15 +1356,15 @@ function calcInvest(p) {
   }
 
   const renditeGewinn  = depot - einz;
-  const steuerAbzug    = renditeGewinn * p.steuer / 100;
+  const steuerAbzug    = steuerAufGewinn(renditeGewinn, p.steuer, p.aktienfonds);
   const nachSteuer     = depot - steuerAbzug;
   const realEnd        = years[years.length - 1].real;
 
   // Tagesgeld comparison
-  const tgR = p.tagesgeld / 100 / 12;
+  const tgR = monatszins(p.tagesgeld);
   let tgDepot = p.startkapital;
   for (let y = 0; y < p.horizont; y++)
-    for (let m = 0; m < 12; m++) tgDepot = (tgDepot + p.sparrate) * (1 + tgR);
+    for (let m = 0; m < 12; m++) tgDepot = tgDepot * (1 + tgR) + p.sparrate;
 
   return { years, depot, nachSteuer, realEnd, einz, renditeGewinn, steuerAbzug, tgDepot };
 }
@@ -1350,6 +1376,7 @@ function renderInvest() {
     rendite:      +document.getElementById('rendite').value,
     horizont:     +document.getElementById('horizont').value,
     steuer:       +document.getElementById('invest_steuer').value,
+    aktienfonds:  document.getElementById('invest_aktienfonds').checked,
     inflation:    +document.getElementById('inflation').value,
     tagesgeld:    +document.getElementById('tagesgeld').value,
   };
@@ -1358,7 +1385,7 @@ function renderInvest() {
   document.getElementById('v_sparrate').textContent      = fmtEUR(p.sparrate) + ' / Mo.';
   document.getElementById('v_rendite').textContent       = p.rendite.toFixed(1).replace('.', ',') + ' %';
   document.getElementById('v_horizont').textContent      = p.horizont + ' Jahre';
-  document.getElementById('v_invest_steuer').textContent = p.steuer + ' %';
+  document.getElementById('v_invest_steuer').textContent = p.steuer + ' % + Soli';
   document.getElementById('v_inflation').textContent     = p.inflation.toFixed(1).replace('.', ',') + ' %';
   document.getElementById('v_tagesgeld').textContent     = p.tagesgeld.toFixed(2).replace('.', ',') + ' %';
 
@@ -1375,7 +1402,7 @@ function renderInvest() {
   // 72er-Regel info
   const verdopp = p.rendite > 0 ? (72 / p.rendite).toFixed(1).replace('.', ',') : '—';
   document.getElementById('invest-info-box').innerHTML =
-    `<strong>Die 72er-Regel:</strong> Bei ${p.rendite.toFixed(1).replace('.',',')} % Rendite verdoppelt sich dein Kapital alle <strong>~${verdopp} Jahre</strong>. Über ${p.horizont} Jahre macht der Zinseszins <strong>${fmtEUR(r.renditeGewinn)}</strong> aus.`;
+    `<strong>Die 72er-Regel:</strong> Bei ${p.rendite.toFixed(1).replace('.',',')} % Rendite verdoppelt sich dein Kapital alle <strong>~${verdopp} Jahre</strong>. Über ${p.horizont} Jahre macht der Zinseszins <strong>${fmtEUR(r.renditeGewinn)}</strong> aus.<br><span style="font-size:11px">Rechenweise: Jahresrendite als effektiver Zins, Einzahlung jeweils zum Monatsende. Steuer beim Verkauf: Abgeltungsteuer + Soli auf den Gewinn nach Teilfreistellung und Sparer-Pauschbetrag (1.000 €); ohne Vorabpauschale und Kirchensteuer.</span>`;
 
   // SVG Chart
   renderInvestChart(r, p);
@@ -1443,7 +1470,7 @@ function renderInvestChart(r, p) {
   </svg>`;
 }
 
-document.querySelectorAll('#tool-invest input[type="range"]').forEach(inp => {
+document.querySelectorAll('#tool-invest input[type="range"], #tool-invest input[type="checkbox"]').forEach(inp => {
   inp.addEventListener('input', renderInvest);
 });
 
@@ -1451,6 +1478,7 @@ document.querySelectorAll('#tool-invest input[type="range"]').forEach(inp => {
 // TOOL 2: KREDIT VS. INVESTIEREN
 // ════════════════════════════════════════════
 function calcKredit(p) {
+  // Sollzins p. a. / 12: übliche Konvention bei Annuitätendarlehen (der Effektivzins liegt leicht darüber)
   const r = p.zinssatz / 100 / 12;
   const n = p.laufzeit * 12;
   // Monthly mortgage payment (annuity)
@@ -1461,35 +1489,45 @@ function calcKredit(p) {
   const gesamtZahlung = monatRate * n;
   const zinsenGesamt  = gesamtZahlung - p.kreditsumme;
 
-  // SCENARIO A: Sondertilgung (extra budget reduces principal each year)
+  // SCENARIO A: Sondertilgung. Nach vollständiger Tilgung fließen Rate und Zusatzbudget in dasselbe
+  // Portfolio wie in B — beide Szenarien haben über die ganze Laufzeit denselben Mittelabfluss (F-032).
   const extraMonthly_A = p.budget / 12;
+  const ri = monatszins(p.portfolio_rendite);
   let restschuld = p.kreditsumme;
   let gezahlteZinsen = 0;
   let yearsTilgung = 0;
-  const verlauf_A = [{ year: 0, netto: -p.kreditsumme }];
+  let portfolioA = 0, einzahlungA = 0;
+  const verlauf_A = [{ year: 0, netto: 0 }];
 
   for (let y = 1; y <= p.laufzeit; y++) {
     for (let m = 0; m < 12; m++) {
-      if (restschuld <= 0) break;
-      const zinsAnteil = restschuld * r;
-      const tilgung    = Math.min(restschuld, monatRate - zinsAnteil + extraMonthly_A);
-      gezahlteZinsen  += zinsAnteil;
-      restschuld       = Math.max(0, restschuld - tilgung);
+      let frei = monatRate + extraMonthly_A;
+      if (restschuld > 0) {
+        const zinsAnteil = restschuld * r;
+        const zahlung    = Math.min(restschuld + zinsAnteil, frei);
+        gezahlteZinsen  += zinsAnteil;
+        restschuld       = Math.max(0, restschuld + zinsAnteil - zahlung);
+        frei            -= zahlung;
+      }
+      portfolioA = portfolioA * (1 + ri) + frei;
+      einzahlungA += frei;
     }
     if (restschuld <= 0 && yearsTilgung === 0) yearsTilgung = y;
-    // Net worth = Immobilienwert (assume equals kreditsumme) − Restschuld
-    verlauf_A.push({ year: y, netto: p.kreditsumme - restschuld - gezahlteZinsen });
+    // Vermögen = Immobilienwert (= Kreditsumme angenommen) − Restschuld + Portfolio nach Steuer. Gezahlte Zinsen
+    // sind darin enthalten (weniger Geld im Portfolio); beide Szenarien haben denselben Mittelabfluss.
+    const portfolioA_ns = portfolioA - steuerAufGewinn(portfolioA - einzahlungA, p.steuer, p.aktienfonds);
+    verlauf_A.push({ year: y, netto: p.kreditsumme - restschuld + portfolioA_ns });
   }
   const zinsenSpartA  = zinsenGesamt - gezahlteZinsen;
-  const nettoA        = p.kreditsumme - Math.max(0, restschuld) - gezahlteZinsen;
+  const portfolioA_NS = portfolioA - steuerAufGewinn(portfolioA - einzahlungA, p.steuer, p.aktienfonds);
+  const nettoA        = p.kreditsumme - Math.max(0, restschuld) + portfolioA_NS;
 
   // SCENARIO B: Investieren (extra budget goes into portfolio)
   const extraMonthly_B = p.budget / 12;
-  const ri = p.portfolio_rendite / 100 / 12;
   let portfolioB = 0;
   let restschuldB = p.kreditsumme;
   let zinsenB = 0;
-  const verlauf_B = [{ year: 0, netto: -p.kreditsumme }];
+  const verlauf_B = [{ year: 0, netto: 0 }];
 
   for (let y = 1; y <= p.laufzeit; y++) {
     for (let m = 0; m < 12; m++) {
@@ -1499,18 +1537,17 @@ function calcKredit(p) {
         zinsenB         += zinsAnteil;
         restschuldB      = Math.max(0, restschuldB - tilgung);
       }
-      portfolioB = (portfolioB + extraMonthly_B) * (1 + ri);
+      portfolioB = portfolioB * (1 + ri) + extraMonthly_B;
     }
-    const portfolioNachSteuer = portfolioB - Math.max(0, portfolioB - p.budget * y) * p.steuer / 100;
-    verlauf_B.push({ year: y, netto: p.kreditsumme - Math.max(0, restschuldB) - zinsenB + portfolioNachSteuer });
+    const portfolioNachSteuer = portfolioB - steuerAufGewinn(portfolioB - p.budget * y, p.steuer, p.aktienfonds);
+    verlauf_B.push({ year: y, netto: p.kreditsumme - Math.max(0, restschuldB) + portfolioNachSteuer });
   }
 
-  const portfolioGewinn = Math.max(0, portfolioB - p.budget * p.laufzeit);
-  const portfolioSteuer = portfolioGewinn * p.steuer / 100;
+  const portfolioSteuer = steuerAufGewinn(portfolioB - p.budget * p.laufzeit, p.steuer, p.aktienfonds);
   const portfolioNS     = portfolioB - portfolioSteuer;
-  const nettoB          = p.kreditsumme - Math.max(0, restschuldB) - zinsenB + portfolioNS;
+  const nettoB          = p.kreditsumme - Math.max(0, restschuldB) + portfolioNS;
 
-  return { monatRate, zinsenGesamt, zinsenSpartA, nettoA, nettoB, portfolioNS, verlauf_A, verlauf_B, yearsTilgung };
+  return { monatRate, zinsenGesamt, zinsenSpartA, nettoA, nettoB, portfolioNS, portfolioA_NS, verlauf_A, verlauf_B, yearsTilgung };
 }
 
 function renderKredit() {
@@ -1521,6 +1558,7 @@ function renderKredit() {
     budget:            +document.getElementById('budget').value,
     portfolio_rendite: +document.getElementById('portfolio_rendite').value,
     steuer:            +document.getElementById('kredit_steuer').value,
+    aktienfonds:       document.getElementById('kredit_aktienfonds').checked,
   };
 
   document.getElementById('v_kreditsumme').textContent    = fmtEUR(p.kreditsumme);
@@ -1528,7 +1566,7 @@ function renderKredit() {
   document.getElementById('v_laufzeit').textContent       = p.laufzeit + ' Jahre';
   document.getElementById('v_budget').textContent         = fmtEUR(p.budget) + ' / Jahr';
   document.getElementById('v_portfolio_rendite').textContent = p.portfolio_rendite.toFixed(1).replace('.', ',') + ' %';
-  document.getElementById('v_kredit_steuer').textContent  = p.steuer + ' %';
+  document.getElementById('v_kredit_steuer').textContent  = p.steuer + ' % + Soli';
 
   const r = calcKredit(p);
 
@@ -1547,7 +1585,7 @@ function renderKredit() {
   }
 
   document.getElementById('kredit_ergebnis_tilgung').textContent = fmtEUR(r.nettoA);
-  document.getElementById('kredit_sub_tilgung').textContent = `${fmtEUR(r.zinsenSpartA)} Zinsen gespart`;
+  document.getElementById('kredit_sub_tilgung').textContent = `${fmtEUR(r.zinsenSpartA)} Zinsen gespart` + (r.yearsTilgung ? ` · schuldenfrei nach ${r.yearsTilgung} J., danach Portfolio ${fmtEUR(r.portfolioA_NS)} (n. Steuer)` : '');
   document.getElementById('kredit_ergebnis_invest').textContent  = fmtEUR(r.nettoB);
   document.getElementById('kredit_sub_invest').textContent  = `Portfolio ${fmtEUR(r.portfolioNS)} (n. Steuer)`;
 
@@ -1565,7 +1603,8 @@ function renderKredit() {
   </div>`).join('');
 
   // Info box
-  const netto_rendite = p.portfolio_rendite * (1 - p.steuer / 100);
+  // Grobe Nettorendite für den Hinweis: Steuer auf den Gewinn nach Teilfreistellung (ohne Pauschbetrag)
+  const netto_rendite = p.portfolio_rendite * (1 - p.steuer / 100 * (1 + SOLI_SATZ) * (p.aktienfonds ? 1 - TEILFREISTELLUNG_AKTIEN : 1));
   document.getElementById('kredit-info-box').innerHTML = netto_rendite > p.zinssatz
     ? `<strong>Netto-Rendite (${netto_rendite.toFixed(1).replace('.',',')}%) &gt; Kreditzins (${p.zinssatz.toFixed(2).replace('.',',')}%)</strong> — rein rechnerisch lohnt Investieren mehr. Aber: Die Rendite ist unsicher, der Zinsvorteil durch Tilgung ist <em>garantiert</em>.`
     : `<strong>Kreditzins (${p.zinssatz.toFixed(2).replace('.',',')}%) &gt; Netto-Rendite (${netto_rendite.toFixed(1).replace('.',',')}%)</strong> — Sondertilgung ist die mathematisch bessere Wahl: risikolose Einsparung schlägt unsichere Rendite.`;
@@ -1617,44 +1656,49 @@ function renderKreditChart(r, p) {
   </svg>`;
 }
 
-document.querySelectorAll('#tool-kredit input[type="range"]').forEach(inp => {
+document.querySelectorAll('#tool-kredit input[type="range"], #tool-kredit input[type="checkbox"]').forEach(inp => {
   inp.addEventListener('input', renderKredit);
 });
 
 // ════════════════════════════════════════════
 // TOOL 3: ALTERSVORSORGE
 // ════════════════════════════════════════════
+// Altersvorsorge (F-030, F-031): Wunschrente und gesetzliche Rente in heutiger Kaufkraft; die gesetzliche
+// Rente wächst annahmegemäß mit der Inflation. Die Lücke wird bis Rentenbeginn inflationiert und über die
+// gewählte Rentenphase als real konstante Monatsrente entnommen (Barwert mit realer Rendite, nachschüssig).
 function calcRente(p) {
   const jahre = Math.max(1, p.rentenalter - p.alter);
-  const luecke = Math.max(0, p.wunschrente - p.gesrente);
+  const pi = p.inflation / 100;
+  const luecke = Math.max(0, p.wunschrente - p.gesrente);                 // heutige Kaufkraft
+  const lueckeNominalStart = luecke * Math.pow(1 + pi, jahre);            // Euro bei Rentenbeginn
 
-  // Required capital using 4% withdrawal (SWR)
-  const benoetigtesKapital = luecke * 12 / 0.04;
+  // Rentenbarwertfaktor über die Rentenphase mit realem Monatszins
+  const rReal = (1 + p.depot_rendite / 100) / (1 + pi) - 1;
+  const iReal = Math.pow(1 + rReal, 1 / 12) - 1;
+  const m = p.rentenphase * 12;
+  const rbf = Math.abs(iReal) > 1e-12 ? (1 - Math.pow(1 + iReal, -m)) / iReal : m;
+  const benoetigtesKapital = lueckeNominalStart * rbf;
+  // Vergleichswert: feste Entnahmerate 4 % (Bengen 1994, US-Daten, 30 Jahre)
+  const kapital4Prozent = lueckeNominalStart * 12 / 0.04;
 
-  // How much monthly savings needed to reach that capital
-  const r = p.depot_rendite / 100 / 12;
+  // Sparrate (nachschüssig, effektiver Monatszins), um das Kapital zu erreichen
+  const r = monatszins(p.depot_rendite);
   const n = jahre * 12;
-  let sparrateNötig;
-  if (r > 0) {
-    const fv_factor = (Math.pow(1 + r, n) - 1) / r;
-    const fv_start  = p.depot_start * Math.pow(1 + r, n);
-    sparrateNötig = Math.max(0, (benoetigtesKapital - fv_start) / fv_factor);
-  } else {
-    sparrateNötig = Math.max(0, (benoetigtesKapital - p.depot_start) / n);
-  }
+  const fv_factor = r > 0 ? (Math.pow(1 + r, n) - 1) / r : n;
+  const fv_start  = p.depot_start * Math.pow(1 + r, n);
+  const sparrateNötig = Math.max(0, (benoetigtesKapital - fv_start) / fv_factor);
 
-  // Depot growth curve
   const verlauf = [{ year: 0, depot: p.depot_start }];
   let depot = p.depot_start;
   for (let y = 1; y <= jahre; y++) {
-    for (let m = 0; m < 12; m++) depot = (depot + sparrateNötig) * (1 + r);
+    for (let mo = 0; mo < 12; mo++) depot = depot * (1 + r) + sparrateNötig;
     verlauf.push({ year: y, depot });
   }
 
-  // Real purchasing power of desired rent
-  const realWunsch = p.wunschrente / Math.pow(1 + p.inflation / 100, jahre);
+  // Nominaler Betrag bei Rentenbeginn, der der heutigen Wunschrente entspricht
+  const wunschNominal = p.wunschrente * Math.pow(1 + pi, jahre);
 
-  return { jahre, luecke, benoetigtesKapital, sparrateNötig, verlauf, realWunsch };
+  return { jahre, luecke, lueckeNominalStart, benoetigtesKapital, kapital4Prozent, sparrateNötig, verlauf, wunschNominal, rbf };
 }
 
 function renderRente() {
@@ -1694,12 +1738,12 @@ function renderRente() {
   document.getElementById('kpi_jahre').textContent        = r.jahre;
 
   // Bars
-  const maxBar = Math.max(p.wunschrente, 1);
+  const maxBar = Math.max(p.wunschrente, r.wunschNominal, 1);
   document.getElementById('rente-bars').innerHTML = [
     { label: 'Wunschbetrag', v: p.wunschrente, cls: 'neu' },
     { label: 'Gesetzl. RV', v: p.gesrente,     cls: 'pos' },
     { label: 'Private VV', v: Math.min(p.wunschrente, r.luecke), cls: r.luecke > 0 ? '' : 'pos' },
-    { label: 'Real (inflat.)', v: r.realWunsch, cls: '' },
+    { label: 'Nominal bei Rentenbeginn', v: r.wunschNominal, cls: '' },
   ].map(b => `<div class="bar-row">
     <div class="bar-label">${b.label}</div>
     <div class="bar-track"><div class="bar-fill ${b.cls}" style="width:${Math.max(2, b.v/maxBar*100)}%"></div></div>
@@ -1713,7 +1757,7 @@ function renderRente() {
   document.getElementById('rente-info-box').innerHTML =
     r.luecke <= 0
       ? `<strong>Keine Rentenlücke!</strong> Die gesetzliche Rente deckt bereits deinen Wunsch von ${fmtEUR(p.wunschrente)} / Monat ab.`
-      : `<strong>Die 4%-Regel:</strong> Für ${fmtEUR(r.luecke)} / Monat privater Zusatzrente brauchst du <strong>${fmtEUR(r.benoetigtesKapital)}</strong> Depot. Das entspricht einer monatlichen Sparrate von <strong>${fmtEUR(r.sparrateNötig)}</strong> über ${r.jahre} Jahre.`;
+      : `Für ${fmtEUR(r.luecke)} / Monat private Zusatzrente in heutiger Kaufkraft (bei Rentenbeginn ${fmtEUR(r.lueckeNominalStart)} / Monat, danach mit der Inflation steigend) über ${p.rentenphase} Jahre brauchst du bei Rentenbeginn <strong>${fmtEUR(r.benoetigtesKapital)}</strong>. Das entspricht einer monatlichen Sparrate von <strong>${fmtEUR(r.sparrateNötig)}</strong> über ${r.jahre} Jahre (nominal, Rendite ${p.depot_rendite.toFixed(1).replace('.', ',')} %). Vergleich: Nach der 4-%-Regel (Bengen 1994, US-Daten, 30 Jahre Entnahme) wären es ${fmtEUR(r.kapital4Prozent)}. Annahme: Die gesetzliche Rente steigt mit der Inflation.`;
 }
 
 function renderRenteChart(r, p) {

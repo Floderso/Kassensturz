@@ -308,6 +308,14 @@ const QUELLEN = [
     doi:'10.1016/j.jpubeco.2011.11.001',
     verwendet:'Einkommensstabilisierungskoeffizient τ = 1 − ΔVerfügbar/ΔBrutto bei proportionalem Schock (Wirkungsanalyse)' },
 
+  { id:'A39', typ:'akademisch',
+    autor:'Bengen, W.P.',
+    jahr:'1994',
+    titel:'Determining Withdrawal Rates Using Historical Data',
+    quelle:'Journal of Financial Planning, 7(4), 171–180',
+    doi:'',
+    verwendet:'Altersvorsorge-Rechner · 4-%-Regel nur als Vergleichswert (US-Daten, 30 Jahre Entnahme)' },
+
 
   /* ─────────────────────────────────────────────────────────────
      BERICHTE, GUTACHTEN & INSTITUTIONELLE PUBLIKATIONEN
