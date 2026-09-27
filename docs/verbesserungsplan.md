@@ -169,8 +169,9 @@ Offen bleiben nach Block 2 die Kalibrierung der Aufkommen (F-002, F-003) und die
 
 | Reihenfolge | Schritt | Vorschlag | Befunde | Schweregrad |
 |---|---|---|---|---|
+| 7.0 | Pareto-Rand der Top-1-%-Gruppe, damit der Spitzensatz eine Bemessungsgrundlage hat (neu, Entscheidung „Pareto-Rand einbauen“) | – | F-071 | schwer |
 | 7.1 | Laffer-Kurve: nur Spitzensatz, Gesamtaufkommen, Aussage aus dem Modell, Quelle Diamond/Saez | V-14 | F-022, F-048 | schwer |
-| 7.2 | Benchmarks mit gleicher Abgrenzung; Challenge-IDs generiert, Schwellen neu, Erreichbarkeitstest; S80/S20-Referenz; METR-Balken umbenannt oder echter Stabilisierungskoeffizient | V-26 | F-055, F-056, F-057, F-058 | leicht |
+| 7.2 | Benchmarks mit gleicher Abgrenzung; Challenge-IDs generiert, Schwellen neu, Erreichbarkeitstest; S80/S20-Referenz; echter Stabilisierungskoeffizient (Entscheidung) | V-26 | F-055, F-056, F-057, F-058 | leicht |
 
 **Prüfung:**
 - Die Laffer-Aussage im Tooltip entspricht dem berechneten Kurvenverlauf.
@@ -212,7 +213,7 @@ Offen bleiben nach Block 2 die Kalibrierung der Aufkommen (F-002, F-003) und die
 **Erreicht nach Block 9:**
 - Jede Quellen- und Datenangabe existiert genau einmal und stimmt mit dem Original überein.
 - Die veröffentlichten Daten entsprechen dem Rechenmodell.
-- Für alle 67 Befunde ist der Status dokumentiert.
+- Für alle 71 Befunde ist der Status dokumentiert.
 
 ---
 

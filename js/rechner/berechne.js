@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: CC-BY-4.0
 // Copyright 2025 Florian Aram Feuerriegel — kassensturz.org
-import { DEZILE, ELAST, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, BASIS_AUFKOMMEN, ADMIN_QUOTE, BGE_LABOR_EFF, PERIOD_STATE_0, KALIBRIERUNG_ZIELE, ERBST_2024, VGR_2025, BUERGERGELD_2025 } from '../data.js';
-import { zvE, estHaushalt, grenzsatzHaushalt, abgeltungHaushalt, SPARER_PAUSCHBETRAG } from './haushalt.js';
+import { DEZILE, ELAST, BASIS_MAKRO, STAATSAUSGABEN, PRESETS, BASIS_AUFKOMMEN, ADMIN_QUOTE, BGE_LABOR_EFF, PERIOD_STATE_0, KALIBRIERUNG_ZIELE, ERBST_2024, VGR_2025, BUERGERGELD_2025, TOP_PARETO } from '../data.js';
+import { zvE, estHaushalt, grenzsatzHaushalt, estHaushaltPareto, grenzsatzHaushaltPareto, abgeltungHaushalt, SPARER_PAUSCHBETRAG } from './haushalt.js';
 import { berechneGini, berechneMedianGewichtet, berechnePalma, berechneS80S20, berechneArmutsquote, mwstSatzfaktor, berechneDezilDelta, svArbeitnehmer, svGrenzsatz, bbgRV } from './verteilung.js';
 
 // ═══════════════════════════════════════════════════════
@@ -161,10 +161,17 @@ function berechne(params, zustand = null, _intern = null) {
   // ---------- 1. ARBEITSANGEBOT-REAKTION pro Dezil ----------
   // Grenzbelastung je zusätzlichem Brutto-Euro Arbeit: Grenzsteuersatz auf das zvE der Gruppe
   // (Splitting-Mischung), gemindert um die abzugsfähigen SV-Beiträge (F-002). Ohne Soli.
+  // Top-1-%-Gruppe: einkommensgewichteter Grenzsatz über den Pareto-Rand (F-071)
   const grenzbelastung = (arbeit, d, p) => {
     const zve = zvE(arbeit, svArbeitnehmer(arbeit, p), d.erwerbstaetige);
-    return grenzsatzHaushalt(zve, d.paar_anteil, p) * (1 - svGrenzsatz(arbeit, p));
+    const gs = d.label === TOP_PARETO.gruppe
+      ? grenzsatzHaushaltPareto(zve, d.paar_anteil, TOP_PARETO.a, p)
+      : grenzsatzHaushalt(zve, d.paar_anteil, p);
+    return gs * (1 - svGrenzsatz(arbeit, p));
   };
+  const estGruppe = (zve, d, p) => d.label === TOP_PARETO.gruppe
+    ? estHaushaltPareto(zve, d.paar_anteil, TOP_PARETO.a, p)
+    : estHaushalt(zve, d.paar_anteil, p);
 
   // BGE-Arbeitsangebotseffekt (Substitutionseffekt: höherer Reservationslohn)
   // Quellen: RWI 2024 (bis −30 % bei 1.500 €), DIW Pilot 2024 (−2 % kurzfristig, n=107),
@@ -172,8 +179,10 @@ function berechne(params, zustand = null, _intern = null) {
   // Kompromiss: deutlicher Effekt bei unteren Dezilen, minimal bei oberen.
   const bge_labor_scale = Math.min(1.67, (params.bge || 0) / 1200);
 
+  // Proportionaler Markteinkommensschock (nur für den Stabilisierungskoeffizienten, F-058)
+  const schock = _intern?.schock ?? 1;
   const dezile = DEZILE.map((d, idx) => {
-    const arbeit0 = d.brutto * (1 - d.kapital);
+    const arbeit0 = d.brutto * (1 - d.kapital) * schock;
     const gs_neu = grenzbelastung(arbeit0, d, params);
     const gs_sq = grenzbelastung(arbeit0, d, SQ);
     const delta_nettolohn = (1 - gs_neu) - (1 - gs_sq);
@@ -199,7 +208,7 @@ function berechne(params, zustand = null, _intern = null) {
     // BGE: Substitutionseffekt — skaliert mit BGE/1200 und Dezil (RWI/ZEW)
     const lf = Math.max(0.55, lf_tax * (1 - BGE_LABOR_EFF[idx] * bge_labor_scale));
     // Verhaltensreaktion nur auf das Arbeitseinkommen (F-034); Kapitaleinkommen bleibt unverändert
-    const arbeit_adj = arbeit0 * lf, kapital_adj = d.brutto * d.kapital;
+    const arbeit_adj = arbeit0 * lf, kapital_adj = d.brutto * d.kapital * schock;
     return { ...d, labor_factor: lf, arbeit_adj, kapital_adj, brutto_adj: arbeit_adj + kapital_adj, gs_neu, avoidance };
   });
 
@@ -211,12 +220,12 @@ function berechne(params, zustand = null, _intern = null) {
   for (const d of dezile) {
     const sv_an = svArbeitnehmer(d.arbeit_adj, params);
     const zve_arbeit = zvE(d.arbeit_adj, sv_an, d.erwerbstaetige);
-    const arb = estHaushalt(zve_arbeit, d.paar_anteil, params);
+    const arb = estGruppe(zve_arbeit, d, params);
     const est_arbeit = arb.est + arb.soli;
     let est_kap;
     if (params.synthetisch) {
       const kap_stpfl = Math.max(0, d.kapital_adj - SPARER_PAUSCHBETRAG * d.erwachsene);
-      const ges = estHaushalt(zve_arbeit + kap_stpfl, d.paar_anteil, params);
+      const ges = estGruppe(zve_arbeit + kap_stpfl, d, params);
       est_kap = Math.max(0, ges.est + ges.soli - est_arbeit);
     } else {
       est_kap = abgeltungHaushalt(d.kapital_adj, d.erwachsene, params.abgeltung);
@@ -503,7 +512,26 @@ function berechne(params, zustand = null, _intern = null) {
     kv_bbg_frei_bonus, kv_kapital_bonus,
     // Multi-Perioden-Felder
     emissionen, bip_aktuell, invest_impuls, demografie_aufschlag, sv_ausgaben_delta, zinsen_dyn,
+    hh_brutto: dezile.map(d => d.brutto_adj),
+    // Top-1-%-Gruppe: einkommensgewichteter Grenzsatz und Vermeidungsfaktor (F-071)
+    top: (({ gs_neu, avoidance }) => ({ grenzsatz: gs_neu, avoidance }))(dezile.find(d => d.label === TOP_PARETO.gruppe)),
   };
 }
 
-export { berechne, FORMEL_QUELLEN_BERECHNE };
+// Einkommensstabilisierungskoeffizient nach Dolls/Fuest/Peichl (2012): Anteil eines proportionalen
+// Markteinkommensschocks, den Steuern und Abgaben auffangen: τ = 1 − ΔVerfügbar / ΔBrutto (F-058).
+// Transfers (Bürgergeld-Anteile je Gruppe) reagieren im Modell nicht auf das Einkommen → Untergrenze.
+const STABILISIERUNG_SCHOCK = 0.95;
+function stabilisierung(params, zustand = null) {
+  const kal = kalibrierung();
+  const a = berechne(params, zustand, { kal, referenz: true });
+  const b = berechne(params, zustand, { kal, referenz: true, schock: STABILISIERUNG_SCHOCK });
+  let dv = 0, dy = 0;
+  DEZILE.forEach((d, i) => {
+    dv += (a.hh_delta.verfuegbar[i] - b.hh_delta.verfuegbar[i]) * d.anzahl;
+    dy += (a.hh_brutto[i] - b.hh_brutto[i]) * d.anzahl;
+  });
+  return 1 - dv / dy;
+}
+
+export { berechne, stabilisierung, STABILISIERUNG_SCHOCK, FORMEL_QUELLEN_BERECHNE };

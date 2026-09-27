@@ -276,6 +276,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Der Tooltip und Quelle A15 („Aufkommensmaximum bei ~65–70 %“) behaupten jedoch ein sichtbares Maximum.
   - Außerdem verändert der Regler „Spitze“ über `satz4 = 0,05·eingang + 0,95·spitze` auch den Satz der gesamten 42-%-Zone. Für `spitze < eingang` fallen die Grenzsteuersätze.
   - Die Kurve bildet daher keine Variation des Spitzensteuersatzes ab.
+- **Status:** Behoben in Block 7. Die Kurve variiert nur den Spitzensatz (Zone 5) und zeigt das Gesamtaufkommen. Die Aussage zum Maximum wird aus den berechneten Punkten erzeugt; ein Randmaximum wird nicht als Maximum ausgegeben. Voraussetzung war F-071.
 
 ### F-023 · schwer · Z · Rentenpaket II / Generationenkapital als geltendes Recht dargestellt
 - **Fundstelle:** `js/data.js:480` (Tooltip `rv`), `:520`, `:530`; `quellen.html:769-774` (B32); `js/rechner/rente.js:14`
@@ -465,6 +466,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Fundstelle:** `quellen.html:378` (A15)
 - **Beleg:** `verwendet:'Laffer-Kurve · ZEW-Schätzung: Aufkommensmaximum bei ~65–70 % Spitzensteuersatz für Deutschland'`
 - **Begründung:** Das Paper untersucht den Zusammenhang zwischen Umverteilungspolitik und Ungleichheit in OECD-Ländern und schätzt kein aufkommensmaximierendes Steuersatzniveau für Deutschland.
+- **Status:** Behoben in Block 7. A15 ist aus dem Quellenverzeichnis entfernt. Die Einordnung stützt sich auf Saez (2001), Diamond/Saez (2011) und Bach/Corneo/Steiner (2012).
 
 ### F-049 · leicht · Z · Klimageld mit dem Koalitionsvertrag 2025 belegt
 - **Fundstelle:** `js/data.js:456`
@@ -507,6 +509,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Fundstelle:** `js/data.js:612`
 - **Beleg:** `einn:   'DE 2024: ~1.450 Mrd. · Steuerquote 22 % BIP',`
 - **Begründung:** 1.450 Mrd. € entsprechen bei einem BIP von ca. 4.300 Mrd. € rund 34 %, nicht 22 %. Der Modellwert (1.836 Mrd. €) enthält Sozialbeiträge, der Benchmark offenbar nicht.
+- **Status:** Behoben in Block 7. Der Benchmark nennt die VGR-Einnahmen 2025 (2.140,2 Mrd. €), auf die der Status quo kalibriert ist.
 
 ### F-056 · leicht · T · Challenges: ID und Ziel inkonsistent; „tägliches“ Ziel praktisch unerreichbar
 - **Fundstelle:** `js/data.js:270-272`, `:282-284`
@@ -514,11 +517,13 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Begründung:**
   - Die IDs kodieren andere Schwellen als die Beschreibungen (16 vs. 8; `armut_14` vs. „unter 5 %“).
   - Palma im Status quo 6,36; selbst die umverteilendsten Presets erreichen nur 2,61–2,77. Als „leichte“ Tagesaufgabe ist das ungeeignet (Folge von F-021).
+- **Status:** Behoben in Block 7. ID, Beschreibung, Balkenbeschriftung und Prüfung werden aus derselben Schwelle erzeugt. Die Schwellen sind neu gesetzt; `tests/challenges.test.mjs` prüft, dass jede Challenge von einem Preset oder einer dokumentierten Beispielkonfiguration erreicht wird und im Status quo noch nicht erfüllt ist.
 
 ### F-057 · leicht · T · S80/S20-Balken mit Referenzwert 0
 - **Fundstelle:** `js/haushaltsspiel.js:323-338`
 - **Beleg:** `ref: 0, max: 15, fmt: v => v.toFixed(1).replace('.',',') }`
 - **Begründung:** Mit `ref: 0` gilt immer `value > ref`, und der Balken wird stets als Verschlechterung eingefärbt. Zudem gilt F-021 (Haushalts- statt Äquivalenzeinkommen).
+- **Status:** Behoben in Block 4b (Referenz `REF.s80s20`, Maß je Person).
 
 ### F-058 · leicht · W/Z · „Automatische Stabilisatoren“ als Durchschnitt der METR
 - **Fundstelle:** `js/haushaltsspiel.js:384`, `:400`
@@ -526,6 +531,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Begründung:**
   - Der Stabilisierungskoeffizient nach Dolls/Fuest/Peichl (J Public Econ 96, 2012) misst den Anteil eines aggregierten Einkommensschocks, der durch das Steuer-Transfer-System absorbiert wird.
   - Die mittlere Grenzbelastung der unteren vier Dezile ist ein anderes Konzept. Die Jahresangabe 2020 ist nicht nachvollziehbar.
+- **Status:** Behoben in Block 7. Der Balken zeigt den Einkommensstabilisierungskoeffizienten nach Dolls/Fuest/Peichl (2012): 1 − ΔVerfügbar/ΔBrutto bei einem Rückgang der Markteinkommen um 5 % (Status quo 36,8 %). Da Transfers im Modell nicht auf das Einkommen reagieren, ist der Wert eine Untergrenze.
 
 ### F-059 · leicht · W · Finanzrechner: Verzinsungskonvention und Steuern vereinfacht, nicht offengelegt
 - **Fundstelle:** `finanz.html:1321`, `:1336`, `:1204`
@@ -637,3 +643,16 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Die übrige MwSt wird als offen ausgewiesene Restgröße geführt: 44 % im Status quo, skaliert nur mit den Sätzen.
   - Sie umfasst MwSt aus Staatskonsum, steuerbefreiten Branchen und Wohnungsbau sowie die Einkommenslücke; beides lässt sich ohne Destatis-Daten nicht trennen.
   - Offen: Einkommen der Gruppen auf VGR-Niveau bringen (VGR-/EVS-Daten).
+
+### F-071 · schwer · W · Spitzensteuersatz ohne Bemessungsgrundlage (Gruppendurchschnitt statt Verteilung)
+- **Fundstelle:** `js/rechner/berechne.js` (ESt je Gruppe über `estHaushalt` auf das mittlere zvE); `js/data.js`, `DEZILE` (D10c)
+- **Beleg:** D10c: mittleres zvE 365.047 €, Paaranteil 0,85 → Splitting-zvE je Person rund 182.500 €, unterhalb der Grenze der Zone 5 (277.826 €).
+- **Begründung:**
+  - Der Spitzensatz traf im Modell nur die 15 % Alleinveranlagten der Gruppe und dort nur rund 87.000 € Einkommen. Die mechanische Mehreinnahme lag bei etwa 0,05 Mrd. € je Prozentpunkt.
+  - Die Verhaltensreaktion war größer als die mechanische Wirkung. Das ESt-Aufkommen sank deshalb schon ab 5 % Spitzensatz (5 % → 357,3; 45 % → 357,0; 95 % → 353,7 Mrd. €).
+  - Eine Laffer-Kurve daraus hätte ein Maximum bei 5 % gezeigt. Reformen mit höherem Spitzensatz brachten praktisch keine Mehreinnahmen.
+  - Ursache: Ein Durchschnittshaushalt kann die Zone 5 grundsätzlich nicht abbilden, weil der obere Rand der Einkommensverteilung Pareto-verteilt ist (Saez 2001; Diamond/Saez 2011).
+- **Status:** Behoben in Block 7.
+  - Das zvE der Gruppe D10c wird als Pareto-Verteilung mit gleichem Mittelwert behandelt: erwartete Steuer und einkommensgewichteter Grenzsatz, Paare mit Splitting auf z/2.
+  - Der Pareto-Parameter a = 1,6 ist eine gekennzeichnete Annahme (`TOP_PARETO`).
+  - Die mechanische Mehreinnahme beträgt jetzt rund 0,44 Mrd. € je Prozentpunkt. Die Status-quo-Kalibrierung bleibt erhalten (ESt 357 Mrd. €, Restfaktor 0,957).

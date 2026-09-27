@@ -124,14 +124,6 @@ const QUELLEN = [
     doi:'10.1093/qje/qjz041',
     verwendet:'Mikrolabor · Monopolmodell: Marktmacht-Zunahme und Wohlfahrtsverluste' },
 
-  { id:'A15', typ:'akademisch',
-    autor:'Doerrenberg, P. & Peichl, A.',
-    jahr:'2014',
-    titel:'The impact of redistributive policies on inequality in OECD countries',
-    quelle:'Applied Economics, 46(17), 2066–2086 / ZEW Discussion Paper',
-    doi:'10.1080/00036846.2014.892202',
-    verwendet:'Laffer-Kurve · ZEW-Schätzung: Aufkommensmaximum bei ~65–70 % Spitzensteuersatz für Deutschland' },
-
   { id:'A16', typ:'akademisch',
     autor:'Doyle, J. & Samphantharak, K.',
     jahr:'2008',
@@ -242,7 +234,7 @@ const QUELLEN = [
     titel:'Using Elasticities to Derive Optimal Income Tax Rates',
     quelle:'Review of Economic Studies, 68(2), 205–229',
     doi:'10.1111/1467-937X.00166',
-    verwendet:'Laffer-Kurve · optimale Steuersätze; Grundlage für Aufkommensmaxima-Schätzungen' },
+    verwendet:'Laffer-Kurve · Formel für den aufkommensmaximierenden Spitzensatz (Pareto-Parameter, Elastizität)' },
 
   { id:'A30', typ:'akademisch',
     autor:'Saez, E., Slemrod, J. & Giertz, S.H.',
@@ -291,6 +283,30 @@ const QUELLEN = [
     quelle:'Proceedings of the National Academy of Sciences, 121(13), e2312030121',
     doi:'10.1073/pnas.2312030121',
     verwendet:'DICE-Schadensparameter γ = 0,003467 in der Zukunftssimulation' },
+
+  { id:'A36', typ:'akademisch',
+    autor:'Diamond, P. & Saez, E.',
+    jahr:'2011',
+    titel:'The Case for a Progressive Tax: From Basic Research to Policy Recommendations',
+    quelle:'Journal of Economic Perspectives, 25(4), 165–190',
+    doi:'10.1257/jep.25.4.165',
+    verwendet:'Laffer-Kurve · aufkommensmaximierender Spitzensatz τ* = 1/(1 + a·e); Pareto-Rand der Top-1-%-Gruppe' },
+
+  { id:'A37', typ:'akademisch',
+    autor:'Bach, S., Corneo, G. & Steiner, V.',
+    jahr:'2012',
+    titel:'Optimal top marginal tax rates under income splitting for couples',
+    quelle:'European Economic Review, 56(6), 1055–1069',
+    doi:'10.1016/j.euroecorev.2012.05.004',
+    verwendet:'Einordnung des Pareto-Rands für Deutschland (Splitting, Einzeldaten der Top-Steuerpflichtigen); Pareto-Parameter im Modell ist Annahme' },
+
+  { id:'A38', typ:'akademisch',
+    autor:'Dolls, M., Fuest, C. & Peichl, A.',
+    jahr:'2012',
+    titel:'Automatic stabilizers and economic crisis: US vs. Europe',
+    quelle:'Journal of Public Economics, 96(3–4), 279–294',
+    doi:'10.1016/j.jpubeco.2011.11.001',
+    verwendet:'Einkommensstabilisierungskoeffizient τ = 1 − ΔVerfügbar/ΔBrutto bei proportionalem Schock (Wirkungsanalyse)' },
 
 
   /* ─────────────────────────────────────────────────────────────

@@ -6,7 +6,7 @@
 
 import { DEZILE, ELAST, PRESETS, FISKAL, MOD_DEFS, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, ZUKUNFTS_SZENARIEN } from './data.js';
 import { grenzsteuersatz, tarifAusParams } from './rechner/einkommensteuer.js';
-import { berechne } from './rechner/berechne.js';
+import { berechne, stabilisierung } from './rechner/berechne.js';
 import { simulierePfad } from './rechner/transition.js';
 import { renderEstKurve, renderIncomeDist, exportCSV, renderSchuldenpfad, renderZeitreihe, renderStaatsausgaben } from './render/charts.js';
 import { renderRenten } from './render/renten.js';
@@ -148,9 +148,10 @@ function fmtSignedMrd(x) {
 }
 
 // Referenz: Status Quo
-let REF = null;
+let REF = null, STAB_REF = null;
 function computeRef() {
   REF = berechne(PRESETS.status_quo);
+  STAB_REF = stabilisierung(PRESETS.status_quo) * 100;
 }
 
 
@@ -381,7 +382,9 @@ function render() {
   // WIRTSCHAFTLICHE WIRKUNGSANALYSE (R01, R10, R12)
   // Kurzfristiger Nachfrageimpuls einer Saldoänderung (überwiegend Steuern/Transfers): Multiplikator aus FISKAL
   const bip_impuls = -(r.saldo - REF.saldo) * FISKAL.multiplikator_steuern_transfers;
-  const stab_index = r.metr.slice(0, 4).reduce((a, m) => a + m, 0) / 4 * 100; // Ø METR D1–D4 als Stabilisierungsgrad
+  // Einkommensstabilisierungskoeffizient (Dolls/Fuest/Peichl 2012) statt Ø METR (F-058)
+  const stab_index = stabilisierung(p) * 100;
+  const stab_ref = STAB_REF;
   const wirkBars = [
     {
       label: `BIP-Impuls (Multiplikator ${fmtDE(FISKAL.multiplikator_steuern_transfers, 2)})`,
@@ -392,12 +395,12 @@ function render() {
       hint: 'Saldoänderung × Steuer-/Transfermultiplikator (Gechert 2015, Oxford Economic Papers 67(3))'
     },
     {
-      label: 'Auto-Stabilisatoren (Ø METR D1–D4)',
+      label: 'Automatische Stabilisatoren (Einkommensschock −5 %)',
       value: stab_index,
-      fmt: v => v.toFixed(1) + ' %',
-      cls: stab_index > 50 ? 'pos' : stab_index < 35 ? 'neg' : 'neu',
+      fmt: v => fmtDE(v, 1) + ' %',
+      cls: stab_index > stab_ref + 0.5 ? 'pos' : stab_index < stab_ref - 0.5 ? 'neg' : 'neu',
       pct: Math.min(100, stab_index),
-      hint: 'Dämpfungsgrad Einkommensschock — DE Benchmark: ~48 % (Dolls et al. 2020)'
+      hint: `Anteil eines proportionalen Rückgangs der Markteinkommen um 5 %, den Steuern und Sozialabgaben auffangen: 1 − ΔVerfügbar/ΔBrutto (Dolls/Fuest/Peichl 2012, J Public Econ 96(3–4)). Status quo im Modell: ${fmtDE(stab_ref, 1)} %. Untergrenze: Bürgergeld und andere Transfers reagieren im Modell nicht auf das Einkommen.`
     },
     {
       label: 'Dyn. Scoring: KSt-Investitionseffekt',
@@ -671,7 +674,7 @@ function renderChallenges(r) {
     const subsHtml = c.subs.map(sub => {
       const pct = challengeProgress(sub, r);
       const done = sub.check(r);
-      const ctx = CHALLENGE_CTX[sub.label] ? `<div class="challenge-context">${CHALLENGE_CTX[sub.label]}</div>` : '';
+      const ctx = CHALLENGE_CTX[sub.ctxKey] ? `<div class="challenge-context">${CHALLENGE_CTX[sub.ctxKey]}</div>` : '';
       return `<div class="challenge-bar-wrap">
         <div class="challenge-bar-label">
           <span>${sub.label}</span>
@@ -909,13 +912,13 @@ function renderRechenweg(r, p) {
       <div class="rw-section-title">2 · Verhaltensreaktion — Arbeitsangebot</div>
       <div class="rw-formula">Δ_Arbeit = ε × Δ(1 − GSatz_neu) / (1 − GSatz_Basis)
 D1–D10b: ε = ${ELAST.labor_supply} (intensive margin, Saez/Chetty Konsens)
-D10c (Top 1%): ε = ${ELAST.d10c_labor} + Avoidance-Effekt ab GSatz > 45%
+D10c (Top 1%): ε = ${ELAST.d10c_labor} + Avoidance-Effekt ab GSatz > 45% (GSatz einkommensgewichtet über den Pareto-Rand)
   Avoidance = 1 − ${ELAST.d10c_avoidance} × max(0, GSatz−0,45) − ${ELAST.d10c_wegzug} × max(0, GSatz−0,60)
   (Einkommensverschiebung: Kapitalgesellschaft, Stiftung, Timing)
   (Wegzug: steuerbedingte Emigration bei sehr hohen Sätzen)
 Begrenzung: 0,55 – 1,25 (D10c: 0,40 Minimum)</div>
       <div class="rw-text">Arbeitsangebots-Index: <span class="${r.behavior.labor >= 99.5 ? 'rw-good' : r.behavior.labor < 97 ? 'rw-bad' : ''}">${f(r.behavior.labor)} (Basis: 100,0)</span>
-        · D10c-Avoidance: ${p.spitze > 45 ? `aktiv (GS ${p.spitze}% > 45% Schwelle)` : `inaktiv (GS ${p.spitze}% ≤ 45% Schwelle)`}
+        · D10c: einkommensgewichteter Grenzsatz ${f(r.top.grenzsatz * 100)} % (Pareto-Rand), Vermeidung ${r.top.avoidance < 1 ? `aktiv (Faktor ${r.top.avoidance.toFixed(3).replace('.', ',')})` : 'inaktiv (≤ 45 %)'}
         · Quellen: Saez/Chetty/Gruber (2012), Piketty/Saez/Stantcheva (2014), Kleven/Schultz (2014), Kleven et al. (2020, Wegzug; Wert ist Modellannahme)</div>
     </div>
 

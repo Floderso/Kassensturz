@@ -197,6 +197,14 @@ const ELAST_QUELLEN = {
 };
 
 
+// ── PARETO-RAND DER TOP-1-%-GRUPPE (F-071) ──
+// Das zvE der Gruppe D10c wird als Pareto-Verteilung mit gleichem Mittelwert behandelt, damit die Zone 5
+// (Spitzensatz) eine realistische Bemessungsgrundlage hat. [ANNAHME] a = 1,6: zwischen dem Wert 1,5, den
+// Diamond/Saez (2011, JEP 25(4)) für die USA verwenden, und dünneren Rändern in Kontinentaleuropa.
+// Für Deutschland mit Einzeldaten: Bach/Corneo/Steiner (2012, EER 56(6)) — konkreter Wert dort nicht
+// geprüft [QUELLE PRÜFEN]. Theoretischer Aufkommensmaximierer bei konstanter Elastizität e: τ* = 1/(1 + a·e).
+const TOP_PARETO = { gruppe: 'D10c', a: 1.6, annahme: true, refs: ['A36', 'A37'] };
+
 // ── EINKOMMENSTEUERTARIF ──
 
 // § 32a Abs. 1 EStG, VZ 2026, i.d.F. Steuerfortentwicklungsgesetz v. 23.12.2024 (BGBl. 2024 I Nr. 449).
@@ -324,138 +332,86 @@ const PRESETS = {
 
 // ── CHALLENGES ──
 
+// ── CHALLENGES (F-056) ──
+// Kennzahlen und Ziele getrennt: Beschreibung, Balkenbeschriftung, Prüfung und ID werden aus derselben
+// Schwelle erzeugt und können nicht mehr auseinanderlaufen. Referenz (Fortschritt 0 %) ist immer der
+// Status quo des Modells. Erreichbarkeit: tests/challenges.test.mjs prüft jede Challenge gegen die
+// Presets und die dokumentierten Beispielkonfigurationen (CHALLENGE_BEISPIELE).
+const komma = (v, d) => v.toFixed(d).replace('.', ',');
+const KENNZAHLEN = {
+  gini:     { label:'Gini',              wert:r=>r.gini,                 fmt:v=>komma(v, 3) },
+  palma:    { label:'Palma',             wert:r=>r.palma,                fmt:v=>komma(v, 2) },
+  s80s20:   { label:'S80/S20',           wert:r=>r.s80s20,               fmt:v=>komma(v, 2) },
+  armut:    { label:'Armutsrisiko',      wert:r=>r.armutsrisiko,         fmt:v=>komma(v, 1) + ' %' },
+  saldo:    { label:'Saldo',             wert:r=>r.saldo,                fmt:v=>komma(v, 0) + ' Mrd.' },
+  defizit:  { label:'Saldo % BIP',       wert:r=>r.saldo_bip_pct,        fmt:v=>(v >= 0 ? '+' : '') + komma(v, 2) + ' %' },
+  schuld:   { label:'Schulden-Δ',        wert:r=>r.schuldenquote_delta,  fmt:v=>komma(v, 2) + ' Pp.' },
+  admin:    { label:'Verwaltung',        wert:r=>r.admin_kosten,         fmt:v=>komma(v, 0) + ' Mrd.' },
+  nst:      { label:'Steuerarten',       wert:r=>r.nst,                  fmt:v=>v + ' Arten' },
+  arbeit:   { label:'Arbeit-Index',      wert:r=>r.behavior.labor,       fmt:v=>komma(v, 1) },
+  invest:   { label:'Investition',       wert:r=>r.behavior.invest,      fmt:v=>komma(v, 1) },
+  co2:      { label:'CO₂-Index',         wert:r=>r.behavior.co2,         fmt:v=>komma(v, 1) },
+  dwl:      { label:'Wohlfahrtsverlust', wert:r=>r.dwl,                  fmt:v=>komma(v, 0) + ' Mrd.' },
+  metr_d1:  { label:'METR D1',           wert:r=>r.metr[0] * 100,        fmt:v=>komma(v, 0) + ' %' },
+};
+const OP = { '<': ['lt', 'unter', 'down'], '<=': ['le', 'höchstens', 'down'], '>': ['gt', 'über', 'up'], '>=': ['ge', 'mindestens', 'up'] };
+const PRUEF = { '<': (a, b) => a < b, '<=': (a, b) => a <= b, '>': (a, b) => a > b, '>=': (a, b) => a >= b };
+
+function challenge(diff, title, ziele) {
+  const subs = ziele.map(([k, op, tgt]) => {
+    const K = KENNZAHLEN[k];
+    return { kennzahl: k, label: `${K.label} ${OP[op][1]} ${K.fmt(tgt)}`, ctxKey: K.label,
+             check: r => PRUEF[op](K.wert(r), tgt), cur: K.wert, tgt, refFn: K.wert, dir: OP[op][2], fmt: K.fmt };
+  });
+  const id = ziele.map(([k, op, tgt]) => `${k}_${OP[op][0]}_${String(tgt).replace('-', 'm').replace('.', '_')}`).join('__');
+  return { id, diff, title, desc: subs.map(s => s.label).join(' · '), subs };
+}
+
 const CHALLENGES = [
-  // ── TÄGLICH (leicht, ein Ziel) ──────────────────────────
-  { id:'gini_285', diff:'daily', title:'Soziale Balance',
-    desc:'Gini-Koeffizient unter 0,285 senken',
-    subs:[{ label:'Gini', check:r=>r.gini<0.285, cur:r=>r.gini, tgt:0.285, refFn:ref=>ref.gini, dir:'down', fmt:v=>v.toFixed(3).replace('.',',') }]},
-  { id:'saldo_50', diff:'daily', title:'Haushaltsdisziplin',
-    desc:'Defizit unter 50 Mrd. € drücken',
-    subs:[{ label:'Saldo', check:r=>r.saldo>-50, cur:r=>r.saldo, tgt:-50, refFn:ref=>ref.saldo, dir:'up', fmt:v=>v.toFixed(0)+' Mrd.' }]},
-  { id:'admin_120', diff:'daily', title:'Schlankerer Staat',
-    desc:'Verwaltungskosten unter 120 Mrd. €',
-    subs:[{ label:'Verwaltung', check:r=>r.admin_kosten<120, cur:r=>r.admin_kosten, tgt:120, refFn:ref=>ref.admin_kosten, dir:'down', fmt:v=>v.toFixed(0)+' Mrd.' }]},
-  { id:'labor_101', diff:'daily', title:'Beschäftigungsimpuls',
-    desc:'Arbeitsangebot-Index über 101',
-    subs:[{ label:'Arbeit-Index', check:r=>r.behavior.labor>101, cur:r=>r.behavior.labor, tgt:101, refFn:()=>100, dir:'up', fmt:v=>v.toFixed(1) }]},
-  { id:'armut_16', diff:'daily', title:'Armutsreduktion',
-    desc:'Armutsrisikoquote unter 8 %',
-    subs:[{ label:'Armutsrisiko', check:r=>r.armutsrisiko<8, cur:r=>r.armutsrisiko, tgt:8, refFn:ref=>ref.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' }]},
-  { id:'co2_85', diff:'daily', title:'Klimakurs',
-    desc:'CO₂-Emissionen auf Index unter 85',
-    subs:[{ label:'CO₂-Index', check:r=>r.behavior.co2<85, cur:r=>r.behavior.co2, tgt:85, refFn:()=>100, dir:'down', fmt:v=>v.toFixed(1) }]},
-  { id:'nst_12', diff:'daily', title:'Steuervereinfachung',
-    desc:'Höchstens 12 aktive Steuerarten',
-    subs:[{ label:'Steuerarten', check:r=>r.nst<=12, cur:r=>r.nst, tgt:12, refFn:ref=>ref.nst, dir:'down', fmt:v=>v+' Arten' }]},
-  { id:'invest_101', diff:'daily', title:'Standortpflege',
-    desc:'Investitionsindex über 101',
-    subs:[{ label:'Investition', check:r=>r.behavior.invest>101, cur:r=>r.behavior.invest, tgt:101, refFn:()=>100, dir:'up', fmt:v=>v.toFixed(1) }]},
-  { id:'palma_18', diff:'daily', title:'Einkommensschere',
-    desc:'Palma-Koeffizient unter 1,8 senken',
-    subs:[{ label:'Palma', check:r=>r.palma<1.8, cur:r=>r.palma, tgt:1.8, refFn:ref=>ref.palma, dir:'down', fmt:v=>v.toFixed(2).replace('.',',') }]},
-  { id:'dwl_50', diff:'daily', title:'Effizienzgewinn',
-    desc:'Wohlfahrtsverlust des Steuersystems unter 50 Mrd. €',
-    subs:[{ label:'Wohlfahrtsverlust', check:r=>r.dwl<50, cur:r=>r.dwl, tgt:50, refFn:ref=>ref.dwl, dir:'down', fmt:v=>v.toFixed(0)+' Mrd.' }]},
-  { id:'co2_80', diff:'daily', title:'Klimaschritt',
-    desc:'CO₂-Emissionen auf Index unter 80',
-    subs:[{ label:'CO₂-Index', check:r=>r.behavior.co2<80, cur:r=>r.behavior.co2, tgt:80, refFn:()=>100, dir:'down', fmt:v=>v.toFixed(1) }]},
-  { id:'schuld_plus1', diff:'daily', title:'Schuldendisziplin',
-    desc:'Schuldenquote um weniger als 1 % BIP steigen lassen',
-    subs:[{ label:'Schulden-Δ', check:r=>r.schuldenquote_delta<1.0, cur:r=>r.schuldenquote_delta, tgt:1.0, refFn:ref=>ref.schuldenquote_delta, dir:'down', fmt:v=>v.toFixed(2)+' %' }]},
-  { id:'armut_12', diff:'daily', title:'Armutsbekämpfung',
-    desc:'Armutsrisikoquote unter 12 %',
-    subs:[{ label:'Armutsrisiko', check:r=>r.armutsrisiko<12, cur:r=>r.armutsrisiko, tgt:12, refFn:ref=>ref.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' }]},
-  { id:'invest_103', diff:'daily', title:'Investitionsklima',
-    desc:'Investitionsindex über 103',
-    subs:[{ label:'Investition', check:r=>r.behavior.invest>103, cur:r=>r.behavior.invest, tgt:103, refFn:()=>100, dir:'up', fmt:v=>v.toFixed(1) }]},
+  // ── TÄGLICH (ein Ziel, von mindestens einem Preset erreicht) ──
+  challenge('daily', 'Soziale Balance',        [['gini', '<', 0.34]]),
+  challenge('daily', 'Haushaltsdisziplin',     [['saldo', '>', -100]]),
+  challenge('daily', 'Schlankerer Staat',      [['admin', '<', 50]]),
+  challenge('daily', 'Beschäftigungsimpuls',   [['arbeit', '>', 100.1]]),
+  challenge('daily', 'Armutsreduktion',        [['armut', '<', 15.5]]),
+  challenge('daily', 'Klimakurs',              [['co2', '<', 90]]),
+  challenge('daily', 'Steuervereinfachung',    [['nst', '<=', 12]]),
+  challenge('daily', 'Standortpflege',         [['invest', '>', 101]]),
+  challenge('daily', 'Einkommensschere',       [['palma', '<', 1.4]]),
+  challenge('daily', 'Effizienzgewinn',        [['dwl', '<', 25]]),
+  challenge('daily', 'Klimaschritt',           [['co2', '<', 85]]),
+  challenge('daily', 'Schuldendisziplin',      [['schuld', '<', 2]]),
+  challenge('daily', 'Armutsbekämpfung',       [['armut', '<', 14]]),
+  challenge('daily', 'Investitionsklima',      [['invest', '>', 103]]),
+  challenge('daily', 'Oben und unten',         [['s80s20', '<', 4.5]]),
 
-  // ── WÖCHENTLICH (mittel, anspruchsvoller) ───────────────
-  { id:'gini_270', diff:'weekly', title:'Starke Umverteilung',
-    desc:'Gini-Koeffizient unter 0,270',
-    subs:[{ label:'Gini', check:r=>r.gini<0.270, cur:r=>r.gini, tgt:0.270, refFn:ref=>ref.gini, dir:'down', fmt:v=>v.toFixed(3).replace('.',',') }]},
-  { id:'saldo_0', diff:'weekly', title:'Schwarze Null',
-    desc:'Staatssaldo auf ≥ 0 Mrd. bringen',
-    subs:[{ label:'Saldo', check:r=>r.saldo>=0, cur:r=>r.saldo, tgt:0, refFn:ref=>ref.saldo, dir:'up', fmt:v=>v.toFixed(0)+' Mrd.' }]},
-  { id:'nst_7', diff:'weekly', title:'Kirchhof-Schüler',
-    desc:'Maximal 7 aktive Steuerarten',
-    subs:[{ label:'Steuerarten', check:r=>r.nst<=7, cur:r=>r.nst, tgt:7, refFn:ref=>ref.nst, dir:'down', fmt:v=>v+' Arten' }]},
-  { id:'invest_104', diff:'weekly', title:'Investitionsoffensive',
-    desc:'Investitionsindex über 104',
-    subs:[{ label:'Investition', check:r=>r.behavior.invest>104, cur:r=>r.behavior.invest, tgt:104, refFn:()=>100, dir:'up', fmt:v=>v.toFixed(1) }]},
-  { id:'armut_14', diff:'weekly', title:'Soziale Gerechtigkeit',
-    desc:'Armutsrisikoquote unter 5 %',
-    subs:[{ label:'Armutsrisiko', check:r=>r.armutsrisiko<5, cur:r=>r.armutsrisiko, tgt:5, refFn:ref=>ref.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' }]},
-  { id:'schuld_neg', diff:'weekly', title:'Schuldenabbau',
-    desc:'Schuldenquote jährlich sinkend (Δ < 0)',
-    subs:[{ label:'Schulden-Δ', check:r=>r.schuldenquote_delta<0, cur:r=>r.schuldenquote_delta, tgt:0, refFn:ref=>ref.schuldenquote_delta, dir:'down', fmt:v=>v.toFixed(2)+' %' }]},
-  { id:'co2_70', diff:'weekly', title:'Klimaführerschaft',
-    desc:'CO₂-Emissionen auf Index unter 70',
-    subs:[{ label:'CO₂-Index', check:r=>r.behavior.co2<70, cur:r=>r.behavior.co2, tgt:70, refFn:()=>100, dir:'down', fmt:v=>v.toFixed(1) }]},
-  { id:'admin_100', diff:'weekly', title:'Effizienzreform',
-    desc:'Verwaltungskosten unter 100 Mrd. €',
-    subs:[{ label:'Verwaltung', check:r=>r.admin_kosten<100, cur:r=>r.admin_kosten, tgt:100, refFn:ref=>ref.admin_kosten, dir:'down', fmt:v=>v.toFixed(0)+' Mrd.' }]},
-  { id:'defizit_1', diff:'weekly', title:'Solide Finanzen',
-    desc:'Defizitquote des Gesamtstaats auf höchstens 1 % BIP senken',
-    subs:[{ label:'Saldo % BIP', check:r=>r.saldo_bip_pct>=-1, cur:r=>r.saldo_bip_pct, tgt:-1, refFn:ref=>ref.saldo_bip_pct, dir:'up', fmt:v=>(v>=0?'+':'')+v.toFixed(2)+' %' }]},
-  { id:'metr_d1_70', diff:'weekly', title:'Armutsfalle durchbrechen',
-    desc:'Grenzbelastung des untersten Dezils unter 70 % senken',
-    subs:[{ label:'METR D1', check:r=>r.metr[0]<0.70, cur:r=>r.metr[0]*100, tgt:70, refFn:()=>99, dir:'down', fmt:v=>v.toFixed(0)+' %' }]},
+  // ── WÖCHENTLICH (anspruchsvoller) ──
+  challenge('weekly', 'Starke Umverteilung',     [['gini', '<', 0.31]]),
+  challenge('weekly', 'Schwarze Null',           [['saldo', '>=', 0]]),
+  challenge('weekly', 'Kirchhof-Schüler',        [['nst', '<=', 11]]),
+  challenge('weekly', 'Investitionsoffensive',   [['invest', '>', 102.5]]),
+  challenge('weekly', 'Soziale Gerechtigkeit',   [['armut', '<', 12]]),
+  challenge('weekly', 'Schuldenabbau',           [['schuld', '<', 0]]),
+  challenge('weekly', 'Klimaführerschaft',       [['co2', '<', 80]]),
+  challenge('weekly', 'Effizienzreform',         [['admin', '<', 40]]),
+  challenge('weekly', 'Solide Finanzen',         [['defizit', '>=', -1]]),
+  challenge('weekly', 'Armutsfalle durchbrechen', [['metr_d1', '<', 70]]),
 
-  // ── MONATLICH (schwer, Kombinationen) ───────────────────
-  { id:'gini_saldo', diff:'monthly', title:'Quadratur des Kreises',
-    desc:'Gini < 0,280 UND Saldo > −30 Mrd.',
-    subs:[
-      { label:'Gini < 0,280',    check:r=>r.gini<0.280,   cur:r=>r.gini,          tgt:0.280,  refFn:ref=>ref.gini,         dir:'down', fmt:v=>v.toFixed(3).replace('.',',') },
-      { label:'Saldo > −30',     check:r=>r.saldo>-30,    cur:r=>r.saldo,         tgt:-30,    refFn:ref=>ref.saldo,        dir:'up',   fmt:v=>v.toFixed(0)+' Mrd.' }
-    ]},
-  { id:'labor_co2', diff:'monthly', title:'Grünes Wachstum',
-    desc:'Arbeitsangebot > 101 UND CO₂-Index < 80',
-    subs:[
-      { label:'Arbeit > 101',   check:r=>r.behavior.labor>101,  cur:r=>r.behavior.labor, tgt:101, refFn:()=>100, dir:'up',   fmt:v=>v.toFixed(1) },
-      { label:'CO₂ < 80',       check:r=>r.behavior.co2<80,     cur:r=>r.behavior.co2,   tgt:80,  refFn:()=>100, dir:'down', fmt:v=>v.toFixed(1) }
-    ]},
-  { id:'invest_admin', diff:'monthly', title:'Effizienz & Kapital',
-    desc:'Investitionen > 103 UND Verwaltung < 105 Mrd.',
-    subs:[
-      { label:'Invest. > 103',  check:r=>r.behavior.invest>103, cur:r=>r.behavior.invest, tgt:103, refFn:()=>100, dir:'up',   fmt:v=>v.toFixed(1) },
-      { label:'Verwalt. < 105', check:r=>r.admin_kosten<105,    cur:r=>r.admin_kosten,    tgt:105, refFn:ref=>ref.admin_kosten, dir:'down', fmt:v=>v.toFixed(0)+' Mrd.' }
-    ]},
-  { id:'triple_klima', diff:'monthly', title:'Klimasozialpakt',
-    desc:'Gini < 0,285, Saldo > −50 Mrd., CO₂ < 80',
-    subs:[
-      { label:'Gini < 0,285',   check:r=>r.gini<0.285,         cur:r=>r.gini,          tgt:0.285, refFn:ref=>ref.gini,  dir:'down', fmt:v=>v.toFixed(3).replace('.',',') },
-      { label:'Saldo > −50',    check:r=>r.saldo>-50,          cur:r=>r.saldo,         tgt:-50,   refFn:ref=>ref.saldo, dir:'up',   fmt:v=>v.toFixed(0)+' Mrd.' },
-      { label:'CO₂ < 80',       check:r=>r.behavior.co2<80,    cur:r=>r.behavior.co2,  tgt:80,    refFn:()=>100,       dir:'down', fmt:v=>v.toFixed(1) }
-    ]},
-  { id:'sozmark', diff:'monthly', title:'Soziale Marktwirtschaft',
-    desc:'Armut < 6 %, Investitionen > 101, Saldo > −40 Mrd.',
-    subs:[
-      { label:'Armut < 6 %',    check:r=>r.armutsrisiko<6,      cur:r=>r.armutsrisiko,   tgt:6,   refFn:ref=>ref.armutsrisiko, dir:'down', fmt:v=>v.toFixed(1)+' %' },
-      { label:'Invest. > 101',  check:r=>r.behavior.invest>101, cur:r=>r.behavior.invest, tgt:101, refFn:()=>100,              dir:'up',   fmt:v=>v.toFixed(1) },
-      { label:'Saldo > −40',    check:r=>r.saldo>-40,           cur:r=>r.saldo,           tgt:-40, refFn:ref=>ref.saldo,        dir:'up',   fmt:v=>v.toFixed(0)+' Mrd.' }
-    ]},
-  { id:'gini_invest_schuld', diff:'monthly', title:'Aufstieg ohne Schulden',
-    desc:'Gini < 0,278, Investitionen > 102, Schuldenquote Δ < 0',
-    subs:[
-      { label:'Gini < 0,278',   check:r=>r.gini<0.278,          cur:r=>r.gini,            tgt:0.278, refFn:ref=>ref.gini,              dir:'down', fmt:v=>v.toFixed(3).replace('.',',') },
-      { label:'Invest. > 102',  check:r=>r.behavior.invest>102, cur:r=>r.behavior.invest,  tgt:102,   refFn:()=>100,                  dir:'up',   fmt:v=>v.toFixed(1) },
-      { label:'Schulden-Δ < 0', check:r=>r.schuldenquote_delta<0, cur:r=>r.schuldenquote_delta, tgt:0, refFn:ref=>ref.schuldenquote_delta, dir:'down', fmt:v=>v.toFixed(2)+' %' }
-    ]},
-  { id:'dwl_gini', diff:'monthly', title:'Gerecht & effizient',
-    desc:'Wohlfahrtsverlust < 45 Mrd., Gini < 0,285, Saldo > −55 Mrd.',
-    subs:[
-      { label:'DWL < 45 Mrd.',  check:r=>r.dwl<45,              cur:r=>r.dwl,             tgt:45,    refFn:ref=>ref.dwl,               dir:'down', fmt:v=>v.toFixed(0)+' Mrd.' },
-      { label:'Gini < 0,285',   check:r=>r.gini<0.285,          cur:r=>r.gini,            tgt:0.285, refFn:ref=>ref.gini,              dir:'down', fmt:v=>v.toFixed(3).replace('.',',') },
-      { label:'Saldo > −55',    check:r=>r.saldo>-55,           cur:r=>r.saldo,           tgt:-55,   refFn:ref=>ref.saldo,             dir:'up',   fmt:v=>v.toFixed(0)+' Mrd.' }
-    ]},
-  { id:'generationen', diff:'monthly', title:'Generationengerechtigkeit',
-    desc:'Schuldenquote sinkend, CO₂-Index < 80, Investitionen > 102',
-    subs:[
-      { label:'Schulden-Δ < 0',  check:r=>r.schuldenquote_delta<0,     cur:r=>r.schuldenquote_delta,    tgt:0,   refFn:ref=>ref.schuldenquote_delta, dir:'down', fmt:v=>v.toFixed(2)+' %' },
-      { label:'CO₂-Index < 80',  check:r=>r.behavior.co2<80,           cur:r=>r.behavior.co2,           tgt:80,  refFn:()=>100,                      dir:'down', fmt:v=>v.toFixed(1) },
-      { label:'Invest. > 102',   check:r=>r.behavior.invest>102,       cur:r=>r.behavior.invest,        tgt:102, refFn:()=>100,                      dir:'up',   fmt:v=>v.toFixed(1) }
-    ]},
+  // ── MONATLICH (Kombinationen) ──
+  challenge('monthly', 'Quadratur des Kreises',     [['gini', '<', 0.3], ['saldo', '>', -30]]),
+  challenge('monthly', 'Grünes Wachstum',           [['arbeit', '>', 100.1], ['co2', '<', 90]]),
+  challenge('monthly', 'Effizienz & Kapital',       [['invest', '>', 103], ['admin', '<', 45]]),
+  challenge('monthly', 'Klimasozialpakt',           [['gini', '<', 0.31], ['saldo', '>', -50], ['co2', '<', 85]]),
+  challenge('monthly', 'Soziale Marktwirtschaft',   [['armut', '<', 14], ['invest', '>', 101], ['saldo', '>', -40]]),
+  challenge('monthly', 'Aufstieg ohne Schulden',    [['gini', '<', 0.32], ['invest', '>', 102], ['schuld', '<', 0]]),
+  challenge('monthly', 'Gerecht & effizient',       [['dwl', '<', 35], ['gini', '<', 0.32], ['saldo', '>', -115]]),
+  challenge('monthly', 'Generationengerechtigkeit', [['schuld', '<', 0], ['co2', '<', 85], ['invest', '>', 102]]),
 ];
+
+// Dokumentierte Beispielkonfigurationen (Abweichungen vom Status quo) für Challenges ohne passendes Preset
+const CHALLENGE_BEISPIELE = {
+  gruenes_wachstum: { co2: 125, freibetrag: 14000, eingang: 12 },
+};
 
 
 // ── TOOLTIPS ──
@@ -480,7 +436,7 @@ const TOOLTIPS = {
   },
   spitze: {
     title: "Spitzensteuersatz",
-    text: "Satz der obersten Tarifzone („Reichensteuer“): 2026 45 % ab 277.826 €. Die 42-%-Zone ab 69.879 € hat einen eigenen Regler (Satz Proportionalzone). Koalitionsausschuss 01.07.2026: 42%-Zone soll bis 70.600 € abgeflacht werden, ab 2027 zusätzlich 45% ab 250.000 € und 47% ab 280.000 € (im Modell nicht als eigene Zwischenstufe abbildbar, s. Preset „Koalition 2027\"). DIW/Bach: Erhöhung auf 49–52% kaum Aufkommensverlust, hoher Verteilungseffekt. ifo/Fuest: ab ~55% sinkt Aufkommen durch Verhaltensreaktion (Laffer-Kurve sichtbar im Modell).",
+    text: "Satz der obersten Tarifzone („Reichensteuer“): 2026 45 % ab 277.826 €. Die 42-%-Zone ab 69.879 € hat einen eigenen Regler (Satz Proportionalzone). Koalitionsausschuss 01.07.2026: 42%-Zone soll bis 70.600 € abgeflacht werden, ab 2027 zusätzlich 45% ab 250.000 € und 47% ab 280.000 € (im Modell nicht als eigene Zwischenstufe abbildbar, s. Preset „Koalition 2027\"). Im Modell trifft der Spitzensatz den Pareto-Rand der Top-1-%-Gruppe (Annahme a = 1,6); wo das Gesamtaufkommen sein Maximum hat, zeigt das Modul Laffer-Kurve aus der aktuellen Einstellung.",
     quelle: "§ 32a Nr. 4+5 EStG · 2026: 69.879 € · Koalitionsausschuss 01.07.2026 · Piketty/Saez/Stantcheva (2014) AER"
   },
   grenze: {
@@ -693,7 +649,7 @@ const REFORM_TOURS = [
 
 const KPI_BENCH = {
   saldo:  'DE 2025: −119 Mrd. (VGR/Maastricht, Destatis Feb 2026) · DE 2024: −115 Mrd. · Defizitquote: −2,7 % BIP',
-  einn:   'DE 2024: ~1.450 Mrd. · Steuerquote 22 % BIP',
+  einn:   'Status quo kalibriert auf VGR 2025: 2.140,2 Mrd. € Einnahmen des Staates (Steuern 1.031,5 Mrd. €, Sozialbeiträge und übrige Einnahmen)',
   gini:   'Modellwert aus 12 Gruppen (ohne Ungleichheit innerhalb der Gruppen) — nur Veränderungen vergleichen. Amtlich DE: 0,295 · DK: 0,281 · SE: 0,273 · US: 0,395',
   admin:  'DE ~2 % Steueraufkommen (OECD-Ø)',
   nst:    'DE aktuell: ~40 Steuerarten',
@@ -704,21 +660,18 @@ const KPI_BENCH = {
   zins:   'Bund 2025: 7,7 Ct/€ (30,2 Mrd.) · Projektion 2029: 17,2 Ct/€ (66,5 Mrd.) · Tief 2021: 4,6 Ct · Quelle: IW Köln (Hentze 2025) · BMF Finanzplan 2025–2029 (Abbildung 4)',
 };
 const CHALLENGE_CTX = {
-  'Saldo':            'DE 2025: −119 Mrd. € (VGR/Maastricht, Destatis Feb 2026) · Defizitquote −2,7 % BIP',
-  'Gini':             'DE heute: 0,295 · Dänemark: 0,281',
-  'Armutsrisiko':     'DE 2025: 16,1 % (Destatis, Erstergebnis)',
-  'Verwaltung':       'DE ~2 % Steueraufkommen (OECD)',
-  'Arbeit-Index':     'Indexbasis = 100 (Status quo)',
-  'Steuerarten':      'Kirchhof-Ideal: 4–5 Steuerarten',
-  'CO₂-Index':        'DE 2030-Ziel: −65 % ggü. 1990',
-  'Schulden-Δ < 0':   'Verfassungsgrenze: 0,35 % BIP/Jahr',
-  'Wohlfahrtsverlust':'ca. 5–15 % des Steueraufkommens (Lit.) · Harberger-Dreieck je Dezil · sinkt mit flacherem Tarif',
-  'Saldo % BIP':      'Status quo 2025: −2,7 % BIP (Destatis) · Maastricht-Referenzwert: −3 %',
-  'METR D1':          'Status quo ~99 % (80 % Bürgergeld-Entzug + ~20 % SV · ifo 2025)',
-  'DWL < 45 Mrd.':    'Harberger-Effizienzkosten: sinken mit flacheren Grenzsteuersätzen',
-  'CO₂-Index < 80':   'Basis 100 = 500 Mio. t · DE 2030-Ziel: −65 % ggü. 1990',
-  'Palma':            'DE heute ~1,9 · Dänemark ~1,4 · USA ~2,3 (Eurostat)',
-  'Schulden-Δ':       'Status quo: Defizit 2,7 % BIP/Jahr (VGR 2025)',
+  'Saldo':            'Status quo kalibriert auf VGR 2025: −119,1 Mrd. €',
+  'Saldo % BIP':      'Maastricht-Referenzwert: −3 % BIP',
+  'Gini':             'Modellwert je Person aus 12 Gruppen — amtliche Werte (EU-SILC) sind anders abgegrenzt',
+  'Palma':            'Modellwert je Person aus 12 Gruppen',
+  'S80/S20':          'Modellwert je Person aus 12 Gruppen',
+  'Armutsrisiko':     'Status quo kalibriert auf 16,1 % (Destatis, Erstergebnis 2025)',
+  'Arbeit-Index':     'Index 100 = Status quo',
+  'Investition':      'Index 100 = Status quo',
+  'CO₂-Index':        'Index 100 = Emissionen im Bepreisungsbereich im Status quo (327 Mio. t)',
+  'Schulden-Δ':       'Änderung der Schuldenquote im Jahr, Prozentpunkte',
+  'Wohlfahrtsverlust':'Harberger-Dreieck je Gruppe; sinkt mit niedrigeren Grenzsteuersätzen',
+  'METR D1':          'Grenzbelastung inkl. Transferentzug im untersten Dezil',
 };
 
 
@@ -855,4 +808,4 @@ const ZUKUNFTS_SZENARIEN = [
   },
 ];
 
-export { FISKAL, TARIF_2026, HH_STRUKTUR, KALIBRIERUNG_ZIELE, ERBST_2024, DEZILE, MPC_DEZIL, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, VGR_2025, BUERGERGELD_2025, PRESETS, MOD_DEFS, CHALLENGES, CHALLENGE_CTX, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };
+export { FISKAL, TARIF_2026, TOP_PARETO, HH_STRUKTUR, KALIBRIERUNG_ZIELE, ERBST_2024, DEZILE, MPC_DEZIL, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, VGR_2025, BUERGERGELD_2025, PRESETS, MOD_DEFS, CHALLENGES, CHALLENGE_CTX, CHALLENGE_BEISPIELE, KENNZAHLEN, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };
