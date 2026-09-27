@@ -170,7 +170,7 @@ const QUELLEN = [
     titel:'The elasticity of taxable income: evidence and implications',
     quelle:'Journal of Public Economics, 84(1), 1–32',
     doi:'10.1016/S0047-2727(01)00085-8',
-    verwendet:'ELAST.labor_supply = 0,20 · zentrales Schätzpapier für Arbeitselastizität (intensive margin)' },
+    verwendet:'Einordnung: Elastizität des zu versteuernden Einkommens (ETI); nicht als Beleg für die Arbeitsangebotselastizität verwendet' },
 
   { id:'A22', typ:'akademisch',
     autor:'Jakobsen, K., Jakobsen, K., Kleven, H. & Zucman, G.',
@@ -186,7 +186,7 @@ const QUELLEN = [
     titel:'Estimating Taxable Income Responses Using Danish Tax Reforms',
     quelle:'American Economic Journal: Economic Policy, 6(4), 271–301',
     doi:'10.1257/pol.6.4.271',
-    verwendet:'ELAST.capital_supply = 0,50 · ELAST.d10c_avoidance · Tooltip synthetische ESt und Kapitalbesteuerung' },
+    verwendet:'Einordnung ELAST.d10c_avoidance (Reaktion des zu versteuernden Einkommens, dänische Reformen) · Tooltip synthetische ESt' },
 
   { id:'A24', typ:'akademisch',
     autor:'Kleven, H., Landais, C., Muñoz, M. & Stantcheva, S.',
@@ -202,7 +202,7 @@ const QUELLEN = [
     titel:'Tricks with Hicks: The EASI Demand System',
     quelle:'American Economic Review, 99(3), 827–863',
     doi:'10.1257/aer.99.3.827',
-    verwendet:'F3-Korrektur (Audit) · methodische Grundlage: verschiedene Warenkategorien haben unterschiedliche Preiselastizitäten → MwSt-Verhaltensreaktion muss je Satz getrennt modelliert werden' },
+    verwendet:'Nur methodisch (EASI-Nachfragesystem): Reaktion je Satz getrennt. Der Wert ELAST.consumption ist eine Modellannahme und stammt nicht aus diesem Paper' },
 
   { id:'A26', typ:'akademisch',
     autor:'Mankiw, N.G. & Taylor, M.',
@@ -242,7 +242,7 @@ const QUELLEN = [
     titel:'The Elasticity of Taxable Income with Respect to Marginal Tax Rates: A Critical Review',
     quelle:'Journal of Economic Literature, 50(1), 3–50',
     doi:'10.1257/jel.50.1.3',
-    verwendet:'ELAST.labor_supply = 0,20 · Konsens-Schätzung intensive margin; Fußnote Elastizitäten (Saez/Chetty-Konsens)' },
+    verwendet:'Übersicht zur Elastizität des zu versteuernden Einkommens' },
 
   { id:'A31', typ:'akademisch',
     autor:'Weyl, E.G. & Fabinger, M.',
@@ -316,6 +316,21 @@ const QUELLEN = [
     doi:'',
     verwendet:'Altersvorsorge-Rechner · 4-%-Regel nur als Vergleichswert (US-Daten, 30 Jahre Entnahme)' },
 
+  { id:'A40', typ:'akademisch',
+    autor:'Chetty, R.',
+    jahr:'2012',
+    titel:'Bounds on Elasticities With Optimization Frictions: A Synthesis of Micro and Macro Evidence on Labor Supply',
+    quelle:'Econometrica, 80(3), 969–1018',
+    doi:'10.3982/ECTA9043',
+    verwendet:'Einordnung ELAST.labor_supply (Wert 0,20 ist Modellannahme)' },
+
+  { id:'A41', typ:'akademisch',
+    autor:'Masters, R., Anwar, E., Collins, B., Cookson, R. & Capewell, S.',
+    jahr:'2017',
+    titel:'Return on investment of public health interventions: a systematic review',
+    quelle:'Journal of Epidemiology and Community Health, 71(8), 827–834',
+    doi:'10.1136/jech-2016-208141',
+    verwendet:'GKV-Panel Prävention · Einordnung: Median-ROI 14,3 über 52 Studien; im Modell vorsichtig 1,5× (Annahme)' },
 
   /* ─────────────────────────────────────────────────────────────
      BERICHTE, GUTACHTEN & INSTITUTIONELLE PUBLIKATIONEN
@@ -537,14 +552,6 @@ const QUELLEN = [
     doi:'',
     verwendet:'SVR-Demografieprojektion: +0,3 PP/Jahr RV-Beitragssatz bis 2045; Tooltip GewSt; Saldo-Projektion' },
 
-  { id:'B28', typ:'bericht',
-    autor:'WHO – World Health Organization',
-    jahr:'2017',
-    titel:'Return on Investment of Public Health Interventions: A Systematic Review',
-    quelle:'WHO Regional Office for Europe, Copenhagen',
-    doi:'',
-    verwendet:'GKV-Panel Prävention · ROI 3–5 € je 1 € über 20 Jahre; im Modell vereinfacht 1,5× Nettonutzen (konservativ)' },
-
   { id:'B29', typ:'bericht',
     autor:'ZEW – Leibniz-Zentrum für Europäische Wirtschaftsforschung / Heim, B. et al.',
     jahr:'diverse',
@@ -601,6 +608,13 @@ const QUELLEN = [
     doi:'',
     verwendet:'BUERGERGELD_2025: Regelleistungen 29,0 Mrd. €, KdU-Bundesanteil 12,5 Mrd. €, 5,378 Mio. Regelleistungsberechtigte' },
 
+  { id:'B36', typ:'bericht',
+    autor:'Bundesministerium für Arbeit und Soziales (BMAS)',
+    jahr:'2025',
+    titel:'Rentenversicherungsbericht 2025',
+    quelle:'Bericht der Bundesregierung, Kabinettsbeschluss November 2025',
+    doi:'',
+    verwendet:'Rentenfonds-Panel · Beitragssatzpfad 18,6 % (bis 2027) → 20,1 % (2030) → 21,2 % (2039), mittlere Variante' },
 
   /* ─────────────────────────────────────────────────────────────
      AMTLICHE STATISTIKEN & DATENSÄTZE
@@ -693,7 +707,6 @@ const QUELLEN = [
     quelle:'PKV-Verband, Pressemitteilung Februar 2025',
     doi:'',
     verwendet:'8,74 Mio. PKV-Vollversicherte 2024 (Tooltip und GKV-Panel)' },
-
 
   /* ─────────────────────────────────────────────────────────────
      RECHTLICHE QUELLEN

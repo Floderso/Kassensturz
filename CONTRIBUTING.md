@@ -31,6 +31,16 @@ for t in tests/*.test.mjs; do node "$t" || exit 1; done
 
 Sie prüfen unter anderem, dass der Status quo ein Fixpunkt ist (keine Veränderung gegenüber sich selbst), dass jedes Preset in den Reglern exakt darstellbar ist und dass die Zukunftssimulation die Budgetidentität einhält. Wer Status-quo-Werte in `PRESETS.status_quo` fortschreibt (z. B. Grundfreibetrag des nächsten Jahres), sieht hier sofort, ob ein Regler angepasst werden muss.
 
+### Offene Daten
+
+`data.json` und `llms.txt` werden nicht von Hand gepflegt, sondern aus `js/data.js` und dem Status-quo-Lauf des Modells erzeugt. Nach jeder Änderung an Daten oder Rechenkern:
+
+```bash
+node tools/export.mjs
+```
+
+`tests/export.test.mjs` schlägt fehl, solange die Dateien veraltet sind.
+
 ## Grenzen des Modells
 
 Vor einem Beitrag lohnt sich ein Blick in [`Konzept_Steuersimulation.md`](Konzept_Steuersimulation.md) — dort ist dokumentiert, was das Modell bewusst vereinfacht und was es nicht abbilden kann.

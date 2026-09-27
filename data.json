@@ -2,135 +2,188 @@
   "meta": {
     "quelle": "kassensturz.org",
     "lizenz": "CC BY 4.0",
-    "stand": "2026-07-15",
-    "basis": [
-      "Bundeshaushalt 2026 (BMF)",
-      "SOEP v40 (DIW)",
-      "Destatis Mikrozensus 2024",
-      "DINA-DE",
-      "DIW Vermögensbericht 2024"
-    ],
-    "hinweis": "dezile unverändert ggü. 2025 (keine neuere Verteilungserhebung verfügbar); staatsausgaben_2026: nur verteidigung auf bestätigten 2026-Gesamtstaat-Wert aktualisiert, übrige Posten noch 2025er-Schätzung; steueraufkommen_2026: nur co2_steuer neu kalibriert (Preiskorridor 55–65 €/t), übrige Posten noch 2025er-Schätzung mangels amtlicher Einzelsteuerarten-Aufschlüsselung für 2026"
+    "stand": "2026-09-27",
+    "erzeugt_aus": "js/data.js und Status-quo-Lauf von js/rechner/berechne.js (tools/export.mjs)",
+    "hinweis": "Dezile: Modellgruppen (D10 geteilt in P90–95, P95–99, Top 1 %), Einkommen der Gruppen liegen unter dem VGR-Niveau (Prüfbericht F-070). Haushaltsstruktur (Erwachsene, Kinder, Paaranteil, Erwerbstätige) ist eine gekennzeichnete Annahme. Vermögen je Gruppe wird nicht veröffentlicht, weil Herkunft und Maß ungeklärt sind (F-050). Aufkommen: überwiegend Werte 2025 als Näherung für 2026."
   },
   "dezile": [
     {
-      "dezil": "D1",
+      "gruppe": "D1",
       "haushalte_mio": 4.1,
       "brutto_jahr_eur": 14000,
-      "anteil_kapital": 0.01,
-      "vermoegen_median_eur": 1000
+      "anteil_kapitaleinkommen": 0.01,
+      "erwachsene_annahme": 1.2,
+      "kinder_annahme": 0.37,
+      "paaranteil_annahme": 0.15,
+      "erwerbstaetige_annahme": 0.4
     },
     {
-      "dezil": "D2",
+      "gruppe": "D2",
       "haushalte_mio": 4.1,
       "brutto_jahr_eur": 21000,
-      "anteil_kapital": 0.01,
-      "vermoegen_median_eur": 5000
+      "anteil_kapitaleinkommen": 0.01,
+      "erwachsene_annahme": 1.35,
+      "kinder_annahme": 0.51,
+      "paaranteil_annahme": 0.3,
+      "erwerbstaetige_annahme": 0.6
     },
     {
-      "dezil": "D3",
+      "gruppe": "D3",
       "haushalte_mio": 4.1,
       "brutto_jahr_eur": 27000,
-      "anteil_kapital": 0.02,
-      "vermoegen_median_eur": 15000
+      "anteil_kapitaleinkommen": 0.02,
+      "erwachsene_annahme": 1.5,
+      "kinder_annahme": 0.56,
+      "paaranteil_annahme": 0.4,
+      "erwerbstaetige_annahme": 0.8
     },
     {
-      "dezil": "D4",
+      "gruppe": "D4",
       "haushalte_mio": 4.1,
       "brutto_jahr_eur": 33000,
-      "anteil_kapital": 0.02,
-      "vermoegen_median_eur": 35000
+      "anteil_kapitaleinkommen": 0.02,
+      "erwachsene_annahme": 1.6,
+      "kinder_annahme": 0.54,
+      "paaranteil_annahme": 0.5,
+      "erwerbstaetige_annahme": 1
     },
     {
-      "dezil": "D5",
+      "gruppe": "D5",
       "haushalte_mio": 4.1,
       "brutto_jahr_eur": 40000,
-      "anteil_kapital": 0.03,
-      "vermoegen_median_eur": 70000
+      "anteil_kapitaleinkommen": 0.03,
+      "erwachsene_annahme": 1.7,
+      "kinder_annahme": 0.49,
+      "paaranteil_annahme": 0.6,
+      "erwerbstaetige_annahme": 1.2
     },
     {
-      "dezil": "D6",
+      "gruppe": "D6",
       "haushalte_mio": 4.1,
       "brutto_jahr_eur": 48000,
-      "anteil_kapital": 0.03,
-      "vermoegen_median_eur": 120000
+      "anteil_kapitaleinkommen": 0.03,
+      "erwachsene_annahme": 1.8,
+      "kinder_annahme": 0.44,
+      "paaranteil_annahme": 0.65,
+      "erwerbstaetige_annahme": 1.3
     },
     {
-      "dezil": "D7",
+      "gruppe": "D7",
       "haushalte_mio": 4.1,
       "brutto_jahr_eur": 58000,
-      "anteil_kapital": 0.04,
-      "vermoegen_median_eur": 200000
+      "anteil_kapitaleinkommen": 0.04,
+      "erwachsene_annahme": 1.9,
+      "kinder_annahme": 0.4,
+      "paaranteil_annahme": 0.75,
+      "erwerbstaetige_annahme": 1.5
     },
     {
-      "dezil": "D8",
+      "gruppe": "D8",
       "haushalte_mio": 4.1,
       "brutto_jahr_eur": 72000,
-      "anteil_kapital": 0.05,
-      "vermoegen_median_eur": 340000
+      "anteil_kapitaleinkommen": 0.05,
+      "erwachsene_annahme": 2,
+      "kinder_annahme": 0.35,
+      "paaranteil_annahme": 0.8,
+      "erwerbstaetige_annahme": 1.6
     },
     {
-      "dezil": "D9",
+      "gruppe": "D9",
       "haushalte_mio": 4.1,
       "brutto_jahr_eur": 95000,
-      "anteil_kapital": 0.07,
-      "vermoegen_median_eur": 620000
+      "anteil_kapitaleinkommen": 0.07,
+      "erwachsene_annahme": 2,
+      "kinder_annahme": 0.3,
+      "paaranteil_annahme": 0.85,
+      "erwerbstaetige_annahme": 1.7
     },
     {
-      "dezil": "D10a",
+      "gruppe": "D10a",
       "haushalte_mio": 2.05,
       "brutto_jahr_eur": 125000,
-      "anteil_kapital": 0.08,
-      "vermoegen_median_eur": 450000
+      "anteil_kapitaleinkommen": 0.08,
+      "erwachsene_annahme": 2,
+      "kinder_annahme": 0.23,
+      "paaranteil_annahme": 0.85,
+      "erwerbstaetige_annahme": 1.7
     },
     {
-      "dezil": "D10b",
+      "gruppe": "D10b",
       "haushalte_mio": 1.64,
       "brutto_jahr_eur": 220000,
-      "anteil_kapital": 0.18,
-      "vermoegen_median_eur": 1500000
+      "anteil_kapitaleinkommen": 0.18,
+      "erwachsene_annahme": 2,
+      "kinder_annahme": 0.16,
+      "paaranteil_annahme": 0.85,
+      "erwerbstaetige_annahme": 1.6
     },
     {
-      "dezil": "D10c_top1pct",
+      "gruppe": "D10c",
       "haushalte_mio": 0.41,
       "brutto_jahr_eur": 700000,
-      "anteil_kapital": 0.45,
-      "vermoegen_median_eur": 7000000
+      "anteil_kapitaleinkommen": 0.45,
+      "erwachsene_annahme": 2,
+      "kinder_annahme": 0.09,
+      "paaranteil_annahme": 0.85,
+      "erwerbstaetige_annahme": 1.5
     }
   ],
-  "staatsausgaben_2026_mrd_eur": {
-    "soziales_rente_gkv_pflege_buergergeld": 850,
-    "gesundheit": 320,
-    "bildung": 180,
-    "verteidigung": 108,
-    "infrastruktur": 120,
-    "verwaltung": 140,
-    "zinsen": 30,
-    "sonstiges": 140,
-    "gesamt": 1888
-  },
-  "steueraufkommen_2026_mrd_eur": {
+  "steueraufkommen_mrd_eur": {
     "lohnsteuer": 255,
-    "einkommensteuer_veranlagt": 90,
+    "einkommensteuer_veranlagt_inkl_kapitalertragsteuer": 90,
+    "abgeltungsteuer_und_soli": 12,
     "mehrwertsteuer": 303,
     "koerperschaftsteuer": 45,
     "gewerbesteuer": 75,
     "energiesteuer": 37,
-    "co2_steuer": 21,
+    "co2_bepreisung": 21,
     "tabaksteuer": 15,
-    "grunderwerbsteuer": 16,
-    "erbschaftsteuer": 13.3,
+    "grundsteuer": 16,
+    "erbschaft_und_schenkungsteuer": 13.3,
+    "kfz_steuer": 10,
+    "sonstige_verbrauchsteuern": 35,
     "rentenversicherungsbeitraege": 310,
     "krankenversicherungsbeitraege": 290,
-    "arbeitslosenversicherung_pflegeversicherung": 105
+    "arbeitslosen_und_pflegeversicherung": 105
+  },
+  "gesamtstaat_vgr_2025_mrd_eur": {
+    "einnahmen": 2140.2,
+    "ausgaben": 2259.3,
+    "saldo": -119.1,
+    "steuern": 1031.5
+  },
+  "modell_status_quo_2026_mrd_eur": {
+    "einnahmen": 2140.2,
+    "ausgaben": 2259.3,
+    "saldo": -119.1,
+    "saldo_bip_prozent": -2.58,
+    "einkommensteuer_inkl_soli": 357,
+    "ausgabenposten": {
+      "rente": 390,
+      "gkv": 290,
+      "al_pflege": 90,
+      "buergergeld": 41.5,
+      "kindergeld": 52.9,
+      "neg_est": 0,
+      "bge": 0,
+      "zinsen": 30,
+      "bildung": 180,
+      "verteidigung": 108,
+      "infrastruktur": 120,
+      "verwaltung": 140,
+      "uebrige": 816.9
+    },
+    "armutsrisikoquote_prozent": 16.1
   },
   "makro_2026": {
     "bip_mrd_eur": 4622,
-    "co2_emissionen_mio_tonnen": 327,
-    "erbschaftsmasse_pro_jahr_mrd_eur": 400,
-    "bodenwert_gesamt_mrd_eur": 5000,
-    "steuerpflichtiges_vermoegen_ueber_2mio_mrd_eur": 3500,
+    "co2_bepreiste_emissionen_mio_t": 327,
     "sozialversicherungspflichtige_lohnsumme_mrd_eur": 1750,
-    "rentenversicherung_gesamtausgaben_mrd_eur": 449
+    "kv_beitragsbemessungsgrenze_eur": 69750,
+    "nominalwachstum_annahme": 0.03
+  },
+  "annahmen": {
+    "pareto_parameter_top1": 1.6,
+    "oeffentlicher_kapitalstock_mrd_eur": 1500
   }
 }

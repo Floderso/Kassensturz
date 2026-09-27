@@ -2,6 +2,8 @@
 
 Stand: 24.09.2026 · Prüfgegenstand: Branch `claude/kassensturz-code-review-col3ha`, Commit `e33f00a`
 
+Umsetzungsstand: 27.09.2026 (Blöcke 1–9). Jeder Befund trägt eine Zeile **Status**. Die Übersicht steht am Ende dieses Berichts.
+
 ## Prüfrahmen
 
 - **Umfang:** gesamtes Repository (Rechenkern `js/rechner/*`, Datenbasis `js/data.js`/`data.json`, `index.html` + `js/haushaltsspiel.js` + `js/render/*`, `finanz.html`, `mikro.html`, `quellen.html`, `impressum.html`, `Konzept_Steuersimulation.md`, `llms.txt`, GitHub-Workflow + `.github/scripts/claude_review.py`)
@@ -47,6 +49,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Die Datenschutzerklärung verneint beides ausdrücklich. Sie ist damit für die Live-Seite nachweislich unzutreffend.
   - Betroffen sind die Informationspflichten (Art. 13 DSGVO), die Rechtsgrundlage (Art. 6 DSGVO) und die Einwilligungspflicht für Endgerätezugriffe (§ 25 TDDDG).
   - Die Einstufung ist technisch-faktisch und keine Rechtsberatung.
+- **Status:** Behoben in Block 1. Google-Tag entfernt, Schriften lokal eingebunden, Datenschutzerklärung (`impressum.html#datenschutz`) entsprechend angepasst.
 
 ### F-002 · kritisch · W · Einkommensteuer auf Haushalts-Brutto ohne Splitting und Abzüge – Aufkommen doppelt so hoch wie real
 - **Fundstelle:** `js/rechner/berechne.js:126-141`, insb. `:129`, `:140`
@@ -62,6 +65,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Ergebnis: 675,3 Mrd. € Einkommensteuer gegenüber 345 Mrd. € im eigenen Referenzwert. Das ist Faktor 1,96.
   - Alle darauf aufbauenden Größen sind verzerrt: Netto je Dezil, Konsum, MwSt, Gini, Laffer, dynamisches Scoring.
   - Das Konzeptdokument verspricht dagegen eine „Mikrosimulation“ mit Haushaltstypen (`Konzept_Steuersimulation.md:31, 51-58`).
+- **Status:** Behoben in Block 4b. ESt auf das zvE je Gruppe mit Splitting-Anteil, AN-Pauschbetrag, Vorsorgeaufwendungen, Soli und Abgeltung (`js/rechner/haushalt.js`). Die Haushaltsstruktur je Gruppe ist eine gekennzeichnete Annahme (Mikrozensus/EVS nicht erreichbar); der ESt-Restfaktor gegenüber der Kassenstatistik liegt bei 0,957.
 
 ### F-003 · kritisch · W · Übrige Einnahmen nicht auf die Referenzwerte kalibriert
 - **Fundstelle:**
@@ -79,6 +83,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Das plausibel wirkende Gesamtaufkommen (1.838 Mrd. €) entsteht nur, weil sich diese Fehler und F-002 gegenseitig ausgleichen.
   - Jede Reform einer einzelnen Steuer wird dadurch gegen eine falsche Bemessungsgrundlage gerechnet. Beispiel: Eine MwSt-Erhöhung wirkt im Modell nur halb so stark wie real.
   - Für die MwSt kommt hinzu: Der gesamte Konsum wird besteuert (70/30-Split), obwohl Mieten und weitere Leistungen nach § 4 UStG steuerfrei sind.
+- **Status:** Behoben in Block 4c und 5. Bemessungsgrundlagen aus Ist-Aufkommen, offen ausgewiesene Kalibrierung (Sparquote, ESt-Restfaktor, MwSt-Restgröße) und Restposten gegenüber den VGR-Summen 2025; der Status quo trifft Einnahmen, Ausgaben und Saldo der VGR.
 
 ### F-004 · kritisch · W · Status quo enthält ein Klimageld, das es 2026 nicht gibt
 - **Fundstelle:** `js/data.js:148`; `js/rechner/berechne.js:177`, `:255`
@@ -87,6 +92,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Eine Pro-Kopf-Rückzahlung der CO₂-Einnahmen ist 2026 geltendes Recht weder im BEHG noch in einem anderen Gesetz.
   - Der „Status quo 2026“ zieht trotzdem 70 % der CO₂-Einnahmen ab (netto 6,4 statt 21 Mrd. €) und verteilt sie in `berechneNettoSQ` auf die Haushalte um.
   - Der Referenzpunkt aller Δ-Berechnungen bildet damit eine nicht existierende Politik ab.
+- **Status:** Behoben in Block 2. Status quo und Preset „Koalition 2027“ ohne Klimageld.
 
 ### F-005 · kritisch · W · Klimasensitivität um Faktor ~1.100 zu hoch; zudem Gesamt- statt Zusatzemissionen
 - **Fundstelle:** `js/rechner/transition.js:36`, `:117`
@@ -97,6 +103,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Zusätzlich werden die gesamten deutschen bepreisten Emissionen kumuliert (327 Mt/Jahr), nicht die im Kommentar genannten „Zusatz-Emissionen“.
   - Folge in der Baseline: nach 16 Jahren 5.232 Mt → +2,6 °C allein durch Deutschland. Über `diceKlimaMalus` wird daraus ein BIP-Verlust von mehreren Prozent.
   - Der Klimaschaden in der Zukunftssimulation ist damit um Größenordnungen überzeichnet.
+- **Status:** Behoben in Block 2. TCRE in der korrekten Einheit, nur zusätzliche Emissionen gegenüber dem Status quo, Hinweistext.
 
 ### F-006 · kritisch · T/W · Zinsen in der Zukunftssimulation doppelt gezählt, mit zwei verschiedenen Zinssätzen
 - **Fundstelle:** `js/rechner/berechne.js:77-83`, `:297`; `js/rechner/transition.js:32`, `:113`
@@ -106,6 +113,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - In der Transition wird der Schuldenstand zusätzlich mit 2,5 % p. a. aufgezinst, und davon wird der bereits zinsbelastete Saldo abgezogen.
   - Korrekt wäre `schuld_next = schuld_curr − Σ saldo`, wobei der Saldo die Zinsen enthält. Alternativ: aufzinsen und dafür einen Primärsaldo abziehen.
   - Die doppelte Zählung ist ein Hauptgrund für den Anstieg der Schuldenquote von 65,3 % auf 123,6 % im Status-quo-Pfad.
+- **Status:** Behoben in Block 2. Zinsen werden nur einmal im Saldo gebucht; die Transition hält die Budgetidentität ein (`tests/transition.test.mjs`).
 
 ### F-007 · kritisch · T · Range-Slider runden die Status-quo-Werte; Anzeige und Referenz `REF` fallen auseinander
 - **Fundstelle:**
@@ -129,6 +137,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Ebenso betroffen: Presets `koalition27` (12.900 → 13.000), `kirchhof`, `simpel`, `bge` (BBG, Bürgergeld, Grenze).
 
 ---
+- **Status:** Behoben in Block 2. Reglerraster und Tastenschritte so, dass alle Presets exakt darstellbar sind; Test in `tests/presets.test.mjs`.
 
 ## Schwer
 
@@ -140,6 +149,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - `berechne()` skaliert nur den Unternehmensgewinn mit `bip_faktor`. Lohnsumme, Konsum, Transfers und Ausgaben bleiben über 20 Jahre nominal konstant, während Schulden nominal aufgezinst werden.
   - Die Staatsquote auf der Einnahmenseite sinkt dadurch mechanisch. Der Schuldenpfad ist nicht interpretierbar.
   - Zudem ist „Bundesbank“ als Quelle für 1,5 % nominal nicht nachvollziehbar belegt (siehe Kopfkommentar `transition.js:18`: „Bundesbank Winterprognose 2024“).
+- **Status:** Behoben in Block 6. Alle Posten außer Zinsen skalieren mit dem nominalen BIP-Pfad (offengelegte Annahme: keine kalte Progression).
 
 ### F-009 · schwer · W · Einkommensteuertarif weicht von § 32a EStG 2026 ab
 - **Fundstelle:** `js/rechner/einkommensteuer.js:5`, `:36-61`, `:88-94`
@@ -157,6 +167,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 
   - Grenzsteuersatz am Ende von Zone 2 im Modell: 24,34 % (gesetzlich 23,97 %).
   - Der Tooltip behauptet den gesetzlichen Tarif („42% ab 69.879 €“, `data.js:405`), gerechnet wird ein anderer.
+- **Status:** Behoben in Block 4a. Formeltarif § 32a EStG 2026 mit eigenem Regler für die Proportionalzone; Abweichung ≤ 1 € (`tests/tarif.test.mjs`).
 
 ### F-010 · schwer · T · Arbeitsangebotsreaktion wird gegen einen veralteten Grundfreibetrag gerechnet
 - **Fundstelle:** `js/rechner/berechne.js:87`
@@ -166,6 +177,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Dadurch ist `labor_factor ≠ 1` schon im Status quo (Nachrechnung: `avg_labor = 1,000295`).
   - Die Netto-Δ je Dezil im Status quo sind ungleich null (+9 € für D1 bis −1 € für D10c).
   - Der Referenzpunkt ist nicht neutral.
+- **Status:** Behoben in Block 2. Alle Referenzwerte aus `PRESETS.status_quo`; Status quo ist Fixpunkt (`tests/status_quo.test.mjs`).
 
 ### F-011 · schwer · T · SV-Ausgaben-Kopplung mit falscher Basis: +21,3 Mrd. € Ausgaben im Status quo
 - **Fundstelle:** `js/rechner/berechne.js:288-292`
@@ -174,6 +186,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Der KV-Satz im Status quo ist 17,5 (`data.js:150`). Die Normierung erfolgt aber auf 16,3.
   - Im Status quo entstehen dadurch 290 · (17,5/16,3 − 1) = +21,3 Mrd. € zusätzliche Ausgaben.
   - Sie stecken in jedem Saldo und jedem Szenario-Vergleich.
+- **Status:** Behoben in Block 2. SV-Kopplung gegen den Status-quo-Lauf; SV-Δ im Status quo = 0.
 
 ### F-012 · schwer · T · Investitionsfaktor im Status quo ≠ 1
 - **Fundstelle:** `js/rechner/berechne.js:145`
@@ -182,6 +195,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Die Referenzbelastung ist mit 0,30 fest codiert. Der Status quo ergibt jedoch 15 + 14 = 29 %, damit `investment_factor = 1,004`.
   - Gewinne, KSt, GewSt, Verhaltensindex „Investition“ (100,4) und `dynamisch_kst` weichen im Status quo von ihren Basiswerten ab.
   - Zusätzlich fehlt der Soli auf die KSt (15,825 %), den die eigene Quelle G03 nennt.
+- **Status:** Behoben in Block 2. Investitionsfaktor im Status quo = 1.
 
 ### F-013 · schwer · W · Erhebungskosten der Steuern ersetzen die gesamten Verwaltungsausgaben
 - **Fundstelle:** `js/rechner/berechne.js:268-282`, `:297`
@@ -191,6 +205,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - `admin_kosten` sind nur die Erhebungskosten der Abgaben (Quoten aus `ADMIN_QUOTE`), im Status quo 68,6 Mrd. €.
   - Durch die Ersetzung sinken die Staatsausgaben im Status quo um ca. 71 Mrd. €. Jede Steuerreform verändert zudem scheinbar die gesamte Staatsverwaltung.
   - Die Challenge „Verwaltungskosten unter 120 Mrd. €“ misst daher eine falsch definierte Größe.
+- **Status:** Behoben in Block 5. Erhebungskosten wirken nur als Differenz zum Status quo.
 
 ### F-014 · schwer · W · BGE-Renteneinsparung gegen inkonsistente Ausgabenbasis
 - **Fundstelle:** `js/rechner/berechne.js:220-234`; `js/data.js:89`
@@ -202,6 +217,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Zusätzlich:
     - `rentner_h`/`rentner_g` (Summe 21 Mio.) sind unbelegt.
     - Die Durchschnittseinkommen `rl * 0.55` bzw. `rl * 1.80` sind ad hoc gesetzt.
+- **Status:** Behoben in Block 5. BGE-Anrechnung höchstens bis zum Rentenposten.
 
 ### F-015 · schwer · W · Staatsausgaben: GKV doppelt, Gesamtvolumen zu niedrig
 - **Fundstelle:** `js/data.js:43-52`; `js/rechner/berechne.js:286`; `data.json` `staatsausgaben_2026_mrd_eur`
@@ -211,6 +227,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Das Bürgergeld ist in „sozial“ enthalten und wird außerdem über `bg_auszahlung` separat addiert (`berechne.js:297`).
   - `llms.txt` und `data.json` veröffentlichen „Staatsausgaben Gesamtstaat 2026: ca. 1.888 Mrd. €“ als Datum. Nach VGR liegen die Ausgaben des Gesamtstaats bei rund 2,1 Bio. €.
   - Die Aufschlüsselung ist nach eigener Angabe eine „2025er-Schätzung“ ohne Primärquelle (`data.js:39-42`).
+- **Status:** Teilweise behoben in Block 5. Ausgaben auf die VGR-Summe 2025 kalibriert, GKV nur einmal. Offen: Aufteilung nach COFOG (Destatis nicht erreichbar); der nicht einzeln modellierte Rest steht als ausgewiesener Restposten.
 
 ### F-016 · schwer · W · Rentenfonds: Erträge gleichzeitig ausgeschüttet und reinvestiert
 - **Fundstelle:** `js/rechner/rente.js:61-72`
@@ -219,6 +236,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Der volle Jahresertrag wird als Beitragsentlastung verbucht und zugleich im Kapitalstock thesauriert. Ein Euro Ertrag wird damit zweimal verwendet.
   - Außerdem wird mit Nominalrendite (Default 7 %) gegen eine konstante nominale Lohnsumme gerechnet. Der eigene Hinweis „Inflationsabzug für Realrendite nötig“ (`rente.js:15`) wird nicht umgesetzt.
   - Beispiel Fondsquote 10 % ab 2010: Der Beitragssatz mit Fonds fällt bis 2045 auf die Untergrenze von 12 %.
+- **Status:** Behoben in Block 5. Reale Rendite, ab 2025 Ausschüttung ohne Doppelzählung.
 
 ### F-017 · schwer · T · PKV-Abschaffung: Einheitenfehler um Faktor 1.000
 - **Fundstelle:** `js/rechner/rente.js:76-81`
@@ -227,6 +245,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - 11 Mio. Personen × 600 €/Monat × 12 = 79,2 Mrd. €. Der Code liefert 0,0792 „Mrd.“.
   - Der Nettoeffekt beträgt −0,0066 Mrd. € statt der dokumentierten Größenordnung (`FORMEL_QUELLEN_RENTE.pkv_abschaffung.note`: „Einnahmen +~8 Mrd., Ausgaben +~8,5 Mrd.“).
   - Auch diese Dokumentation passt nicht zu den eigenen Parametern (0,60/0,65 T€ × 11 Mio. × 12).
+- **Status:** Behoben in Block 5. PKV-Nettoeffekt 3,35 Mrd. € (Mittelwert IGES 2020) mit Einheit im Namen.
 
 ### F-018 · schwer · W · „HANK“-Multiplikator konzeptionell falsch hergeleitet und kumulativ als Niveaueffekt angewandt
 - **Fundstelle:** `js/rechner/transition.js:58-68`, `:106-108`
@@ -236,6 +255,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Der Impuls wird als Summe über n Jahre × Multiplikator als dauerhafter Niveauaufschlag auf das BIP gebucht und kumuliert sich über die Perioden.
   - Ergebnis im Szenario „Investitionsschub“ (60/60/30/0/0 Mrd. €/J.): BIP 2042 = 6.647 statt 5.640 Mrd. € (+17,9 %), auch nach Ende der Investitionen.
   - Das widerspricht der zitierten Meta-Literatur zu Multiplikatoren, die kurzfristige Flusseffekte beschreibt.
+- **Status:** Behoben in Block 6. Ein Multiplikator als Flusseffekt; dauerhafte Wirkung nur über den öffentlichen Kapitalstock; HANK-Gewichtung entfernt.
 
 ### F-019 · schwer · W · Zwei widersprüchliche Fiskalmultiplikatoren
 - **Fundstelle:** `js/haushaltsspiel.js:387`; `js/rechner/transition.js:33`
@@ -243,6 +263,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Begründung:**
   - Dieselbe Oberfläche zeigt einen Multiplikator von 0,65 und rechnet in der Zukunftssimulation mit 1,2.
   - Beide werden unterschiedlichen, nicht spezifizierten Quellen zugeschrieben.
+- **Status:** Behoben in Block 6. Ein Satz Multiplikatoren in `FISKAL` (Gechert 2015), überall verwendet.
 
 ### F-020 · schwer · W · Schuldenbremse falsch operationalisiert
 - **Fundstelle:** `js/rechner/berechne.js:391-394`; `index.html:572`; `js/data.js:327`
@@ -254,6 +275,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
     - Spielraum der Länder von 0,35 % des BIP
     - Sondervermögen Infrastruktur
   - Die Live-Seite meldet im Status quo „✗ verletzt -1,99 % BIP“. Das ist keine korrekte Aussage über die Schuldenbremse.
+- **Status:** Behoben in Block 5. Maastricht-Defizitquote statt Schuldenbremse.
 
 ### F-021 · schwer · W · Gini, Palma und S80/S20 nicht äquivalenzgewichtet; widerspricht Konzept und Benchmark
 - **Fundstelle:**
@@ -267,6 +289,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Gini im Status quo: 0,357, direkt neben dem Benchmark 0,295. Palma im Status quo: 6,36 (OECD-Werte für DE ca. 1,1). Die Werte sind nicht vergleichbar.
   - Weil Gruppenmittelwerte verwendet werden, ist die Ungleichheit innerhalb der Gruppen zudem gleich null.
   - Die Challenges (`gini_285`, `palma_18`) beziehen sich implizit auf die amtliche Skala.
+- **Status:** Behoben in Block 4b. Gini, Palma, S80/S20 und Median auf Äquivalenzeinkommen je Person (neue OECD-Skala).
 
 ### F-022 · schwer · W · Laffer-Kurve zeigt kein Maximum; Tooltip behauptet das Gegenteil
 - **Fundstelle:** `js/render/laffer.js:31-34`; `js/data.js:405`; `quellen.html:378`
@@ -285,6 +308,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Der Gesetzentwurf wurde im Herbst 2024 im Bundestag beraten und ist mit dem Ende der Koalition im November 2024 nicht verabschiedet worden ([Bundestag Textarchiv](https://www.bundestag.de/dokumente/textarchiv/2024/kw42-pa-arbeit-rentenpaket-1022606)).
   - Eine Verkündung im Bundesgesetzblatt existiert nicht, und es fließen keine 12 Mrd. €/Jahr in ein Generationenkapital.
   - Die Angabe „BT-Drs. 20/10749“ ist nicht nachvollziehbar belegt.
+- **Status:** Behoben in Block 3. Rentenpaket II als nicht verabschiedeter Gesetzentwurf (BT-Drs. 20/11898) gekennzeichnet; Test verbietet die Falschangabe.
 
 ### F-024 · schwer · Z · Brülhart et al. falsch zitiert und sachfremd verwendet
 - **Fundstelle:** `quellen.html:324-331` (A09); `js/data.js:123`, `:136`
@@ -292,6 +316,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Begründung:**
   - Die korrekten Angaben lauten: AEJ: Economic Policy 14(4), 2022, S. 111–150, DOI 10.1257/pol.20200258 ([AEA](https://www.aeaweb.org/articles?id=10.1257%2Fpol.20200258)). Band, Seiten, Jahr und DOI im Verzeichnis sind falsch.
   - Die Studie untersucht die Reaktion auf die kantonale Vermögensteuer. Sie liefert keine Emigrationselastizität für Einkommensteuer-Grenzsätze über 60 %, wofür `ELAST.d10c_wegzug` sie heranzieht.
+- **Status:** Behoben in Block 3. Brülhart et al. (2022), AEJ:EP 14(4), korrekte DOI; Wegzug über Kleven et al. (2020).
 
 ### F-025 · schwer · Z · Jakobsen et al. mit falschen Autoren und falschem Publikationsort
 - **Fundstelle:** `quellen.html:428-433` (A22); `js/rechner/berechne.js:44-47`, `:202`
@@ -300,6 +325,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Die Publikation lautet: Jakobsen, K., Jakobsen, K., Kleven, H. & Zucman, G. (2020), QJE 135(1), 329–388, DOI 10.1093/qje/qjz032 ([OUP](https://academic.oup.com/qje/article-abstract/135/1/329/5584349)).
   - „Kolsrud“ ist kein Koautor.
   - Der verwendete Wert „Avoidance 15 % bei 2 % Satz“ ist dort nicht in dieser Form ausgewiesen.
+- **Status:** Behoben in Block 3. Jakobsen/Jakobsen/Kleven/Zucman (2020), QJE 135(1).
 
 ### F-026 · schwer · Z · Tarif-Rechtsgrundlage, Grundfreibetrag 2025 und Kindergeld falsch angegeben
 - **Fundstelle:** `quellen.html:839`, `:963-968` (G17); `js/data.js:395`, `:505`
@@ -308,6 +334,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Der Grundfreibetrag 2025 beträgt 12.096 €, 2026 12.348 €. Beide wurden durch das Steuerfortentwicklungsgesetz vom 23.12.2024 festgelegt ([Haufe](https://www.haufe.de/steuern/gesetzgebung-politik/steuerfortentwicklungsgesetz_168_628032.html)), nicht durch ein „Steueränderungsgesetz Oktober 2025“.
   - Das Kindergeld betrug 2025 255 € und beträgt erst ab 2026 259 €.
   - Die Default-Werte im HTML (`index.html:224` `value="12084"`, `:430` `value="255"`) übernehmen die falschen bzw. veralteten Werte.
+- **Status:** Behoben in Block 3. Steuerfortentwicklungsgesetz (BGBl. 2024 I Nr. 449), Grundfreibetrag 2025 12.096 €, Kindergeld 259 € ab 2026.
 
 ### F-027 · schwer · Z · DICE-Parameter falsch zugeordnet
 - **Fundstelle:** `js/rechner/transition.js:21`, `:34`, `:72`
@@ -316,6 +343,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - DICE-2023 (Barrage & Nordhaus, PNAS 121(13), 2024) verwendet γ = 0,003467. DICE-2016R2 verwendet 0,00227 ([PNAS](https://www.pnas.org/doi/abs/10.1073/pnas.2312030121)).
   - 0,00267 entspricht keiner der beiden Versionen.
   - Einen „Nordhaus (2023) PNAS“ mit dem Titel „An Optimal Transition Path“ gibt es in dieser Form nicht.
+- **Status:** Behoben in Block 2 und 6. DICE-2023-Schadensparameter (Barrage/Nordhaus 2024, A35).
 
 ### F-028 · schwer · W/Z · Bürgergeld: falsche Bezugsgröße und nur Regelsatz Alleinstehender
 - **Fundstelle:** `js/data.js:500`; `js/rechner/berechne.js:238`
@@ -324,6 +352,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Rund 5,5 Mio. ist die Zahl der Leistungsberechtigten. Bedarfsgemeinschaften gibt es etwa 2,9 Mio. (BA-Statistik).
   - Der Code multipliziert 5,5 Mio. mit dem Regelsatz für Alleinstehende (563 €). Kinder haben aber niedrigere Regelbedarfsstufen, und Kosten der Unterkunft sowie Heizung fehlen.
   - Ausgaben und Einsparungen bei BGE bzw. Bürgergeldreform sind damit in ihrer Zusammensetzung falsch.
+- **Status:** Behoben in Block 5 mit anderer Lösung als V-16: Ausgaben aus den Ist-Summen 2025 (Regelleistungen 29,0 Mrd. €, KdU-Bundesanteil 12,5 Mrd. €, BIAJ/BA-Statistik), skaliert mit dem Regler; Bezugsgröße 5,378 Mio. Leistungsberechtigte korrekt benannt. Eine Aufteilung nach Regelbedarfsstufen ist nicht umgesetzt.
 
 ### F-029 · schwer · T (Sicherheit) · GitHub-Workflow: Kostenmissbrauch und Prompt-Injection durch beliebige Nutzer
 - **Fundstelle:** `.github/workflows/claude-gutachter.yml:6-7`; `.github/scripts/claude_review.py:111-116`, `:157-158`, `:177-181`
@@ -332,6 +361,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Jeder GitHub-Account kann durch Öffnen eines Issues einen bezahlten Aufruf der Anthropic-API mit dem Repository-Secret auslösen. Es gibt keine Autoren- oder Häufigkeitsbegrenzung, also ist Kostenmissbrauch möglich.
   - Issue- bzw. PR-Text und Diff werden unmaskiert in den Prompt eingesetzt. Die Modellausgabe wird ungeprüft mit `issues: write` als Kommentar unter der Identität von `github-actions` gepostet.
   - Ein Angreifer kann so gezielt Inhalte, etwa Links oder falsche „ANNEHMEN“-Empfehlungen, im Namen des Projekts veröffentlichen lassen.
+- **Status:** Behoben in Block 1. Workflow nur für OWNER/MEMBER/COLLABORATOR, mit Nebenläufigkeitsgrenze und Timeout; Nutzertext wird im Prompt abgegrenzt und die Ausgabe entschärft.
 
 ### F-030 · schwer · W · Altersvorsorge-Rechner rechnet Kapitalbedarf ohne Inflation und korrigiert in die falsche Richtung
 - **Fundstelle:** `finanz.html:1632-1659`
@@ -376,6 +406,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Fundstelle:** `js/rechner/berechne.js:120`
 - **Beleg:** `return { ...d, labor_factor: lf, brutto_adj: d.brutto * lf, gs_neu, avoidance };`
 - **Begründung:** Die Reaktion auf den Grenzsteuersatz für Arbeit wird auf das gesamte Bruttoeinkommen angewandt, einschließlich Kapitalanteil (bei D10c 45 %).
+- **Status:** Behoben in Block 4b. Verhaltensreaktion nur auf das Arbeitseinkommen.
 
 ### F-035 · leicht · W · Armutsrisikoquote nicht auf den genannten Wert kalibriert
 - **Fundstelle:** `js/rechner/berechne.js:335-339`
@@ -384,6 +415,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - (0,90 + 0,62 + 0,05) · 4,1/41 = 15,7 %. Die Nachrechnung ergibt 15,69 % statt der angegebenen 14,8 %.
   - Die Anteile „D1 90 %, D2 62 %“ sind nicht an einer konkreten Tabelle belegt.
   - Die Elastizität −1,5 stammt aus der Literatur zur Wachstumselastizität absoluter Armut in Entwicklungsländern (siehe F-040).
+- **Status:** Behoben in Block 4c. Armutsquote aus der Verteilung innerhalb der Gruppen, kalibriert auf 16,1 %.
 
 ### F-036 · leicht · W · Soli und Sparerpauschbetrag fehlen
 - **Fundstelle:** `js/rechner/berechne.js:137`; `js/rechner/verteilung.js:151-152`
@@ -391,6 +423,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Begründung:**
   - Die Abgeltungsteuer wird ohne Soli (effektiv 26,375 %) und ohne Sparerpauschbetrag gerechnet. Die eigenen Tooltips und die Quelle G02 nennen beides.
   - Der Solidaritätszuschlag auf die veranlagte ESt fehlt im Tarif vollständig.
+- **Status:** Behoben in Block 4b. Soli mit Freigrenze und Milderungszone; Sparer-Pauschbetrag in der Abgeltung.
 
 ### F-037 · leicht · W · „Zucman-Mindeststeuer“ auf falsche Bemessungsgrundlage
 - **Fundstelle:** `js/rechner/berechne.js:199-205`, `:46`
@@ -399,6 +432,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Der Vorschlag von Zucman (2024) betrifft Milliardäre (weltweit ca. 3.000 Personen), nicht die obersten 1 % der Haushalte.
   - Das Datenfeld ist als Durchschnitt beschrieben (`data.js:25`), wird hier aber als „Median“ bezeichnet.
   - Die Bemessungsgrundlage ist um Größenordnungen zu breit.
+- **Status:** Behoben in Block 4c durch Umbenennung in „Mindeststeuer Top 1 %“ mit offengelegter Bemessungsgrundlage.
 
 ### F-038 · leicht · Z · Gechert/Heimberger falsch zitiert und als Multiplikatorquelle missbraucht
 - **Fundstelle:** `js/data.js:133`; `js/rechner/transition.js:33`
@@ -406,11 +440,13 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Begründung:**
   - Das Paper ist im European Economic Review 147 (2022) erschienen (so auch korrekt in `quellen.html` A20), nicht im NIER.
   - Es ist eine Meta-Regression zu Körperschaftsteuersenkungen und Wachstum. Es liefert weder einen Multiplikator von 1,2 für öffentliche Investitionen noch eine Investitionselastizität von −0,40.
+- **Status:** Behoben in Block 6. Multiplikatoren aus Gechert (2015); Gechert/Heimberger (2022) nur noch für die Investitionselastizität.
 
 ### F-039 · leicht · Z · Kaplan/Moll/Violante (2018) sachfremd zitiert
 - **Fundstelle:** `js/rechner/transition.js:20`, `:51`
 - **Beleg:** `//   HANK-Multiplikator: Kaplan/Moll/Violante (2018) AER · McKay/Nakamura/Steinsson (2016)`
 - **Begründung:** „Monetary Policy According to HANK“ (AER 108(3), 2018) behandelt die Transmission der Geldpolitik. Es enthält keinen MPC-gewichteten Investitionsmultiplikator in der hier implementierten Form.
+- **Status:** Behoben in Block 6. HANK-Rechnung und Zitat entfernt; `MPC_DEZIL` ist als nicht verwendet gekennzeichnet.
 
 ### F-040 · leicht · Z · Bourguignon (2003) falsch zugeordnet
 - **Fundstelle:** `js/rechner/verteilung.js:30`; `js/rechner/berechne.js:350`
@@ -418,6 +454,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Begründung:**
   - „The Growth Elasticity of Poverty Reduction“ ist ein Buchkapitel (Eicher/Turnovsky (Hrsg.), Inequality and Growth, MIT Press 2003), kein JPubEc-Artikel.
   - Es betrifft absolute Armut, nicht die relative Armutsrisikoquote.
+- **Status:** Behoben in Block 4c. Zitat entfernt; Armutsquote mit eigener, offengelegter Methode.
 
 ### F-041 · leicht · Z · „WHO 2017“ und „Reinhardt 2004“ belegen die Parameter nicht
 - **Fundstelle:** `js/rechner/rente.js:29`, `:34`; `quellen.html` B28
@@ -426,6 +463,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Die systematische Übersicht ist Masters, R. et al. (2017), J Epidemiol Community Health 71(8), keine WHO-Publikation.
   - Reinhardt et al. (2004) ist ein internationaler Ausgabenvergleich und belegt keine Fixkostendegression von 45 % bei Kassenfusionen.
   - Der Code-Kommentar nennt zudem „EU-Studie: 1€ → 3€“ (`rente.js:89`). Das widerspricht der Quellenangabe.
+- **Status:** Behoben in Block 9. Übersicht Masters et al. (2017), J Epidemiol Community Health 71(8), als A41; Fusionsparameter 45 % als Annahme gekennzeichnet; widersprüchlicher Kommentar entfernt.
 
 ### F-042 · leicht · Z · Veraltete Bevölkerungsvorausberechnung
 - **Fundstelle:** `js/rechner/transition.js:23`; `js/data.js` (`DEMOGRAFIE_KURVE`)
@@ -433,11 +471,13 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Begründung:**
   - Maßgeblich ist die 15. koordinierte Bevölkerungsvorausberechnung (Destatis, Dezember 2022).
   - Die Ankerwerte `renten_faktor` 1,06/1,14/… sind keiner Tabelle zugeordnet.
+- **Status:** Teilweise behoben in Block 9. Die falsche Quellenangabe ist entfernt; die Demografie-Anker sind als Annahme gekennzeichnet. Offen: Ableitung aus der aktuellen koordinierten Bevölkerungsvorausberechnung (Destatis nicht erreichbar).
 
 ### F-043 · leicht · Z · PKV-Versichertenzahl zu hoch
 - **Fundstelle:** `js/rechner/rente.js:76`; `js/data.js` (Tooltip `pkv_abschaffen`)
 - **Beleg:** `const pkv_versicherte = 11; // Mio.`
 - **Begründung:** Laut PKV-Zahlenbericht (Quelle B24) gibt es ca. 8,7 Mio. Vollversicherte. 11 Mio. ist ohne Beleg.
+- **Status:** Behoben in Block 5. PKV-Vollversicherte 8,74 Mio. (PKV-Verband, Zahlen 2024).
 
 ### F-044 · leicht · Z · RV-Beitragspfad unbelegt und über offiziellen Projektionen
 - **Fundstelle:** `js/rechner/rente.js:57-58`, `:20`
@@ -445,6 +485,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Begründung:**
   - Das ergibt 24,6 % im Jahr 2045. Der Rentenversicherungsbericht 2024 bzw. die Begründung zum Rentenpaket II weisen etwa 22,3 % aus.
   - Ein „SVR-Wert 0,3 PP/Jahr“ ist nicht nachgewiesen.
+- **Status:** Behoben in Block 9. Beitragssatzpfad aus dem Rentenversicherungsbericht 2025 (18,6 % bis 2027, 20,1 % 2030, 21,2 % 2039; B36), ab 2040 als Annahme fortgeschrieben.
 
 ### F-045 · leicht · Z · Kleven/Schultz und Lewbel/Pendakur mit falscher Zeitschrift; EASI belegt keine MwSt-Elastizität
 - **Fundstelle:** `js/data.js:129-130`; `js/rechner/berechne.js:30`, `:151`
@@ -453,6 +494,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Die Quellen erschienen in AEJ: Economic Policy 6(4) bzw. AER 99(3); so auch `quellen.html` A23/A25.
   - Das EASI-Nachfragesystem ist eine Methodik und liefert keine Konsumelastizität gegenüber dem MwSt-Satz von −0,35.
   - Kleven/Schultz schätzt Elastizitäten des zu versteuernden Einkommens (ETI), keine „Kapitalangebotselastizität 0,5“.
+- **Status:** Behoben in Block 9. Zeitschriften korrigiert (AEJ:EP 6(4); AER 99(3)); die unbenutzte Kapitalangebotselastizität ist entfernt; die MwSt-Konsumelastizität ist als Annahme gekennzeichnet, Lewbel/Pendakur nur methodisch.
 
 ### F-046 · leicht · Z · Arbeitsangebotselastizität inkonsistent belegt
 - **Fundstelle:** `js/data.js:114`, `:128`; `quellen.html` A21; `js/haushaltsspiel.js:416`
@@ -460,11 +502,13 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Begründung:**
   - Im Code heißt es „Saez/Chetty/Gruber Konsens“, im Verzeichnis Gruber & Saez (2002), in der Oberfläche „Gruber/Saez 2002“.
   - Gruber/Saez schätzt die Elastizität des zu versteuernden Einkommens (ETI; ca. 0,4 bzw. 0,12 für das breite Einkommen), nicht die Arbeitsangebotselastizität.
+- **Status:** Behoben in Block 9. ε = 0,20 als Annahme mit Einordnung Chetty (2012), Econometrica 80(3) (A40); Gruber/Saez nur als ETI-Referenz.
 
 ### F-047 · leicht · Z · Kleven/Landais unvollständig und ungenau
 - **Fundstelle:** `quellen.html:444-449` (A24)
 - **Beleg:** `autor:'Kleven, H. & Landais, C.',` · `titel:'Tax Migration and the Limits of Tax Policy',`
 - **Begründung:** Die Publikation lautet: Kleven, H., Landais, C., Muñoz, M. & Stantcheva, S. (2020), „Taxation and Migration: Evidence and Policy Implications“, JEP 34(2), 119–142.
+- **Status:** Behoben in Block 3 (A24 mit vollständigen Autoren, JEP 34(2), DOI).
 
 ### F-048 · leicht · Z · Doerrenberg/Peichl als Beleg für ein Laffer-Maximum
 - **Fundstelle:** `quellen.html:378` (A15)
@@ -476,6 +520,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Fundstelle:** `js/data.js:456`
 - **Beleg:** `quelle: "PIK Potsdam · Edenhofer/Franks/Kalkuhl (2021) Nature Climate Change · Koalitionsvertrag 2025"`
 - **Begründung:** Der Koalitionsvertrag 2025 sieht keine Pro-Kopf-Rückzahlung im Sinne des Moduls vor. Zusammen mit F-004 entsteht so der Eindruck geltender Politik.
+- **Status:** Behoben in Block 2. Klimageld nicht mehr im Status quo und nicht mit dem Koalitionsvertrag belegt.
 
 ### F-050 · leicht · W · `data.json` falsch bezeichnet und nicht monoton
 - **Fundstelle:** `data.json:121` sowie Felder `vermoegen_median_eur`; `js/data.js:19`, `:21`
@@ -485,21 +530,25 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Das Vermögen von D10a liegt unter dem von D9, obwohl die Gruppen nach Einkommen aufsteigend sortiert sind. Das ist unplausibel.
   - „median“ widerspricht der Beschreibung als Durchschnitt.
   - `data.json` wird als maschinenlesbare Primärdatenquelle veröffentlicht (`llms.txt`).
+- **Status:** Teilweise behoben in Block 9. `data.json` und `llms.txt` werden aus dem Code erzeugt (`tools/export.mjs`, Test auf Aktualität); Grundsteuer korrekt benannt; Einkommen monoton geprüft. Die ungeklärten Vermögenswerte werden nicht mehr veröffentlicht; ihre Prüfung gegen SOEP/DIW ist offen.
 
 ### F-051 · leicht · Z · Veraltete KV-Beitragsbemessungsgrenze in Tooltips
 - **Fundstelle:** `js/data.js:560`, `:565`
 - **Beleg:** „Derzeit: nur auf Arbeitseinkommen bis BBG (66.150 €).“
 - **Begründung:** 66.150 € ist die BBG 2025. Das Modell rechnet mit 69.750 € (2026). Auch die Bezugssätze „16,3 %“ passen nicht zum Status quo 17,5 %.
+- **Status:** Behoben in Block 9. KV-BBG 2026 (69.750 €) und Status-quo-Satz 17,5 % in den Tooltips.
 
 ### F-052 · leicht · W · Vermögensteuer-Tooltip in sich widersprüchlich
 - **Fundstelle:** `js/data.js:475`
 - **Beleg:** „Linke-Modell erzielt ~100 Mrd./Jahr; bei Freibetrag 10–20 Mio. immer noch 110–125 Mrd.“
 - **Begründung:** Ein höherer Freibetrag verkleinert die Bemessungsgrundlage. Ein höheres Aufkommen als beim Modell mit niedrigerem Freibetrag ist ohne zusätzliche Erläuterung (z. B. höhere Sätze) nicht plausibel.
+- **Status:** Behoben in Block 9. Der widersprüchliche Satz ist gestrichen (DIW-Originalstudie nicht erreichbar).
 
 ### F-053 · leicht · T · Veraltete Default-Werte bei fehlenden Parametern
 - **Fundstelle:** `js/haushaltsspiel.js:107`; `index.html:353`
 - **Beleg:** `document.getElementById('bbg').value = p.bbg ?? 90000;` · `id="bbg" … value="90000"`
 - **Begründung:** Share-Links oder gespeicherte Sitzungen ohne `bbg` erhalten eine BBG von 90.000 € statt 101.400 €. Ebenso stehen in `index.html` weitere veraltete Startwerte (`freibetrag` 12.084, `kg` 255).
+- **Status:** Behoben in Block 2. `setParams` ergänzt fehlende Werte aus dem Status quo und warnt.
 
 ### F-054 · leicht · T · `?preset=` akzeptiert geerbte Objekteigenschaften; Hash-Parameter ungeprüft
 - **Fundstelle:** `js/haushaltsspiel.js:1373-1381`, `:1082-1084`
@@ -508,6 +557,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - `?preset=constructor` (bzw. `toString`) ist truthy. `setParams(Object)` setzt dann alle Regler auf `undefined`, also auf ihre Mittelwerte. Im Browser verifiziert: `freibetrag=15000`, `spitze=48`, `co2=150`.
   - Hash-Objekte mit fehlenden Feldern führen zum selben Effekt.
   - Eine Code-Ausführung ist nicht möglich, weil alle Werte in Regler bzw. Checkboxen geschrieben werden.
+- **Status:** Behoben in Block 1. `Object.hasOwn(PRESETS, …)` und Validierung der Hash-Parameter (`sanitizeParams`).
 
 ### F-055 · leicht · W · Benchmark „Einnahmen“ in sich widersprüchlich und nicht vergleichbar
 - **Fundstelle:** `js/data.js:612`
@@ -553,6 +603,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Begründung:**
   - Ein beschädigter oder fremd gesetzter localStorage-Eintrag wirft eine Ausnahme in `init()`. Die Initial-Renders der Rechner entfallen dann.
   - Ist localStorage gesperrt (Privatmodus/Richtlinie), wirft schon `localStorage.getItem`.
+- **Status:** Behoben in Block 1. Gekapselte localStorage-Zugriffe mit Fehlerbehandlung und Profilprüfung.
 
 ### F-061 · leicht · T · Monopolmodell erzeugt negative Mengen
 - **Fundstelle:** `mikro.html:387`, `:894`
@@ -574,12 +625,13 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Fundstelle:** `mikro.html:652`, `:974`
 - **Beleg:** `Benzin ε ≈ −0,25 · Lebensmittel ε ≈ −0,27 · Restaurants ε ≈ −2,3.`
 - **Begründung:** Die eigene Quelle A01 (Andreyeva et al. 2010) nennt für „food away from home“ 0,81. Für −2,3 fehlt ein Beleg, ebenso für „Meta/Google ≈ 0,5–0,6“.
-- **Status:** Teilweise behoben in Block 8 (Meta/Google entfernt). Die Richtwerte der Elastizitäten folgen in Block 9.
+- **Status:** Behoben in Block 8 und 9. Meta/Google entfernt; die Richtwerte stammen aus Andreyeva et al. (2010) (Essen außer Haus −0,81, Eier −0,27), unbelegte Werte sind gestrichen.
 
 ### F-064 · leicht · T · Workflow scheitert bei jedem Fork-PR
 - **Fundstelle:** `.github/workflows/claude-gutachter.yml:3-5`; `.github/scripts/claude_review.py:188-190`
 - **Beleg:** `if not ANTHROPIC_API_KEY:` … `sys.exit(1)`
 - **Begründung:** Bei `pull_request` aus Forks stellt GitHub keine Secrets bereit. Das Skript beendet sich mit Exit 1, und jeder externe Beitrag erhält einen roten Check.
+- **Status:** Behoben in Block 1. Ohne API-Key (Fork-PR) endet das Skript mit Hinweis und Exit 0.
 
 ### F-065 · leicht · T · Unvollständige Fehlerbehandlung im Review-Skript
 - **Fundstelle:** `.github/scripts/claude_review.py:67-73`, `:89-92`
@@ -587,11 +639,13 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
 - **Begründung:**
   - `URLError`, Timeouts und `KeyError`/`IndexError` bei unerwarteter API-Antwort werden nicht abgefangen.
   - Fehler beim Posten führen nicht zu einem Fehler-Exitcode. Ein fehlgeschlagener Kommentar bleibt unbemerkt.
+- **Status:** Behoben in Block 1. Netzwerk- und Antwortfehler werden abgefangen; ein fehlgeschlagener Kommentar macht den Job rot.
 
 ### F-066 · leicht · T · Action nicht per Commit-SHA gepinnt
 - **Fundstelle:** `.github/workflows/claude-gutachter.yml:18`
 - **Beleg:** `- uses: actions/checkout@v4`
 - **Begründung:** Ein veränderlicher Tag in einem Workflow mit `pull-requests: write`/`issues: write` und Zugriff auf ein bezahltes API-Secret ist ein Supply-Chain-Risiko. Empfohlen ist Pinning per SHA.
+- **Status:** Behoben in Block 1. `actions/checkout` per Commit-SHA gepinnt (v4.2.2).
 
 ### F-067 · leicht · T · Keine Security-Header
 - **Fundstelle:** Repository-Wurzel (keine `_headers`-Datei; nur `_redirects`)
@@ -601,6 +655,7 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Die Seite nutzt ausgiebig `innerHTML` und lädt Drittskripte (F-001). Eine CSP wäre hier die zweite Verteidigungslinie.
 
 ---
+- **Status:** Behoben in Block 1. `_headers` mit CSP und Security-Headern; `'unsafe-inline'` bleibt wegen Inline-Handlern nötig.
 
 ## Geprüft ohne Befund (Auswahl)
 
@@ -664,3 +719,27 @@ Referenzwerte der Nachrechnung (Status quo, `berechne(PRESETS.status_quo)`):
   - Das zvE der Gruppe D10c wird als Pareto-Verteilung mit gleichem Mittelwert behandelt: erwartete Steuer und einkommensgewichteter Grenzsatz, Paare mit Splitting auf z/2.
   - Der Pareto-Parameter a = 1,6 ist eine gekennzeichnete Annahme (`TOP_PARETO`).
   - Die mechanische Mehreinnahme beträgt jetzt rund 0,44 Mrd. € je Prozentpunkt. Die Status-quo-Kalibrierung bleibt erhalten (ESt 357 Mrd. €, Restfaktor 0,957).
+
+## Umsetzungsstand (Abschluss Block 9)
+
+- 71 Befunde (67 aus Phase 1, 4 Nachträge aus der Umsetzung).
+- **Behoben:** 67
+- **Teilweise behoben:** 4. Der offene Rest hängt jeweils an amtlichen Daten, die aus der Prüfumgebung nicht erreichbar waren (Destatis, SOEP/DIW):
+  - F-015: Aufteilung der Ausgaben nach COFOG
+  - F-042: Demografie-Anker aus der koordinierten Bevölkerungsvorausberechnung
+  - F-050: Vermögen je Gruppe
+  - F-070: Einkommen der Gruppen auf VGR-Niveau
+- **Behoben, aber auf Annahmen gestützt:** F-002 (Haushaltsstruktur je Gruppe) und F-071 (Pareto-Parameter).
+- **Als Annahme gekennzeichnet** (im Code mit `[ANNAHME]`), zu ersetzen, sobald Primärdaten vorliegen:
+  - Haushaltsstruktur je Gruppe
+  - steuerfreier Konsumanteil
+  - öffentlicher Kapitalstock
+  - Zinsen auf Ebene des Gesamtstaats
+  - Pareto-Parameter der Top-1-%-Gruppe
+  - Arbeitsangebots- und Konsumelastizität
+  - Demografie-Anker
+  - Fusions- und Präventionsparameter der GKV
+  - Renditeannahmen im Finanzprofil
+- **Prüfgerüst:**
+  - 11 Testdateien unter `tests/`
+  - `node tools/export.mjs --check` für die offenen Daten

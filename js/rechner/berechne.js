@@ -17,7 +17,7 @@ import { berechneGini, berechneMedianGewichtet, berechnePalma, berechneS80S20, b
 const FORMEL_QUELLEN_BERECHNE = {
   arbeitsangebot: {
     formel: 'labor_factor = 1 + ε × Δ(1 − GS) / (1 − GS_SQ)',
-    ref:    'Saez/Chetty/Gruber Konsens · ifo Schnelldienst 01/2025 · Piketty/Saez/Stantcheva (2014) AER',
+    ref:    'Modellannahme, Einordnung Chetty (2012) Econometrica · Piketty/Saez/Stantcheva (2014) AEJ:EP',
     note:   'ε = 0,20 (intensive margin, konservativ); D10c: ε = 0,40 + Avoidance/Wegzug-Korrektur'
   },
   bge_arbeitsangebot: {
@@ -27,7 +27,7 @@ const FORMEL_QUELLEN_BERECHNE = {
   },
   mwst_konsumanteil: {
     formel: 'MwSt = Konsum × (0,70 × t_reg/(1+t_reg) + 0,30 × t_erm/(1+t_erm))',
-    ref:    'Destatis VGR 2024 (ca. 70 % Regelsatz-Konsum) · Lewbel/Pendakur (2009) JPubEc',
+    ref:    'Destatis VGR 2024 (ca. 70 % Regelsatz-Konsum) · Lewbel/Pendakur (2009) AER (Methodik)',
     note:   '70/30-Split grob; feiner auflösbar mit EVS-Einzeldaten. VAT-Gap-Korrekturfaktor 0,963 (CASE 2024)'
   },
   co2_emissionen: {
@@ -63,7 +63,7 @@ const FORMEL_QUELLEN_BERECHNE = {
   },
   dynamisches_scoring: {
     formel: 'Δ_dyn = Δ_KSt × (investment_factor − 1) + Δ_ESt × (avg_labor − 1)',
-    ref:    'CBO Dynamic Scoring Guidelines · ifo Schnelldienst 01/2025 · Saez/Chetty Konsens',
+    ref:    'CBO Dynamic Scoring Guidelines · ifo Schnelldienst 01/2025',
     note:   'Verhaltensbedingte Aufkommensabweichung gegenüber mechanischer (statischer) Wirkung'
   }
 };
@@ -492,7 +492,7 @@ function berechne(params, zustand = null, _intern = null) {
   // Verhaltensbedingte Aufkommensänderung gegenüber mechanischer (statischer) Wirkung
   // KSt: investment_factor-Abweichung von 1 = Investitionsreaktion auf KSt-Änderung
   const dynamisch_kst = BEMESSUNG.kst * params.kst / 100 * (investment_factor - 1) * bip_faktor;
-  // ESt: labor_factor-Abweichung → Arbeitsangebotsreaktion (Saez/Chetty-Konsens ε = 0,20)
+  // ESt: labor_factor-Abweichung → Arbeitsangebotsreaktion (ε = 0,20, Annahme)
   const dynamisch_est = est_aufkommen * (avg_labor - 1) * bip_faktor;
   const dynamisch_delta = dynamisch_kst + dynamisch_est;
 

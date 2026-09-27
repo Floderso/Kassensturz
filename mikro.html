@@ -259,10 +259,10 @@
       </div>
 
       <div style="margin-top:14px;font-family:var(--ff-mono);font-size:var(--fs-micro);color:var(--muted);line-height:1.6;">
-        Empirische Richtwerte:<br>
-        Benzin: −0,25 · Lebensmittel: −0,27<br>
-        Restaurants: −2,3 · Zigaretten: −0,4<br>
-        Luxusgüter: −2,5 bis −4,0
+        Empirische Richtwerte (Andreyeva/Long/Brownell 2010, USA, Übersicht von 160 Studien):<br>
+        Essen außer Haus: −0,81<br>
+        Softdrinks, Säfte, Fleisch: ca. −0,7 bis −0,8<br>
+        Eier: −0,27 (geringste Reaktion)
       </div>
     </div>
 
@@ -647,7 +647,7 @@ function drawElast() {
     `Deine Kurve ist ${Math.abs(eps) > 1 ? 'elastisch' : 'unelastisch'} (ε = ${fmt(eps, 1)}). ` +
     `Bei ${Math.abs(dp * 100).toFixed(0)}% Preisänderung ändert sich die Menge um ${fmt(Math.abs((Q1 - Q0) / Q0 * 100), 1)}% → ` +
     `Umsatz ${dR >= 0 ? 'steigt' : 'sinkt'} um ${fmt(Math.abs(dR / R0 * 100), 1)}%. ` +
-    `Benzin ε ≈ −0,25 · Lebensmittel ε ≈ −0,27 · Restaurants ε ≈ −2,3.`;
+    `Richtwerte (Andreyeva et al. 2010): Essen außer Haus ε ≈ −0,81 · Eier ε ≈ −0,27.`;
 }
 
 // ══════════════════════════════════════════════

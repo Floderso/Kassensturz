@@ -22,9 +22,10 @@ const FORMEL_QUELLEN_RENTE = {
     note:   'Real in Preisen von 2025 (r_real = (1 + r)/(1 + 2 %) − 1); ab 2025 wird der reale Ertrag vollständig ausgeschüttet, sodass kein Ertrag doppelt zählt (F-016)'
   },
   beitragspfad: {
-    formel: 'Beitrag_t = Beitrag_0 + t × 0,3 PP  (Demografiedruck ohne Reform)',
-    ref:    'SVR Jahresgutachten 2023/24 · DRV Rentenversicherungsbericht 2024',
-    note:   '+0,3 PP/Jahr bis 2045 ohne Reform (konservativer SVR-Wert). Projektion mit Fonds: Beitrag − Entlastung_t'
+    formel: 'Beitrag_t = Beitrag_SQ + (Pfad_t − 18,6)  (Pfad: Rentenversicherungsbericht 2025, mittlere Variante)',
+    ref:    'BMAS Rentenversicherungsbericht 2025',
+    refs:   ['B36'],
+    note:   '18,6 % bis 2027, 19,8 % (2028), 20,0 % (2029), 20,1 % (2030), 21,2 % (2039); 2040–2045 mit dem Anstieg 2030–2039 fortgeschrieben [ANNAHME]. Projektion mit Fonds: Beitrag − Entlastung_t'
   },
   pkv_abschaffung: {
     formel: 'Nettoeffekt GKV = Mittelwert der IGES-Spanne (2,4–4,3 Mrd. €/Jahr)',
@@ -33,16 +34,29 @@ const FORMEL_QUELLEN_RENTE = {
   },
   kassenfusion: {
     formel: 'Ersparnis = Admin_SQ × (1 − Kassen/95) × 0,45',
-    ref:    'GKV-SV Jahresbericht 2025 · Reinhardt et al. Health Affairs 2004',
-    note:   '45 % Fixkostendegression bei Kassenzusammenlegung; Admin_SQ = 12 Mrd. €/Jahr (95 Kassen 2025)'
+    ref:    'Modellannahme (Fixkostenanteil 45 %) · GKV-SV Jahresbericht 2025 (Zahl der Kassen)',
+    note:   '[ANNAHME] 45 % der Verwaltungskosten skalieren mit der Zahl der Kassen; keine Primärquelle zu Verwaltungskosten nach Kassengröße geprüft. Admin_SQ = 12 Mrd. €/Jahr (95 Kassen 2025)'
   },
   praevention: {
     formel: 'Nettoersparnis = Investition × (ROI − 1)',
-    ref:    'WHO (2017) Return on Investment of Public Health Interventions · GKV-SV Präventionsbericht 2024',
-    note:   'ROI vereinfacht 1,5× (Nettonutzen 0,5×); langfristig: 3–5× laut WHO über 20 Jahre'
+    ref:    'Masters/Anwar/Collins/Cookson/Capewell (2017) J Epidemiol Community Health 71(8) · GKV-SV Präventionsbericht 2024',
+    refs:   ['A41'],
+    note:   '[ANNAHME] ROI 1,5× (Nettonutzen 0,5×), bewusst vorsichtig: Die Übersichtsarbeit findet über 52 Studien in Hocheinkommensländern einen Median-ROI von 14,3 bei sehr großer Streuung'
   }
 };
 
+
+
+// Beitragssatz der gesetzlichen Rentenversicherung, Rentenversicherungsbericht 2025 (mittlere Variante)
+const RV_PFAD_2025 = [[2025, 18.6], [2027, 18.6], [2028, 19.8], [2029, 20.0], [2030, 20.1], [2039, 21.2]];
+function rvBeitragPfad(jahr) {
+  const P = RV_PFAD_2025;
+  if (jahr <= P[0][0]) return P[0][1];
+  for (let k = 1; k < P.length; k++)
+    if (jahr <= P[k][0]) return P[k - 1][1] + (P[k][1] - P[k - 1][1]) * (jahr - P[k - 1][0]) / (P[k][0] - P[k - 1][0]);
+  const [a, b] = [P[P.length - 2], P[P.length - 1]];   // Fortschreibung mit dem Anstieg 2030–2039 [ANNAHME]
+  return b[1] + (b[1] - a[1]) / (b[0] - a[0]) * (jahr - b[0]);
+}
 
 function berechneRente(params, rv_aufkommen_aktuell) {
   const lohnsumme_sv = BASIS_MAKRO.lohnsumme_sv; // Mrd. Beitragsbasis
@@ -64,14 +78,13 @@ function berechneRente(params, rv_aufkommen_aktuell) {
   const beitragsentlastung = (jahresertrag / lohnsumme_sv) * 100; // Prozentpunkte
 
   // --- Beitragssatz-Projektion 2025–2045 ---
-  // Demografiedruck: ohne Reform +0,3 PP/Jahr (SVR-Schätzung)
-  const demo_anstieg = 0.30;
+  // Beitragssatzpfad ohne Fonds: Rentenversicherungsbericht 2025 (F-044), ab 2040 fortgeschrieben [ANNAHME]
   const sq_beitrag = PRESETS.status_quo.rv;
   const proj_ohne = [];
   const proj_mit = [];
   let ks_proj = kapitalstock;
   for (let y = 0; y <= 20; y++) {
-    const beitrag_ohne = sq_beitrag + y * demo_anstieg;
+    const beitrag_ohne = sq_beitrag + (rvBeitragPfad(2025 + y) - RV_PFAD_2025[0][1]);
     // Ab 2025: realer Ertrag wird vollständig zur Beitragssenkung entnommen (Ausschüttung), der
     // Kapitalstock wächst nur noch um neue Einzahlungen — jeder Ertrags-Euro wird genau einmal verwendet
     const ertrag_y = ks_proj * r_real;
@@ -92,7 +105,7 @@ function berechneRente(params, rv_aufkommen_aktuell) {
     ? kv_admin_sq * (1 - params.anzahl_kv / 95) * 0.45
     : 0;
 
-  // Prävention: langfristiger ROI 1,5× (Vereinfachung; EU-Studie: 1€ → 3€ über 20J.)
+  // Prävention: ROI 1,5× als vorsichtige Annahme (Masters et al. 2017, Median-ROI 14,3 bei großer Streuung)
   const praevention_ersparnis = params.praevention * 1.5 - params.praevention; // Nettoersparnis
 
   const gkv_gesamt_effekt = pkv_netto_effekt + kassen_ersparnis + praevention_ersparnis;

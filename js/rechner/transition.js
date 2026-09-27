@@ -20,7 +20,7 @@
 //   Öffentl. Kapital:   Bom & Ligthart (2014) J. Econ. Surveys 28(5)
 //   DICE-Klimaschaden:  Barrage & Nordhaus (2024) PNAS · γ = 0,003467 (DICE-2023) · TCRE: IPCC AR6 WG1 SPM D.1.1
 //   Zinsen:             Effektivzins aus STAATSAUSGABEN.zinsen / Schuldenstand (berechne.js), einzige Zinsbuchung
-//   Demografie:         Destatis 14. Bev.-Vorausberechnung 2021 · DEMOGRAFIE_KURVE in data.js
+//   Demografie:         DEMOGRAFIE_KURVE in data.js (Anker als Annahme, Abgleich mit Destatis offen)
 
 import { DEMOGRAFIE_KURVE, PERIOD_STATE_0, BASIS_MAKRO, FISKAL } from '../data.js';
 

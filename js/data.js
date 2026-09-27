@@ -6,6 +6,11 @@
 
 // ── DEZILE + STAATSAUSGABEN + BASIS-DATEN ──
 
+// Datenstand der Modellparameter; wird von tools/export.mjs in data.json übernommen
+const DATENSTAND = '2026-09-27';
+
+// vermoegen: [ANNAHME] im Rechenmodell nicht verwendet; nicht monoton (D10a < D9), Herkunft und Maß
+// (Median oder Mittel) ungeklärt — Prüfung gegen SOEP/DIW offen (F-050). Wird nicht exportiert.
 const DEZILE = [
   // D1–D9: je 4,1 Mio. Haushalte (SOEP v40, Destatis Mikrozensus 2024)
   { d:1,  idx:0,  label:'D1',   brutto: 14000,  kapital: 0.01, konsum: 1.00, gewicht: 1.3, vermoegen: 1000,    anzahl: 4.1 },
@@ -55,7 +60,8 @@ DEZILE.forEach((d, i) => Object.assign(d, HH_STRUKTUR[i]));
 // D10c = Top 1% (0,41 Mio. Haushalte). Brutto 700k ist Durchschnitt — echte Spitze deutlich höher.
 // Kapitalanteil D10c: ~45% des Einkommens aus Kapital (DINA-DE, Bach/Buggeln 2024).
 
-// Marginale Konsumneigung (MPC) je Dezil — für den HANK-Fiskalmultiplikator in transition.js.
+// Marginale Konsumneigung (MPC) je Dezil. Derzeit im Rechenmodell nicht verwendet: Die MPC-gewichtete
+// Multiplikator-Berechnung (HANK) wurde in Block 6 entfernt (Prüfbericht F-018, F-039).
 // Getrennt von DEZILE[i].konsum (das ist die durchschnittliche Konsumquote am Nettoeinkommen,
 // für die MwSt-Berechnung), weil Durchschnitts- und Grenzgröße ökonomisch verschiedene Dinge sind.
 // Stilisierte, monoton fallende Kalibrierung — qualitativ konsistent mit dem empirischen Befund,
@@ -171,9 +177,8 @@ const ADMIN_QUOTE = {
 
 // Verhaltens-Elastizitäten (konservativ)
 const ELAST = {
-  labor_supply: 0.20,      // Saez/Chetty konsens
-  capital_supply: 0.50,    // Kleven/Schultz
-  consumption: -0.35,      // MwSt-Pass-Through
+  labor_supply: 0.20,      // [ANNAHME] intensive Marge; Einordnung Chetty (2012)
+  consumption: -0.35,      // [ANNAHME] Konsumreaktion auf den MwSt-Satz
   co2: -0.30,              // BEHG Evaluation
   evasion: 0.25,           // Schneider
   investment: -0.40,       // Unternehmenssteuer
@@ -185,14 +190,13 @@ const ELAST = {
 
 // Strukturierte Quellenmetadaten zu ELAST — Werte bleiben oben kompatibel
 const ELAST_QUELLEN = {
-  labor_supply:   { ref: 'Saez/Chetty/Gruber Konsens · ifo Schnelldienst 01/2025',         range: '0,1–0,3', note: 'intensive margin, konservativ; extensive margin untere Dezile 0,2–0,5 (Meghir/Phillips)', refs: ['A21'] },
-  capital_supply: { ref: 'Kleven/Schultz (2014) JPubEc',                                    range: '0,4–0,8', note: 'dänische Daten, auf DE übertragbar; hohe Elastizität wegen Ausweichoptionen', refs: ['A23'] },
-  consumption:    { ref: 'Lewbel/Pendakur (2009) JPubEc · Metaanalyse Havranek et al. 2018',range: '−0,2 bis −0,5', note: 'MwSt-Pass-Through auf Konsum; getrennt für Regel- und Ermäßigungssatz', refs: ['A25'] },
+  labor_supply:   { ref: 'Modellannahme · Einordnung: Chetty (2012) Econometrica 80(3)',   range: '0,1–0,3', note: 'intensive Marge; Gruber/Saez (2002) schätzen die Elastizität des zu versteuernden Einkommens und sind kein Beleg für diesen Wert', refs: ['A40'] },
+  consumption:    { ref: 'Modellannahme · Methodik je Satz: Lewbel/Pendakur (2009) AER 99(3)', range: '−0,2 bis −0,5', note: 'keine direkte Schätzung der Konsumreaktion auf den MwSt-Satz; getrennt für Regel- und Ermäßigungssatz', refs: ['A25'] },
   co2:            { ref: 'EWI/DIW BEHG-Evaluation 2023 · Edenhofer/PIK 2024',               range: '−0,2 bis −0,4', note: 'kurzfristig konservativ; langfristig höher durch Infrastruktur-/Verhaltensanpassung' },
   evasion:        { ref: 'Schneider (2023) Shadow Economy DE · IfW Kiel 2024',              range: '0,1–0,3', note: 'Schwarzarbeit/Schattenwirtschaft-Reaktion auf Gesamtsteuerlast' },
   investment:     { ref: 'Gechert/Heimberger (2022) NIER · Neumeier SVR Arbeitspapier 03/2025', range: '−0,3 bis −0,5', note: 'KSt-Investitionselastizität; Effekte kleiner als oft behauptet (Meta-Analyse)', refs: ['A20'] },
-  d10c_labor:     { ref: 'Piketty/Saez/Stantcheva (2014) AER',                              range: '0,3–0,5', note: 'extensive margin Top 1%: Stunden, Ruhestandsentscheidung, Einkommensverschiebung', refs: ['A28'] },
-  d10c_avoidance: { ref: 'Kleven/Schultz (2014) JPubEc · Chetty/Friedman/Saez (2013)',      range: '0,3–0,7', note: 'Einkommensverschiebung/Avoidance ab Grenzsteuersatz > 45 %', refs: ['A23'] },
+  d10c_labor:     { ref: 'Piketty/Saez/Stantcheva (2014) AEJ:EP',                              range: '0,3–0,5', note: 'extensive margin Top 1%: Stunden, Ruhestandsentscheidung, Einkommensverschiebung', refs: ['A28'] },
+  d10c_avoidance: { ref: 'Kleven/Schultz (2014) AEJ:EP 6(4) · Chetty/Friedman/Saez (2013)',      range: '0,3–0,7', note: 'Einkommensverschiebung/Avoidance ab Grenzsteuersatz > 45 %', refs: ['A23'] },
   d10c_wegzug:    { ref: 'Kleven/Landais/Muñoz/Stantcheva (2020) JEP 34(2)',               range: '0,05–0,15', note: 'steuerbedingte Emigration ab Grenzsteuersatz > 60 %; Wert ist Modellannahme (Übersichtsarbeit, keine DE-Punktschätzung)', refs: ['A24'] }
 };
 
@@ -437,7 +441,7 @@ const TOOLTIPS = {
   spitze: {
     title: "Spitzensteuersatz",
     text: "Satz der obersten Tarifzone („Reichensteuer“): 2026 45 % ab 277.826 €. Die 42-%-Zone ab 69.879 € hat einen eigenen Regler (Satz Proportionalzone). Koalitionsausschuss 01.07.2026: 42%-Zone soll bis 70.600 € abgeflacht werden, ab 2027 zusätzlich 45% ab 250.000 € und 47% ab 280.000 € (im Modell nicht als eigene Zwischenstufe abbildbar, s. Preset „Koalition 2027\"). Im Modell trifft der Spitzensatz den Pareto-Rand der Top-1-%-Gruppe (Annahme a = 1,6); wo das Gesamtaufkommen sein Maximum hat, zeigt das Modul Laffer-Kurve aus der aktuellen Einstellung.",
-    quelle: "§ 32a Nr. 4+5 EStG · 2026: 69.879 € · Koalitionsausschuss 01.07.2026 · Piketty/Saez/Stantcheva (2014) AER"
+    quelle: "§ 32a Nr. 4+5 EStG · 2026: 69.879 € · Koalitionsausschuss 01.07.2026 · Piketty/Saez/Stantcheva (2014) AEJ:EP"
   },
   grenze: {
     title: "Einkommen ab Spitzensatz",
@@ -506,7 +510,7 @@ const TOOLTIPS = {
   },
   verm: {
     title: "Vermögensteuer",
-    text: "Jährliche Steuer auf Nettovermögen. In DE seit 1997 ausgesetzt. Bach/Wichers/Mudrack (DIW 2026): Linke-Modell erzielt ~100 Mrd./Jahr; bei Freibetrag 10–20 Mio. immer noch 110–125 Mrd. Nur ~1,9% der Bevölkerung betroffen. Migrationseffekte kleiner als oft behauptet (Kleven et al. 2020).",
+    text: "Jährliche Steuer auf Nettovermögen. In DE seit 1997 ausgesetzt. Bach/Wichers/Mudrack (DIW 2026): Linke-Modell erzielt ~100 Mrd./Jahr. Nur ~1,9% der Bevölkerung betroffen. Migrationseffekte kleiner als oft behauptet (Kleven et al. 2020).",
     quelle: "BVerfGE 93, 121 · Bach/Wichers/Mudrack DIW 2026 · Jakobsen/Jakobsen/Kleven/Zucman (2020) QJE · Kleven et al. (2020) JEP",
     refs: ['G09', 'A06', 'A22', 'A24']
   },
@@ -576,13 +580,13 @@ const TOOLTIPS = {
   },
   anzahl_kv: {
     title: "Anzahl Krankenkassen",
-    text: "2025: ~95 GKV-Kassen (1995: ~1.200). Fusionen senken Verwaltungskosten (Fixkostendegression ~45%). Einheitskasse (Taiwan/Kanada): sehr niedrige Verwaltungskosten, weniger Wettbewerb. Koalition 2025: keine Fusionspflicht geplant.",
-    quelle: "GKV-SV Jahresbericht 2025 · BMG Kassenstatistik · Reinhardt et al. Health Affairs 2004"
+    text: "2025: ~95 GKV-Kassen (1995: ~1.200). Fusionen senken Verwaltungskosten (im Modell angenommen: 45 % der Verwaltungskosten hängen an der Zahl der Kassen). Einheitskasse (Taiwan/Kanada): sehr niedrige Verwaltungskosten, weniger Wettbewerb. Koalition 2025: keine Fusionspflicht geplant.",
+    quelle: "GKV-SV Jahresbericht 2025 · BMG Kassenstatistik · Fixkostenanteil 45 % ist Modellannahme"
   },
   praevention: {
     title: "Prävention-Investitionen",
-    text: "Zusatzinvestitionen in Vorsorge, Früherkennung, betriebliche Gesundheit. WHO (2017): ROI 3–5 € pro 1 € über 20 Jahre. Im Modell: vereinfacht 1,5× Nettonutzen (konservativ). GKV-Präventionsbericht 2024: aktuell ~700 Mio. €/Jahr.",
-    quelle: "WHO (2017) 'Return on investment of public health interventions' · GKV-SV Präventionsbericht 2024"
+    text: "Zusatzinvestitionen in Vorsorge, Früherkennung, betriebliche Gesundheit. Masters et al. (2017, J Epidemiol Community Health): Median-ROI 14,3 über 52 Studien in Hocheinkommensländern, bei großer Streuung. Im Modell: vorsichtige Annahme 1,5× (Nettonutzen 0,5×). GKV-Präventionsbericht 2024: aktuell ~700 Mio. €/Jahr.",
+    quelle: "Masters/Anwar/Collins/Cookson/Capewell (2017) J Epidemiol Community Health 71(8) · GKV-SV Präventionsbericht 2024"
   },
   bbg: {
     title: "Beitragsbemessungsgrenze (BBG)",
@@ -597,13 +601,13 @@ const TOOLTIPS = {
   },
   kv_kapital: {
     title: "Kapitalerträge KV-pflichtig",
-    text: "GKV-Mitglieder zahlen Beitrag auch auf Kapitalerträge (Dividenden, Zinsen, Mieteinnahmen). Derzeit: nur auf Arbeitseinkommen bis BBG (66.150 €). Reform würde Beitragsbasis strukturell verbreitern. ifo Forschungsbericht 159/2025: Mehreinnahmen ~8 Mrd. € / Jahr bei 16,3% Satz. Erfasst ca. 90% der unteren Dezile, nur ~8% im Spitzendezil (PKV-Quote).",
+    text: "GKV-Mitglieder zahlen Beitrag auch auf Kapitalerträge (Dividenden, Zinsen, Mieteinnahmen). Derzeit: nur auf Arbeitseinkommen bis zur KV-Beitragsbemessungsgrenze (2026: 69.750 €). Reform würde Beitragsbasis strukturell verbreitern. ifo Forschungsbericht 159/2025: Mehreinnahmen ~8 Mrd. € / Jahr (im Modell skaliert mit dem eingestellten KV-Satz; Status quo 17,5 %). Erfasst ca. 90% der unteren Dezile, nur ~8% im Spitzendezil (PKV-Quote).",
     quelle: "§ 226 SGB V · ifo Forschungsbericht 159/2025 · GKV-SV Jahresbericht 2025 · DIW Wochenbericht 4/2026"
   },
   kv_bbg_frei: {
     title: "KV-Beitragsbemessungsgrenze abschaffen",
-    text: "Aktuell: KV-Beiträge nur bis 66.150 € (2025). Darüber: kein weiterer Beitrag — wirkt stark regressiv. Abschaffung: alle Arbeitseinkommen KV-pflichtig ohne Deckel. DIW (2025): Mehreinnahmen ~18 Mrd. € / Jahr bei 16,3% Satz. Entlastet mittlere Einkommen nicht direkt, stärkt aber GKV-Finanzierungsbasis dauerhaft.",
-    quelle: "§ 6 Abs. 7 SGB V · KV-BBG 2025: 66.150 € · DIW Wochenbericht 4/2026 · GKV-SV Jahresbericht 2025"
+    text: "Aktuell: KV-Beiträge nur bis 69.750 € (2026). Darüber: kein weiterer Beitrag — wirkt stark regressiv. Abschaffung: alle Arbeitseinkommen KV-pflichtig ohne Deckel. DIW (2025): Mehreinnahmen ~18 Mrd. € / Jahr (im Modell skaliert mit dem eingestellten KV-Satz; Status quo 17,5 %). Entlastet mittlere Einkommen nicht direkt, stärkt aber GKV-Finanzierungsbasis dauerhaft.",
+    quelle: "§ 6 Abs. 7 SGB V · KV-BBG 2026: 69.750 € · DIW Wochenbericht 4/2026 · GKV-SV Jahresbericht 2025"
   }
 };
 
@@ -653,7 +657,7 @@ const KPI_BENCH = {
   gini:   'Modellwert aus 12 Gruppen (ohne Ungleichheit innerhalb der Gruppen) — nur Veränderungen vergleichen. Amtlich DE: 0,295 · DK: 0,281 · SE: 0,273 · US: 0,395',
   admin:  'DE ~2 % Steueraufkommen (OECD-Ø)',
   nst:    'DE aktuell: ~40 Steuerarten',
-  arb:    'Elastizitäten: Saez/Chetty/Gruber',
+  arb:    'Elastizität 0,20 (Annahme; Einordnung Chetty 2012), Top 1 %: 0,40 (Piketty/Saez/Stantcheva 2014)',
   armut:  'Im Status quo kalibriert auf DE 2025: 16,1 % (Destatis, Erstergebnis) · 2024: 15,5 %',
   schuld: 'DE Schuldenquote 2025: 63,5 % BIP · Schuldenstand: 2.838 Mrd. € (Bundesbank Feb 2026) · Maastricht-Grenze: 60 %',
   dwl:    'Schätzung: 5–15 % des Steueraufkommens',
@@ -713,7 +717,8 @@ const BGE_LABOR_EFF = [0.15, 0.12, 0.09, 0.06, 0.04, 0.025, 0.015, 0.01, 0.005, 
 // Demografische Entwicklung 2025–2041 (Destatis 14. koordinierte Bev.-Vorausberechnung 2021)
 // renten_faktor: Multiplikator auf den RV-Ausgabenanteil (~390 Mrd.) — Basis 1,0 im Jahr 2025
 // altersquotient: Bevölkerung 65+ / Bevölkerung 20–64
-// Jährliche Interpolation zwischen Destatis-Ankerpunkten (14. Bev.-Vorausberechnung 2021)
+// Jährliche Interpolation zwischen Ankerpunkten. [ANNAHME] Die Anker sind keiner Tabelle der koordinierten
+// Bevölkerungsvorausberechnung (Destatis) zugeordnet; Abgleich offen (F-042).
 // IIFE erzeugt 21 Einträge: 2025–2045, indexierbar via DEMOGRAFIE_KURVE[jahr - 2025]
 const DEMOGRAFIE_KURVE = (() => {
   const anchors = [
@@ -779,7 +784,7 @@ const ZUKUNFTS_SZENARIEN = [
     name: 'Demografie-Baseline',
     icon: '📊',
     beschreibung: 'Status-quo-Politik — aber steigende Rentenlasten durch die Baby-Boomer-Rentenwelle erhöhen die Staatsausgaben automatisch.',
-    quelle: 'Destatis 14. Bev.-Vorausberechnung 2021 · DRV Rentenbericht 2024',
+    quelle: 'Demografie-Anker als Annahme (Abgleich mit der koordinierten Bevölkerungsvorausberechnung offen) · Rentenversicherungsbericht 2025',
     perioden_params: Array.from({ length: 5 }, () => ({ ...PRESETS.status_quo })),
   },
   {
@@ -808,4 +813,4 @@ const ZUKUNFTS_SZENARIEN = [
   },
 ];
 
-export { FISKAL, TARIF_2026, TOP_PARETO, HH_STRUKTUR, KALIBRIERUNG_ZIELE, ERBST_2024, DEZILE, MPC_DEZIL, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, VGR_2025, BUERGERGELD_2025, PRESETS, MOD_DEFS, CHALLENGES, CHALLENGE_CTX, CHALLENGE_BEISPIELE, KENNZAHLEN, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };
+export { DATENSTAND, FISKAL, TARIF_2026, TOP_PARETO, HH_STRUKTUR, KALIBRIERUNG_ZIELE, ERBST_2024, DEZILE, MPC_DEZIL, ELAST, ELAST_QUELLEN, BASIS_AUFKOMMEN, ADMIN_QUOTE, BASIS_MAKRO, STAATSAUSGABEN, VGR_2025, BUERGERGELD_2025, PRESETS, MOD_DEFS, CHALLENGES, CHALLENGE_CTX, CHALLENGE_BEISPIELE, KENNZAHLEN, TOOLTIPS, REFORM_TOURS, KPI_BENCH, BGE_LABOR_EFF, DEMOGRAFIE_KURVE, PERIOD_STATE_0, ZUKUNFTS_SZENARIEN };

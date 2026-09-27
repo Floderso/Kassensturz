@@ -48,6 +48,18 @@ const VERBOTEN = [
   [/Grundfreibetrag 12\.084/, 'F-026: Grundfreibetrag 2025 = 12.096 €'],
   [/Steueränderungsgesetz Okt/, 'F-026: Rechtsgrundlage ist das Steuerfortentwicklungsgesetz'],
   [/Ab 2025: 259/, 'F-026: Kindergeld 259 € erst ab 2026'],
+  // Block 9 (F-041 bis F-052, F-063)
+  [/Reinhardt/, 'F-041: belegt keine Fixkostendegression'],
+  [/WHO[^\n]{0,10}\(?2017/, 'F-041: Übersicht ist Masters et al. (2017), keine WHO-Publikation'],
+  [/14\. Bev/, 'F-042: veraltete Bevölkerungsvorausberechnung'],
+  [/konservativer SVR-Wert/, 'F-044: unbelegter Beitragspfad'],
+  [/(Kleven\/Schultz|Lewbel\/Pendakur) \(20(14|09)\) JPubEc/, 'F-045: falsche Zeitschrift'],
+  [/Saez\/Chetty/, 'F-046: kein Beleg für die Arbeitsangebotselastizität'],
+  [/66\.150/, 'F-051: KV-BBG 2026 = 69.750 €'],
+  [/immer noch 110–125/, 'F-052: widersprüchlicher Vermögensteuer-Satz'],
+  [/Restaurants[^\n]{0,10}−2,3/, 'F-063: Andreyeva et al. nennen −0,81'],
+  [/grunderwerbsteuer/, 'F-050: Wert ist die Grundsteuer'],
+  [/Kirchner et al\. 2010\)[^\n]{0,40}ECB Bulletin 2020|ECB Bulletin 2020/, 'F-058: Dolls/Fuest/Peichl 2012, J Public Econ'],
 ];
 const wurzel = new URL('..', import.meta.url).pathname;
 function dateien(dir) {

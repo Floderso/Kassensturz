@@ -72,7 +72,7 @@
   "@context": "https://schema.org",
   "@type": "Dataset",
   "name": "Kassensturz Haushaltsdaten Deutschland 2026",
-  "description": "Einkommensdezile, Staatsausgaben, Steueraufkommen und Makrodaten für Deutschland 2026. Basis: SOEP v40, Bundeshaushalt 2026, Destatis.",
+  "description": "Modellgruppen nach Einkommen, Steueraufkommen, VGR-Summen des Gesamtstaats 2025, Status-quo-Ergebnis des Rechenmodells und gekennzeichnete Annahmen. Erzeugt aus dem Quellcode von kassensturz.org.",
   "url": "https://kassensturz.org/data.json",
   "license": "https://creativecommons.org/licenses/by/4.0/",
   "inLanguage": "de",
@@ -676,7 +676,7 @@
       </summary>
       <div class="panel-body">
         <div class="bars" id="wirk_bars" style="margin-top:16px"></div>
-        <p style="font-size:11px;color:var(--muted);margin-top:10px;font-style:italic;">BIP-Impuls: Saldoänderung × 0,65 (kurzfristiger Steuer-/Transfermultiplikator nach Gechert 2015). Auto-Stabilisatoren: Ø METR D1–D4 — DE-Benchmark ~48 % Dämpfung (Dolls et al. 2020). Dyn. Scoring: Verhaltensbedingte Aufkommensreaktion (Gruber/Saez 2002 · Neumeier/SVR 2025). Quellen: Gechert (2015) Oxford Economic Papers · Dolls et al. 2020 · Elmendorf/Hubbard/Williams 2024</p>
+        <p style="font-size:11px;color:var(--muted);margin-top:10px;font-style:italic;">BIP-Impuls: Saldoänderung × 0,65 (kurzfristiger Steuer-/Transfermultiplikator nach Gechert 2015). Automatische Stabilisatoren: Anteil eines Rückgangs der Markteinkommen um 5 %, den Steuern und Abgaben auffangen (Dolls/Fuest/Peichl 2012, J Public Econ 96). Dyn. Scoring: verhaltensbedingte Aufkommensreaktion (Neumeier/SVR 2025). Quellen: Gechert (2015) Oxford Economic Papers · Dolls/Fuest/Peichl (2012) · Elmendorf/Hubbard/Williams 2024</p>
       </div>
     </details>
 
@@ -853,7 +853,7 @@
     </details>
 
     <p class="footer-note">
-      Daten: Bundesfinanzministerium (Haushalt 2025, Steuerschätzung), Destatis, SOEP v40 (DIW), EU-SILC 2024, IW Verteilungsbericht 2025, BMF-Monatsbericht Januar 2026, BRH-Berichte zu Verwaltungskosten, IMF Article IV 2025. Elastizitäten: Saez/Chetty/Gruber (Labor), Kleven/Schultz (Kapital), EWI/DIW (CO₂), Neumeier/SVR 2025 (Investitionen). MwSt-Compliance-Abschlag: EU-Kommission / CASE VAT Gap 2024. Fiskalmultiplikator: ECB WP 1267 (Kirchner et al. 2010) · Bundesbank DP 28/2018. Automatische Stabilisatoren: Dolls/Fuest/Peichl (ECB Bulletin 2020). Das Modell arbeitet mit 10 Haushaltsdezilen + Unternehmenssektor und berücksichtigt statische Aufkommensänderung, Verhaltensreaktion, Verwaltungskosten und Fiskalmultiplikatoreffekte. Grenzen: keine regionale Differenzierung, vereinfachte Unternehmensseite, keine Konjunkturbereinigung im Schuldenbremsen-Indikator.
+      Daten: Bundesfinanzministerium (Haushalt 2025, Steuerschätzung), Destatis, SOEP v40 (DIW), EU-SILC 2024, IW Verteilungsbericht 2025, BMF-Monatsbericht Januar 2026, BRH-Berichte zu Verwaltungskosten, IMF Article IV 2025. Elastizitäten: Arbeitsangebot 0,20 als Annahme (Einordnung Chetty 2012), Top 1 % nach Piketty/Saez/Stantcheva (2014), EWI/DIW (CO₂), Neumeier/SVR 2025 (Investitionen). MwSt-Compliance-Abschlag: EU-Kommission / CASE VAT Gap 2024. Fiskalmultiplikator: ECB WP 1267 (Kirchner et al. 2010) · Bundesbank DP 28/2018. Automatische Stabilisatoren: Dolls/Fuest/Peichl (2012), J Public Econ 96. Das Modell arbeitet mit 10 Haushaltsdezilen + Unternehmenssektor und berücksichtigt statische Aufkommensänderung, Verhaltensreaktion, Verwaltungskosten und Fiskalmultiplikatoreffekte. Grenzen: keine regionale Differenzierung, vereinfachte Unternehmensseite, keine Konjunkturbereinigung im Schuldenbremsen-Indikator.
     </p>
 
   </main>

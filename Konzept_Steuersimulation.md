@@ -40,7 +40,7 @@ Die Struktur folgt dem **statischen Mikrosimulationsansatz**: Ein repräsentativ
 | Haushaltsstruktur | Destatis Mikrozensus | 2024 |
 | Sozialversicherung | Rentenversicherung Bund, GKV-Spitzenverband | 2026 |
 | Verwaltungskosten | BRH, Normenkontrollrat, Wiss. Dienst BT | div. |
-| Elastizitäten | ZEW, ifo, Saez/Chetty Reviews | 2012–2024 |
+| Elastizitäten | Chetty (2012), Piketty/Saez/Stantcheva (2014), ifo; Werte teils Modellannahme | 2012–2024 |
 
 ---
 
@@ -121,7 +121,7 @@ Zentrale Elastizitäten (aus empirischer Literatur, konservativ gewählt):
 
 | Reaktion | Elastizität | Quelle |
 |---|---|---|
-| Arbeitsangebot (intensiv) | 0,1–0,3 | Saez/Chetty/Gruber |
+| Arbeitsangebot (intensiv) | 0,1–0,3 | Modellannahme 0,20, Einordnung Chetty (2012) |
 | Arbeitsangebot (extensiv, untere Dezile) | 0,2–0,5 | Meghir/Phillips |
 | Kapitaleinkommen / Steuersatz | 0,4–0,8 | Kleven/Schultz |
 | Konsum / MwSt | −0,3 bis −0,5 | Div. Meta-Studien |

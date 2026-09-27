@@ -64,7 +64,7 @@ Das Projekt hat **keine Abhängigkeiten** und benötigt keinen Server — es fun
 | Einkommensverteilung | SOEP v40 / DIW, EU-SILC | 2024/25 |
 | Haushaltsstruktur | Destatis Mikrozensus | 2024 |
 | Sozialversicherung | Deutsche Rentenversicherung, GKV-Spitzenverband | 2026 |
-| Verhaltens-Elastizitäten | ZEW, ifo, Saez/Chetty | 2012–2024 |
+| Verhaltens-Elastizitäten | Chetty (2012), Piketty/Saez/Stantcheva (2014), ifo; teils Modellannahme | 2012–2024 |
 
 Das Modell folgt dem **statischen Mikrosimulationsansatz**: 12 repräsentative Haushaltstypen (10 Dezile, D10 aufgespalten in P90–95, P95–99, Top-1%) werden durch das Steuer-Transfer-System gerechnet. Verhaltensreaktionen werden über kalibrierte Elastizitäten aus der empirischen Literatur modelliert.
 

@@ -416,7 +416,7 @@ function render() {
       fmt: v => (v >= 0 ? '+' : '') + v.toFixed(1) + ' Mrd. €',
       cls: r.dynamisch_est > 0 ? 'pos' : r.dynamisch_est < 0 ? 'neg' : 'neu',
       pct: Math.min(100, Math.abs(r.dynamisch_est) / 20 * 100),
-      hint: 'Anteil des ESt-Aufkommens der auf Arbeitsangebotsreaktion zurückgeht (bereits in Gesamtaufkommen enthalten) — ε = 0,20, Gruber/Saez 2002'
+      hint: 'Anteil des ESt-Aufkommens der auf Arbeitsangebotsreaktion zurückgeht (bereits in Gesamtaufkommen enthalten) — ε = 0,20 (Annahme; Einordnung Chetty 2012)'
     },
     {
       label: 'Dyn. Scoring gesamt (KSt + ESt)',
@@ -911,7 +911,7 @@ function renderRechenweg(r, p) {
     <div class="rw-section">
       <div class="rw-section-title">2 · Verhaltensreaktion — Arbeitsangebot</div>
       <div class="rw-formula">Δ_Arbeit = ε × Δ(1 − GSatz_neu) / (1 − GSatz_Basis)
-D1–D10b: ε = ${ELAST.labor_supply} (intensive margin, Saez/Chetty Konsens)
+D1–D10b: ε = ${ELAST.labor_supply} (intensive Marge, Annahme; Einordnung Chetty 2012)
 D10c (Top 1%): ε = ${ELAST.d10c_labor} + Avoidance-Effekt ab GSatz > 45% (GSatz einkommensgewichtet über den Pareto-Rand)
   Avoidance = 1 − ${ELAST.d10c_avoidance} × max(0, GSatz−0,45) − ${ELAST.d10c_wegzug} × max(0, GSatz−0,60)
   (Einkommensverschiebung: Kapitalgesellschaft, Stiftung, Timing)
@@ -919,7 +919,7 @@ D10c (Top 1%): ε = ${ELAST.d10c_labor} + Avoidance-Effekt ab GSatz > 45% (GSatz
 Begrenzung: 0,55 – 1,25 (D10c: 0,40 Minimum)</div>
       <div class="rw-text">Arbeitsangebots-Index: <span class="${r.behavior.labor >= 99.5 ? 'rw-good' : r.behavior.labor < 97 ? 'rw-bad' : ''}">${f(r.behavior.labor)} (Basis: 100,0)</span>
         · D10c: einkommensgewichteter Grenzsatz ${f(r.top.grenzsatz * 100)} % (Pareto-Rand), Vermeidung ${r.top.avoidance < 1 ? `aktiv (Faktor ${r.top.avoidance.toFixed(3).replace('.', ',')})` : 'inaktiv (≤ 45 %)'}
-        · Quellen: Saez/Chetty/Gruber (2012), Piketty/Saez/Stantcheva (2014), Kleven/Schultz (2014), Kleven et al. (2020, Wegzug; Wert ist Modellannahme)</div>
+        · Quellen: Chetty (2012, Einordnung), Piketty/Saez/Stantcheva (2014), Kleven/Schultz (2014), Kleven et al. (2020, Wegzug; Wert ist Modellannahme)</div>
     </div>
 
     <div class="rw-section">
